@@ -40,7 +40,7 @@ function idpg_core_register_sidebars() {
 }
 add_action( 'widgets_init', 'idpg_core_register_sidebars' );
 
-if ( ! class_exists( 'IDPG_Ad_Widget' ) ) :
+if ( ! function_exists( 'idpg_core_ad_code_allowed_html' ) ) :
 
 /**
  * Разрешённые HTML-теги для рекламного кода.
@@ -82,20 +82,64 @@ function idpg_core_ad_code_allowed_html() {
 	return $allowed;
 }
 
+endif;
+
+if ( ! class_exists( 'IDPG_Ad_Ru_Widget' ) ) :
+
+/**
+ * Российские рекламные площадки: пресеты с шаблонами кода.
+ *
+ * Список площадок: slug => массив ( 'label', 'template', 'hint' ).
+ * Шаблоны — подстановочные заготовки: администратор меняет XXXXX
+ * (или номер блока) на свои ID из личного кабинета площадки.
+ *
+ * @return array
+ */
+function idpg_core_ad_platforms() {
+	return array(
+		'yandex_direct' => array(
+			'label'    => __( 'Яндекс Директ / РСЯ', 'idpg_core' ),
+			'template' => "<!-- Яндекс Директ / РСЯ -->\n<script>window.yaContextCb=window.yaContextCb||[]</script>\n<script src=\"https://yandex.ru/ads/system/context.js\" async></script>\n<div id=\"yandex_rtb_R-A-XXXXXX-Y\"></div>\n<script>window.yaContextCb.push(()=>{Ya.Context.AdvManager.render({renderTo:'yandex_rtb_R-A-XXXXXX-Y',blockId:'R-A-XXXXXX-Y'})})</script>",
+			'hint'     => __( 'Замените R-A-XXXXXX-Y на номер блока из кабинета Яндекс Директ (РСЯ).', 'idpg_core' ),
+		),
+		'vk_reklama' => array(
+			'label'    => __( 'VK Реклама (ex-MyTarget)', 'idpg_core' ),
+			'template' => "<!-- VK Реклама (ex-MyTarget) -->\n<div id=\"MyTarget_block_XXXXX\"></div>\n<script src=\"https://ad.mail.ru/static/ads-async.js\" async></script>\n<script>\n    new MyTarget({ id: 'MyTarget_block_XXXXX', adId: 'XXXXX' });\n</script>",
+			'hint'     => __( 'Замените XXXXX на ID блока из кабинета VK Реклама (ads.vk.com).', 'idpg_core' ),
+		),
+		'smi2' => array(
+			'label'    => __( 'SMI2 (Контент маркет)', 'idpg_core' ),
+			'template' => "<!-- SMI2 (Контент маркет) -->\n<script type=\"text/javascript\" src=\"//smi2.ru/data/js/XXXXX.js\" charset=\"utf-8\"></script>\n<script type=\"text/javascript\" src=\"//static.smi2.net/js/asyncInit.js\" charset=\"utf-8\"></script>",
+			'hint'     => __( 'Замените XXXXX на номер счётчика SMI2.', 'idpg_core' ),
+		),
+		'mediavenus' => array(
+			'label'    => __( 'MediaVenus', 'idpg_core' ),
+			'template' => "<!-- MediaVenus -->\n<script type=\"text/javascript\" src=\"//static.mediavenus.ru/ads/js/XXXXX.js\"></script>",
+			'hint'     => __( 'Замените XXXXX на номер площадки из кабинета MediaVenus.', 'idpg_core' ),
+		),
+		'marketgid' => array(
+			'label'    => __( 'MarketGid', 'idpg_core' ),
+			'template' => "<!-- MarketGid -->\n<script type=\"text/javascript\">\n    (function() {\n        var m = document.createElement('script');\n        m.async = true;\n        m.src = '//jsn.marketgid.com/script/XXXXX.js';\n        var s = document.getElementsByTagName('script')[0];\n        s.parentNode.insertBefore(m, s);\n    })();\n</script>",
+			'hint'     => __( 'Замените XXXXX на ID места из кабинета MarketGid.', 'idpg_core' ),
+		),
+	);
+}
+
 /**
  * Виджет рекламного блока.
  *
- * Позволяет разместить рекламу (HTML/JS-код, либо баннер-изображение со ссылкой)
- * в любой зоне виджетов. Поле «Позиция» управляет порядком вывода внутри зоны.
+ * Позволяет разместить рекламу любой площадки (HTML/JS-код) либо
+ * баннер-изображение со ссылкой в любой зоне виджетов.
+ * Поле «Позиция» управляет порядком вывода внутри зоны.
  */
-class IDPG_Ad_Widget extends WP_Widget {
+class IDPG_Ad_Ru_Widget extends WP_Widget {
 
 	public function __construct() {
 		parent::__construct(
 			'idpg_ad',
 			__( 'Реклама (IDPG)', 'idpg_core' ),
 			array(
-				'description'              => __( 'Рекламный блок: код, баннер или ссылка.', 'idpg_core' ),
+				'description'                 => __( 'Рекламный блок: код площадки, баннер или ссылка.', 'idpg_core' ),
 				'customize_selective_refresh' => true,
 			)
 		);
@@ -134,11 +178,17 @@ class IDPG_Ad_Widget extends WP_Widget {
 	}
 
 	public function form( $instance ) {
-		$title    = isset( $instance['title'] ) ? $instance['title'] : '';
-		$ad_code  = isset( $instance['ad_code'] ) ? $instance['ad_code'] : '';
-		$ad_image = isset( $instance['ad_image'] ) ? $instance['ad_image'] : '';
-		$ad_link  = isset( $instance['ad_link'] ) ? $instance['ad_link'] : '';
-		$position = isset( $instance['position'] ) ? $instance['position'] : 50;
+		$title     = isset( $instance['title'] ) ? $instance['title'] : '';
+		$ad_code   = isset( $instance['ad_code'] ) ? $instance['ad_code'] : '';
+		$ad_image  = isset( $instance['ad_image'] ) ? $instance['ad_image'] : '';
+		$ad_link   = isset( $instance['ad_link'] ) ? $instance['ad_link'] : '';
+		$position  = isset( $instance['position'] ) ? $instance['position'] : 50;
+		$platform  = isset( $instance['platform'] ) ? $instance['platform'] : '';
+		$platforms = idpg_core_ad_platforms();
+		$hint      = '';
+		if ( '' !== $platform && isset( $platforms[ $platform ] ) ) {
+			$hint = $platforms[ $platform ]['hint'];
+		}
 		?>
 		<p>
 			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Заголовок:', 'idpg_core' ); ?></label>
@@ -146,17 +196,28 @@ class IDPG_Ad_Widget extends WP_Widget {
 				name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text"
 				value="<?php echo esc_attr( $title ); ?>">
 		</p>
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'ad_code' ) ); ?>"><?php esc_html_e( 'Рекламной код (HTML/JS):', 'idpg_core' ); ?></label>
+		<div class="idpg-ad-widget__platform-wrap" style="margin:8px 0 16px;">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'platform' ) ); ?>"><?php esc_html_e( 'Рекламная площадка (пресет):', 'idpg_core' ); ?></label>
+			<select class="widefat idpg-ad-widget__platform" id="<?php echo esc_attr( $this->get_field_id( 'platform' ) ); ?>"
+				name="<?php echo esc_attr( $this->get_field_name( 'platform' ) ); ?>">
+				<option value=""><?php esc_html_e( '— Универсальный код (другая площадка) —', 'idpg_core' ); ?></option>
+				<?php foreach ( $platforms as $slug => $platform_data ) : ?>
+					<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $platform, $slug, true ); ?>><?php echo esc_html( $platform_data['label'] ); ?></option>
+				<?php endforeach; ?>
+			</select>
+			<div style="margin:6px 0;">
+				<button type="button" class="button button-small idpg-ad-widget__preset-insert"><?php esc_html_e( 'Вставить шаблон в код', 'idpg_core' ); ?></button>
+			</div>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'ad_code' ) ); ?>"><?php esc_html_e( 'Рекламный код (HTML/JS):', 'idpg_core' ); ?></label>
 			<textarea class="widefat" rows="8" id="<?php echo esc_attr( $this->get_field_id( 'ad_code' ) ); ?>"
 				name="<?php echo esc_attr( $this->get_field_name( 'ad_code' ) ); ?>"><?php echo esc_textarea( $ad_code ); ?></textarea>
-			<small><?php esc_html_e( 'Пример: <code>&lt;script async src="https://example.com/ad.js"&gt;&lt;/script&gt;</code>', 'idpg_core' ); ?></small>
-		</p>
+			<small class="idpg-ad-widget__platform-hint"><?php echo esc_html( $hint ); ?></small>
+		</div>
 		<div class="idpg-ad-widget__media" style="margin:8px 0 16px;">
 			<label for="<?php echo esc_attr( $this->get_field_id( 'ad_image' ) ); ?>"><?php esc_html_e( 'Или баннер (ID медиа):', 'idpg_core' ); ?></label>
 			<div class="idpg-ad-widget__image-wrap" style="margin:8px 0">
 				<?php if ( $ad_image ) : ?>
-					<?php echo wp_get_attachment_image( $ad_image, 'medium' ); ?>
+					<?php echo wp_get_attachment_image( $ad_image, 'medium', false, array( 'class' => 'idpg-ad-widget__form-img', 'style' => 'max-width:300px;height:auto;' ) ); ?>
 				<?php endif; ?>
 			</div>
 			<input type="hidden" class="idpg-ad-widget__image-id"
@@ -178,7 +239,7 @@ class IDPG_Ad_Widget extends WP_Widget {
 				name="<?php echo esc_attr( $this->get_field_name( 'position' ) ); ?>" type="number" min="0"
 				value="<?php echo esc_attr( $position ); ?>">
 		</p>
-		<p class="description"><?php esc_html_e( 'Если заполнен рекламной код — выводится он; иначе выводится баннер. "Позиция" управляет порядком внутри зоны на фронте.', 'idpg_core' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Код площадки имеет приоритет: если поле «Рекламный код» не пусто — выводится код, иначе — баннер-картинка. Чтобы показать баннер, очистите поле кода. «Позиция» задаёт порядок внутри зоны на фронте.', 'idpg_core' ); ?></p>
 		<?php
 	}
 
@@ -200,6 +261,13 @@ class IDPG_Ad_Widget extends WP_Widget {
 		$instance['ad_image'] = ! empty( $new['ad_image'] ) ? (int) $new['ad_image'] : '';
 		$instance['ad_link']  = ! empty( $new['ad_link'] ) ? esc_url_raw( $new['ad_link'] ) : '';
 		$instance['position'] = ! empty( $new['position'] ) ? max( 0, min( 999, (int) $new['position'] ) ) : 50;
+		$instance['platform'] = '';
+		if ( ! empty( $new['platform'] ) ) {
+			$slug = sanitize_key( (string) $new['platform'] );
+			if ( array_key_exists( $slug, idpg_core_ad_platforms() ) ) {
+				$instance['platform'] = $slug;
+			}
+		}
 		return $instance;
 	}
 }
@@ -338,13 +406,16 @@ endif;
  * Регистрирует виджеты.
  */
 function idpg_core_register_widgets() {
-	register_widget( 'IDPG_Ad_Widget' );
+	register_widget( 'IDPG_Ad_Ru_Widget' );
 	register_widget( 'IDPG_Recent_Events_Widget' );
 }
 add_action( 'widgets_init', 'idpg_core_register_widgets', 20 );
 
 /**
- * Enqueue media uploader для формы виджета в админке.
+ * Enqueue media uploader и JS-пресетов площадок для формы виджета в админке.
+ *
+ * Медиа-загрузчик (widget-ad.js) — для опции «баннер-картинка»;
+ * инлайн-скрипт — подстановка шаблона кода и подсказки при выборе площадки.
  */
 function idpg_core_ad_widget_admin_assets() {
 	if ( ! is_admin() ) {
@@ -358,13 +429,63 @@ function idpg_core_ad_widget_admin_assets() {
 		IDPG_VERSION,
 		true
 	);
+
+	$platforms = array();
+	foreach ( idpg_core_ad_platforms() as $slug => $platform_data ) {
+		$platforms[ $slug ] = array(
+			'template' => $platform_data['template'],
+			'hint'     => $platform_data['hint'],
+		);
+	}
+
 	wp_localize_script(
 		'idpg_core-ad-widget',
 		'idpgAdWidgetL10n',
 		array(
-			'select' => __( 'Выбрать', 'idpg_core' ),
+			'select'    => __( 'Выбрать', 'idpg_core' ),
+			'platforms' => $platforms,
 		)
 	);
+
+	$script = <<<'JS'
+(function ($) {
+	'use strict';
+
+	function idpgAdWidgetApplyPlatformHints() {
+		var l10n = window.idpgAdWidgetL10n || {};
+		var platforms = l10n.platforms || {};
+
+		$('.idpg-ad-widget__platform-wrap').each(function () {
+			var $wrap = $(this);
+			var slug = String($wrap.find('.idpg-ad-widget__platform').val() || '');
+			var rec = platforms[slug];
+			var $hint = $wrap.find('.idpg-ad-widget__platform-hint');
+
+			$hint.text(rec ? rec.hint : '');
+		});
+	}
+
+	function idpgAdWidgetInsertTemplate() {
+		var $btn = $(this);
+		var $wrap = $btn.closest('.idpg-ad-widget__platform-wrap');
+		var slug = String($wrap.find('.idpg-ad-widget__platform').val() || '');
+		var platforms = (window.idpgAdWidgetL10n || {}).platforms || {};
+
+		if (!platforms[slug]) {
+			return;
+		}
+		$wrap.find('textarea').val(platforms[slug].template);
+		idpgAdWidgetApplyPlatformHints();
+	}
+
+	$(document).on('change', '.idpg-ad-widget__platform', idpgAdWidgetApplyPlatformHints);
+	$(document).on('click', '.idpg-ad-widget__preset-insert', idpgAdWidgetInsertTemplate);
+	$(document).on('widget-added widget-updated', idpgAdWidgetApplyPlatformHints);
+	setTimeout(idpgAdWidgetApplyPlatformHints, 300);
+})(jQuery);
+JS;
+
+	wp_add_inline_script( 'idpg_core-ad-widget', $script );
 }
 add_action( 'admin_enqueue_scripts', 'idpg_core_ad_widget_admin_assets' );
 
