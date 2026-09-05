@@ -2,8 +2,8 @@
 /**
  * Шаблон страницы входа и регистрации.
  *
- * Содержит три таба: вход, регистрация пользователя,
- * регистрация организатора и форму восстановления пароля.
+ * Содержит два таба: вход, регистрация организатора
+ * и форму восстановления пароля.
  *
  * @package idpg_core
  */
@@ -119,45 +119,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 				}
 
 				wp_safe_redirect( $redirect_url );
-				exit;
-			}
-		}
-	}
-
-	// Форма регистрации пользователя.
-	if ( ! $is_forgot && isset( $_POST['name'] ) && isset( $_POST['email'] ) ) {
-		$name     = sanitize_text_field( wp_unslash( $_POST['name'] ) );
-		$email    = sanitize_email( wp_unslash( $_POST['email'] ) );
-		$password = wp_unslash( $_POST['password'] );
-		$confirm  = wp_unslash( $_POST['password_confirm'] );
-		$terms    = isset( $_POST['terms'] ) ? (bool) $_POST['terms'] : false;
-
-		if ( ! $terms ) {
-			$register_error = __( 'Необходимо согласие с правилами сайта.', 'idpg_core' );
-		} elseif ( strlen( $password ) < 8 ) {
-			$register_error = __( 'Пароль должен содержать минимум 8 символов.', 'idpg_core' );
-		} elseif ( $password !== $confirm ) {
-			$register_error = __( 'Пароли не совпадают.', 'idpg_core' );
-		} elseif ( ! is_email( $email ) ) {
-			$register_error = __( 'Введите корректный email.', 'idpg_core' );
-		} elseif ( email_exists( $email ) ) {
-			$register_error = __( 'Этот email уже зарегистрирован.', 'idpg_core' );
-		} else {
-			$user_id = wp_create_user( $email, $password, $email );
-
-			if ( is_wp_error( $user_id ) ) {
-				$register_error = __( 'Ошибка при создании пользователя.', 'idpg_core' );
-			} else {
-				wp_update_user(
-					array(
-						'ID'           => $user_id,
-						'display_name' => $name,
-					)
-				);
-				wp_set_current_user( $user_id );
-				wp_set_auth_cookie( $user_id );
-				do_action( 'wp_login', $email, $user_id );
-				wp_safe_redirect( home_url( '/' ) );
 				exit;
 			}
 		}
@@ -321,17 +282,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 				</button>
 				<button
 					class="auth__tab"
-					id="tab-register-user"
-					type="button"
-					role="tab"
-					aria-selected="false"
-					aria-controls="register-user-form"
-					data-tab="register-user"
-				>
-					Регистрация
-				</button>
-				<button
-					class="auth__tab"
 					id="tab-register-organizer"
 					type="button"
 					role="tab"
@@ -396,90 +346,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 						</a>
 					</p>
 				</form>
-				<?php echo apply_filters( 'idpg_social_login_buttons', '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — под ссылкой «Забыли пароль?» ?>
-			</div>
-
-			<!-- Форма регистрации пользователя -->
-			<div id="register-user-form" class="auth__panel" role="tabpanel" aria-labelledby="tab-register-user" hidden>
-				<form class="auth__form" method="post" autocomplete="on" novalidate>
-					<?php wp_nonce_field( 'idpg_login', 'idpg_login_nonce' ); ?>
-					<div class="auth__field">
-						<label for="reg-user-name" class="auth__label">Имя</label>
-						<input
-							id="reg-user-name"
-							class="auth__input"
-							type="text"
-							name="name"
-							required
-							autocomplete="name"
-							placeholder="Ваше имя"
-						>
-					</div>
-
-					<div class="auth__field">
-						<label for="reg-user-email" class="auth__label">Email</label>
-						<input
-							id="reg-user-email"
-							class="auth__input"
-							type="email"
-							name="email"
-							required
-							autocomplete="email"
-							placeholder="email@example.com"
-						>
-					</div>
-
-					<div class="auth__field">
-						<label for="reg-user-password" class="auth__label">Пароль</label>
-						<input
-							id="reg-user-password"
-							class="auth__input"
-							type="password"
-							name="password"
-							required
-							minlength="8"
-							autocomplete="new-password"
-							placeholder="Минимум 8 символов"
-						>
-					</div>
-
-					<div class="auth__field">
-						<label for="reg-user-password-confirm" class="auth__label">Подтверждение пароля</label>
-						<input
-							id="reg-user-password-confirm"
-							class="auth__input"
-							type="password"
-							name="password_confirm"
-							required
-							autocomplete="new-password"
-							placeholder="Повторите пароль"
-						>
-					</div>
-
-					<div class="auth__field auth__field--horizontal">
-						<label class="auth__checkbox-label">
-							<input
-								class="auth__checkbox"
-								type="checkbox"
-								name="terms"
-								value="1"
-								required
-							>
-							<span class="auth__checkbox-text">
-								Согласен с
-								<a href="<?php echo esc_url( home_url( '/terms/' ) ); ?>" target="_blank" class="auth__link">
-									правилами сайта
-								</a>
-							</span>
-						</label>
-					</div>
-
-					<button class="auth__submit" type="submit">
-						<span class="auth__submit-text">Зарегистрироваться</span>
-						<span class="auth__spinner" aria-hidden="true"></span>
-					</button>
-				</form>
-				<?php echo apply_filters( 'idpg_social_login_buttons', '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — под кнопкой «Зарегистрироваться» ?>
 			</div>
 
 			<!-- Форма регистрации организатора -->
@@ -596,7 +462,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 						<span class="auth__spinner" aria-hidden="true"></span>
 					</button>
 				</form>
-				<?php echo apply_filters( 'idpg_social_login_buttons', '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — под кнопкой «Зарегистрироваться» (организатор) ?>
 			</div>
 
 		<?php endif; ?>

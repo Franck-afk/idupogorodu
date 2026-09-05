@@ -2779,12 +2779,6 @@ a:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  position: sticky;
-  top: calc(var(--idpg-header-h, 72px) + 16px);
-  align-self: flex-start;
-  max-height: calc(100dvh - var(--idpg-header-h, 72px) - 28px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 .idpg-ad-widget {

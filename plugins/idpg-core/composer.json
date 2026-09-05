@@ -5,11 +5,7 @@
     "require": {
         "htmlburger/carbon-fields": "^3.6"
     },
-    "autoload": {
-        "psr-4": {
-            "Idpg\\SocialAuth\\": "includes/social-auth/"
-        }
-    },
+    "autoload": {},
     "config": {
         "allow-plugins": {
             "htmlburger/carbon-fields-installer": true

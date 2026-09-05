@@ -8,3 +8,14 @@ node_modules/
 
 # Вендор (Carbon Fields) ставится через Composer
 # vendor/ — раскомментируйте, если не хотите хранить зависимости в репозитории
+
+# Сторонние плагины/архивы и служебные файлы (не часть проекта)
+/plugins/clearfy-pro/
+/plugins/wp-authorization-ru-main/
+/plugins/wp-mail-smtp/
+/plugins/wpvivid-backuprestore/
+/plugins/idpg-auth.zip
+/plugins/wp-cloud-sync.zip
+/plugins/index.php
+/themes/index.php
+/plugins/*.zip

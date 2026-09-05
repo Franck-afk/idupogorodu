@@ -28,7 +28,6 @@
 		var targetId  = tab.getAttribute( 'data-tab' );
 		var targetMap = {
 			'login':              'login-form',
-			'register-user':      'register-user-form',
 			'register-organizer': 'register-organizer-form',
 		};
 		var targetPanel = document.getElementById( targetMap[ targetId ] );
@@ -370,58 +369,6 @@
 	}
 
 	/**
-	 * Валидация и отправка формы регистрации пользователя.
-	 *
-	 * @param {Event} e
-	 */
-	function handleRegisterUserSubmit( e ) {
-		e.preventDefault();
-		clearAllErrors( e.target );
-
-		var form   = e.target;
-		var email  = form.querySelector( '[name="email"]' ).value.trim();
-		var pass   = form.querySelector( '[name="password"]' ).value;
-		var confirm = form.querySelector( '[name="password_confirm"]' ).value;
-
-		if ( ! form.querySelector( '[name="name"]' ).value.trim() ) {
-			showFieldError( form.querySelector( '[name="name"]' ), 'Введите имя.' );
-			return;
-		}
-
-		if ( ! validateEmail( email ) ) {
-			showFieldError( form.querySelector( '[name="email"]' ), 'Введите корректный email.' );
-			return;
-		}
-
-		if ( ! validatePassword( pass ) ) {
-			showFieldError( form.querySelector( '[name="password"]' ), 'Пароль должен быть минимум 8 символов.' );
-			return;
-		}
-
-		if ( ! passwordsMatch( pass, confirm ) ) {
-			showFieldError( form.querySelector( '[name="password_confirm"]' ), 'Пароли не совпадают.' );
-			return;
-		}
-
-		if ( ! form.querySelector( '[name="terms"]' ).checked ) {
-			showMessage( 'Необходимо согласиться с правилами сайта.', 'error' );
-			return;
-		}
-
-		hideMessage();
-
-		submitAuthForm( form, '/auth/register', function ( fd ) {
-			return {
-				type:     'user',
-				name:     fd.get( 'name' ),
-				email:    fd.get( 'email' ),
-				password: fd.get( 'password' ),
-				terms:    fd.get( 'terms' ) === '1',
-			};
-		} );
-	}
-
-	/**
 	 * Валидация и отправка формы регистрации организатора.
 	 *
 	 * @param {Event} e
@@ -590,9 +537,6 @@
 			switch ( id ) {
 				case 'login-form':
 					form.addEventListener( 'submit', handleLoginSubmit );
-					break;
-				case 'register-user-form':
-					form.addEventListener( 'submit', handleRegisterUserSubmit );
 					break;
 				case 'register-organizer-form':
 					form.addEventListener( 'submit', handleRegisterOrganizerSubmit );

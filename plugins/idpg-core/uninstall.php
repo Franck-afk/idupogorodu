@@ -25,8 +25,6 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 // Опции плагина (точные имена).
 $direct_options = array(
-	'idpg_social_auth_settings',          // Настройки соц-авторизации (APP_ID/SECRET/ENABLED).
-	'idpg_social_auth_rewrite_flushed',   // Флаг версии flush rewrite-правил.
 	'idpg_roles_version',                 // Версия набора capabilities ролей.
 	'idpg_meta_migration_version',        // Версия выполненной мета-миграции.
 );
@@ -44,12 +42,9 @@ $GLOBALS['wpdb']->query(
 	    OR option_name = 'idpg_maintenance_enabled'"
 );
 
-// Транзиенты: одноразовые state-токены CSRF соц-авторизации,
-// PKCE-пара VK ID и блокировка миграций. Транзиенты с истечением
+// Транзиенты: блокировка миграций. Транзиенты с истечением
 // создают парные ключи *_timeout — удаляем по тому же LIKE.
 $transient_likes = array(
-	'idpg_social_state\\_%',
-	'idpg_vk_pkce\\_%',
 	'idpg_migration_lock%',
 );
 
@@ -67,8 +62,6 @@ foreach ( $transient_likes as $like ) {
 
 // User meta плагина.
 $user_meta_keys = array(
-	'_idpg_social_provider',       // Слаг провайдера соц-авторизации.
-	'_idpg_social_id',             // ID пользователя в соцсети.
 	'idpg_avatar_attachment_id',   // Загруженный аватар (вложение).
 	'idpg_avatar_url',             // URL аватара из соцсети.
 	'idpg_org_name',               // Название организации организатора.

@@ -22,3 +22,10 @@ endif;
 add_action( 'wp_enqueue_scripts', 'chld_thm_cfg_parent_css', 10 );
 
 // END ENQUEUE PARENT ACTION
+
+// Регистрация пользователей в WordPress принудительно отключена,
+// даже если в Настройки → Общие галочка будет включена заново.
+function idpg_core_force_disable_registration() {
+    return false;
+}
+add_filter( 'option_users_can_register', 'idpg_core_force_disable_registration' );

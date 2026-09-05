@@ -206,105 +206,6 @@ class IDPG_REST_Auth {
 				'permission_callback' => 'is_user_logged_in',
 			)
 		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/auth/vkid',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'handle_vkid_login' ),
-				'permission_callback' => '__return_true',
-				'args'                => array(
-					'access_token' => array(
-						'required'          => true,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'id_token'     => array(
-						'required'          => false,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-			)
-		);
-	}
-
-	/**
-	 * Вход через VK ID OneTap (обмен code выполнен SDK в браузере).
-	 *
-	 * Принимает access_token, проверяет его на сервере через
-	 * id.vk.com/oauth2/user_info (Provider_Vk::get_profile) и входит
-	 * либо регистрирует пользователя (Social_User::login, subscriber).
-	 *
-	 * @param WP_REST_Request $request Запрос.
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function handle_vkid_login( $request ) {
-		$access_token = (string) $request->get_param( 'access_token' );
-
-		if ( empty( $access_token ) ) {
-			return new WP_Error(
-				'empty_token',
-				__( 'Токен VK ID не передан.', 'idpg-core' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		if ( ! class_exists( '\Idpg\SocialAuth\Provider_Vk' ) || ! class_exists( '\Idpg\SocialAuth\Social_User' ) ) {
-			return new WP_Error(
-				'social_auth_unavailable',
-				__( 'Модуль социальной авторизации недоступен.', 'idpg-core' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		// Серверная проверка токена: id.vk.com/oauth2/user_info.
-		$profile = \Idpg\SocialAuth\Provider_Vk::instance()->get_profile( $access_token );
-
-		if ( empty( $profile['id'] ) ) {
-			error_log( '[SOCIAL-AUTH][vkid] REST: не удалось получить профиль по токену' );
-
-			return new WP_Error(
-				'profile_failed',
-				__( 'Не удалось проверить токен VK ID. Попробуйте войти заново.', 'idpg-core' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		// Email может отсутствовать в user_info — берём из профиля как есть.
-		$user_id = \Idpg\SocialAuth\Social_User::instance()->login( 'vk', $profile );
-
-		if ( is_wp_error( $user_id ) ) {
-			error_log( '[SOCIAL-AUTH][vkid] REST: ошибка входа: ' . $user_id->get_error_message() );
-
-			return new WP_Error(
-				'login_failed',
-				__( 'Ошибка входа через VK ID.', 'idpg-core' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		$user = get_userdata( $user_id );
-		wp_set_current_user( $user_id );
-		wp_set_auth_cookie( $user_id, true );
-		do_action( 'wp_login', $user->user_login, $user );
-
-		error_log( '[SOCIAL-AUTH][vkid] REST: вход #' . $user_id . ' через VK ID OneTap' );
-
-		$role         = $this->get_user_role( $user );
-		$redirect_url = $this->get_redirect_url_by_role( $role );
-
-		return new WP_REST_Response(
-			array(
-				'success'      => true,
-				'user_id'      => $user_id,
-				'role'         => $role,
-				'redirect_url' => $redirect_url,
-				'nonce'        => wp_create_nonce( 'wp_rest' ),
-			),
-			200
-		);
 	}
 
 	/**
@@ -388,6 +289,16 @@ class IDPG_REST_Auth {
 		}
 
 		$type     = $request->get_param( 'type' );
+
+		// Регистрация обычных пользователей отключена — доступен только вход организатора.
+		if ( 'user' === $type ) {
+			return new WP_Error(
+				'registration_disabled',
+				__( 'Регистрация обычных пользователей отключена.', 'idpg-core' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$name     = $request->get_param( 'name' );
 		$email    = $request->get_param( 'email' );
 		$password = $request->get_param( 'password' );
@@ -503,8 +414,6 @@ class IDPG_REST_Auth {
 			if ( ! empty( $phone ) ) {
 				update_user_meta( $user_id, 'idpg_phone', sanitize_text_field( $phone ) );
 			}
-		} else {
-			$user->set_role( 'subscriber' );
 		}
 
 		// Автоматическая авторизация после регистрации.

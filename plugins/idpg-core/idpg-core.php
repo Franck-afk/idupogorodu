@@ -107,9 +107,6 @@ require_once IDPG_CORE_DIR . 'includes/class-auth-emails.php';
 require_once IDPG_CORE_DIR . 'includes/class-maintenance.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-selector-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-calendar-widget.php';
-// Модуль социальной авторизации (Idpg\SocialAuth): файл фасада
-// регистрирует SPL-автозагрузчик остальных классов неймспейса.
-require_once IDPG_CORE_DIR . 'includes/social-auth/class-social-auth.php';
 /**
  * Инициализация компонентов плагина.
  *
@@ -130,8 +127,6 @@ function idpg_core_init() {
 	IDPG_REST_Auth::instance();
 	IDPG_Auth_Emails::instance();
 	IDPG_Maintenance::instance();
-	\Idpg\SocialAuth\Social_Auth::instance();
-	\Idpg\SocialAuth\Social_Routes::instance();
 }
 add_action( 'init', 'idpg_core_init' );
 
@@ -210,14 +205,6 @@ function idpg_core_activate() {
 
 	// Перенос мета-полей на единый префикс _idpg_.
 	IDPG_Migrations::run_all();
-
-	// Маршруты соц-авторизации: /auth/vk/, /auth/mailru/, /auth/callback/{provider}/.
-	if ( class_exists( '\Idpg\SocialAuth\Social_Auth' ) ) {
-		\Idpg\SocialAuth\Social_Auth::instance()->register_rewrite();
-	}
-	if ( class_exists( '\Idpg\SocialAuth\Social_Routes' ) ) {
-		\Idpg\SocialAuth\Social_Routes::instance()->register_rewrite();
-	}
 
 	flush_rewrite_rules();
 }

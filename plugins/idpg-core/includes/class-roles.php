@@ -279,9 +279,21 @@ class IDPG_Roles {
 			'publish_events',
 			'edit_others_events',
 			'delete_published_events',
+			'delete_private_events',
 			'read_private_events',
 			'delete_others_events',
 			'manage_categories',
+
+			// Capabilities для CPT venue (добавляются в create_roles и sync_role_caps).
+			'edit_venues',
+			'read_venues',
+			'delete_venues',
+			'edit_published_venues',
+			'publish_venues',
+			'edit_others_venues',
+			'delete_published_venues',
+			'read_private_venues',
+			'delete_others_venues',
 		);
 
 		if ( $admin ) {
