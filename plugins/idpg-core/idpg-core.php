@@ -84,6 +84,7 @@ require_once IDPG_CORE_DIR . 'includes/class-rest-api.php';
 require_once IDPG_CORE_DIR . 'includes/class-ical-export.php';
 require_once IDPG_CORE_DIR . 'includes/class-banners.php';
 require_once IDPG_CORE_DIR . 'includes/class-current-event-banner.php';
+require_once IDPG_CORE_DIR . 'includes/class-settings-page.php';
 
 /**
  * Инициализация системы баннеров (file-load).
@@ -127,6 +128,7 @@ function idpg_core_init() {
 	IDPG_REST_Auth::instance();
 	IDPG_Auth_Emails::instance();
 	IDPG_Maintenance::instance();
+	IDPG_Settings_Page::instance();
 }
 add_action( 'init', 'idpg_core_init' );
 

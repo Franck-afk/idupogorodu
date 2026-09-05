@@ -31,15 +31,7 @@ $current_city_name = class_exists( 'IDPG_City_Filter' )
 	<div class="idpg-header__container container">
 
 		<!-- Логотип -->
-		<?php if ( has_custom_logo() ) : ?>
-			<div class="idpg-header__logo">
-				<?php the_custom_logo(); ?>
-			</div>
-		<?php else : ?>
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="idpg-header__logo" rel="home">
-				<?php echo esc_html( get_bloginfo( 'name' ) ); ?>
-			</a>
-		<?php endif; ?>
+		<?php idpg_render_logo(); ?>
 
 		<!-- Навигация -->
 		<nav class="idpg-nav" id="idpg-nav" role="navigation" aria-label="<?php esc_attr_e( 'Основная навигация', 'idpg_core' ); ?>">

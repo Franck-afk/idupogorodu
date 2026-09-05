@@ -373,6 +373,62 @@ class IDPG_Banners {
 	}
 
 	/**
+	 * Получить активный контейнер Carbon Fields баннеров.
+	 *
+	 * @return \Carbon_Fields\Container\Theme_Options_Container|null
+	 */
+	public static function get_container() {
+		return self::$container;
+	}
+
+	/**
+	 * Рендер полей баннеров внутри вкладки единой страницы настроек.
+	 *
+	 * Активирует контейнер Carbon Fields, чтобы поля попали в JSON-данные
+	 * cf.preloaded и была инициализирована JS-форма, затем выводит её.
+	 * Метод вызывается из IDPG_Settings_Page (вкладка «Баннеры»).
+	 *
+	 * @return void
+	 */
+	public static function render_settings_tab() {
+		$container = self::$container;
+
+		if ( ! $container ) {
+			// Модуль баннеров зарегистрирован, но контейнер ещё не создан.
+			echo '<p>' . esc_html__( 'Поля баннеров недоступны.', 'idpg-core' ) . '</p>';
+			return;
+		}
+
+		// activate() объявлена защищённой внутри Carbon Fields — вызываем
+		// через замыкание с привязкой к объекту, сохраняя контекст $this.
+		$activate = \Closure::bind( function () {
+			$this->activate();
+		}, $container, $container );
+		$activate();
+
+		$container->render();
+	}
+
+	/**
+	 * Сохранение полей баннеров на единой странице настроек.
+	 *
+	 * Вызывается на admin_init из IDPG_Settings_Page (вкладка «Баннеры»).
+	 * _save() сам проверяет nonce контейнера и права доступа, поэтому
+	 * для пустых запросов ничего не делает.
+	 *
+	 * @return void
+	 */
+	public static function maybe_save() {
+		$container = self::$container;
+
+		if ( ! $container ) {
+			return;
+		}
+
+		$container->_save();
+	}
+
+	/**
 	 * Публичный рендер баннера (callback для хука idpg_banner_position).
 	 *
 	 * Выводит только на главной странице.

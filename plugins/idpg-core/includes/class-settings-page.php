@@ -2,7 +2,8 @@
 /**
  * Страница настроек плагина IDPG Core.
  *
- * Три вкладки: Общие, Экспорт / Импорт, О плагине.
+ * Вкладки: Общие, Главная (Блоки), Области виджетов, Баннеры,
+ * Экспорт / О плагине.
  *
  * @package IDPG_Core
  */
@@ -84,6 +85,7 @@ class IDPG_Settings_Page {
 		add_action( 'admin_menu', array( $this, 'register_page' ) );
 		add_action( 'admin_menu', array( $this, 'hide_legacy_menus' ), 9999 );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_init', array( $this, 'maybe_save_banners' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_init', array( $this, 'redirect_legacy_urls' ) );
 		add_action( 'wp_ajax_idpg_export_settings', array( $this, 'ajax_export' ) );
@@ -97,19 +99,29 @@ class IDPG_Settings_Page {
 	 * Функционал перенесён на единую страницу «Иду по городу»:
 	 * - Внешний вид → Настройки главной;
 	 * - Внешний вид → Области виджетов (страница скрыта, но остаётся
-	 *   обработчиком для редиректа старых прямых ссылок на вкладку).
+	 *   обработчиком для редиректа старых прямых ссылок на вкладку);
+	 * - Карбон-поля → Баннеры (вкладка «Баннеры»).
 	 *
 	 * @return void
 	 */
 	public function hide_legacy_menus() {
 		remove_submenu_page( 'themes.php', 'idpg-home-sections' );
 		remove_submenu_page( 'themes.php', 'idpg-widget-areas' );
+
+		// Прячем отдельную страницу «Баннеры» Carbon Fields — её поля
+		// теперь отображаются во вкладке «Баннеры» единой страницы.
+		if ( class_exists( 'IDPG_Banners' ) ) {
+			$container = IDPG_Banners::get_container();
+			if ( $container ) {
+				remove_menu_page( $container->get_page_file() );
+			}
+		}
 	}
 
 	/**
 	 * Регистрация единой страницы настроек как верхнего пункта меню.
 	 *
-	 * Вкладки: Общие, Главная (Блоки), Области виджетов,
+	 * Вкладки: Общие, Главная (Блоки), Области виджетов, Баннеры,
 	 * Экспорт / О плагине.
 	 */
 	public function register_page() {
@@ -148,6 +160,14 @@ class IDPG_Settings_Page {
 
 		if ( isset( $_GET['page'] ) && 'idpg-widget-areas' === $_GET['page'] ) {
 			wp_safe_redirect( $base( 'widgets' ) );
+			exit;
+		}
+
+		if ( isset( $_GET['page'] )
+			&& class_exists( 'IDPG_Banners' )
+			&& ( $container = IDPG_Banners::get_container() )
+			&& $_GET['page'] === $container->get_page_file() ) {
+			wp_safe_redirect( $base( 'banners' ) );
 			exit;
 		}
 
@@ -269,6 +289,7 @@ class IDPG_Settings_Page {
 			'obshie'   => __( 'Общие', 'idpg-core' ),
 			'glavnaya' => __( 'Главная (Блоки)', 'idpg-core' ),
 			'widgets'  => __( 'Области виджетов', 'idpg-core' ),
+			'banners'  => __( 'Баннеры', 'idpg-core' ),
 			'export'   => __( 'Экспорт / О плагине', 'idpg-core' ),
 		);
 
@@ -295,6 +316,9 @@ class IDPG_Settings_Page {
 						break;
 					case 'widgets':
 						$this->render_widgets_tab();
+						break;
+					case 'banners':
+						$this->render_banners_tab();
 						break;
 					case 'export':
 						$this->render_export_tab();
@@ -349,6 +373,50 @@ class IDPG_Settings_Page {
 			return;
 		}
 		idpg_widget_areas_admin_page();
+	}
+
+	/**
+	 * Вкладка «Баннеры» — внедряемые поля Carbon Fields.
+	 *
+	 * Переиспользует контейнер баннеров CF: активирует его и рендерит
+	 * родную форму (поля + кнопку сохранения). См. IDPG_Banners::render_settings_tab().
+	 *
+	 * @return void
+	 */
+	private function render_banners_tab() {
+		if ( ! class_exists( 'IDPG_Banners' ) ) {
+			echo '<p>' . esc_html__( 'Модуль баннеров не активен.', 'idpg-core' ) . '</p>';
+			return;
+		}
+		IDPG_Banners::render_settings_tab();
+	}
+
+	/**
+	 * Сохранение полей «Баннеров» на единой странице настроек.
+	 *
+	 * Вызывается на admin_init только для вкладки «Баннеры», делегирует
+	 * сохранение в контейнер CF (там проверяется nonce и права доступа).
+	 *
+	 * @return void
+	 */
+	public function maybe_save_banners() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		if ( ! isset( $_GET['page'] ) || self::PAGE_SLUG !== $_GET['page'] ) {
+			return;
+		}
+
+		if ( ! isset( $_GET['tab'] ) || 'banners' !== $_GET['tab'] ) {
+			return;
+		}
+
+		if ( ! class_exists( 'IDPG_Banners' ) ) {
+			return;
+		}
+
+		IDPG_Banners::maybe_save();
 	}
 
 	/**

@@ -318,10 +318,10 @@ class IDPG_Roles {
 	}
 
 	/**
-	 * Скрытие ненужных пунктов меню для организатора.
+	 * Скрытие ненужных пунктов меню для администратора и организатора.
 	 *
-	 * Убирает «Записи» и «Инструменты» — организатору нужны только
-	 * события, площадки и его настройки.
+	 * Убирает «Записи», «Комментарии» и «Органайзер» — как у администратора,
+	 * так и у организатора, которым нужны только события, площадки и настройки.
 	 *
 	 * @return void
 	 */
@@ -332,12 +332,26 @@ class IDPG_Roles {
 
 		$user = wp_get_current_user();
 
-		if ( ! $user->exists() || ! in_array( 'event_organizer', (array) $user->roles, true ) ) {
+		if ( ! $user->exists() ) {
 			return;
 		}
 
-		remove_menu_page( 'edit.php' );      // Записи.
-		remove_menu_page( 'tools.php' );     // Инструменты.
+		$roles = (array) $user->roles;
+
+		// Применяем только для администратора и организатора.
+		if ( ! in_array( 'administrator', $roles, true )
+			&& ! in_array( 'event_organizer', $roles, true ) ) {
+			return;
+		}
+
+		remove_menu_page( 'edit.php' );               // Записи.
+		remove_menu_page( 'edit-comments.php' );      // Комментарии.
+		remove_menu_page( 'idpg-organizer-settings' ); // Органайзер (страница настроек организатора).
+
+		// Инструменты — дополнительно организатору.
+		if ( in_array( 'event_organizer', $roles, true ) ) {
+			remove_menu_page( 'tools.php' );          // Инструменты.
+		}
 	}
 
 	/**
