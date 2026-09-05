@@ -1,0 +1,60 @@
+/**
+ * IDPG Ad Widget — выбор/удаление баннера (медиабиблиотека).
+ *
+ * Вешается на документ, чтобы работать и для виджетов,
+ * добавленных в блочном редакторе виджетов.
+ *
+ * @package idpg_core
+ */
+(function ($) {
+	'use strict';
+
+	var frame;
+
+	$(document).on('click', '.idpg-ad-widget__select', function (e) {
+		e.preventDefault();
+
+		var $wrap = $(this).closest('.idpg-ad-widget__media');
+		if (!$wrap.length) {
+			return;
+		}
+
+		if (frame) {
+			frame.remove();
+			frame = null;
+		}
+
+		frame = wp.media({
+			multiple: false,
+			button: { text: idpgAdWidgetL10n.select || 'Выбрать' }
+		});
+
+		frame.on('select', function () {
+			var att = frame.state().get('selection').first();
+			var id = att ? att.id : '';
+
+			$wrap.find('.idpg-ad-widget__image-id').val(id);
+			$wrap.find('.idpg-ad-widget__image-wrap').empty();
+
+			if (id) {
+				wp.media.attachment(id).fetch().then(function (a) {
+					$wrap.find('.idpg-ad-widget__image-wrap').html('<img src="' + a.get('url') + '" alt="">');
+				});
+			}
+		});
+
+		frame.open();
+	});
+
+	$(document).on('click', '.idpg-ad-widget__remove', function (e) {
+		e.preventDefault();
+
+		var $wrap = $(this).closest('.idpg-ad-widget__media');
+		if (!$wrap.length) {
+			return;
+		}
+
+		$wrap.find('.idpg-ad-widget__image-wrap').empty();
+		$wrap.find('.idpg-ad-widget__image-id').val('');
+	});
+})(jQuery);

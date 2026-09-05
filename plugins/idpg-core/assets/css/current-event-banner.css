@@ -1,0 +1,209 @@
+/*
+ * Стили баннера текущего события.
+ * Подключаются только на главной странице.
+ */
+
+.idpg-current-event-banner {
+	display: block;
+	position: relative;
+	width: 100%;
+	height: 400px;
+	overflow: hidden;
+	margin: 16px 0 4rem;
+	border-radius: 20px;
+	text-decoration: none;
+}
+
+.idpg-current-event-banner__picture,
+.idpg-current-event-banner__img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	margin: 0;
+	font-size: 0;
+}
+
+/* Градиентное затемнение поверх изображения. */
+.idpg-current-event-banner__overlay {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* Контентный блок: бейдж + даты + заголовок + анонс, прижат к низу. */
+.idpg-current-event-banner__content {
+	position: absolute;
+	bottom: 40px;
+	left: 40px;
+	right: 40px;
+	z-index: 2;
+	box-sizing: border-box;
+	color: #fff;
+	text-align: left;
+}
+
+/* Бейдж-пилюля с рубрикой. */
+.idpg-current-event-banner__badge {
+	display: inline-block;
+	margin: 0 0 12px;
+	padding: 6px 14px;
+	background: #ff7846;
+	color: #fff;
+	font-size: 0.8rem;
+	font-weight: 600;
+	line-height: 1.2;
+	border-radius: 999px;
+}
+
+/* Бейдж статуса: билеты закончились / мероприятие отменено. */
+.idpg-current-event-banner__status {
+	display: inline-block;
+	margin: 0 0 12px 8px;
+	padding: 6px 14px;
+	background: #c0392b;
+	color: #fff;
+	font-size: 0.8rem;
+	font-weight: 600;
+	line-height: 1.2;
+	border-radius: 999px;
+}
+
+.idpg-current-event-banner__status--cancelled {
+	background: #6c757d;
+}
+
+.idpg-current-event-banner__status--active {
+	background: #27ae60;
+}
+
+/* Даты проведения события. */
+.idpg-current-event-banner__dates {
+	display: block;
+	margin: 0 0 10px;
+	font-size: 0.9rem;
+	font-weight: 600;
+	line-height: 1.2;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	opacity: 0.92;
+}
+
+.idpg-current-event-banner__title {
+	display: block;
+	font-size: 2rem;
+	font-weight: 700;
+	line-height: 1.2;
+	margin: 0 0 8px;
+}
+
+.idpg-current-event-banner__subtitle {
+	display: block;
+	font-size: 1rem;
+	line-height: 1.4;
+	margin: 0;
+	opacity: 0.92;
+}
+
+/* Строка доп. данных: цена, город, возраст, площадка. */
+.idpg-current-event-banner__meta {
+	display: block;
+	margin: 14px 0 0;
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+
+.idpg-current-event-banner__meta-item {
+	display: inline-block;
+	margin-right: 14px;
+}
+
+.idpg-current-event-banner__meta-item--price {
+	font-weight: 700;
+}
+
+/* -------- Планшет и меньше -------- */
+@media (max-width: 900px) {
+	.idpg-current-event-banner__content {
+		bottom: 24px;
+		left: 20px;
+		right: 20px;
+	}
+
+	.idpg-current-event-banner__title {
+		font-size: 1.5rem;
+	}
+}
+
+@media (max-width: 640px) {
+	.idpg-current-event-banner {
+		margin: 16px 0 2.5rem;
+	}
+}
+
+/* -------- Мобильный баннер -------- */
+@media (max-width: 767px) {
+	.idpg-current-event-banner {
+		height: 260px;
+		margin: 16px 0 1.5rem;
+	}
+
+	.idpg-current-event-banner__picture,
+	.idpg-current-event-banner__img {
+		height: 55%;
+	}
+
+	/* Тёмная панель: фото 55% сверху, текст на твёрдом фоне снизу */
+	.idpg-current-event-banner__overlay::after {
+		content: "";
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 50%;
+		background: rgba(10, 11, 13, 0.92);
+	}
+
+	.idpg-current-event-banner__content {
+		bottom: 14px;
+		left: 14px;
+		right: 14px;
+	}
+
+	.idpg-current-event-banner__dates {
+		font-size: 0.7rem;
+		margin-bottom: 5px;
+	}
+
+	.idpg-current-event-banner__title {
+		font-size: 1.1rem;
+		margin-bottom: 4px;
+	}
+
+	.idpg-current-event-banner__subtitle {
+		font-size: 0.8rem;
+		opacity: 0.8;
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.idpg-current-event-banner__meta {
+		font-size: 0.75rem;
+		margin-top: 8px;
+	}
+}
+
+/* ≤360px */
+@media (max-width: 360px) {
+	.idpg-current-event-banner {
+		height: 220px;
+	}
+	.idpg-current-event-banner__title {
+		font-size: 1rem;
+	}
+}

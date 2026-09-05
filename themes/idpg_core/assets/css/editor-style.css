@@ -1,0 +1,413 @@
+/**
+ * Стили редактора Гутенберг
+ *
+ * Синхронизированы с фронтендом темы idpg_core
+ *
+ * @package idpg_core
+ */
+
+/* ============================================================================
+   Базовые стили редактора
+   ============================================================================ */
+
+/* Шрифт */
+.editor-styles-wrapper {
+	font-family: "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-size: 16px;
+	line-height: 1.5;
+	color: #111827;
+}
+
+/* ============================================================================
+   Типографика
+   ============================================================================ */
+
+.editor-styles-wrapper h1,
+.editor-styles-wrapper h2,
+.editor-styles-wrapper h3,
+.editor-styles-wrapper h4,
+.editor-styles-wrapper h5,
+.editor-styles-wrapper h6 {
+	font-weight: 700;
+	line-height: 1.2;
+	color: #111827;
+	margin-top: 1.5em;
+	margin-bottom: 0.5em;
+}
+
+.editor-styles-wrapper h1 {
+	font-size: 2.25rem;
+}
+
+.editor-styles-wrapper h2 {
+	font-size: 1.875rem;
+}
+
+.editor-styles-wrapper h3 {
+	font-size: 1.5rem;
+}
+
+.editor-styles-wrapper h4 {
+	font-size: 1.25rem;
+}
+
+.editor-styles-wrapper h5 {
+	font-size: 1.125rem;
+}
+
+.editor-styles-wrapper h6 {
+	font-size: 1rem;
+}
+
+/* ============================================================================
+   Абзацы и текст
+   ============================================================================ */
+
+.editor-styles-wrapper p {
+	margin-bottom: 1.5em;
+}
+
+.editor-styles-wrapper strong {
+	font-weight: 700;
+}
+
+.editor-styles-wrapper em {
+	font-style: italic;
+}
+
+/* ============================================================================
+   Ссылки
+   ============================================================================ */
+
+.editor-styles-wrapper a {
+	color: #0052ff;
+	text-decoration: none;
+}
+
+.editor-styles-wrapper a:hover {
+	color: #003ecc;
+	text-decoration: underline;
+}
+
+/* ============================================================================
+   Списки
+   ============================================================================ */
+
+.editor-styles-wrapper ul,
+.editor-styles-wrapper ol {
+	margin-bottom: 1.5em;
+	padding-left: 1.5em;
+}
+
+.editor-styles-wrapper ul {
+	list-style-type: disc;
+}
+
+.editor-styles-wrapper ol {
+	list-style-type: decimal;
+}
+
+.editor-styles-wrapper li {
+	margin-bottom: 0.5em;
+}
+
+.editor-styles-wrapper li > ul,
+.editor-styles-wrapper li > ol {
+	margin-bottom: 0;
+	margin-left: 1.5em;
+}
+
+/* ============================================================================
+   Цитаты
+   ============================================================================ */
+
+.editor-styles-wrapper blockquote {
+	margin: 1.5em 0;
+	padding: 1em 1.5em;
+	border-left: 4px solid #0052ff;
+	background-color: #f9fafb;
+	font-style: italic;
+	color: #374151;
+}
+
+.editor-styles-wrapper blockquote p:last-child {
+	margin-bottom: 0;
+}
+
+/* ============================================================================
+   Код
+   ============================================================================ */
+
+.editor-styles-wrapper code {
+	font-family: 'SF Mono', Monaco, 'Andale Mono', monospace;
+	font-size: 0.875em;
+	padding: 0.125em 0.375em;
+	background-color: #f3f4f6;
+	border-radius: 4px;
+	color: #0052ff;
+}
+
+.editor-styles-wrapper pre {
+	margin-bottom: 1.5em;
+	padding: 1em;
+	background-color: #1f2937;
+	color: #f9fafb;
+	border-radius: 8px;
+	overflow-x: auto;
+}
+
+.editor-styles-wrapper pre code {
+	background-color: transparent;
+	padding: 0;
+	color: inherit;
+}
+
+/* ============================================================================
+   Изображения
+   ============================================================================ */
+
+.editor-styles-wrapper img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+}
+
+.editor-styles-wrapper figure {
+	margin: 1.5em 0;
+}
+
+.editor-styles-wrapper figcaption {
+	margin-top: 0.5em;
+	font-size: 0.875rem;
+	color: #6b7280;
+	text-align: center;
+}
+
+/* ============================================================================
+   Галерея
+   ============================================================================ */
+
+.editor-styles-wrapper .wp-block-gallery {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 0.5em;
+	margin: 1.5em 0;
+}
+
+.editor-styles-wrapper .wp-block-image {
+	margin: 0;
+}
+
+/* ============================================================================
+   Таблицы
+   ============================================================================ */
+
+.editor-styles-wrapper table {
+	width: 100%;
+	margin-bottom: 1.5em;
+	border-collapse: collapse;
+}
+
+.editor-styles-wrapper th,
+.editor-styles-wrapper td {
+	padding: 0.75em 1em;
+	border: 1px solid #e5e7eb;
+	text-align: left;
+}
+
+.editor-styles-wrapper th {
+	background-color: #f9fafb;
+	font-weight: 600;
+}
+
+.editor-styles-wrapper tr:nth-child(even) {
+	background-color: #f9fafb;
+}
+
+/* ============================================================================
+   Кнопки ( блоки )
+   ============================================================================ */
+
+$1100px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.editor-styles-wrapper .wp-block-button__link:not(.has-background) {
+	background-color: #0052ff;
+	color: #ffffff;
+}
+
+.editor-styles-wrapper .wp-block-button__link:not(.has-text-color) {
+	color: #ffffff;
+}
+
+/* ============================================================================
+   Разделители
+   ============================================================================ */
+
+.editor-styles-wrapper hr {
+	border: 0;
+	height: 1px;
+	background-color: #e5e7eb;
+	margin: 2em 0;
+}
+
+/* ============================================================================
+   Кавычки (pullquote)
+   ============================================================================ */
+
+.editor-styles-wrapper .wp-block-pullquote {
+	margin: 2em 0;
+	padding: 1.5em;
+	border-top: 2px solid #0052ff;
+	border-bottom: 2px solid #0052ff;
+	text-align: center;
+}
+
+.editor-styles-wrapper .wp-block-pullquote blockquote {
+	border-left: none;
+	padding: 0;
+	background-color: transparent;
+}
+
+.editor-styles-wrapper .wp-block-pullquote cite {
+	display: block;
+	margin-top: 0.5em;
+	font-size: 0.875rem;
+	color: #6b7280;
+	font-style: normal;
+}
+
+/* ============================================================================
+   Встраиваемые (embed)
+   ============================================================================ */
+
+.editor-styles-wrapper .wp-block-embed {
+	margin: 1.5em 0;
+}
+
+.editor-styles-wrapper .wp-block-embed__wrapper {
+	position: relative;
+	padding-bottom: 56.25%;
+	height: 0;
+	overflow: hidden;
+	border-radius: 8px;
+}
+
+.editor-styles-wrapper .wp-block-embed iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+
+/* ============================================================================
+   Виджеты
+   ============================================================================ */
+
+.editor-styles-wrapper .widget {
+	margin-bottom: 1.5em;
+	padding: 1.5em;
+	background-color: #f9fafb;
+	border-radius: 8px;
+}
+
+.editor-styles-wrapper .widget-title {
+	font-size: 1.125rem;
+	font-weight: 700;
+	margin-bottom: 0.75em;
+	color: #111827;
+}
+
+/* ============================================================================
+   Ширина контента
+   ============================================================================ */
+
+.editor-styles-wrapper .wp-block {
+	max-width: 720px;
+}
+
+.editor-styles-wrapper .alignwide {
+	max-width: 1080px;
+}
+
+.editor-styles-wrapper .alignfull {
+	max-width: none;
+}
+
+/* ============================================================================
+   Комментарии
+   ============================================================================ */
+
+.editor-styles-wrapper .comment-content {
+	font-size: 0.9375rem;
+	line-height: 1.6;
+}
+
+.editor-styles-wrapper .comment-meta {
+	margin-bottom: 0.75em;
+	font-size: 0.875rem;
+	color: #6b7280;
+}
+
+/* ============================================================================
+   Формы
+   ============================================================================ */
+
+.editor-styles-wrapper input[type="text"],
+.editor-styles-wrapper input[type="email"],
+.editor-styles-wrapper input[type="url"],
+.editor-styles-wrapper input[type="password"],
+.editor-styles-wrapper input[type="search"],
+.editor-styles-wrapper input[type="number"],
+.editor-styles-wrapper input[type="tel"],
+.editor-styles-wrapper textarea,
+.editor-styles-wrapper select {
+	width: 100%;
+	padding: 10px 14px;
+	font-size: 1rem;
+	color: #111827;
+	background-color: #ffffff;
+	border: 1px solid #d1d5db;
+	border-radius: 8px;
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.editor-styles-wrapper input[type="text"]:focus,
+.editor-styles-wrapper input[type="email"]:focus,
+.editor-styles-wrapper input[type="url"]:focus,
+.editor-styles-wrapper input[type="password"]:focus,
+.editor-styles-wrapper input[type="search"]:focus,
+.editor-styles-wrapper input[type="number"]:focus,
+.editor-styles-wrapper input[type="tel"]:focus,
+.editor-styles-wrapper textarea:focus,
+.editor-styles-wrapper select:focus {
+	outline: none;
+	border-color: #0052ff;
+	box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.1);
+}
+
+/* ============================================================================
+   Адаптив (превью в редакторе)
+   ============================================================================ */
+
+@media (max-width: 782px) {
+	.editor-styles-wrapper {
+		font-size: 15px;
+	}
+
+	.editor-styles-wrapper h1 {
+		font-size: 1.75rem;
+	}
+
+	.editor-styles-wrapper h2 {
+		font-size: 1.5rem;
+	}
+
+	.editor-styles-wrapper h3 {
+		font-size: 1.25rem;
+	}
+}

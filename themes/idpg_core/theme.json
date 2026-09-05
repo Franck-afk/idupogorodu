@@ -1,0 +1,91 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"settings": {
+		"layout": {
+			"contentSize": "720px",
+			"wideSize": "1400px"
+		},
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFamily": "'Gilroy', sans-serif",
+					"slug": "gilroy",
+					"name": "Gilroy",
+					"fontFace": [
+						{
+							"fontFamily": "Gilroy",
+							"fontWeight": "400",
+							"fontStyle": "normal",
+							"src": [
+								"/wp-content/themes/idpg_core/fonts/gilroy-regular.ttf"
+							]
+						}
+					]
+				}
+			]
+		},
+		"spacing": {
+			"units": [
+				"px",
+				"rem",
+				"%"
+			]
+		},
+		"color": {
+			"palette": [
+				{
+					"slug": "primary",
+					"color": "#0052ff",
+					"name": "Primary"
+				},
+				{
+					"slug": "secondary",
+					"color": "#0a0b0d",
+					"name": "Secondary"
+				},
+				{
+					"slug": "background",
+					"color": "#ffffff",
+					"name": "Background"
+				},
+				{
+					"slug": "text",
+					"color": "#0a0b0d",
+					"name": "Text"
+				}
+			]
+		}
+	},
+	"styles": {
+		"typography": {
+			"fontFamily": "'Gilroy', sans-serif",
+			"fontSize": "16px",
+			"lineHeight": "1.5"
+		},
+		"color": {
+			"text": "#0a0b0d",
+			"background": "#ffffff"
+		},
+		"elements": {
+			"heading": {
+				"typography": {
+					"fontWeight": "400",
+					"letterSpacing": "-0.02em",
+					"lineHeight": "1.1"
+				}
+			},
+			"link": {
+				"color": {
+					"text": "#0052ff"
+				},
+				":hover": {
+					"color": {
+						"text": "#003ecc"
+					}
+				}
+			}
+		}
+	}
+}
+

@@ -1,0 +1,137 @@
+// --- Home sidebar + ad widgets + widget areas (ported from hand-written style.css) ---
+/* --- Home sidebar (right) + ad widgets --- */
+.idpg-home {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+}
+.idpg-home__inner {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.idpg-home__sidebar {
+  flex: 0 0 320px;
+  width: 320px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.idpg-ad-widget {
+  background: #fff;
+  border: 1px solid #e2e4e7;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  padding: 16px;
+  box-sizing: border-box;
+}
+.idpg-ad-widget__title {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.idpg-ad-widget__img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+.idpg-ad-widget__empty {
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+/* responsive: stack sidebar under content on narrow screens */
+@media (max-width: 1200px) {
+  .idpg-home {
+    flex-direction: column;
+  }
+  .idpg-home__sidebar {
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* --- Widget areas (idpg_widget_areas_render) --- */
+.idpg-widget-area {
+  width: 100%;
+}
+.idpg-widget-area--below-header {
+  padding-top: 88px;
+}
+.idpg-widget-area--before-footer {
+  padding-top: 24px;
+}
+.idpg-widget-area--above-content {
+  margin-bottom: 24px;
+}
+.idpg-widget-area--below-content {
+  margin-top: 24px;
+}
+.idpg-widget-area__widget {
+  margin-bottom: 20px;
+  background: #fff;
+  border: 1px solid #e2e4e7;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Заголовок виджета в зонах — как в сайдбаре главной */
+.idpg-widget-area__widget .widget-title,
+.idpg-widget-area__title {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.idpg-widget-area__widget:last-child {
+  margin-bottom: 0;
+}
+
+/* --- Widget «Последние события» --- */
+.idpg-recent-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__item {
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+
+    &:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  &__item a {
+    display: inline-block;
+    color: #0f172a;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #2563eb;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+}

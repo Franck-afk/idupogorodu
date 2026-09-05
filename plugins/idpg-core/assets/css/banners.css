@@ -1,0 +1,30 @@
+/*
+ * Стили баннеров idpg-core.
+ * Подключаются только на главной странице.
+ */
+
+.idpg-banner {
+	display: flow-root;
+	position: relative;
+	width: 100%;
+	height: 400px;
+	overflow: hidden;
+	margin: 16px 0 4rem;
+	border-radius: 20px;
+}
+
+@media (max-width: 640px) {
+	.idpg-banner {
+		margin: 16px 0 2.5rem;
+	}
+}
+
+.idpg-banner__picture,
+.idpg-banner__img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	margin: 0;
+	font-size: 0;
+}

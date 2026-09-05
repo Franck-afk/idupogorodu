@@ -1,0 +1,186 @@
+@use '../base/variables' as *;
+
+// ============================================================================
+// Футер сайта
+// ============================================================================
+
+.site-footer {
+	margin-top: auto;
+	background-color: #2d3748;
+	color: #ffffff;
+
+	&__container {
+		max-width: $container-max;
+		width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 60px 20px;
+	}
+
+	&__top {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 40px;
+
+		@media (min-width: $breakpoint-tablet) {
+			grid-template-columns: repeat(2, 1fr);
+		}
+
+		@media (min-width: $breakpoint-desktop) {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
+
+	&__column {
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__title {
+		margin: 0 0 16px;
+		font-family: $font-family-display;
+		font-size: 18px;
+		font-weight: 700;
+		color: #ffffff;
+	}
+
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__link {
+		display: inline-block;
+		font-size: 14px;
+		line-height: 1.4;
+		color: #cbd5e0;
+		text-decoration: none;
+		transition: color $transition-fast;
+
+		&:hover,
+		&:focus {
+			color: #ffffff;
+			text-decoration: underline;
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid $color-primary;
+			outline-offset: 2px;
+		}
+	}
+
+	&__text {
+		margin: 0 0 16px;
+		font-size: 14px;
+		line-height: 1.6;
+		color: #cbd5e0;
+	}
+
+	&__social {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin: 20px 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__social-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		color: #cbd5e0;
+		background-color: rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.16);
+		border-radius: 8px;
+		transition: color $transition-fast, background-color $transition-fast, border-color $transition-fast;
+
+		svg {
+			width: 20px;
+			height: 20px;
+			fill: currentColor;
+		}
+
+		&:hover,
+		&:focus {
+			color: #ffffff;
+			background-color: rgba(255, 255, 255, 0.14);
+			border-color: rgba(255, 255, 255, 0.35);
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid $color-primary;
+			outline-offset: 2px;
+		}
+	}
+
+	&__subscribe {
+		display: flex;
+		gap: 8px;
+
+		&-input {
+			flex: 1;
+			min-width: 0;
+			padding: 10px 14px;
+			font-family: $font-family;
+			font-size: 14px;
+			color: #ffffff;
+			background-color: rgba(255, 255, 255, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 8px;
+			outline: none;
+			transition: border-color $transition-fast, background-color $transition-fast;
+
+			&::placeholder {
+				color: #a0aec0;
+			}
+
+			&:focus {
+				background-color: rgba(255, 255, 255, 0.14);
+				border-color: $color-primary;
+			}
+		}
+
+		&-btn {
+			flex-shrink: 0;
+			padding: 10px 16px;
+			font-family: $font-family;
+			font-size: 14px;
+			font-weight: 600;
+			color: #ffffff;
+			background-color: $color-primary;
+			border: 1px solid $color-primary;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: background-color $transition-fast, border-color $transition-fast;
+
+			&:hover,
+			&:focus {
+				background-color: $color-primary-hover;
+				border-color: $color-primary-hover;
+			}
+
+			&:focus-visible {
+				outline: 2px solid $color-primary;
+				outline-offset: 2px;
+			}
+		}
+	}
+
+	&__bottom {
+		margin-top: 40px;
+		padding-top: 24px;
+		border-top: 1px solid rgba(255, 255, 255, 0.12);
+		font-size: 14px;
+		color: #a0aec0;
+		text-align: center;
+	}
+}

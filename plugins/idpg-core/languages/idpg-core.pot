@@ -1,0 +1,1942 @@
+# Copyright (C) 2026 IDPG Team
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: IDPG Core 1.0.0\n"
+"Report-Msgid-Bugs-To: https://idupogorodu.ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-01 17:21:23+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: idpg pot builder\n"
+"Language-Team: LANGUAGE\n"
+"X-Domain: idpg-core\n"
+
+#: includes/class-notifications.php:115
+msgid "\nЭто автоматическое уведомление."
+msgstr ""
+
+#: includes/class-meta.php:1113
+msgid "— Выберите —"
+msgstr ""
+
+#: includes/class-meta.php:1199
+msgid "— Выберите сеть —"
+msgstr ""
+
+#: includes/class-meta.php:736
+msgid "— Не выбран —"
+msgstr ""
+
+#: includes/class-meta.php:770
+msgid "— Не выбрана —"
+msgstr ""
+
+#: includes/class-meta.php:662
+msgid "«Внешняя ссылка» — кнопка ведёт на ваш сайт продаж; «Виджет Яндекс.Билетов» — вставьте код виджета ниже."
+msgstr ""
+
+#: includes/social-auth/class-social-auth.php:545
+msgid "← Вернуться ко входу"
+msgstr ""
+
+#: includes/class-maintenance.php:631
+#: includes/class-meta.php:1209
+msgid "+ Добавить соцсеть"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:261
+msgid "52629123"
+msgstr ""
+
+#: includes/class-rest-api.php:1079
+msgid "Аватар загружен."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:528
+msgid "Август"
+msgstr ""
+
+#: includes/class-maintenance.php:620
+#: includes/class-maintenance.php:638
+msgid "Авто (по домену)"
+msgstr ""
+
+#: includes/class-maintenance.php:657
+msgid "Авто-выключение"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:202
+msgid "Автоопределение города по IP:"
+msgstr ""
+
+#: includes/class-maintenance.php:730
+msgid "Авторизованные администраторы видят настоящий сайт."
+msgstr ""
+
+#: includes/class-meta.php:528
+#: includes/class-meta.php:743
+msgid "Адрес"
+msgstr ""
+
+#: includes/class-notifications.php:133
+msgid "Активны"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:146
+msgid "Алфавит"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:526
+msgid "Апрель"
+msgstr ""
+
+#: includes/class-ical-export.php:285
+msgid "Афиша IDPG"
+msgstr ""
+
+#: includes/class-banners.php:111
+msgid "Баннеры"
+msgstr ""
+
+#: includes/class-maintenance.php:453
+msgid "Белый список IP"
+msgstr ""
+
+#: includes/class-meta.php:626
+msgid "Бесплатное событие"
+msgstr ""
+
+#: includes/class-current-event-banner.php:557
+msgid "Билеты в продаже"
+msgstr ""
+
+#: includes/class-current-event-banner.php:558
+#: includes/class-template-helpers.php:70
+msgid "Билеты закончились"
+msgstr ""
+
+#: includes/class-meta.php:611
+msgid "Билеты и цены"
+msgstr ""
+
+#: includes/class-meta.php:261
+msgid "В «Билетах и ценах» укажите цены (или отметьте «Бесплатное событие»), тип продажи и ссылку на покупку билетов."
+msgstr ""
+
+#: includes/class-meta.php:260
+msgid "В «Месте проведения» выберите площадку или укажите адрес и координаты вручную."
+msgstr ""
+
+#: includes/class-meta.php:259
+msgid "В блоке «Основная информация» заполните дату начала и, при необходимости, дату окончания и сеансы."
+msgstr ""
+
+#: includes/class-favorites.php:183
+msgid "В избранное"
+msgstr ""
+
+#: includes/class-cpt.php:120
+msgid "В корзине нет площадок"
+msgstr ""
+
+#: includes/class-cpt.php:75
+msgid "В корзине нет событий"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:271
+msgid "В настройках приложения VK ID укажите Redirect URI (см. блок «Callback URL» ниже). Поток: OAuth 2.1 + PKCE (S256), scope vkid.personal_info email. Название кнопки на /login/: «Войти через VK ID»."
+msgstr ""
+
+#: includes/class-meta.php:619
+msgid "В продаже"
+msgstr ""
+
+#: includes/class-maintenance.php:482
+msgid "В режиме «Разработка» сайт видят все авторизованные. Администраторы получают доступ в любом режиме."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:656
+msgid "В этом месяце событий нет."
+msgstr ""
+
+#: includes/class-meta.php:629
+msgid "Валюта"
+msgstr ""
+
+#: includes/class-meta.php:636
+msgid "Валюта, в которой указаны цены билетов."
+msgstr ""
+
+#: includes/class-meta.php:1138
+msgid "Введите 10 или 12 цифр без пробелов и дефисов."
+msgstr ""
+
+#: includes/class-rest-auth.php:427
+msgid "Введите название организации."
+msgstr ""
+
+#: includes/class-rest-auth.php:443
+msgid "Введите номер телефона."
+msgstr ""
+
+#: includes/class-rest-auth.php:435
+msgid "Введите ФИО представителя."
+msgstr ""
+
+#: includes/class-maintenance.php:1101
+#: includes/class-maintenance.php:188
+#: includes/class-maintenance.php:568
+msgid "Ведутся технические работы. Загляните позже!"
+msgstr ""
+
+#: includes/class-meta.php:482
+msgid "Весь день"
+msgstr ""
+
+#: includes/class-meta.php:710
+msgid "Видео-трейлер"
+msgstr ""
+
+#: includes/class-meta.php:660
+msgid "Виджет Яндекс.Билетов"
+msgstr ""
+
+#: includes/class-maintenance.php:378
+msgid "Включён"
+msgstr ""
+
+#: includes/class-maintenance.php:715
+msgid "Включена"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:294
+msgid "Включить вход через Яндекс ID (ENABLED)"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:254
+msgid "Включить вход через VK ID (ENABLED)"
+msgstr ""
+
+#: includes/class-banners.php:252
+msgid "Включить отслеживание показов и кликов"
+msgstr ""
+
+#: includes/class-banners.php:202
+msgid "Включить показ нижнего баннера"
+msgstr ""
+
+#: includes/class-banners.php:152
+msgid "Включить показ среднего баннера"
+msgstr ""
+
+#: includes/class-maintenance.php:1032
+msgid "ВКонтакте"
+msgstr ""
+
+#: includes/class-meta.php:755
+msgid "Вместимость"
+msgstr ""
+
+#: includes/class-meta.php:659
+msgid "Внешняя ссылка"
+msgstr ""
+
+#: includes/class-cpt.php:211
+msgid "Возрастной рейтинг"
+msgstr ""
+
+#: includes/class-maintenance.php:1485
+msgid "Войти"
+msgstr ""
+
+#: includes/social-auth/class-social-routes.php:257
+msgid "Войти через Яндекс ID"
+msgstr ""
+
+#: includes/social-auth/class-social-routes.php:257
+msgid "Войти через VK ID"
+msgstr ""
+
+#: includes/class-meta.php:490
+msgid "Время"
+msgstr ""
+
+#: includes/class-banners.php:265
+msgid "Время кэширования баннеров (минуты)"
+msgstr ""
+
+#: includes/class-meta.php:488
+msgid "Время начала, цена и ссылка на билеты для каждого сеанса."
+msgstr ""
+
+#: includes/class-city-selector-widget.php:148
+msgid "Вручную (порядок в админке)"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:535
+msgid "Вс"
+msgstr ""
+
+#: includes/class-cpt.php:244
+#: includes/class-event-calendar-widget.php:212
+msgid "Все города"
+msgstr ""
+
+#: includes/class-cpt.php:167
+#: includes/class-event-calendar-widget.php:190
+msgid "Все категории"
+msgstr ""
+
+#: includes/class-cpt.php:111
+msgid "Все площадки"
+msgstr ""
+
+#: includes/class-cpt.php:206
+msgid "Все рейтинги"
+msgstr ""
+
+#: includes/class-cpt.php:66
+msgid "Все события"
+msgstr ""
+
+#: includes/class-meta.php:721
+msgid "Вставьте HTML-код плеера для онлайн-трансляции. Доступно также в «Настройки организатора»."
+msgstr ""
+
+#: includes/class-meta.php:1233
+msgid "Вставьте HTML-код плеера для трансляции (YouTube, VK Video, Rutube)."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:533
+msgid "Вт"
+msgstr ""
+
+#: includes/class-current-event-banner.php:401
+#: includes/class-template-helpers.php:103
+msgid "Вход свободный"
+msgstr ""
+
+#: includes/social-auth/class-social-auth.php:530
+msgid "Вход через VK ID…"
+msgstr ""
+
+#: includes/class-rest-auth.php:385
+msgid "Вы уже авторизованы."
+msgstr ""
+
+#: includes/class-city-selector-widget.php:588
+msgid "Выберите город"
+msgstr ""
+
+#: includes/class-meta.php:526
+msgid "Выберите площадку. Если её нет — укажите адрес вручную."
+msgstr ""
+
+#: includes/class-meta.php:1119
+msgid "Выберите тип юридического лица для выставления счетов."
+msgstr ""
+
+#: includes/class-city-selector-widget.php:69
+msgid "Выбор города (IDPG)"
+msgstr ""
+
+#: includes/class-maintenance.php:378
+msgid "Выключен"
+msgstr ""
+
+#: includes/class-maintenance.php:715
+msgid "Выключена"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:151
+msgid "Выпадающий список"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:71
+msgid "Выпадающий список городов для мультигородского портала."
+msgstr ""
+
+#: includes/class-meta.php:1166
+msgid "Выходной"
+msgstr ""
+
+#: includes/class-meta.php:714
+msgid "Галерея"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:251
+msgid "Город"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:208
+msgid "Город (фильтр):"
+msgstr ""
+
+#: includes/class-cpt.php:251
+msgid "Города"
+msgstr ""
+
+#: includes/class-meta.php:1103
+msgid "Данные организатора"
+msgstr ""
+
+#: includes/class-meta.php:729
+msgid "Данные площадки"
+msgstr ""
+
+#: includes/class-meta.php:464
+msgid "Дата начала"
+msgstr ""
+
+#: includes/class-banners.php:179
+#: includes/class-banners.php:229
+msgid "Дата начала показа"
+msgstr ""
+
+#: includes/class-meta.php:473
+msgid "Дата окончания"
+msgstr ""
+
+#: includes/class-meta.php:1246
+msgid "Дата окончания закрепления"
+msgstr ""
+
+#: includes/class-banners.php:185
+#: includes/class-banners.php:235
+msgid "Дата окончания показа"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:530
+msgid "Декабрь"
+msgstr ""
+
+#: includes/class-maintenance.php:1540
+msgid "день"
+msgstr ""
+
+#: includes/class-maintenance.php:1041
+msgid "Дзен"
+msgstr ""
+
+#: includes/class-meta.php:263
+msgid "Для онлайн-мероприятия отметьте «Онлайн-событие» и укажите ссылку на трансляцию во вкладке «Дополнительно»."
+msgstr ""
+
+#: includes/class-maintenance.php:1413
+#: includes/class-maintenance.php:1540
+msgid "дней"
+msgstr ""
+
+#: includes/class-maintenance.php:1540
+msgid "дня"
+msgstr ""
+
+#: includes/class-cpt.php:67
+msgid "Добавить новое событие"
+msgstr ""
+
+#: includes/class-cpt.php:172
+msgid "Добавить новую категорию"
+msgstr ""
+
+#: includes/class-cpt.php:112
+msgid "Добавить новую площадку"
+msgstr ""
+
+#: includes/class-cpt.php:249
+msgid "Добавить новый город"
+msgstr ""
+
+#: includes/class-cpt.php:209
+msgid "Добавить новый рейтинг"
+msgstr ""
+
+#: includes/class-cpt.php:113
+msgid "Добавить площадку"
+msgstr ""
+
+#: includes/class-cpt.php:68
+msgid "Добавить событие"
+msgstr ""
+
+#: includes/class-banners.php:253
+msgid "Добавляет data-атрибуты для JS-аналитики."
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:277
+msgid "Добавьте его в id.vk.com → ваше приложение → Настройки → «Доверенный Redirect URI» и укажите базовый домен сайта. URI сверяется посимвольно (включая слэш и https). При локальном тестировании на домене, не привязанном к приложению, VK вернёт ошибку «redirect_uri is missing or invalid» — вход через VK ID работает только на продовом домене из настроек приложения."
+msgstr ""
+
+#: includes/class-meta.php:1210
+msgid "Добавьте ссылки на социальные сети площадки."
+msgstr ""
+
+#: includes/class-meta.php:538
+msgid "Дополнительно"
+msgstr ""
+
+#: includes/class-banners.php:271
+msgid "Дополнительные CSS-классы для баннеров"
+msgstr ""
+
+#: includes/class-maintenance.php:433
+msgid "Доступ"
+msgstr ""
+
+#: includes/class-meta.php:262
+msgid "Если нужна регистрация участников через Яндекс.Форму — создайте её по кнопке и вставьте ссылку в поле «Ссылка на Яндекс.Форму»."
+msgstr ""
+
+#: includes/class-rest-auth.php:581
+msgid "Если email существует, инструкции отправлены."
+msgstr ""
+
+#: includes/social-auth/class-social-auth.php:543
+msgid "Завершаем вход через VK ID…"
+msgstr ""
+
+#: includes/class-maintenance.php:653
+msgid "Завершение"
+msgstr ""
+
+#: includes/class-maintenance.php:395
+msgid "Заглушка"
+msgstr ""
+
+#: includes/class-maintenance.php:729
+msgid "Заглушка видна гостям и неавторизованным посетителям."
+msgstr ""
+
+#: includes/class-maintenance.php:424
+msgid "Заглушка для всех, кроме администраторов, IP и пароля."
+msgstr ""
+
+#: includes/class-maintenance.php:417
+msgid "Заглушка только для гостей, авторизованные видят сайт."
+msgstr ""
+
+#: includes/class-maintenance.php:546
+msgid "Заголовок"
+msgstr ""
+
+#: includes/class-cpt.php:77
+msgctxt "Заголовок области обложки"
+msgid "Задать постер"
+msgstr ""
+
+#: includes/class-cpt.php:122
+msgctxt "Заголовок области обложки"
+msgid "Задать фото"
+msgstr ""
+
+#: includes/class-cpt.php:79
+msgctxt "Заголовок области обложки"
+msgid "Использовать как постер"
+msgstr ""
+
+#: includes/class-cpt.php:124
+msgctxt "Заголовок области обложки"
+msgid "Использовать как фото"
+msgstr ""
+
+#: includes/class-cpt.php:76
+msgctxt "Заголовок области обложки"
+msgid "Постер события"
+msgstr ""
+
+#: includes/class-cpt.php:78
+msgctxt "Заголовок области обложки"
+msgid "Удалить постер"
+msgstr ""
+
+#: includes/class-cpt.php:123
+msgctxt "Заголовок области обложки"
+msgid "Удалить фото"
+msgstr ""
+
+#: includes/class-cpt.php:121
+msgctxt "Заголовок области обложки"
+msgid "Фото площадки"
+msgstr ""
+
+#: includes/class-maintenance.php:698
+msgid "Заголовок HTTP для поисковиков, сек."
+msgstr ""
+
+#: includes/class-city-selector-widget.php:157
+#: includes/class-event-calendar-widget.php:163
+msgid "Заголовок:"
+msgstr ""
+
+#: includes/class-meta.php:264
+msgid "Загрузите обложку (медиафайл) и нажмите «Опубликовать»."
+msgstr ""
+
+#: includes/class-meta.php:562
+msgid "Закрепить в топе"
+msgstr ""
+
+#: includes/class-meta.php:529
+msgid "Заполняется, если адрес отличается от адреса площадки."
+msgstr ""
+
+#: includes/class-notifications.php:94
+msgid "Здравствуйте, %s!\n\n"
+msgstr ""
+
+#: includes/class-banners.php:155
+#: includes/class-banners.php:205
+msgid "Изображение баннера"
+msgstr ""
+
+#: includes/class-banners.php:161
+#: includes/class-banners.php:211
+msgid "Изображение для мобильных"
+msgstr ""
+
+#: includes/social-auth/class-social-routes.php:247
+msgid "или"
+msgstr ""
+
+#: includes/social-auth/class-social-auth.php:425
+msgid "или войдите через"
+msgstr ""
+
+#: includes/class-meta.php:1114
+msgid "Индивидуальный предприниматель"
+msgstr ""
+
+#: includes/class-meta.php:1125
+msgid "ИНН"
+msgstr ""
+
+#: includes/class-meta.php:665
+msgid "Используется cron-синхронизацией статусов билетов."
+msgstr ""
+
+#: includes/social-auth/class-provider-vk.php:292
+msgid "Истёк срок авторизации. Попробуйте войти заново."
+msgstr ""
+
+#: includes/class-meta.php:557
+msgid "Источник импорта"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:528
+msgid "Июль"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:527
+msgid "Июнь"
+msgstr ""
+
+#: includes/class-ticket-sync.php:76
+msgid "Каждые 3 часа (IDPG)"
+msgstr ""
+
+#: includes/class-meta.php:221
+msgid "Как создать событие"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:277
+msgid "Календарь событий"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:75
+msgid "Календарь событий (IDPG)"
+msgstr ""
+
+#: includes/class-cpt.php:174
+msgid "Категории"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:186
+msgid "Категория (фильтр):"
+msgstr ""
+
+#: includes/class-meta.php:738
+msgid "Кинотеатр"
+msgstr ""
+
+#: includes/class-meta.php:583
+#: includes/class-views.php:245
+msgid "Клики"
+msgstr ""
+
+#: includes/class-rest-auth.php:625
+msgid "Ключ сброса истёк. Запросите восстановление пароля заново."
+msgstr ""
+
+#: includes/class-city-selector-widget.php:152
+msgid "Кнопки"
+msgstr ""
+
+#: includes/class-meta.php:689
+msgid "Код виджета"
+msgstr ""
+
+#: includes/class-meta.php:719
+msgid "Код встраивания трансляции"
+msgstr ""
+
+#: includes/class-meta.php:1222
+msgid "Код для встраивания трансляции"
+msgstr ""
+
+#: includes/class-maintenance.php:575
+msgid "Контакты"
+msgstr ""
+
+#: includes/class-meta.php:740
+msgid "Концертный зал"
+msgstr ""
+
+#: includes/class-template-helpers.php:98
+msgid "Купить билет"
+msgstr ""
+
+#: includes/class-maintenance.php:524
+msgid "Логотип"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:527
+msgid "Май"
+msgstr ""
+
+#: includes/class-meta.php:654
+msgid "Максимальная цена билета."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:526
+msgid "Март"
+msgstr ""
+
+#: includes/class-meta.php:705
+msgid "Медиа"
+msgstr ""
+
+#: includes/class-current-event-banner.php:559
+#: includes/class-template-helpers.php:71
+msgid "Мероприятие отменено"
+msgstr ""
+
+#: includes/class-current-event-banner.php:560
+#: includes/class-template-helpers.php:72
+msgid "Мероприятие перенесено"
+msgstr ""
+
+#: includes/class-meta.php:537
+msgid "Место проведения"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:127
+msgid "Месяц"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:77
+msgid "Мини-календарь событий с навигацией и экспортом в iCal."
+msgstr ""
+
+#: includes/class-meta.php:648
+msgid "Минимальная цена билета."
+msgstr ""
+
+#: includes/class-maintenance.php:1421
+#: includes/class-maintenance.php:1542
+msgid "минут"
+msgstr ""
+
+#: includes/class-maintenance.php:1542
+msgid "минута"
+msgstr ""
+
+#: includes/class-maintenance.php:1542
+msgid "минуты"
+msgstr ""
+
+#: includes/class-rest-auth.php:257
+msgid "Модуль социальной авторизации недоступен."
+msgstr ""
+
+#: includes/class-rest-api.php:374
+msgid "Можно управлять только своими объектами."
+msgstr ""
+
+#: includes/class-meta.php:739
+msgid "Музей"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:283
+msgid "Мы определили ваш город автоматически. При необходимости выберите другой:"
+msgstr ""
+
+#: includes/class-cpt.php:65
+msgctxt "Название в меню"
+msgid "Афиша"
+msgstr ""
+
+#: includes/class-cpt.php:110
+msgctxt "Название в меню"
+msgid "Площадки"
+msgstr ""
+
+#: includes/class-cpt.php:250
+msgid "Название нового города"
+msgstr ""
+
+#: includes/class-cpt.php:210
+msgid "Название нового рейтинга"
+msgstr ""
+
+#: includes/class-cpt.php:173
+msgid "Название новой категории"
+msgstr ""
+
+#: includes/class-meta.php:558
+msgid "Название сервиса, из которого импортировано событие."
+msgstr ""
+
+#: includes/class-cpt.php:243
+msgid "Найти город"
+msgstr ""
+
+#: includes/class-cpt.php:166
+msgid "Найти категорию"
+msgstr ""
+
+#: includes/class-cpt.php:118
+msgid "Найти площадку"
+msgstr ""
+
+#: includes/class-cpt.php:205
+msgid "Найти рейтинг"
+msgstr ""
+
+#: includes/class-cpt.php:73
+msgid "Найти событие"
+msgstr ""
+
+#: includes/class-meta.php:498
+msgid "Например: 19:00"
+msgstr ""
+
+#: includes/class-maintenance.php:375
+msgid "Настройки заглушки для посетителей сайта."
+msgstr ""
+
+#: includes/class-meta.php:1065
+#: includes/class-meta.php:1085
+msgid "Настройки организатора"
+msgstr ""
+
+#: includes/class-meta.php:1090
+msgid "Настройки сохранены."
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:350
+msgid "Настройте OAuth-приложения VK ID (OAuth 2.1, id.vk.com) и Яндекс ID. CALLBACK_URL генерируется автоматически."
+msgstr ""
+
+#: includes/class-city-selector-widget.php:57
+msgid "Не определять"
+msgstr ""
+
+#: includes/social-auth/class-social-auth.php:559
+msgid "Не удалось завершить вход."
+msgstr ""
+
+#: includes/social-auth/class-provider-yandex.php:328
+msgid "Не удалось получить профиль Яндекс."
+msgstr ""
+
+#: includes/social-auth/class-provider-yandex.php:284
+#: includes/social-auth/class-provider-yandex.php:417
+msgid "Не удалось получить токен от Яндекс."
+msgstr ""
+
+#: includes/social-auth/class-provider-vk.php:327
+msgid "Не удалось получить токен от VK ID."
+msgstr ""
+
+#: includes/class-rest-auth.php:270
+msgid "Не удалось проверить токен VK ID. Попробуйте войти заново."
+msgstr ""
+
+#: includes/class-ical-export.php:148
+msgid "Не указан ID события."
+msgstr ""
+
+#: includes/class-city-filter.php:707
+msgid "Неверный город."
+msgstr ""
+
+#: includes/class-rest-api.php:336
+#: includes/class-rest-api.php:425
+msgid "Неверный или отсутствующий nonce-токен."
+msgstr ""
+
+#: includes/class-rest-auth.php:632
+msgid "Неверный ключ сброса пароля."
+msgstr ""
+
+#: includes/class-maintenance.php:1477
+msgid "Неверный пароль."
+msgstr ""
+
+#: includes/class-rest-api.php:955
+msgid "Неверный текущий пароль."
+msgstr ""
+
+#: includes/class-ical-export.php:82
+msgid "Неверный формат месяца."
+msgstr ""
+
+#: includes/class-rest-auth.php:341
+msgid "Неверный email или пароль."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:128
+msgid "Неделя"
+msgstr ""
+
+#: includes/class-rest-api.php:834
+msgid "Недопустимая таксономия."
+msgstr ""
+
+#: includes/class-rest-api.php:384
+msgid "Недостаточно прав для выполнения этого действия."
+msgstr ""
+
+#: includes/class-rest-api.php:1052
+#: includes/class-rest-api.php:987
+msgid "Недостаточно прав для загрузки файлов."
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:344
+msgid "Недостаточно прав для просмотра этой страницы."
+msgstr ""
+
+#: includes/class-meta.php:1278
+msgid "Недостаточно прав."
+msgstr ""
+
+#: includes/class-meta.php:1117
+msgid "Некоммерческая организация"
+msgstr ""
+
+#: includes/social-auth/class-social-user.php:103
+msgid "Некорректные данные от соцсети."
+msgstr ""
+
+#: includes/class-rest-api.php:926
+msgid "Некорректный email."
+msgstr ""
+
+#: includes/social-auth/class-social-user.php:219
+msgid "Некорректный URL аватара."
+msgstr ""
+
+#: includes/class-rest-api.php:346
+#: includes/class-rest-api.php:407
+msgid "Необходима авторизация."
+msgstr ""
+
+#: includes/class-rest-auth.php:455
+msgid "Необходимо согласие с правилами сайта."
+msgstr ""
+
+#: includes/class-meta.php:717
+msgid "Несколько изображений; порядок задаётся перетаскиванием."
+msgstr ""
+
+#: includes/class-ical-export.php:198
+msgid "Нет событий для экспорта."
+msgstr ""
+
+#: includes/class-ical-export.php:129
+msgid "Нет событий за этот месяц."
+msgstr ""
+
+#: includes/class-banners.php:200
+msgid "Нижний баннер"
+msgstr ""
+
+#: includes/class-cpt.php:114
+msgid "Новая площадка"
+msgstr ""
+
+#: includes/class-cpt.php:69
+msgid "Новое событие"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:530
+msgid "Ноябрь"
+msgstr ""
+
+#: includes/class-cpt.php:248
+msgid "Обновить город"
+msgstr ""
+
+#: includes/class-cpt.php:171
+msgid "Обновить категорию"
+msgstr ""
+
+#: includes/class-cpt.php:116
+msgid "Обновить площадку"
+msgstr ""
+
+#: includes/class-cpt.php:208
+msgid "Обновить рейтинг"
+msgstr ""
+
+#: includes/class-cpt.php:71
+msgid "Обновить событие"
+msgstr ""
+
+#: includes/class-maintenance.php:670
+msgid "Обратный отсчёт"
+msgstr ""
+
+#: includes/class-maintenance.php:423
+msgid "Обслуживание"
+msgstr ""
+
+#: includes/class-cpt.php:203
+msgctxt "Общее название"
+msgid "Возрастные рейтинги"
+msgstr ""
+
+#: includes/class-cpt.php:241
+msgctxt "Общее название"
+msgid "Города"
+msgstr ""
+
+#: includes/class-cpt.php:164
+msgctxt "Общее название"
+msgid "Категории событий"
+msgstr ""
+
+#: includes/class-cpt.php:108
+msgctxt "Общее название"
+msgid "Площадки"
+msgstr ""
+
+#: includes/class-cpt.php:63
+msgctxt "Общее название"
+msgid "События"
+msgstr ""
+
+#: includes/class-meta.php:1115
+msgid "Общество с ограниченной ответственностью"
+msgstr ""
+
+#: includes/class-banners.php:250
+msgid "Общие настройки баннеров"
+msgstr ""
+
+#: includes/class-rest-api.php:682
+msgid "Обязательное поле: title."
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:275
+msgid "Обязательный Redirect URI для приложения VK ID:"
+msgstr ""
+
+#: includes/class-cpt.php:204
+msgctxt "Одна запись"
+msgid "Возрастной рейтинг"
+msgstr ""
+
+#: includes/class-cpt.php:242
+msgctxt "Одна запись"
+msgid "Город"
+msgstr ""
+
+#: includes/class-cpt.php:165
+msgctxt "Одна запись"
+msgid "Категория событий"
+msgstr ""
+
+#: includes/class-cpt.php:109
+msgctxt "Одна запись"
+msgid "Площадка"
+msgstr ""
+
+#: includes/class-cpt.php:64
+msgctxt "Одна запись"
+msgid "Событие"
+msgstr ""
+
+#: includes/class-maintenance.php:1038
+msgid "Одноклассники"
+msgstr ""
+
+#: includes/social-auth/class-social-auth.php:590
+msgid "Окно не закрылось автоматически. Закройте вкладку и повторите вход."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:529
+msgid "Октябрь"
+msgstr ""
+
+#: includes/class-meta.php:595
+msgid "Онлайн-событие"
+msgstr ""
+
+#: includes/class-meta.php:1066
+msgid "Органайзер"
+msgstr ""
+
+#: includes/class-roles.php:157
+msgid "Организатор"
+msgstr ""
+
+#: includes/class-meta.php:680
+msgid "Организатор указывает ссылку на Яндекс.Форму — на странице события появится кнопка «Зарегистрироваться на событие»."
+msgstr ""
+
+#: includes/class-meta.php:459
+msgid "Основная информация"
+msgstr ""
+
+#: includes/class-meta.php:480
+msgid "Оставьте пустым для события одного дня."
+msgstr ""
+
+#: includes/class-maintenance.php:1474
+msgid "Открыть"
+msgstr ""
+
+#: includes/class-meta.php:621
+#: includes/class-notifications.php:135
+msgid "Отменено"
+msgstr ""
+
+#: includes/class-meta.php:596
+msgid "Отметьте, если событие проходит онлайн (трансляция в интернете)."
+msgstr ""
+
+#: includes/class-banners.php:153
+msgid "Отображается между блоками событий на главной."
+msgstr ""
+
+#: includes/class-banners.php:203
+msgid "Отображается перед подвалом на главной."
+msgstr ""
+
+#: includes/social-auth/class-provider-vk.php:281
+#: includes/social-auth/class-provider-yandex.php:243
+#: includes/social-auth/class-provider-yandex.php:385
+msgid "Отсутствует код авторизации."
+msgstr ""
+
+#: includes/class-ical-export.php:130
+#: includes/class-ical-export.php:149
+#: includes/class-ical-export.php:159
+#: includes/class-ical-export.php:199
+#: includes/class-ical-export.php:83
+msgid "Ошибка"
+msgstr ""
+
+#: includes/social-auth/class-provider-vk.php:335
+msgid "Ошибка безопасности. Попробуйте войти заново."
+msgstr ""
+
+#: includes/class-rest-auth.php:283
+msgid "Ошибка входа через VK ID."
+msgstr ""
+
+#: includes/class-rest-auth.php:465
+msgid "Ошибка при создании пользователя."
+msgstr ""
+
+#: includes/class-meta.php:221
+msgid "Памятка по заполнению события"
+msgstr ""
+
+#: includes/class-rest-api.php:946
+#: includes/class-rest-auth.php:398
+#: includes/class-rest-auth.php:602
+msgid "Пароль должен содержать минимум 8 символов."
+msgstr ""
+
+#: includes/class-maintenance.php:1471
+#: includes/class-maintenance.php:437
+msgid "Пароль доступа"
+msgstr ""
+
+#: includes/class-rest-auth.php:642
+msgid "Пароль изменён."
+msgstr ""
+
+#: includes/class-rest-auth.php:324
+msgid "Пароль не может быть пустым."
+msgstr ""
+
+#: includes/class-meta.php:622
+msgid "Перенесено"
+msgstr ""
+
+#: includes/class-maintenance.php:1405
+msgid "Плановые работы"
+msgstr ""
+
+#: includes/class-meta.php:524
+msgid "Площадка"
+msgstr ""
+
+#: includes/class-rest-api.php:662
+#: includes/class-rest-api.php:732
+msgid "Площадка не найдена."
+msgstr ""
+
+#: includes/class-rest-api.php:765
+msgid "Площадка обновлена."
+msgstr ""
+
+#: includes/class-rest-api.php:715
+msgid "Площадка создана."
+msgstr ""
+
+#: includes/class-cpt.php:119
+msgid "Площадки не найдены"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:533
+msgid "Пн"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:147
+msgid "По популярности (кол-во событий)"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:328
+msgid "По ТЗ: https://idupogorodu.ru/auth/callback/%s"
+msgstr ""
+
+#: includes/class-banners.php:257
+msgid "По умолчанию: banner"
+msgstr ""
+
+#: includes/class-banners.php:261
+msgid "По умолчанию: cpc"
+msgstr ""
+
+#: includes/class-maintenance.php:727
+msgid "Подсказка"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:119
+msgid "Поиск города…"
+msgstr ""
+
+#: includes/class-maintenance.php:406
+msgid "Показывать заглушку посетителям"
+msgstr ""
+
+#: includes/class-maintenance.php:680
+msgid "Показывать отсчёт до авто-выключения"
+msgstr ""
+
+#: includes/class-maintenance.php:496
+msgid "Показывать ссылку «Войти» на заглушке"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:168
+msgid "Показывать только города с событиями"
+msgstr ""
+
+#: includes/class-rest-api.php:1036
+#: includes/class-rest-api.php:1103
+#: includes/class-rest-api.php:878
+#: includes/class-rest-api.php:907
+#: includes/class-rest-auth.php:660
+msgid "Пользователь не авторизован."
+msgstr ""
+
+#: includes/class-rest-auth.php:612
+#: includes/social-auth/class-social-user.php:194
+msgid "Пользователь не найден."
+msgstr ""
+
+#: includes/class-maintenance.php:448
+msgid "Посетитель вводит его на заглушке и видит сайт (доступ запоминается в cookie)."
+msgstr ""
+
+#: includes/class-maintenance.php:720
+msgid "Посмотреть заглушку на сайте"
+msgstr ""
+
+#: includes/class-cpt.php:117
+msgid "Посмотреть площадку"
+msgstr ""
+
+#: includes/class-cpt.php:72
+msgid "Посмотреть событие"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:545
+msgid "Предыдущий месяц"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:615
+msgid "Применить"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:110
+msgid "Провайдер OAuth 2.0"
+msgstr ""
+
+#: includes/class-meta.php:576
+#: includes/class-views.php:244
+msgid "Просмотры"
+msgstr ""
+
+#: includes/class-rest-api.php:1016
+msgid "Профиль обновлён."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:534
+msgid "Пт"
+msgstr ""
+
+#: includes/social-auth/class-provider-yandex.php:274
+msgid "Пустой ответ от Яндекс при получении токена."
+msgstr ""
+
+#: includes/social-auth/class-provider-yandex.php:319
+msgid "Пустой ответ от Яндекс API."
+msgstr ""
+
+#: includes/class-maintenance.php:416
+msgid "Разработка"
+msgstr ""
+
+#: includes/class-meta.php:620
+#: includes/class-notifications.php:134
+msgid "Распроданы"
+msgstr ""
+
+#: includes/class-cpt.php:247
+msgid "Редактировать город"
+msgstr ""
+
+#: includes/class-cpt.php:170
+msgid "Редактировать категорию"
+msgstr ""
+
+#: includes/class-cpt.php:115
+msgid "Редактировать площадку"
+msgstr ""
+
+#: includes/class-cpt.php:207
+msgid "Редактировать рейтинг"
+msgstr ""
+
+#: includes/class-cpt.php:70
+msgid "Редактировать событие"
+msgstr ""
+
+#: includes/class-maintenance.php:392
+msgid "Режим"
+msgstr ""
+
+#: includes/class-maintenance.php:666
+msgid "Режим отключится автоматически в указанное время."
+msgstr ""
+
+#: includes/class-maintenance.php:1593
+#: includes/class-maintenance.php:374
+#: includes/class-maintenance.php:76
+#: includes/class-maintenance.php:77
+msgid "Режим разработки"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:172
+msgid "Режим:"
+msgstr ""
+
+#: includes/class-banners.php:206
+msgid "Рекомендуемый размер: 1200×200px."
+msgstr ""
+
+#: includes/class-banners.php:162
+msgid "Рекомендуемый размер: 320×100px."
+msgstr ""
+
+#: includes/class-banners.php:212
+msgid "Рекомендуемый размер: 375×150px."
+msgstr ""
+
+#: includes/class-banners.php:156
+msgid "Рекомендуемый размер: 728×90px."
+msgstr ""
+
+#: includes/class-cpt.php:168
+msgid "Родительская категория"
+msgstr ""
+
+#: includes/class-cpt.php:169
+msgid "Родительская категория:"
+msgstr ""
+
+#: includes/class-cpt.php:245
+msgid "Родительский город"
+msgstr ""
+
+#: includes/class-cpt.php:246
+msgid "Родительский город:"
+msgstr ""
+
+#: includes/class-maintenance.php:467
+msgid "Роли с доступом"
+msgstr ""
+
+#: includes/class-maintenance.php:1042
+#: includes/class-meta.php:751
+msgid "Сайт"
+msgstr ""
+
+#: includes/class-maintenance.php:1100
+#: includes/class-maintenance.php:178
+#: includes/class-maintenance.php:554
+msgid "Сайт в разработке"
+msgstr ""
+
+#: includes/class-maintenance.php:1596
+msgid "Сайт закрыт для посетителей. Нажмите, чтобы открыть настройки."
+msgstr ""
+
+#: includes/class-meta.php:1116
+msgid "Самозанятый"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:534
+msgid "Сб"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:140
+msgid "Светлая"
+msgstr ""
+
+#: includes/class-meta.php:485
+msgid "Сеансы"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:308
+msgid "Секрет клиента (Client Secret)."
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:268
+msgid "Секрет приложения VK ID (Client Secret)."
+msgstr ""
+
+#: includes/class-maintenance.php:1425
+#: includes/class-maintenance.php:1543
+msgid "секунд"
+msgstr ""
+
+#: includes/class-maintenance.php:1543
+msgid "секунда"
+msgstr ""
+
+#: includes/class-maintenance.php:1543
+msgid "секунды"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:529
+msgid "Сентябрь"
+msgstr ""
+
+#: includes/class-meta.php:1257
+msgid "Системное поле. Автоматически устанавливается при оплате услуги «Закреп в топе». Видно только администраторам."
+msgstr ""
+
+#: includes/class-meta.php:1240
+msgid "Системные настройки"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:321
+msgid "Скопируйте адреса в настройки приложений провайдеров (Redirect URI). Для VK ID — в приложении на id.vk.com, для Яндекс ID — в OAuth-приложении:"
+msgstr ""
+
+#: includes/class-maintenance.php:1400
+msgid "Скоро вернёмся"
+msgstr ""
+
+#: includes/class-maintenance.php:1531
+msgid "Скоро откроемся!"
+msgstr ""
+
+#: includes/class-meta.php:571
+msgid "Скрыть баннер полностью"
+msgstr ""
+
+#: includes/class-meta.php:567
+msgid "Скрыть из баннера на главной"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:547
+msgid "Следующий месяц"
+msgstr ""
+
+#: includes/class-auth-rate-limiter.php:225
+msgid "Слишком много запросов сброса пароля. Попробуйте позже."
+msgstr ""
+
+#: includes/class-auth-rate-limiter.php:122
+msgid "Слишком много попыток. Подождите 1 минуту."
+msgstr ""
+
+#: includes/class-auth-rate-limiter.php:174
+msgid "Слишком много регистраций с этого IP. Попробуйте позже."
+msgstr ""
+
+#: includes/class-meta.php:483
+msgid "Событие идёт весь день — время сеансов не указывается."
+msgstr ""
+
+#: includes/class-meta.php:572
+msgid "Событие не будет показано в баннере и не будет заменено следующим — баннер на главной скроется полностью."
+msgstr ""
+
+#: includes/class-meta.php:568
+msgid "Событие не будет показываться в hero-баннере на главной странице."
+msgstr ""
+
+#: includes/class-favorites.php:93
+#: includes/class-ical-export.php:158
+msgid "Событие не найдено."
+msgstr ""
+
+#: includes/class-meta.php:563
+msgid "Событие поднимается наверх в списках и подборках."
+msgstr ""
+
+#: includes/class-meta.php:533
+msgid "Событие: место и продвижение"
+msgstr ""
+
+#: includes/class-cpt.php:74
+msgid "События не найдены"
+msgstr ""
+
+#: includes/class-meta.php:686
+msgid "Создать Яндекс.Форму"
+msgstr ""
+
+#: includes/class-maintenance.php:560
+msgid "Сообщение"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:174
+msgid "Сортировка:"
+msgstr ""
+
+#: includes/class-maintenance.php:707
+#: includes/class-meta.php:1265
+#: includes/social-auth/class-social-admin.php:359
+msgid "Сохранить настройки"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:349
+#: includes/social-auth/class-social-admin.php:85
+#: includes/social-auth/class-social-admin.php:86
+msgid "Социальная авторизация"
+msgstr ""
+
+#: includes/class-meta.php:1179
+msgid "Социальные сети площадки"
+msgstr ""
+
+#: includes/social-auth/class-social-routes.php:238
+msgid "Социальный вход не настроен: включите VK ID или Яндекс ID в Настройках → Социальная авторизация."
+msgstr ""
+
+#: includes/class-maintenance.php:606
+#: includes/class-meta.php:1185
+msgid "Соцсети"
+msgstr ""
+
+#: includes/class-maintenance.php:732
+msgid "Соцсети выбираются из списка — сохраняются и сразу показываются иконки."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:129
+msgid "Список"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:533
+msgid "Ср"
+msgstr ""
+
+#: includes/class-banners.php:150
+msgid "Средний баннер"
+msgstr ""
+
+#: includes/class-maintenance.php:486
+msgid "Ссылка «Войти»"
+msgstr ""
+
+#: includes/class-maintenance.php:731
+msgid "Ссылка «Войти» выводится под заглушкой."
+msgstr ""
+
+#: includes/class-meta.php:506
+msgid "Ссылка на билеты"
+msgstr ""
+
+#: includes/class-meta.php:509
+msgid "Ссылка на покупку билета для этого сеанса (необязательно)."
+msgstr ""
+
+#: includes/class-maintenance.php:632
+msgid "Ссылка на соцсеть и иконка из встроенной библиотеки. Если иконка не выбрана — подставится автоматически по домену."
+msgstr ""
+
+#: includes/class-meta.php:601
+msgid "Ссылка на страницу/трансляцию, куда перейдут зрители."
+msgstr ""
+
+#: includes/class-meta.php:598
+msgid "Ссылка на трансляцию"
+msgstr ""
+
+#: includes/class-meta.php:713
+msgid "Ссылка на трейлер: YouTube, VK Видео, Rutube."
+msgstr ""
+
+#: includes/class-meta.php:677
+msgid "Ссылка на Яндекс.Форму"
+msgstr ""
+
+#: includes/class-banners.php:167
+#: includes/class-banners.php:217
+msgid "Ссылка перехода для баннера"
+msgstr ""
+
+#: includes/class-meta.php:670
+msgid "Ссылка, по которой посетители купят билет. Открывается в новой вкладке."
+msgstr ""
+
+#: includes/class-notifications.php:106
+msgid "Ссылки:\n"
+msgstr ""
+
+#: includes/class-meta.php:616
+msgid "Статус билетов"
+msgstr ""
+
+#: includes/class-notifications.php:100
+msgid "Статус билетов для события «%1$s» изменён: %2$s → %3$s.\n\n"
+msgstr ""
+
+#: includes/class-notifications.php:85
+msgid "Статус билетов изменён: \"%1$s\" — %2$s"
+msgstr ""
+
+#: includes/class-maintenance.php:713
+msgid "Статус заглушки"
+msgstr ""
+
+#: includes/class-meta.php:580
+#: includes/class-meta.php:587
+msgid "Счётчик заполняется автоматически."
+msgstr ""
+
+#: includes/class-meta.php:737
+msgid "Театр"
+msgstr ""
+
+#: includes/class-maintenance.php:542
+msgid "Текст заглушки"
+msgstr ""
+
+#: includes/class-maintenance.php:593
+#: includes/class-meta.php:745
+msgid "Телефон"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:141
+msgid "Тёмная"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:188
+msgid "Тип отображения:"
+msgstr ""
+
+#: includes/class-meta.php:734
+msgid "Тип площадки"
+msgstr ""
+
+#: includes/class-meta.php:656
+msgid "Тип продажи билетов"
+msgstr ""
+
+#: includes/class-maintenance.php:411
+msgid "Тип режима"
+msgstr ""
+
+#: includes/class-meta.php:1109
+msgid "Тип юридического лица"
+msgstr ""
+
+#: includes/class-rest-auth.php:249
+msgid "Токен VK ID не передан."
+msgstr ""
+
+#: includes/class-meta.php:1216
+msgid "Трансляция"
+msgstr ""
+
+#: includes/class-maintenance.php:626
+#: includes/class-maintenance.php:644
+#: includes/class-meta.php:1205
+msgid "Удалить"
+msgstr ""
+
+#: includes/class-meta.php:471
+msgid "Укажите дату начала. Поле обязательно для публикации."
+msgstr ""
+
+#: includes/class-meta.php:258
+msgid "Укажите название и добавьте описание события в основном поле."
+msgstr ""
+
+#: includes/class-meta.php:624
+msgid "Укажите состояние продажи билетов — например «Распроданы», если мест нет."
+msgstr ""
+
+#: includes/class-meta.php:1173
+msgid "Укажите часы работы для каждого дня недели."
+msgstr ""
+
+#: includes/class-banners.php:110
+msgid "Управление баннерами"
+msgstr ""
+
+#: includes/class-rest-api.php:1044
+msgid "Файл не загружен."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:525
+msgid "Февраль"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:142
+msgid "Фирменная"
+msgstr ""
+
+#: includes/class-maintenance.php:504
+msgid "Фон и логотип"
+msgstr ""
+
+#: includes/class-maintenance.php:519
+msgid "Цвет подложки страницы заглушки. По умолчанию — кремово-бежевый (#f6efe3)."
+msgstr ""
+
+#: includes/class-maintenance.php:508
+msgid "Цвет фона"
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:230
+msgid "Цветовая схема:"
+msgstr ""
+
+#: includes/class-meta.php:500
+msgid "Цена"
+msgstr ""
+
+#: includes/class-meta.php:504
+msgid "Цена билета для этого сеанса."
+msgstr ""
+
+#: includes/class-meta.php:650
+msgid "Цена до"
+msgstr ""
+
+#: includes/class-meta.php:644
+msgid "Цена от"
+msgstr ""
+
+#: includes/class-meta.php:642
+msgid "Цена VIP-билета. Оставьте пустым, если VIP-билетов нет."
+msgstr ""
+
+#: includes/class-meta.php:627
+msgid "Цены ниже игнорируются — на фронте выводится «Вход свободный»."
+msgstr ""
+
+#: includes/class-maintenance.php:1541
+msgid "час"
+msgstr ""
+
+#: includes/class-maintenance.php:1541
+msgid "часа"
+msgstr ""
+
+#: includes/class-maintenance.php:1417
+#: includes/class-maintenance.php:1541
+msgid "часов"
+msgstr ""
+
+#: includes/class-meta.php:1150
+msgid "Часы работы"
+msgstr ""
+
+#: includes/class-meta.php:1144
+msgid "Часы работы площадки"
+msgstr ""
+
+#: includes/class-banners.php:272
+msgid "Через пробел, применяются ко всем баннерам."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:534
+msgid "Чт"
+msgstr ""
+
+#: includes/class-maintenance.php:463
+msgid "Эти адреса видят сайт без пароля."
+msgstr ""
+
+#: includes/class-rest-api.php:934
+msgid "Этот email уже занят."
+msgstr ""
+
+#: includes/class-rest-auth.php:413
+msgid "Этот email уже зарегистрирован. Используйте другой email или войдите в систему."
+msgstr ""
+
+#: includes/class-event-calendar-widget.php:525
+msgid "Январь"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:125
+msgid "Яндекс ID"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:301
+msgid "abc123..."
+msgstr ""
+
+#: includes/class-banners.php:174
+#: includes/class-banners.php:224
+msgid "Alt-текст для изображения"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:297
+msgid "APP_ID (Яндекс ID)"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:133
+msgid "Callback URL"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:257
+msgid "Client ID (VK ID)"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:264
+msgid "Client Secret (VK ID)"
+msgstr ""
+
+#: includes/class-maintenance.php:579
+#: includes/class-meta.php:748
+msgid "Email"
+msgstr ""
+
+#: includes/class-maintenance.php:1035
+msgid "Facebook"
+msgstr ""
+
+#: includes/class-meta.php:691
+msgid "HTML/JS код виджета продажи билетов. Вставляется на страницу события как есть."
+msgstr ""
+
+#: includes/class-maintenance.php:535
+msgid "ID вложения логотипа. Оставьте 0, чтобы использовать логотип темы."
+msgstr ""
+
+#: includes/class-meta.php:664
+msgid "ID во внешней системе"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:302
+msgid "ID клиента из https://oauth.yandex.ru/client/new"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:262
+msgid "ID приложения VK ID из https://id.vk.com/about/business/go/docs/ru/vkid/latest/vk-id/connection/create-application (раздел «Создать приложение»)."
+msgstr ""
+
+#: includes/class-maintenance.php:1034
+msgid "Instagram"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:58
+msgid "ip-api.com"
+msgstr ""
+
+#: includes/class-city-selector-widget.php:59
+msgid "ipapi.co"
+msgstr ""
+
+#: includes/class-maintenance.php:686
+msgid "Retry-After"
+msgstr ""
+
+#: includes/class-maintenance.php:1040
+msgid "Rutube"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:304
+msgid "SECRET_KEY (Яндекс ID)"
+msgstr ""
+
+#: includes/class-maintenance.php:1031
+msgid "Telegram"
+msgstr ""
+
+#: includes/class-maintenance.php:1037
+msgid "TikTok"
+msgstr ""
+
+#: includes/class-meta.php:667
+msgid "URL страницы продажи"
+msgstr ""
+
+#: includes/class-banners.php:255
+msgid "UTM-метка: источник"
+msgstr ""
+
+#: includes/class-banners.php:263
+msgid "UTM-метка: кампания"
+msgstr ""
+
+#: includes/class-banners.php:259
+msgid "UTM-метка: тип"
+msgstr ""
+
+#: includes/class-meta.php:638
+msgid "VIP-цена"
+msgstr ""
+
+#: includes/social-auth/class-social-admin.php:117
+msgid "VK ID (VK, OK, Mail.ru)"
+msgstr ""
+
+#: includes/class-maintenance.php:1033
+msgid "WhatsApp"
+msgstr ""
+
+#: includes/class-maintenance.php:1039
+msgid "X (Twitter)"
+msgstr ""
+
+#: includes/class-maintenance.php:1036
+msgid "YouTube"
+msgstr ""
+

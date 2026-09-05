@@ -1,0 +1,253 @@
+/**
+ * Виджет «Самые ожидаемые события» (IDPG).
+ *
+ * Дизайн-система сайта: Coinbase-стиль переменные темы
+ * (--idpg-primary, --idpg-ink, --idpg-hairline и т.д.).
+ * Карточки горизонтальные: превью слева, информация справа,
+ * порядковый номер крупно на фоне.
+ *
+ * Адаптивность: сайдбар главной — 320px на десктопе (внутри виджета
+ * ~286px), на ≤1200px — 100% ширины. Стили реагируют на ширину
+ * КОНТЕЙНЕРА (container queries), а не viewport: компактный режим
+ * включается при узком сайдбаре независимо от экрана. Для старых
+ * браузеров без container queries базовая раскладка переносится
+ * (flex-wrap) и влезает в самые узкие контейнеры.
+ */
+
+.idpg-expected-events {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	/* Контейнер для container queries: измеряем фактическую ширину. */
+	container-type: inline-size;
+}
+
+/* ── Карточка события ── */
+.idpg-expected-events__item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 10px 12px 10px 10px;
+	background: var(--idpg-canvas, #fff);
+	border: 1px solid var(--idpg-hairline, #dee1e6);
+	border-radius: 12px;
+	text-decoration: none;
+	transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+
+.idpg-expected-events__item:hover,
+.idpg-expected-events__item:focus {
+	border-color: var(--idpg-primary, #0052ff);
+	box-shadow: 0 2px 10px rgba(0, 82, 255, 0.1);
+	transform: translateY(-1px);
+	outline: none;
+}
+
+.idpg-expected-events__item:focus-visible {
+	outline: 2px solid var(--idpg-primary, #0052ff);
+	outline-offset: 2px;
+}
+
+/* Превью */
+.idpg-expected-events__item .idpg-expected-events__img {
+	width: 72px;
+	height: 54px;
+	flex: 0 0 72px;
+	object-fit: cover;
+	border-radius: 8px;
+	display: block;
+}
+
+.idpg-expected-events__placeholder {
+	width: 72px;
+	height: 54px;
+	flex: 0 0 72px;
+	border-radius: 8px;
+	background: var(--idpg-primary-bg, rgba(0, 82, 255, 0.08));
+	color: var(--idpg-primary, #0052ff);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: "Gilroy", sans-serif;
+	font-size: 24px;
+	font-weight: 700;
+}
+
+/* Тело карточки */
+.idpg-expected-events__body {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding-left: 26px;
+}
+
+/* Порядковый номер: крупный, приглушённый, слева от текста */
+.idpg-expected-events__rank {
+	position: absolute;
+	left: -6px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-family: "Gilroy", sans-serif;
+	font-size: 30px;
+	line-height: 1;
+	font-weight: 700;
+	color: var(--idpg-hairline, #dee1e6);
+	transition: color .15s;
+	user-select: none;
+}
+
+.idpg-expected-events__item:hover .idpg-expected-events__rank,
+.idpg-expected-events__item:focus .idpg-expected-events__rank {
+	color: var(--idpg-primary, #0052ff);
+}
+
+/* Заголовок события */
+.idpg-expected-events__title {
+	font-family: "Gilroy", sans-serif;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--idpg-ink, #0a0b0d);
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+/* Строка метаданных: дата + просмотры.
+ * Переносится при нехватке места — в узком сайдбаре
+ * «383 просмотра» опускается на вторую строку, не вылезая за карточку. */
+.idpg-expected-events__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 10px;
+	font-size: 12px;
+	color: var(--idpg-muted, #7c828a);
+}
+
+.idpg-expected-events__date {
+	white-space: nowrap;
+	text-transform: lowercase;
+}
+
+.idpg-expected-events__views {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	white-space: nowrap;
+	color: var(--idpg-body, #5b616e);
+}
+
+.idpg-expected-events__views svg {
+	flex: 0 0 auto;
+	opacity: .6;
+}
+
+/* ── Ссылка «Все события» ── */
+.idpg-expected-events__all {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	margin-top: 4px;
+	padding: 8px 14px;
+	border: 1px solid var(--idpg-primary, #0052ff);
+	border-radius: 8px;
+	background: transparent;
+	color: var(--idpg-primary, #0052ff);
+	font-family: "Gilroy", sans-serif;
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+	transition: background .15s, color .15s, border-color .15s;
+}
+
+.idpg-expected-events__all:hover,
+.idpg-expected-events__all:focus {
+	background: var(--idpg-primary, #0052ff);
+	color: var(--idpg-on-primary, #fff);
+	border-color: var(--idpg-primary, #0052ff);
+	outline: none;
+}
+
+/* ── Компактный режим для узких контейнеров ──
+ *
+ * Срабатывает по фактической ширине виджета: например, сайдбар
+ * главной на десктопе (~286px внутри карточки-виджета). Независимо
+ * от того, на каком экране. Поддерживается всеми современными
+ * браузерами (Chrome 105+, Firefox 110+, Safari 16+).
+ */
+@container (max-width: 320px) {
+	.idpg-expected-events__item {
+		gap: 10px;
+		padding: 8px 10px;
+	}
+
+	.idpg-expected-events__item .idpg-expected-events__img,
+	.idpg-expected-events__placeholder {
+		width: 60px;
+		height: 45px;
+		flex-basis: 60px;
+	}
+
+	.idpg-expected-events__body {
+		padding-left: 22px;
+	}
+
+	.idpg-expected-events__rank {
+		font-size: 24px;
+		left: -4px;
+	}
+
+	.idpg-expected-events__title {
+		font-size: 13px;
+	}
+
+	.idpg-expected-events__meta {
+		font-size: 11.5px;
+		gap: 2px 8px;
+	}
+}
+
+/* Фолбэк для браузеров без container queries: тот же компактный режим
+ * по viewport — на телефоне сайдбар занимает всю ширину экрана,
+ * но компактность полезна именно на очень узких экранах. */
+@supports not (container-type: inline-size) {
+	@media (max-width: 480px) {
+		.idpg-expected-events__item {
+			gap: 10px;
+			padding: 8px 10px;
+		}
+
+		.idpg-expected-events__item .idpg-expected-events__img,
+		.idpg-expected-events__placeholder {
+			width: 60px;
+			height: 45px;
+			flex-basis: 60px;
+		}
+
+		.idpg-expected-events__body {
+			padding-left: 22px;
+		}
+
+		.idpg-expected-events__rank {
+			font-size: 24px;
+			left: -4px;
+		}
+
+		.idpg-expected-events__title {
+			font-size: 13px;
+		}
+
+		.idpg-expected-events__meta {
+			font-size: 11.5px;
+			gap: 2px 8px;
+		}
+	}
+}

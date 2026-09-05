@@ -1,0 +1,82 @@
+@use 'variables' as *;
+
+// ============================================================================
+// Сброс стилей (Modern Reset)
+// ============================================================================
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	scroll-behavior: smooth;
+}
+
+body {
+	min-height: 100vh;
+	line-height: $line-height;
+	text-rendering: optimizeSpeed;
+	display: flex;
+	flex-direction: column;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+	font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	overflow-wrap: break-word;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
+ul,
+ol {
+	list-style: none;
+}
+
+button {
+	cursor: pointer;
+	border: none;
+	background: none;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+#page {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}

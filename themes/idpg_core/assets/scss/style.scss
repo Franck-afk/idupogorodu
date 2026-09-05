@@ -1,0 +1,53 @@
+/*
+Theme Name: idpg_core
+Theme URI: https://idupogorodu.ru
+Author: idpg Team
+Author URI: https://idupogorodu.ru
+Description: Основная тема сайта-афиши ИДПОГОРОДУ.
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: idpg_core
+Tags: custom-background,custom-logo,custom-menu,featured-images,threaded-comments,translation-ready
+*/
+
+@use 'base/variables' as *;
+@use 'base/reset';
+@use 'base/typography';
+@use 'components/container';
+@use 'components/header';
+@use 'components/footer';
+@use 'pages/auth';
+@use 'pages/create-event';
+@use 'pages/cabinet';
+@use 'pages/dashboard';
+@use 'components/home-sidebar';
+@use 'responsive';
+
+// --- Утилиты ---
+.screen-reader-text {
+	border: 0;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute !important;
+	width: 1px;
+	word-wrap: normal !important;
+}
+
+// --- Контент ---
+.site-main {
+	flex: 1;
+	padding-top: 88px;
+	padding-bottom: 24px;
+
+	&__inner {
+		// Обёртка внутри main для контента
+	}
+}

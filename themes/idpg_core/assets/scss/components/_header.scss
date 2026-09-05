@@ -1,0 +1,685 @@
+@use '../base/variables' as *;
+
+// ============================================================================
+// Шапка сайта
+// ============================================================================
+
+// WordPress admin bar
+.admin-bar {
+	.idpg-header {
+		top: 32px;
+
+		@media (max-width: 782px) {
+			top: 46px;
+		}
+	}
+
+	.idpg-nav {
+		top: 32px;
+		height: calc(100dvh - 32px);
+	}
+}
+
+// --- Планшеты (≤1023px) ---
+@media (max-width: 1023px) {
+	.admin-bar .idpg-nav {
+		top: 46px;
+		height: calc(100dvh - 46px);
+	}
+
+	.idpg-header__actions {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		flex-wrap: wrap;
+		padding-left: 0;
+	}
+
+	.idpg-menu-toggle {
+		margin-top: 0;
+	}
+
+	.idpg-city-selector__btn {
+		order: 0;
+	}
+
+	.idpg-auth-dropdown {
+		order: 0;
+	}
+
+	// На планшетах: убираем desktop-only кнопки
+	.idpg-header__btn-add-event {
+		display: none !important;
+	}
+
+	.idpg-nav__btn-event {
+		display: inline-flex;
+	}
+
+	.idpg-auth-dropdown__user-info {
+		display: block;
+	}
+
+	.idpg-auth-dropdown__label {
+		display: inline;
+	}
+}
+
+// --- Десктоп (≥1024px) ---
+@media (min-width: 1024px) {
+	.idpg-header__btn-add-event {
+		display: inline-flex;
+	}
+
+	.idpg-nav__btn-event {
+		display: none !important;
+	}
+}
+
+.idpg-header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: $z-header;
+	width: 100%;
+	background-color: $color-bg;
+	border-bottom: 1px solid $color-border;
+
+	&__container {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 12px;
+		max-width: $container-max;
+		width: 100%;
+		margin: 0 auto;
+	}
+
+	&__logo {
+		font-family: $font-family-display;
+		font-size: 1rem;
+		font-weight: 500;
+		color: $color-text;
+		text-decoration: none;
+		letter-spacing: -0.025em;
+		flex-shrink: 0;
+		white-space: nowrap;
+
+		// Кастомное логотип (img)
+		img {
+			height: 40px;
+			width: auto;
+		}
+
+		&:hover,
+		&:focus {
+			color: $color-primary;
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid $color-primary;
+			outline-offset: 2px;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		flex-shrink: 0;
+	}
+}
+
+// --- Мобильные кнопки (скрыты на мобильных) ---
+.idpg-header__btn-login {
+	display: none;
+}
+
+.idpg-header__btn-add-event {
+	flex-shrink: 0;
+}
+
+// --- Ультра-узкие экраны (≤360px) ---
+@media (max-width: 360px) {
+	.idpg-header__logo {
+		flex-shrink: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.idpg-city-selector__btn {
+		padding: 6px 6px;
+	}
+}
+
+// --- Выбор города ---
+.idpg-city-selector__btn {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 10px;
+	color: $color-text-secondary;
+	font-size: $font-size-sm;
+	font-weight: 500;
+	border: 1px solid $color-border;
+	border-radius: $border-radius-full;
+	transition: border-color $transition-fast, background-color $transition-fast, color $transition-fast;
+	white-space: nowrap;
+	flex-shrink: 0;
+
+	&:hover,
+	&:focus {
+		border-color: $color-border-hover;
+		color: $color-text;
+		background-color: $color-bg-hover;
+		outline: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid $color-primary;
+		outline-offset: 2px;
+	}
+
+	&__icon {
+		flex-shrink: 0;
+		width: 14px;
+		height: 14px;
+		color: $color-primary;
+	}
+
+	&__name {
+		line-height: 1;
+	}
+}
+
+// --- Кнопки ---
+.idpg-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 16px;
+	font-size: $font-size-sm;
+	font-weight: 600;
+	border-radius: $border-radius-full;
+	transition: background-color $transition-fast, color $transition-fast, border-color $transition-fast;
+	white-space: nowrap;
+
+	&:focus-visible {
+		outline: 2px solid $color-primary;
+		outline-offset: 2px;
+	}
+
+	&--primary {
+		background-color: $color-primary;
+		color: #fff;
+
+		&:hover,
+		&:focus {
+			background-color: $color-primary-hover;
+			color: #fff;
+		}
+	}
+
+	&--secondary {
+		background-color: $color-dark;
+		color: #fff;
+
+		&:hover,
+		&:focus {
+			background-color: $color-dark-hover;
+			color: #fff;
+		}
+	}
+}
+
+// --- Бургер ---
+.idpg-menu-toggle {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	width: 36px;
+	height: 36px;
+	border: 1px solid $color-border;
+	border-radius: $border-radius;
+	flex-shrink: 0;
+	transition: border-color $transition-fast, background-color $transition-fast;
+	cursor: pointer;
+	background: none;
+	padding: 0;
+
+	&:hover,
+	&:focus {
+		border-color: $color-border-hover;
+		background-color: $color-bg-hover;
+		outline: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid $color-primary;
+		outline-offset: 2px;
+	}
+
+	&__line {
+		display: block;
+		width: 18px;
+		height: 2px;
+		background-color: $color-text;
+		border-radius: 1px;
+		transition: transform 0.3s ease, opacity 0.3s ease;
+
+		// Анимация крестика
+		.idpg-menu-toggle[aria-expanded="true"] & {
+			&:nth-child(1) {
+				transform: translateY(6px) rotate(45deg);
+			}
+
+			&:nth-child(2) {
+				opacity: 0;
+			}
+
+			&:nth-child(3) {
+				transform: translateY(-6px) rotate(-45deg);
+			}
+		}
+	}
+}
+
+// --- Навигация (мобильная — выезжает справа) ---
+.idpg-nav {
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 100%;
+	height: 100dvh;
+	padding: 16px;
+	background-color: $color-bg;
+	z-index: $z-nav-mobile;
+	overflow-y: auto;
+	transform: translateX(100%);
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+
+	// Шапка меню (логотип + крестик)
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding-bottom: 16px;
+		border-bottom: 1px solid $color-border;
+		margin-bottom: 16px;
+	}
+
+	// Логотип в меню
+	&__logo {
+		font-family: $font-family-display;
+		font-size: 1.25rem;
+		font-weight: 500;
+		color: $color-text;
+		text-decoration: none;
+		letter-spacing: -0.025em;
+
+		&:hover,
+		&:focus {
+			color: $color-primary;
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid $color-primary;
+			outline-offset: 2px;
+		}
+	}
+
+	// Стрелка dropdown
+	&__arrow {
+		flex-shrink: 0;
+		width: 14px;
+		height: 14px;
+		margin-left: 4px;
+		transition: transform 0.2s ease;
+	}
+
+	&__item--has-children > &__link > &__arrow {
+		// На десктопе поворачивается при hover
+	}
+
+	&__item--open > &__link > &__arrow {
+		transform: rotate(180deg);
+	}
+
+	// Кнопка закрытия
+	&__close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border: 1px solid $color-border;
+		border-radius: $border-radius;
+		background: none;
+		cursor: pointer;
+		color: $color-text;
+		flex-shrink: 0;
+		transition: border-color $transition-fast, background-color $transition-fast;
+
+		&:hover,
+		&:focus {
+			border-color: $color-border-hover;
+			background-color: $color-bg-light;
+		}
+
+		&:focus-visible {
+			outline: 2px solid $color-primary;
+			outline-offset: 2px;
+		}
+	}
+
+	// Список пунктов меню
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	&__item {
+		position: relative;
+	}
+
+	// Ссылка пункта меню
+	&__link {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		padding: 14px 16px;
+		color: $color-text;
+		font-family: $font-family-display;
+		font-size: 1rem;
+		font-weight: 500;
+		text-decoration: none;
+		border-radius: $border-radius;
+		transition: background-color $transition-fast, color $transition-fast;
+
+		&:hover,
+		&:focus {
+			background-color: $color-bg-light;
+			color: $color-text-muted;
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid $color-primary;
+			outline-offset: -2px;
+		}
+
+		&.current-menu-item,
+		&.current_page_item {
+			color: $color-primary;
+			background-color: $color-primary-light;
+			font-weight: 600;
+		}
+	}
+
+	// Подменю (мобильный аккордеон)
+	&__submenu {
+		max-height: 0;
+		overflow: hidden;
+		transition: max-height 0.3s ease;
+		padding: 0;
+	}
+
+	&__item--open > &__submenu {
+		max-height: 500px;
+	}
+
+	// Открытое состояние
+	&--open {
+		transform: translateX(0);
+	}
+
+}
+
+// --- Выпадающее меню авторизации ---
+.idpg-auth-dropdown {
+	position: relative;
+	display: inline-flex;
+
+	&__toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		cursor: pointer;
+	}
+
+	&__arrow {
+		flex-shrink: 0;
+		transition: transform 0.2s ease;
+	}
+
+	// Открытие по hover на десктопе
+	@media (min-width: $breakpoint-desktop) {
+		&:hover &__arrow,
+		&:focus-within &__arrow {
+			transform: rotate(180deg);
+		}
+
+		&:hover &__menu,
+		&:focus-within &__menu {
+			opacity: 1;
+			visibility: visible;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	// Открытие по клику (мобильные и десктоп)
+	&--open &__arrow {
+		transform: rotate(180deg);
+	}
+
+	&--open &__menu {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0) scale(1);
+	}
+
+	&__menu {
+		position: absolute;
+		top: calc(100% + 8px);
+		right: 0;
+		min-width: 200px;
+		background: $color-bg;
+		border: 1px solid $color-border;
+		border-radius: $border-radius;
+		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+		padding: 6px;
+		list-style: none;
+		margin: 0;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(-8px) scale(0.95);
+		transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+		z-index: $z-dropdown;
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: -6px;
+			right: 20px;
+			width: 12px;
+			height: 12px;
+			background: $color-bg;
+			border-top: 1px solid $color-border;
+			border-left: 1px solid $color-border;
+			transform: rotate(45deg);
+			z-index: 1;
+		}
+
+	}
+
+	&__user-info {
+		padding: 6px 12px;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: $color-text;
+		white-space: nowrap;
+	}
+
+	&__divider {
+		height: 1px;
+		background-color: $color-border;
+		margin: 4px 0;
+	}
+
+	&__link {
+		display: block;
+		padding: 8px 12px;
+		font-size: 0.875rem;
+		color: $color-text-secondary;
+		text-decoration: none;
+		border-radius: 6px;
+		white-space: nowrap;
+		transition: background-color 0.15s ease, color 0.15s ease;
+
+		&:hover,
+		&:focus {
+			background-color: $color-bg-hover;
+			color: $color-text;
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: 2px solid $color-primary;
+			outline-offset: -2px;
+		}
+	}
+}
+
+// --- Блокировка скролла ---
+.idpg-body-locked {
+	overflow: hidden;
+}
+
+// --- Поиск в шапке (только десктоп) ---
+.idpg-search {
+	display: none;
+}
+
+// --- Кнопка поиска (только мобилка) ---
+.idpg-search-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border: 1px solid $color-border;
+	border-radius: 12px;
+	background: none;
+	cursor: pointer;
+	color: $color-text;
+	flex-shrink: 0;
+	transition: border-color $transition-fast, background-color $transition-fast;
+
+	&:hover,
+	&:focus {
+		border-color: $color-border-hover;
+		background-color: $color-bg-light;
+	}
+}
+
+// --- Оверлей поиска (мобильные) ---
+.idpg-search-overlay {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 110;
+	background: $color-bg;
+	padding: 16px;
+	flex-direction: column;
+
+	&--open {
+		display: flex;
+	}
+
+	&__inner {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	&__close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border: 1px solid $color-border;
+		border-radius: 12px;
+		background: none;
+		cursor: pointer;
+		color: $color-text;
+		flex-shrink: 0;
+		transition: border-color $transition-fast;
+
+		&:hover,
+		&:focus {
+			border-color: $color-border-hover;
+		}
+	}
+
+	&__form {
+		display: flex;
+		align-items: center;
+		position: relative;
+		flex: 1;
+		height: 44px;
+	}
+
+	&__icon {
+		position: absolute;
+		left: 14px;
+		color: $color-text-muted;
+		pointer-events: none;
+	}
+
+	&__input {
+		width: 100%;
+		height: 100%;
+		padding: 0 16px 0 44px;
+		background: $color-bg-light;
+		border: 1px solid $color-border;
+		border-radius: 12px;
+		font-family: $font-family;
+		font-size: 1rem;
+		color: $color-text;
+		outline: none;
+		transition: border-color $transition-fast, background-color $transition-fast;
+
+		&::placeholder {
+			color: $color-text-muted;
+		}
+
+		&:focus {
+			background-color: $color-bg;
+			border-color: $color-primary;
+			box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+		}
+	}
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+

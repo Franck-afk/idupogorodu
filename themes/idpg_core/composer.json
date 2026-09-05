@@ -1,0 +1,13 @@
+{
+    "name": "idpg/idpg-core-theme",
+    "description": "IDPG Core Theme",
+    "type": "wordpress-theme",
+    "require": {
+        "htmlburger/carbon-fields": "^3.6"
+    },
+    "config": {
+        "allow-plugins": {
+            "htmlburger/carbon-fields-installer": true
+        }
+    }
+}

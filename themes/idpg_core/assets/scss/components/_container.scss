@@ -1,0 +1,28 @@
+@use '../base/variables' as *;
+
+// ============================================================================
+// Единый контейнер
+// ============================================================================
+
+.container {
+	max-width: $container-max;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 16px;
+	padding-right: 16px;
+	width: 100%;
+}
+
+@media (min-width: $breakpoint-tablet) {
+	.container {
+		padding-left: 24px;
+		padding-right: 24px;
+	}
+}
+
+@media (min-width: $breakpoint-desktop) {
+	.container {
+		padding-left: 32px;
+		padding-right: 32px;
+	}
+}
