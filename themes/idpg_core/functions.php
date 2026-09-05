@@ -139,29 +139,6 @@ function idpg_core_scripts() {
 		wp_enqueue_script( 'idpg_core-auth', get_template_directory_uri() . '/assets/js/auth.js', array(), IDPG_VERSION, true );
 	}
 
-	if ( is_page_template( 'page-lk.php' ) || is_page( 'lk' ) ) {
-		$lk_user_id = get_current_user_id();
-
-		wp_enqueue_style( 'idpg_core-lk', get_template_directory_uri() . '/assets/css/lk.css', array(), IDPG_VERSION );
-		wp_enqueue_script( 'idpg_core-lk', get_template_directory_uri() . '/assets/js/lk.js', array(), IDPG_VERSION, true );
-
-		wp_localize_script(
-			'idpg_core-lk',
-			'idpgLk',
-			array(
-				'restUrl'          => esc_url_raw( home_url( '/wp-json/idpg/v1' ) ),
-				'nonce'            => wp_create_nonce( 'wp_rest' ),
-				'userId'           => (int) $lk_user_id,
-				'defaultAvatar80'  => get_avatar( $lk_user_id, 80 ),
-				'defaultAvatar96'  => get_avatar( $lk_user_id, 96 ),
-				'l10n'             => array(
-					'saveSuccess' => __( 'Профиль сохранён.', 'idpg_core' ),
-					'saveError'   => __( 'Ошибка при сохранении.', 'idpg_core' ),
-				),
-			)
-		);
-	}
-
 	// Передача данных в JS
 	$current_city_slug = class_exists( 'IDPG_City_Filter' ) ? IDPG_City_Filter::get_current_city_slug() : '';
 	wp_localize_script(
@@ -435,43 +412,6 @@ function idpg_core_create_default_menu() {
 	set_theme_mod( 'nav_menu_locations', $locations );
 }
 add_action( 'after_setup_theme', 'idpg_core_create_default_menu' );
-
-/**
- * Автосоздание страницы личного кабинета.
- *
- * Создаёт страницу /lk/ с шаблоном page-lk.php,
- * если она ещё не существует.
- */
-function idpg_core_create_lk_page() {
-	$page_slug = 'lk';
-	$page_title = 'Личный кабинет';
-	$page_template = 'page-lk.php';
-
-	$existing_page = get_page_by_path( $page_slug );
-
-	if ( $existing_page ) {
-		$template = get_post_meta( $existing_page->ID, '_wp_page_template', true );
-		if ( $template === $page_template ) {
-			return;
-		}
-	}
-
-	$page_data = array(
-		'post_title'   => $page_title,
-		'post_name'    => $page_slug,
-		'post_status'  => 'publish',
-		'post_type'    => 'page',
-		'post_content' => '',
-		'post_parent'  => 0,
-	);
-
-	$page_id = wp_insert_post( $page_data, true );
-
-	if ( ! is_wp_error( $page_id ) ) {
-		update_post_meta( $page_id, '_wp_page_template', $page_template );
-	}
-}
-add_action( 'after_setup_theme', 'idpg_core_create_lk_page' );
 
 /**
  * Автосоздание страницы входа.

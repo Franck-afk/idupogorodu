@@ -185,90 +185,6 @@ class IDPG_REST_API {
 			)
 		);
 
-		// === USER LK ===
-
-		// GET /user/profile — данные профиля текущего пользователя.
-		register_rest_route(
-			self::NAMESPACE,
-			'/user/profile',
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_user_profile' ),
-				'permission_callback' => array( $this, 'can_access_lk' ),
-			)
-		);
-
-		// POST/PUT /user/profile — обновление профиля текущего пользователя.
-		register_rest_route(
-			self::NAMESPACE,
-			'/user/profile',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE | WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_user_profile' ),
-				'permission_callback' => array( $this, 'can_access_lk' ),
-				'args'                => array(
-					'display_name' => array(
-						'required'          => false,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'email'        => array(
-						'required'          => false,
-						'type'              => 'string',
-						'format'            => 'email',
-						'sanitize_callback' => 'sanitize_email',
-					),
-					'new_password' => array(
-						'required'          => false,
-						'type'              => 'string',
-					),
-					'remove_avatar' => array(
-						'required'          => false,
-						'type'              => 'boolean',
-						'description'       => 'Remove user avatar meta.',
-					),
-					'current_password' => array(
-						'required'          => false,
-						'type'              => 'string',
-						'description'       => 'Required when changing the password.',
-					),
-				),
-			)
-		);
-
-		// GET /user/stats — статистика текущего пользователя.
-		register_rest_route(
-			self::NAMESPACE,
-			'/user/stats',
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_user_stats' ),
-				'permission_callback' => array( $this, 'can_access_lk' ),
-			)
-		);
-
-		// POST /user/avatar — загрузка аватара.
-		register_rest_route(
-			self::NAMESPACE,
-			'/user/avatar',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'upload_user_avatar' ),
-				'permission_callback' => array( $this, 'can_access_lk' ),
-			)
-		);
-
-		// GET /user/city-events — события в городе пользователя.
-		register_rest_route(
-			self::NAMESPACE,
-			'/user/city-events',
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_user_city_events' ),
-				'permission_callback' => array( $this, 'can_access_lk' ),
-			)
-		);
-
 		// GET /event-dates — даты с событиями за месяц (для календаря).
 		register_rest_route(
 			self::NAMESPACE,
@@ -308,6 +224,25 @@ class IDPG_REST_API {
 					'city' => array(
 						'required'          => false,
 						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+			)
+		);
+
+		// POST /city/select — смена города (установка cookie idpg_selected_city).
+		// Публичный маршрут: не требует авторизации, но обязателен valid nonce 'wp_rest'.
+		register_rest_route(
+			self::NAMESPACE,
+			'/city/select',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'select_city' ),
+				'permission_callback' => array( $this, 'can_select_city' ),
+				'args'                => array(
+					'city_id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
 					),
 				),
 			)
@@ -387,45 +322,23 @@ class IDPG_REST_API {
 	}
 
 	/**
-	 * Проверка доступа к ЛК.
+	 * Проверка nonce для публичного маршрута смены города.
 	 *
-	 * Требует авторизацию и роль subscriber.
-	 * Идентификация пользователя выполняется ТОЛЬКО через auth-cookie
-	 * (wp_get_current_user). Никакие параметры запроса (например, user_id)
-	 * не влияют на то, от чьего имени выполняется запрос.
-	 * Для не-GET запросов также проверяется nonce 'wp_rest'.
+	 * Авторизация не требуется (анонимный посетитель тоже может выбрать
+	 * город), но запрос обязан содержать валидный nonce 'wp_rest'.
 	 *
 	 * @param WP_REST_Request $request Запрос.
 	 * @return bool|WP_Error True или объект ошибки.
 	 */
-		public function can_access_lk( $request ) {
-		$user = wp_get_current_user();
+	public function can_select_city( $request ) {
+		$nonce = $request->get_header( 'X-WP-Nonce' );
 
-		if ( ! $user || ! $user->exists() ) {
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new WP_Error(
-				'idpg_rest_not_logged_in',
-				__( 'Необходима авторизация.', 'idpg-core' ),
-				array( 'status' => 401 )
+				'idpg_rest_nonce_failed',
+				__( 'Неверный или отсутствующий nonce-токен.', 'idpg-core' ),
+				array( 'status' => 403 )
 			);
-		}
-
-		// Доступ к ЛК разрешён любому авторизованному пользователю.
-		// Идентификация всегда выполняется только через auth-cookie
-		// (wp_get_current_user), поэтому пользователь не может изменить
-		// чужой профиль, передав user_id в параметрах запроса.
-
-		// Нонс-проверка для записей, изменяющих состояние (PUT/POST/PATCH).
-		$methods = $request->get_method();
-		if ( ! in_array( $methods, array( WP_REST_Server::READABLE, 'GET' ), true ) ) {
-			$nonce = $request->get_header( 'X-WP-Nonce' );
-
-			if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-				return new WP_Error(
-					'idpg_rest_nonce_failed',
-					__( 'Неверный или отсутствующий nonce-токен.', 'idpg-core' ),
-					array( 'status' => 403 )
-				);
-			}
 		}
 
 		return true;
@@ -859,366 +772,44 @@ class IDPG_REST_API {
 		return new WP_REST_Response( $result, 200 );
 	}
 
-	// =========================================================================
-	// LK: Профиль пользователя
-	// =========================================================================
-
 	/**
-	 * GET /user/profile — данные профиля текущего пользователя.
+	 * POST /city/select — установка cookie выбранного города.
+	 *
+	 * Делегирует валидацию термина и запись cookie существующему
+	 * IDPG_City_Filter::set_city_cookie() (тот же механизм, что у AJAX
+	 * wp_ajax_idpg_set_city). Плюс возвращает slug города для перехода
+	 * на /afisha/{slug}/.
 	 *
 	 * @param WP_REST_Request $request Запрос.
 	 * @return WP_REST_Response|WP_Error Ответ.
 	 */
-	public function get_user_profile( $request ) {
-		$user = wp_get_current_user();
+	public function select_city( $request ) {
+		$city_id = absint( $request->get_param( 'city_id' ) );
 
-		if ( ! $user || ! $user->exists() ) {
+		if ( ! $city_id || ! taxonomy_exists( 'city' ) || ! term_exists( $city_id, 'city' ) ) {
 			return new WP_Error(
-				'idpg_rest_not_logged_in',
-				__( 'Пользователь не авторизован.', 'idpg-core' ),
-				array( 'status' => 401 )
-			);
-		}
-
-return new WP_REST_Response(
-		array(
-			'user_id'      => $user->ID,
-			'email'        => $user->user_email,
-			'display_name' => $user->display_name,
-			'roles'        => $user->roles,
-			'avatar_url'   => get_avatar_url( $user->ID, array( 'size' => 96 ) ),
-		),
-		200
-	);
-}
-
-	/**
-	 * PUT /user/profile — обновление профиля текущего пользователя.
-	 *
-	 * @param WP_REST_Request $request Запрос.
-	 * @return WP_REST_Response|WP_Error Ответ.
-	 */
-	public function update_user_profile( $request ) {
-		$user = wp_get_current_user();
-
-		if ( ! $user || ! $user->exists() ) {
-			return new WP_Error(
-				'idpg_rest_not_logged_in',
-				__( 'Пользователь не авторизован.', 'idpg-core' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$user_id = $user->ID;
-		$update_data = array( 'ID' => $user_id );
-
-		$display_name = $request->get_param( 'display_name' );
-		if ( null !== $display_name ) {
-			$update_data['display_name'] = sanitize_text_field( $display_name );
-		}
-
-		$email = $request->get_param( 'email' );
-		if ( null !== $email ) {
-			$email = sanitize_email( $email );
-			if ( ! is_email( $email ) ) {
-				return new WP_Error(
-					'idpg_rest_invalid_email',
-					__( 'Некорректный email.', 'idpg-core' ),
-					array( 'status' => 400 )
-				);
-			}
-			$existing = email_exists( $email );
-			if ( $existing && $existing !== $user_id ) {
-				return new WP_Error(
-					'idpg_rest_email_exists',
-					__( 'Этот email уже занят.', 'idpg-core' ),
-					array( 'status' => 409 )
-				);
-			}
-			$update_data['user_email'] = $email;
-		}
-
-		$new_password = $request->get_param( 'new_password' );
-		if ( null !== $new_password && '' !== $new_password ) {
-			if ( strlen( $new_password ) < 8 ) {
-				return new WP_Error(
-					'idpg_rest_short_password',
-					__( 'Пароль должен содержать минимум 8 символов.', 'idpg-core' ),
-					array( 'status' => 400 )
-				);
-			}
-
-			$current_password = $request->get_param( 'current_password' );
-			if ( ! $current_password || ! wp_check_password( $current_password, $user->user_pass, $user_id ) ) {
-				return new WP_Error(
-					'idpg_rest_invalid_current_password',
-					__( 'Неверный текущий пароль.', 'idpg-core' ),
-					array( 'status' => 400 )
-				);
-			}
-
-			$update_data['user_pass'] = $new_password;
-		}
-
-		$updated = wp_update_user( $update_data );
-
-		if ( is_wp_error( $updated ) ) {
-			return new WP_Error(
-				'idpg_rest_update_failed',
-				$updated->get_error_message(),
+				'idpg_rest_invalid_city',
+				__( 'Неверный город.', 'idpg-core' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		// Уничтожаем все остальные сессии пользователя при смене пароля.
-		if ( ! empty( $update_data['user_pass'] ) ) {
-			wp_destroy_other_sessions( $user_id );
-		}
-
-		$remove_avatar = $request->get_param( 'remove_avatar' );
-		if ( $remove_avatar ) {
-			delete_user_meta( $user_id, 'idpg_avatar_attachment_id' );
-		}
-
-		if ( ! empty( $_FILES['file'] ) && ! $_FILES['file']['error'] ) {
-			if ( ! current_user_can( 'upload_files' ) ) {
-				return new WP_Error(
-					'idpg_rest_forbidden',
-					__( 'Недостаточно прав для загрузки файлов.', 'idpg-core' ),
-					array( 'status' => 403 )
-				);
-			}
-
-			require_once ABSPATH . 'wp-admin/includes/image.php';
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			require_once ABSPATH . 'wp-admin/includes/media.php';
-
-			// Вложение не привязываем к пользователю (это не пост),
-			// parent=0 — файл попадает в медиабиблиотеку WordPress.
-			$attachment_id = media_handle_upload( 'file', 0 );
-
-			if ( is_wp_error( $attachment_id ) ) {
-				return new WP_Error(
-					'idpg_rest_avatar_upload_failed',
-					$attachment_id->get_error_message(),
-					array( 'status' => 400 )
-				);
-			}
-
-			update_user_meta( $user_id, 'idpg_avatar_attachment_id', $attachment_id );
-		}
-
-		$avatar_url = get_avatar_url( $user_id, array( 'size' => 96 ) );
-
-		return new WP_REST_Response(
-			array(
-				'success'    => true,
-				'message'    => __( 'Профиль обновлён.', 'idpg-core' ),
-				'user_id'    => $user_id,
-				'avatar_url' => $avatar_url,
-			),
-			200
-		);
-	}
-
-/**
- * POST /user/avatar — загрузка аватара пользователем.
- *
- * @param WP_REST_Request $request Запрос.
- * @return WP_REST_Response|WP_Error Ответ.
- */
-public function upload_user_avatar( $request ) {
-	$user = wp_get_current_user();
-
-	if ( ! $user || ! $user->exists() ) {
-		return new WP_Error(
-			'idpg_rest_not_logged_in',
-			__( 'Пользователь не авторизован.', 'idpg-core' ),
-			array( 'status' => 401 )
-		);
-	}
-
-	if ( ! isset( $_FILES['file'] ) || empty( $_FILES['file']['name'] ) ) {
-		return new WP_Error(
-			'idpg_rest_no_file',
-			__( 'Файл не загружен.', 'idpg-core' ),
-			array( 'status' => 400 )
-		);
-	}
-
-	if ( ! current_user_can( 'upload_files' ) ) {
-		return new WP_Error(
-			'idpg_rest_forbidden',
-			__( 'Недостаточно прав для загрузки файлов.', 'idpg-core' ),
-			array( 'status' => 403 )
-		);
-	}
-
-	require_once ABSPATH . 'wp-admin/includes/image.php';
-	require_once ABSPATH . 'wp-admin/includes/file.php';
-	require_once ABSPATH . 'wp-admin/includes/media.php';
-
-	// Вложение не привязываем к пользователю (это не пост),
-	// parent=0 — файл попадает в медиабиблиотеку WordPress.
-	$attachment_id = media_handle_upload( 'file', 0 );
-
-	if ( is_wp_error( $attachment_id ) ) {
-		return new WP_Error(
-			'idpg_rest_upload_failed',
-			$attachment_id->get_error_message(),
-			array( 'status' => 400 )
-		);
-	}
-
-	$attachment = get_post( $attachment_id );
-	$image_url  = $attachment ? wp_get_attachment_image_url( $attachment_id, 'medium' ) : '';
-
-	return new WP_REST_Response(
-		array(
-			'success'      => true,
-			'message'      => __( 'Аватар загружен.', 'idpg-core' ),
-			'attachment_id' => $attachment_id,
-			'avatar_url'   => $image_url,
-		),
-		200
-	);
-}
-
-// =========================================================================
-// LK: Статистика пользователя
-// =========================================================================
-
-	/**
-	 * GET /user/stats — статистика текущего пользователя.
-	 *
-	 * @param WP_REST_Request $request Запрос.
-	 * @return WP_REST_Response|WP_Error Ответ.
-	 */
-	public function get_user_stats( $request ) {
-		$user = wp_get_current_user();
-
-		if ( ! $user || ! $user->exists() ) {
+		if ( ! class_exists( 'IDPG_City_Filter' ) || ! method_exists( 'IDPG_City_Filter', 'set_city_cookie' ) ) {
 			return new WP_Error(
-				'idpg_rest_not_logged_in',
-				__( 'Пользователь не авторизован.', 'idpg-core' ),
-				array( 'status' => 401 )
+				'idpg_rest_city_unavailable',
+				__( 'Определение города недоступно.', 'idpg-core' ),
+				array( 'status' => 503 )
 			);
 		}
 
-		$user_id = $user->ID;
-
-		$events_count = (int) get_user_meta( $user_id, 'idpg_events_count', true );
-		$venues_count = (int) get_user_meta( $user_id, 'idpg_venues_count', true );
+		IDPG_City_Filter::set_city_cookie( $city_id );
 
 		return new WP_REST_Response(
 			array(
-				'events_count' => $events_count,
-				'venues_count' => $venues_count,
-			),
-			200
-		);
-	}
-
-	// =========================================================================
-	// LK: События в городе пользователя
-	// =========================================================================
-
-	/**
-	 * GET /user/city-events — события в городе пользователя.
-	 *
-	 * Читает город из существующего cookie 'idpg_selected_city'
-	 * (совпадает с class-city-filter.php).
-	 *
-	 * @param WP_REST_Request $request Запрос.
-	 * @return WP_REST_Response Ответ.
-	 */
-	public function get_user_city_events( $request ) {
-		$city_id = 0;
-
-		if ( ! empty( $_COOKIE['idpg_selected_city'] ) ) {
-			$city_id = absint( $_COOKIE['idpg_selected_city'] );
-		}
-
-		if ( ! $city_id || ! term_exists( $city_id, 'city' ) ) {
-			$default = defined( 'IDPG_DEFAULT_CITY_ID' ) ? (int) IDPG_DEFAULT_CITY_ID : 0;
-
-			if ( $default && term_exists( $default, 'city' ) ) {
-				$city_id = $default;
-			} else {
-				$all = get_terms( array(
-					'taxonomy'   => 'city',
-					'hide_empty' => false,
-					'number'     => 1,
-					'orderby'    => 'count',
-					'order'      => 'DESC',
-				) );
-
-				$city_id = ( ! is_wp_error( $all ) && ! empty( $all ) ) ? $all[0]->term_id : 0;
-			}
-		}
-
-		$city_term = get_term( $city_id, 'city' );
-		$city_name = ( $city_term && ! is_wp_error( $city_term ) ) ? $city_term->name : '';
-
-		$args = array(
-			'post_type'      => 'event',
-			'post_status'    => 'publish',
-			'posts_per_page' => 10,
-			'orderby'        => 'meta_value',
-			'meta_key'       => '_idpg_start_date', // phpcs:ignore WordPress.DB.SlowDBQuery
-			'order'          => 'ASC',
-			'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery
-				array(
-					'key'     => '_idpg_start_date',
-					'value'   => gmdate( 'Y-m-d' ),
-					'compare' => '>=',
-					'type'    => 'DATE',
-				),
-			),
-			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery
-				array(
-					'taxonomy' => 'city',
-					'field'    => 'term_id',
-					'terms'    => $city_id,
-				),
-			),
-		);
-
-		$query  = new WP_Query( $args );
-		$events = array();
-
-		foreach ( $query->posts as $post ) {
-			$venue_id   = (int) get_post_meta( $post->ID, '_idpg_venue', true );
-			$venue_name = '';
-			if ( $venue_id ) {
-				$venue = get_post( $venue_id );
-				if ( $venue && 'publish' === $venue->post_status ) {
-					$venue_name = $venue->post_title;
-				}
-			}
-
-			$events[] = array(
-				'id'         => $post->ID,
-				'title'      => $post->post_title,
-				'permalink'  => get_permalink( $post->ID ),
-				'date_start' => get_post_meta( $post->ID, '_idpg_start_date', true ),
-				'date_end'   => get_post_meta( $post->ID, '_idpg_end_date', true ),
-				'all_day'    => 'yes' === get_post_meta( $post->ID, '_idpg_all_day', true ),
-				'is_free'    => 'yes' === get_post_meta( $post->ID, '_idpg_is_free', true ),
-				'price_from' => get_post_meta( $post->ID, '_idpg_price_from', true ),
-				'price_to'   => get_post_meta( $post->ID, '_idpg_price_to', true ),
-				'thumbnail'  => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '',
-				'venue_name' => $venue_name,
-				'address'    => get_post_meta( $post->ID, '_idpg_address', true ),
-			);
-		}
-
-		return new WP_REST_Response(
-			array(
+				'success'   => true,
 				'city_id'   => $city_id,
-				'city_name' => $city_name,
-				'events'    => $events,
-				'total'     => $query->found_posts,
+				'city_name' => IDPG_City_Filter::get_current_city_name(),
+				'city_slug' => IDPG_City_Filter::get_current_city_slug(),
 			),
 			200
 		);

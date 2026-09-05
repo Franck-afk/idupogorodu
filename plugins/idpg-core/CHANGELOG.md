@@ -4,6 +4,26 @@
 Формат — [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 версионирование — [SemVer](https://semver.org/lang/ru/).
 
+## [1.1.0] — 2026-09-05
+
+### Удалено
+- REST-эндпоинты личного кабинета: `GET/PUT /user/profile`, `GET /user/stats`, `POST /user/avatar`, `GET /user/city-events` и permission-колбэк `can_access_lk()`.
+- Автосоздание страницы `/lk/` больше не выполняется (убрана `idpg_core_create_lk_page()` из темы). Пользователи не имеют доступа к личному кабинету.
+
+### Изменено
+- Редиректы после входа для подписчиков: `/lk/` → главная `/` (форма входа, REST `/auth/login`, соц-авторизация VK/Яндекс).
+- Подписчики, попавшие в `/wp-admin/`, направляются на главную `/` вместо `/lk/`.
+
+## [1.0.9] — 2026-09-05
+
+### Добавлено
+- REST-маршрут `POST /wp-json/idpg/v1/city/select` — смена города без авторизации: валидный nonce `wp_rest`, параметр `city_id` (int). Устанавливает cookie `idpg_selected_city` через существующий `IDPG_City_Filter::set_city_cookie()` и возвращает `city_id`/`city_name`/`city_slug`.
+- Селектор города (виджет + шапка): основным механизмом теперь является REST `/city/select`, `admin-ajax` `idpg_set_city` оставлен как fallback.
+
+### Изменено
+- Настройка `ip_service` виджета «Выбор города» теперь реально действует: `'none'` отключает автоопределение по IP (в т.ч. глобальное на `init`), `'ip_api'`/`'ipapi_co'` — использует только выбранный сервис. `IDPG_City_Filter::lookup_city_id_by_ip()` принимает необязательный параметр `$services`.
+- ip-api.com запрашивается сначала по HTTPS, при неудаче — по HTTP (бесплатный план не поддерживает TLS).
+
 ## [1.0.8] — 2026-09-01
 
 ### Добавлено

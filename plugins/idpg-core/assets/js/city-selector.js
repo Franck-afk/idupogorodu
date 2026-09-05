@@ -1,8 +1,9 @@
 /**
  * Виджет «Выбор города» (IDPG).
  *
- * Смена города → cookie через AJAX idpg_set_city (fallback-механизм)
- * и переход на афишу выбранного города: /afisha/{slug}/
+ * Смена города → cookie через REST /city/select (basic) или AJAX
+ * idpg_set_city (fallback), затем переход на афишу выбранного города:
+ * /afisha/{slug}/
  */
 (function () {
 	'use strict';
@@ -16,7 +17,7 @@
 
 	/**
 	 * Переход на афишу выбранного города.
-	 * Cookie уже установлена AJAX-запросом (fallback для страниц без города в URL).
+	 * Cookie уже установлена запросом (fallback для страниц без города в URL).
 	 */
 	function goAfisha() {
 		var base = String(config.home || window.location.origin + '/').replace(/\/+$/, '');
@@ -29,6 +30,21 @@
 		}
 		currentSlug = slug;
 
+		// Основной путь — REST /city/select (с nonce 'wp_rest').
+		if (config.restUrl && config.restNonce) {
+			fetch(String(config.restUrl).replace(/\/+$/, '') + '/city/select', {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': config.restNonce
+				},
+				body: JSON.stringify({ city_id: parseInt(id, 10) })
+			}).finally(goAfisha);
+			return;
+		}
+
+		// Fallback — admin-ajax idpg_set_city.
 		if (config.ajaxUrl && config.nonce) {
 			var body = new URLSearchParams();
 			body.append('action', 'idpg_set_city');

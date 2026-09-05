@@ -241,3 +241,25 @@
 - Копирование файлов через tar+ssh на Hostland (serv68.hostland.ru)
 - Исключает `node_modules/`, `.git/`, временные файлы
 - НЕ копирует БД или wp-config.php (серверная настройка отдельно)
+
+## 13. Удаление личного кабинета (2026-09-05)
+
+### Удалённые REST-эндпоинты (class-rest-api.php):
+- `GET/PUT /user/profile`, `GET /user/stats`, `POST /user/avatar`, `GET /user/city-events`
+- Permission-колбэк `can_access_lk()` и методы `get_user_profile()`, `update_user_profile()`, `upload_user_avatar()`, `get_user_stats()`, `get_user_city_events()`
+
+### Удалённые файлы темы:
+- `page-lk.php`
+- `assets/js/lk.js`
+- `assets/css/lk.css`
+- `page-favorites.php` **сохранён** — избранное остаётся (страница `/lk/favorites/` работает через rewrite плагина, без страницы в БД)
+
+### Внесённые изменения:
+- `functions.php` — убраны enqueue `idpg_core-lk` и функция `idpg_core_create_lk_page()` (автосоздание `/lk/`)
+- `class-auth.php` — убрана константа `LK_URL`; `redirect_after_login()` и `restrict_admin_access()` для подписчиков направляют на главную `/`
+- `class-rest-auth.php` — `get_redirect_url_by_role()` возвращает подписчикам главную `/`
+- `class-social-user.php` и `class-social-auth.php` — подписчики после соц-входа на главной `/`
+- `page-login.php` — форма входа перенаправляет подписчиков на главную `/`
+
+### База данных:
+- Удалена страница `/lk/` (ID 110) с postmeta (`wp_delete_post(110, true)`); страниц `favorites`/`cabinet` в БД не было

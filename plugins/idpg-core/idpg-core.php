@@ -51,7 +51,7 @@ function idpg_carbon_fields_boot() {
 /**
  * Константы плагина.
  */
-define( 'IDPG_CORE_VERSION', '1.0.8' );
+define( 'IDPG_CORE_VERSION', '1.1.0' );
 define( 'IDPG_CORE_FILE', __FILE__ );
 define( 'IDPG_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'IDPG_CORE_URL', plugin_dir_url( __FILE__ ) );

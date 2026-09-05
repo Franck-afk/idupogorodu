@@ -114,8 +114,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 					|| in_array( 'event_organizer', $roles, true )
 				) {
 					$redirect_url = admin_url();
-				} elseif ( in_array( 'subscriber', $roles, true ) ) {
-					$redirect_url = home_url( '/lk/' );
 				} else {
 					$redirect_url = home_url( '/' );
 				}

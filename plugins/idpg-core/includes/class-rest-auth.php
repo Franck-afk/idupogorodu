@@ -733,10 +733,6 @@ class IDPG_REST_Auth {
 			return admin_url();
 		}
 
-		if ( 'subscriber' === $role ) {
-			return home_url( '/lk/' );
-		}
-
 		return home_url( '/' );
 	}
 }

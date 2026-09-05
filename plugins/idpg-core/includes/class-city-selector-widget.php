@@ -116,6 +116,8 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 			array(
 				'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
 				'nonce'             => wp_create_nonce( 'idpg_set_city' ),
+				'restUrl'           => esc_url_raw( rest_url( 'idpg/v1' ) ),
+				'restNonce'         => wp_create_nonce( 'wp_rest' ),
 				'searchPlaceholder' => __( 'Поиск города…', 'idpg-core' ),
 			)
 		);
@@ -527,12 +529,15 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 	 * Использует общий механизм IDPG_City_Filter::lookup_city_id_by_ip()
 	 * (единый transient-кэш, без дублирующих HTTP-запросов).
 	 *
-	 * @param string $service Ключ сервиса (совместимость сигнатуры; поиск идёт по всем сервисам).
+	 * @param string $service Ключ сервиса ('none' — отключено, либо ip_api|ipapi_co).
 	 * @param array  $tree    Дерево городов.
 	 * @return array|null
 	 */
 	private function detect_city_by_ip( $service, $tree ) {
-		unset( $service );
+		// 'none' — автоопределение для этого виджета отключено.
+		if ( 'none' === $service ) {
+			return null;
+		}
 
 		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 
@@ -543,7 +548,7 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 		$cached = IDPG_City_Filter::get_ip_detection( $ip );
 		$term_id = is_array( $cached )
 			? ( 'ok' === $cached['status'] ? (int) $cached['term_id'] : 0 )
-			: IDPG_City_Filter::lookup_city_id_by_ip( $ip );
+			: IDPG_City_Filter::lookup_city_id_by_ip( $ip, array( $service ) );
 
 		if ( ! $term_id ) {
 			return null;

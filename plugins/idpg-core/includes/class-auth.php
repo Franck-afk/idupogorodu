@@ -72,8 +72,7 @@ class IDPG_Auth {
 	/**
 	 * Редирект после успешного входа.
 	 *
-	 * Направляет подписчиков на фронтенд ЛК,
-	 * остальных — на главную страницу сайта.
+	 * Направляет подписчиков и остальных на главную страницу сайта.
 	 * При WP_Error — на страницу входа.
 	 *
 	 * @param string           $redirect_to URL по умолчанию.
@@ -95,26 +94,15 @@ class IDPG_Auth {
 			return admin_url();
 		}
 
-		if ( in_array( 'subscriber', $roles, true ) ) {
-			return home_url( self::LK_URL );
-		}
-
 		return home_url( '/' );
 	}
-
-	/**
-	 * URL личного кабинета.
-	 *
-	 * @var string
-	 */
-	const LK_URL = '/lk/';
 
 	/**
 	 * Ограничение доступа к админ-панели.
 	 *
 	 * Пропускает AJAX и Cron-запросы.
 	 * Перенаправляет неавторизованных на страницу входа.
-	 * Перенаправляет подписчиков на фронтенд ЛК.
+	 * Перенаправляет подписчиков на главную страницу.
 	 *
 	 * @return void
 	 */
@@ -135,7 +123,7 @@ class IDPG_Auth {
 		$user = wp_get_current_user();
 
 		if ( in_array( 'subscriber', (array) $user->roles, true ) ) {
-			wp_safe_redirect( home_url( self::LK_URL ) );
+			wp_safe_redirect( home_url( '/' ) );
 			exit;
 		}
 	}

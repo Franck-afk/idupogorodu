@@ -116,6 +116,14 @@ class IDPG_City_Filter {
 			return;
 		}
 
+		// Настройка виджета «Выбор города» может отключить автоопределение
+		// ('none') или сузить список сервисов; по умолчанию — оба сервиса.
+		$services = self::allowed_ip_services();
+
+		if ( empty( $services ) ) {
+			return;
+		}
+
 		// Не тратим запросы внешнего сервиса на ботов и пустые UA.
 		$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
 		if ( '' === trim( $ua ) || preg_match( '/bot|crawl|spider|slurp|curl|wget|python|monitor|headless/i', $ua ) ) {
@@ -139,7 +147,7 @@ class IDPG_City_Filter {
 		}
 
 		// В кэше ничего нет — выполняем поиск (под замком от параллельных запросов).
-		$term_id = self::lookup_city_id_by_ip( $ip );
+		$term_id = self::lookup_city_id_by_ip( $ip, $services );
 
 		if ( $term_id ) {
 			self::$detected_from_ip = true;
@@ -179,13 +187,21 @@ class IDPG_City_Filter {
 	 * Публичный метод — используется также виджетом селектора города,
 	 * чтобы не дублировать HTTP-запросы (общий transient-кэш).
 	 *
-	 * @param string $ip IP-адрес.
+	 * @param string $ip       IP-адрес.
+	 * @param array  $services Список сервисов (ip_api, ipapi_co). Пустой список = оба сервиса.
 	 * @return int Term ID или 0.
 	 */
-	public static function lookup_city_id_by_ip( $ip ) {
+	public static function lookup_city_id_by_ip( $ip, $services = array() ) {
 		$ip = sanitize_text_field( (string) $ip );
 
 		if ( ! $ip || ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+			return 0;
+		}
+
+		// Нормализация списка сервисов: пустой список = оба сервиса.
+		$services = self::normalize_services( $services );
+
+		if ( empty( $services ) ) {
 			return 0;
 		}
 
@@ -202,7 +218,7 @@ class IDPG_City_Filter {
 		$term_id     = 0;
 		$had_response = false;
 
-		foreach ( array( 'ip_api', 'ipapi_co' ) as $service ) {
+		foreach ( $services as $service ) {
 			$data = self::request_ip_data( $service, $ip );
 
 			if ( empty( $data ) ) {
@@ -254,6 +270,78 @@ class IDPG_City_Filter {
 	}
 
 	/**
+	 * Список сервисов, разрешённых для глобального автоопределения.
+	 *
+	 * Учитывает настройку `ip_service` виджета «Выбор города»:
+	 * - виджет не размещён или настройка невалидна — оба сервиса;
+	 * - 'none'  — автоопределение отключено;
+	 * - 'ip_api' / 'ipapi_co' — используется только выбранный сервис.
+	 *
+	 * @return array Ключи сервисов.
+	 */
+	public static function allowed_ip_services() {
+		static $allowed = null;
+
+		if ( null !== $allowed ) {
+			return $allowed;
+		}
+
+		$allowed = array( 'ip_api', 'ipapi_co' );
+
+		// Виджет не размещён в активной области — используем оба сервиса.
+		if ( ! is_active_widget( false, false, IDPG_City_Selector_Widget::ID_BASE ) ) {
+			return $allowed;
+		}
+
+		$option = get_option( 'widget_' . IDPG_City_Selector_Widget::ID_BASE, array() );
+		$option = is_array( $option ) ? $option : array();
+
+		// Служебный ключ мультивиджета — не является инстансом.
+		unset( $option['_multiwidget'] );
+
+		// Последний сохранённый инстанс — актуальная настройка.
+		$instance = end( $option );
+
+		if ( ! is_array( $instance ) ) {
+			return $allowed;
+		}
+
+		$ip_service = isset( $instance['ip_service'] ) ? $instance['ip_service'] : 'none';
+
+		if ( 'none' === $ip_service ) {
+			$allowed = array();
+		} elseif ( in_array( $ip_service, array( 'ip_api', 'ipapi_co' ), true ) ) {
+			$allowed = array( $ip_service );
+		}
+
+		return $allowed;
+	}
+
+	/**
+	 * Нормализация списка сервисов автоопределения.
+	 *
+	 * Пустой или невалидный список означает «оба сервиса» (безопасный фолбэк).
+	 *
+	 * @param string|array $services Ключ сервиса или массив ключей.
+	 * @return array
+	 */
+	private static function normalize_services( $services ) {
+		$allowed = array( 'ip_api', 'ipapi_co' );
+
+		if ( is_string( $services ) && '' !== $services ) {
+			$services = array( $services );
+		}
+
+		if ( ! is_array( $services ) || empty( $services ) ) {
+			return $allowed;
+		}
+
+		$services = array_values( array_intersect( array_map( 'strval', $services ), $allowed ) );
+
+		return $services ? $services : $allowed;
+	}
+
+	/**
 	 * Запрос к внешнему сервису определения города по IP.
 	 *
 	 * @param string $service Ключ сервиса: ip_api | ipapi_co.
@@ -261,52 +349,61 @@ class IDPG_City_Filter {
 	 * @return array Поля city/region или пустой массив.
 	 */
 	private static function request_ip_data( $service, $ip ) {
-		$url = '';
+		$urls = array();
 
 		if ( 'ip_api' === $service ) {
-			$url = 'http://ip-api.com/json/' . $ip . '?lang=ru&fields=status,regionName,city';
+			// Бесплатный план ip-api.com не поддерживает HTTPS;
+			// сначала пробуем HTTPS (для платных/прокси), при неудаче — HTTP.
+			$urls = array(
+				'https://ip-api.com/json/' . $ip . '?lang=ru&fields=status,regionName,city',
+				'http://ip-api.com/json/' . $ip . '?lang=ru&fields=status,regionName,city',
+			);
 		} elseif ( 'ipapi_co' === $service ) {
-			$url = 'https://ipapi.co/' . $ip . '/json/';
-		}
-
-		if ( ! $url ) {
+			$urls = array( 'https://ipapi.co/' . $ip . '/json/' );
+		} else {
 			return array();
 		}
 
-		$response = wp_remote_get(
-			$url,
-			array(
-				'timeout' => 3,
-				'headers' => array(
-					'User-Agent' => 'IDPG City Filter',
-					'Accept'     => 'application/json',
-				),
-			)
-		);
+		foreach ( $urls as $url ) {
+			$response = wp_remote_get(
+				$url,
+				array(
+					'timeout' => 3,
+					'headers' => array(
+						'User-Agent' => 'IDPG City Filter',
+						'Accept'     => 'application/json',
+					),
+				)
+			);
 
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return array();
-		}
-
-		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-
-		if ( ! is_array( $body ) ) {
-			return array();
-		}
-
-		$data = array();
-
-		if ( 'ip_api' === $service ) {
-			if ( isset( $body['status'] ) && 'success' === $body['status'] ) {
-				$data['region'] = isset( $body['regionName'] ) ? $body['regionName'] : '';
-				$data['city']   = isset( $body['city'] ) ? $body['city'] : '';
+			if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+				continue;
 			}
-		} elseif ( 'ipapi_co' === $service ) {
-			$data['region'] = isset( $body['region'] ) ? $body['region'] : '';
-			$data['city']   = isset( $body['city'] ) ? $body['city'] : '';
+
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( ! is_array( $body ) ) {
+				continue;
+			}
+
+			$data = array();
+
+			if ( 'ip_api' === $service ) {
+				if ( isset( $body['status'] ) && 'success' === $body['status'] ) {
+					$data['region'] = isset( $body['regionName'] ) ? $body['regionName'] : '';
+					$data['city']   = isset( $body['city'] ) ? $body['city'] : '';
+
+					return $data;
+				}
+			} elseif ( 'ipapi_co' === $service ) {
+				$data['region'] = isset( $body['region'] ) ? $body['region'] : '';
+				$data['city']   = isset( $body['city'] ) ? $body['city'] : '';
+
+				return $data;
+			}
 		}
 
-		return $data;
+		return array();
 	}
 
 	/**

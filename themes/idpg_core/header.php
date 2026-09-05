@@ -86,6 +86,7 @@ $current_city_name = class_exists( 'IDPG_City_Filter' )
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 			</button>
 		</div>
+		<?php echo $idpg_city_ipnote; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<?php if ( ! empty( $city_tree ) ) : ?>
 			<select class="idpg-city-modal__select" id="idpg-city-modal-select" data-idpg-city-header>
 				<?php foreach ( $city_tree as $region ) : ?>
@@ -145,6 +146,15 @@ $current_city_name = class_exists( 'IDPG_City_Filter' )
 		<?php
 		$city_tree  = class_exists( 'IDPG_City_Filter' ) ? IDPG_City_Filter::get_city_tree() : array();
 		$current_id = class_exists( 'IDPG_City_Filter' ) ? IDPG_City_Filter::get_current_city_id() : 0;
+
+		// Подсказка об автоопределении по IP — та же, что в виджете
+		// (class-city-selector-widget.php): показывается, если город был
+		// определён автоматически при первом визите, а не выбран вручную.
+		$idpg_city_ipnote = class_exists( 'IDPG_City_Filter' ) && IDPG_City_Filter::was_detected_from_ip()
+			? '<p class="idpg-city-selector__ipnote">'
+				. esc_html__( 'Мы определили ваш город автоматически. При необходимости выберите другой:', 'idpg_core' )
+				. '</p>'
+			: '';
 		?>
 		<div class="idpg-city-selector" id="idpg-city-dropdown">
 			<button
@@ -167,6 +177,7 @@ $current_city_name = class_exists( 'IDPG_City_Filter' )
 			</button>
 
 			<div class="idpg-city-selector__panel" id="idpg-city-panel" hidden>
+				<?php echo $idpg_city_ipnote; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				<?php if ( ! empty( $city_tree ) ) : ?>
 					<label class="idpg-city-selector__select-label" for="idpg-city-select">
 						<?php esc_html_e( 'Выберите город', 'idpg_core' ); ?>

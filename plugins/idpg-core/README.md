@@ -26,7 +26,7 @@
 3. Активируйте плагин «IDPG Core» в **Плагины → Установленные**.
 4. При активации автоматически: регистрируются CPT и таксономии, создаются роли, ставится cron-задача синхронизации билетов, выполняются миграции меты, сбрасываются rewrite-правила.
 
-Автосоздание страниц (`/login/`, `/lk/`, `/favorites/` и др.) выполняется темой.
+Автосоздание страниц (`/login/`, `/reset-password/`, `/terms/`, `/privacy/`) выполняется темой; избранное доступно по `/lk/favorites/` (rewrite плагина, страницы в БД нет).
 
 ---
 
@@ -61,7 +61,7 @@
 ### REST API (namespace `idpg/v1`)
 
 Публичные: `GET /events`, `GET /venues`, `GET /venues/{id}`, `GET /cities`, `GET /categories`, `GET /age-ratings`.
-Авторизованные: `POST /venues/create`, `PUT /venues/{id}`, `GET/PUT /user/profile`, `GET /user/stats`, избранное (`/favorites/…`), авторизация (`/auth/…`).
+Авторизованные: `POST /venues/create`, `PUT /venues/{id}`, избранное (`/favorites/…`), авторизация (`/auth/…`).
 
 ### Прочее
 
@@ -149,6 +149,14 @@ idpg-core/
 ---
 
 ## Changelog
+
+### 1.1.0 — 2026-09-05
+
+- Удалены REST-эндпоинты ЛК (`/user/profile`, `/user/stats`, `/user/avatar`, `/user/city-events`); после входа подписчики направляются на главную `/` вместо `/lk/`.
+
+### 1.0.9 — 2026-09-05
+
+- REST `POST /city/select` для смены города; настройка `ip_service` реально действует; ip-api запрашивается по HTTPS с fallback на HTTP.
 
 ### 1.0.8 — 2026-09-01
 

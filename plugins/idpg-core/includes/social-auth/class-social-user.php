@@ -264,7 +264,7 @@ class Social_User {
 	/**
 	 * Определяет редирект после входа (по ТЗ: get_redirect_url).
 	 *
-	 * - subscriber      → /cabinet/favorites/
+	 * - subscriber и остальные    → главная /
 	 * - event_organizer → /organizer/dashboard/
 	 * - administrator   → /wp-admin/
 	 *
@@ -288,7 +288,7 @@ class Social_User {
 			$url = admin_url();
 		} else {
 			// subscriber и остальные.
-			$url = home_url( '/cabinet/favorites/' );
+			$url = home_url( '/' );
 		}
 
 		return apply_filters( 'idpg_social_auth_redirect_url', $url, $user );
