@@ -228,7 +228,8 @@
    Кнопки ( блоки )
    ============================================================================ */
 
-$1100px;
+.editor-styles-wrapper .wp-block-button__link {
+	max-width: 1100px;
 	cursor: pointer;
 	transition: background-color 0.2s;
 }

@@ -35,7 +35,7 @@ class IDPG_GeoService {
 		if ( class_exists( 'IDPG_City_Filter' ) && method_exists( 'IDPG_City_Filter', 'get_current_city_id' ) ) {
 			return (int) IDPG_City_Filter::get_current_city_id();
 		}
-		return (int) defined( 'IDPG_DEFAULT_CITY_ID' ) ? IDPG_DEFAULT_CITY_ID : 15;
+		return (int) ( defined( 'IDPG_DEFAULT_CITY_ID' ) ? IDPG_DEFAULT_CITY_ID : 15 );
 	}
 
 	/**

@@ -694,6 +694,23 @@ class IDPG_REST_API {
 			);
 		}
 
+		// Защита в глубину: организатор правит только свои площадки.
+		// (permission_callback can_manage_events уже проверяет владельца,
+		// дублируем здесь, чтобы метод оставался безопасным сам по себе.)
+		$user = wp_get_current_user();
+		if (
+			$user && $user->exists()
+			&& ! current_user_can( 'edit_posts' )
+			&& ! current_user_can( 'edit_others_events' )
+			&& (int) $post->post_author !== $user->ID
+		) {
+			return new WP_Error(
+				'idpg_rest_forbidden_owner',
+				__( 'Можно управлять только своими объектами.', 'idpg-core' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$post_data = array( 'ID' => $post_id );
 
 		$title = $request->get_param( 'title' );
@@ -1032,9 +1049,12 @@ class IDPG_REST_API {
 			$ids = array_merge( $ids, (array) $q2->posts );
 		}
 
-		// 3) По категориям/тегам: event_category, age_rating.
-		$cat_ids = array();
-		foreach ( array( 'event_category', 'age_rating' ) as $tax ) {
+		// 3) По категориям/рубрикам (event_category) и возрастным рейтингам (age_rating).
+		// ID каждой таксономии держим отдельно, чтобы не смешивать совпадающие
+		// term_id разных таксономий в одном списке.
+		$event_cat_ids = array();
+		$age_rating_ids = array();
+		foreach ( array( 'event_category' => &$event_cat_ids, 'age_rating' => &$age_rating_ids ) as $tax => &$target ) {
 			$terms = get_terms( array(
 				'taxonomy'   => $tax,
 				'hide_empty' => false,
@@ -1043,18 +1063,25 @@ class IDPG_REST_API {
 			) );
 			if ( ! is_wp_error( $terms ) && $terms ) {
 				foreach ( $terms as $t ) {
-					$cat_ids[] = $t->term_id;
+					$target[] = $t->term_id;
 				}
 			}
 		}
-		if ( $cat_ids ) {
-			$tax_q = $city_tax;
-			$tax_q[] = array(
-				'taxonomy' => 'event_category',
-				'field'    => 'term_id',
-				'terms'    => $cat_ids,
-			);
-			// Для age_rating — отдельный запрос, но можно объединить через OR (tax_query relation OR).
+		unset( $target );
+
+		// Есть ли вообще совпадения по категориям/рейтингам поискового запроса.
+		$cat_ids_found = ( ! empty( $event_cat_ids ) || ! empty( $age_rating_ids ) );
+		if ( $cat_ids_found ) {
+			// Объединяем в один блок только для удобства: подзапросы ниже
+			// используют правильные ID в соответствующих таксономиях.
+			$sub_tax = array();
+			if ( ! empty( $event_cat_ids ) ) {
+				$sub_tax[] = array( 'taxonomy' => 'event_category', 'field' => 'term_id', 'terms' => $event_cat_ids );
+			}
+			if ( ! empty( $age_rating_ids ) ) {
+				$sub_tax[] = array( 'taxonomy' => 'age_rating', 'field' => 'term_id', 'terms' => $age_rating_ids );
+			}
+
 			$q3 = new WP_Query( array(
 				'post_type'      => 'event',
 				'post_status'    => 'publish',
@@ -1064,8 +1091,7 @@ class IDPG_REST_API {
 					$city_tax[0] ?? array( 'taxonomy' => 'city', 'field' => 'term_id', 'terms' => $city_id ),
 					array(
 						'relation' => 'OR',
-						array( 'taxonomy' => 'event_category', 'field' => 'term_id', 'terms' => $cat_ids ),
-						array( 'taxonomy' => 'age_rating', 'field' => 'term_id', 'terms' => $cat_ids ),
+						$sub_tax,
 					),
 				),
 				'fields'         => 'ids',
@@ -1078,8 +1104,7 @@ class IDPG_REST_API {
 					'posts_per_page' => 6,
 					'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 						'relation' => 'OR',
-						array( 'taxonomy' => 'event_category', 'field' => 'term_id', 'terms' => $cat_ids ),
-						array( 'taxonomy' => 'age_rating', 'field' => 'term_id', 'terms' => $cat_ids ),
+						$sub_tax,
 					),
 					'fields'         => 'ids',
 				) );
