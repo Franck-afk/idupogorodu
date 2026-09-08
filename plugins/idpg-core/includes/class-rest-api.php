@@ -331,7 +331,9 @@ class IDPG_REST_API {
 		}
 
 		// Администраторы и редакторы управляют всем.
-		if ( current_user_can( 'edit_posts' ) || current_user_can( 'edit_others_events' ) ) {
+		// edit_others_events отличает их от организатора (у того edit_posts есть,
+		// но чужие объекты ему закрыты — см. проверку владельца ниже).
+		if ( current_user_can( 'edit_others_events' ) ) {
 			return true;
 		}
 
@@ -697,10 +699,11 @@ class IDPG_REST_API {
 		// Защита в глубину: организатор правит только свои площадки.
 		// (permission_callback can_manage_events уже проверяет владельца,
 		// дублируем здесь, чтобы метод оставался безопасным сам по себе.)
+		// Проверка ведётся по edit_others_events, а не edit_posts: последняя
+		// есть и у организатора, и не отражает права управлять чужим.
 		$user = wp_get_current_user();
 		if (
 			$user && $user->exists()
-			&& ! current_user_can( 'edit_posts' )
 			&& ! current_user_can( 'edit_others_events' )
 			&& (int) $post->post_author !== $user->ID
 		) {
