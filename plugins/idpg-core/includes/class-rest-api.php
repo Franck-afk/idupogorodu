@@ -764,6 +764,9 @@ class IDPG_REST_API {
 			'email'      => get_post_meta( $post->ID, '_idpg_venue_email', true ),
 			'website'    => get_post_meta( $post->ID, '_idpg_venue_website', true ),
 			'capacity'   => (int) get_post_meta( $post->ID, '_idpg_venue_capacity', true ),
+			// Координаты площадки для гео-разметки (GeoCoordinates).
+			'lat'        => get_post_meta( $post->ID, '_idpg_venue_lat', true ) !== '' ? (float) get_post_meta( $post->ID, '_idpg_venue_lat', true ) : null,
+			'lng'        => get_post_meta( $post->ID, '_idpg_venue_lng', true ) !== '' ? (float) get_post_meta( $post->ID, '_idpg_venue_lng', true ) : null,
 			'city'       => ! is_wp_error( $terms_city ) ? $terms_city : array(),
 			'thumbnail'  => IDPG_Media::idpg_get_poster_url( $post->ID, 'medium' ),
 		);
@@ -782,11 +785,24 @@ class IDPG_REST_API {
 			'_idpg_venue_email'    => 'email',
 			'_idpg_venue_website'  => 'website',
 			'_idpg_venue_capacity' => 'capacity',
+			// Координаты площадки (гео-разметка). Хранятся строкой для точности.
+			'_idpg_venue_lat'      => 'lat',
+			'_idpg_venue_lng'      => 'lng',
 		);
 
 		foreach ( $fields as $meta_key => $param ) {
 			$value = $request->get_param( $param );
 			if ( null !== $value && '' !== $value ) {
+				// Координаты — строго число; валидный диапазон отсекает мусор.
+				if ( 'lat' === $param || 'lng' === $param ) {
+					$float = filter_var( $value, FILTER_VALIDATE_FLOAT );
+					if ( false === $float ) {
+						continue;
+					}
+					update_post_meta( $post_id, $meta_key, (string) $float );
+					continue;
+				}
+
 				$clean = 'email' === $param ? sanitize_email( $value ) : sanitize_text_field( $value );
 				update_post_meta( $post_id, $meta_key, $clean );
 			}

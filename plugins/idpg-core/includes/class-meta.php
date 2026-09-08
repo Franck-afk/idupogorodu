@@ -330,6 +330,9 @@ class IDPG_Meta {
 			'_idpg_venue_email'    => array( 'type' => 'string', 'format' => 'email' ),
 			'_idpg_venue_website'  => array( 'type' => 'string' ),
 			'_idpg_venue_capacity' => array( 'type' => 'integer', 'default' => 0 ),
+			// Координаты площадки для гео-разметки Schema.org (GeoCoordinates).
+			'_idpg_venue_lat'      => array( 'type' => 'string' ),
+			'_idpg_venue_lng'      => array( 'type' => 'string' ),
 		);
 
 		foreach ( $fields as $key => $args ) {
@@ -709,6 +712,17 @@ class IDPG_Meta {
 				\Carbon_Fields\Field::make( 'text', 'idpg_venue_capacity', __( 'Вместимость', 'idpg-core' ) )
 					->set_attribute( 'type', 'number' )
 					->set_attribute( 'min', '0' )
+					->set_width( 33 ),
+				// Координаты для гео-разметки (Schema.org GeoCoordinates, карты).
+				\Carbon_Fields\Field::make( 'text', 'idpg_venue_lat', __( 'Широта', 'idpg-core' ) )
+					->set_attribute( 'type', 'text' )
+					->set_attribute( 'placeholder', '56.8527' )
+					->set_help_text( __( 'Десятичные градусы, например 56.8527. Используется для микроразметки GeoCoordinates.', 'idpg-core' ) )
+					->set_width( 33 ),
+				\Carbon_Fields\Field::make( 'text', 'idpg_venue_lng', __( 'Долгота', 'idpg-core' ) )
+					->set_attribute( 'type', 'text' )
+					->set_attribute( 'placeholder', '53.2115' )
+					->set_help_text( __( 'Десятичные градусы, например 53.2115. Используется для микроразметки GeoCoordinates.', 'idpg-core' ) )
 					->set_width( 33 ),
 			) );
 	}

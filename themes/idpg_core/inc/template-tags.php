@@ -758,6 +758,15 @@ if ( ! function_exists( 'idpg_core_event_jsonld' ) ) {
 			return;
 		}
 
+		/*
+		 * При активном Rank Math SEO разметку Event в его граф добавляет
+		 * плагин idpg-core (модуль IDPG_SEO_Integration, с гео-данными и
+		 * городом). Свой вывод здесь отключаем, чтобы не дублировать сущности.
+		 */
+		if ( defined( 'RANK_MATH_VERSION' ) ) {
+			return;
+		}
+
 		$meta   = idpg_core_event_meta( $post_id );
 		$venue  = idpg_core_get_venue( $post_id );
 		$address = idpg_core_event_address( $post_id );

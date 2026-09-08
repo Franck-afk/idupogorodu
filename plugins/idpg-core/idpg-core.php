@@ -108,6 +108,10 @@ require_once IDPG_CORE_DIR . 'includes/class-maintenance.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-selector-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-calendar-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-expected-events-widget.php';
+require_once IDPG_CORE_DIR . 'includes/class-user-purge.php';
+require_once IDPG_CORE_DIR . 'includes/class-organizer-page.php';
+// Интеграция с Rank Math SEO (schema/OG; работает только при активном Rank Math).
+require_once IDPG_CORE_DIR . 'includes/class-seo-integration.php';
 /**
  * Инициализация компонентов плагина.
  *
@@ -130,6 +134,12 @@ function idpg_core_init() {
 	IDPG_Auth_Emails::instance();
 	IDPG_Maintenance::instance();
 	IDPG_Settings_Page::instance();
+
+	// Страница доуполнения анкеты организатора /organizer/complete/.
+	IDPG_Organizer_Page::init();
+
+	// Интеграция с Rank Math SEO (хуки вешаются только если плагин активен).
+	IDPG_SEO_Integration::instance();
 }
 add_action( 'init', 'idpg_core_init' );
 
