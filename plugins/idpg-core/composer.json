@@ -10,5 +10,9 @@
         "allow-plugins": {
             "htmlburger/carbon-fields-installer": true
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6 || ^10.5",
+        "yoast/phpunit-polyfills": "^3.0"
     }
 }

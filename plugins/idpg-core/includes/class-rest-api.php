@@ -1431,5 +1431,41 @@ class IDPG_REST_API {
 			200
 		);
 	}
+
+	/**
+	 * Установка миниатюры площадки по переданному значению thumbnail.
+	 *
+	 * Принимает ID вложения (число) или URL вложения. Ищет существующее
+	 * вложение и назначает его обложкой (featured image) через set_post_thumbnail.
+	 * Некорректные значения молча игнорируются — площадка сохранится без фото.
+	 *
+	 * @param int             $post_id ID площадки.
+	 * @param WP_REST_Request $request Запрос.
+	 * @return void
+	 */
+	private function handle_thumbnail( $post_id, $request ) {
+		$post_id  = absint( $post_id );
+		$thumb    = $request->get_param( 'thumbnail' );
+		$thumb    = is_string( $thumb ) ? trim( $thumb ) : '';
+
+		if ( '' === $thumb ) {
+			return;
+		}
+
+		// 1. Если передано число — это ID вложения.
+		if ( is_numeric( $thumb ) ) {
+			$attachment_id = absint( $thumb );
+			if ( 'attachment' === get_post_type( $attachment_id ) ) {
+				set_post_thumbnail( $post_id, $attachment_id );
+			}
+			return;
+		}
+
+		// 2. Если это URL — пробуем найти вложение по адресу.
+		$attachment_id = attachment_url_to_postid( $thumb );
+		if ( $attachment_id ) {
+			set_post_thumbnail( $post_id, $attachment_id );
+		}
+	}
 }
 
