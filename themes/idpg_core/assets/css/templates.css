@@ -778,6 +778,16 @@
 	font-weight: 500;
 }
 
+/* Стили для вывода Rank Math SEO (span.separator / span.last в нашей обёртке). */
+.idpg-breadcrumbs .separator {
+	color: var(--idpg-text-tertiary, var(--idpg-muted-soft));
+}
+
+.idpg-breadcrumbs .last {
+	color: var(--idpg-text, var(--idpg-ink));
+	font-weight: 500;
+}
+
 /* Отступы хлебных крошек. */
 .idpg-breadcrumbs-wrap {
 	padding-top: 120px;
