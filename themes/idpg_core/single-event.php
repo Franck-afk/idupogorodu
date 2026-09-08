@@ -87,11 +87,11 @@ get_header();
 						<?php endif; ?>
 					</header>
 
-					<?php if ( has_post_thumbnail() ) : ?>
-						<figure class="idpg-event-single__poster">
-							<?php the_post_thumbnail( 'event-featured', array( 'loading' => 'eager' ) ); ?>
-						</figure>
-					<?php endif; ?>
+<?php if ( IDPG_Media::idpg_get_poster_id( get_the_ID() ) ) : ?>
+					<figure class="idpg-event-single__poster">
+						<?php echo IDPG_Media::idpg_get_poster( get_the_ID(), 'event-featured', array( 'loading' => 'eager' ) ); ?>
+					</figure>
+				<?php endif; ?>
 
 					<div class="idpg-event-single__grid">
 						<div class="idpg-event-single__main">
@@ -125,28 +125,17 @@ get_header();
 								</section>
 							<?php endif; ?>
 
-							<?php
-							$idpg_gallery = function_exists( 'carbon_get_post_meta' )
-								? carbon_get_post_meta( $idpg_post_id, 'idpg_gallery' )
-								: array();
+<?php
+						$idpg_gallery_html = IDPG_Media::idpg_get_gallery( $idpg_post_id, 'event-card' );
 
-							if ( $idpg_gallery ) :
-								?>
-								<section class="idpg-event-single__block" aria-label="<?php esc_attr_e( 'Галерея', 'idpg_core' ); ?>">
-									<h2 class="idpg-event-single__block-title"><?php esc_html_e( 'Галерея', 'idpg_core' ); ?></h2>
-									<div class="idpg-gallery">
-										<?php
-										foreach ( $idpg_gallery as $idpg_attachment ) {
-											$idpg_attachment = absint( $idpg_attachment );
-											$idpg_image      = wp_get_attachment_image( $idpg_attachment, 'event-card', false, array( 'loading' => 'lazy' ) );
-
-											if ( $idpg_image ) {
-												echo '<figure class="idpg-gallery__item">' . $idpg_image . '</figure>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-											}
-										}
-										?>
-									</div>
-								</section>
+						if ( $idpg_gallery_html ) :
+							?>
+							<section class="idpg-event-single__block" aria-label="<?php esc_attr_e( 'Галерея', 'idpg_core' ); ?>">
+								<h2 class="idpg-event-single__block-title"><?php esc_html_e( 'Галерея', 'idpg_core' ); ?></h2>
+								<div class="idpg-gallery">
+									<?php echo $idpg_gallery_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</div>
+							</section>
 							<?php endif; ?>
 
 								<?php if ( $idpg_video ) : ?>
@@ -223,6 +212,9 @@ get_header();
 						</div>
 
 						<aside class="idpg-event-single__sidebar">
+							<?php /* Области виджетов админа в сайдбаре страницы события — вверху сайдбара. */ ?>
+							<?php idpg_widget_areas_render( 'event-sidebar' ); ?>
+
 							<dl class="idpg-event-single__info">
 								<?php if ( $idpg_meta['date_start'] ) : ?>
 									<div class="idpg-event-single__info-row">

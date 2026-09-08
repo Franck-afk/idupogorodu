@@ -58,11 +58,11 @@ get_header();
 						<?php endif; ?>
 					</header>
 
-					<?php if ( has_post_thumbnail() ) : ?>
-						<figure class="idpg-event-single__poster">
-							<?php the_post_thumbnail( 'event-featured', array( 'loading' => 'eager' ) ); ?>
-						</figure>
-					<?php endif; ?>
+<?php if ( IDPG_Media::idpg_get_poster_id( get_the_ID() ) ) : ?>
+					<figure class="idpg-event-single__poster">
+						<?php echo IDPG_Media::idpg_get_poster( get_the_ID(), 'event-featured', array( 'loading' => 'eager' ) ); ?>
+					</figure>
+				<?php endif; ?>
 
 					<div class="idpg-event-single__grid">
 						<div class="idpg-event-single__main">
@@ -106,7 +106,10 @@ get_header();
 							<?php endif; ?>
 						</div>
 
-						<aside class="idpg-event-single__sidebar">
+<aside class="idpg-event-single__sidebar">
+							<?php /* Области виджетов админа в сайдбаре страницы площадки — вверху сайдбара. */ ?>
+							<?php idpg_widget_areas_render( 'event-sidebar' ); ?>
+
 							<dl class="idpg-event-single__info">
 								<?php if ( ! empty( $idpg_meta['address'] ) ) : ?>
 									<div class="idpg-event-single__info-row">
@@ -152,7 +155,7 @@ get_header();
 									<div class="idpg-event-single__info-row">
 										<dt><?php esc_html_e( 'Вместимость', 'idpg_core' ); ?></dt>
 										<dd><?php echo esc_html( number_format_i18n( (int) $idpg_meta['capacity'] ) ); ?></dd>
-									</div>
+</div>
 								<?php endif; ?>
 							</dl>
 						</aside>

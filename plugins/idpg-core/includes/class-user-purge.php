@@ -107,9 +107,9 @@ class IDPG_User_Purge {
 	 * @param int $user_id ID пользователя.
 	 */
 	private function purge_avatar( $user_id ) {
-		$attachment_id = (int) get_user_meta( $user_id, 'idpg_avatar_attachment_id', true );
-		if ( $attachment_id && get_post( $attachment_id ) ) {
-			wp_delete_attachment( $attachment_id, true );
+		$attachment_id = IDPG_Media::idpg_get_avatar_id( $user_id );
+		if ( $attachment_id ) {
+			IDPG_Media::idpg_delete_attachment( $attachment_id, true );
 		}
 	}
 
@@ -141,41 +141,7 @@ class IDPG_User_Purge {
 	 * @param int $post_id ID записи.
 	 */
 	private function delete_post_with_assets( $post_id ) {
-		$post = get_post( $post_id );
-		if ( ! $post ) {
-			return;
-		}
-
-		// Само вложение: удаляем через wp_delete_attachment, чтобы
-		// физический файл тоже был стёрт с диска.
-		if ( 'attachment' === $post->post_type ) {
-			wp_delete_attachment( $post_id, true );
-			return;
-		}
-
-		// Миниатюра-постер события/площадки (может быть загружена админом).
-		$thumb_id = (int) get_post_thumbnail_id( $post_id );
-		if ( $thumb_id && get_post( $thumb_id ) ) {
-			wp_delete_attachment( $thumb_id, true );
-		}
-
-		// Вложения-потомки, прикреплённые к этой записи (post_parent).
-		$attachments = get_posts(
-			array(
-				'post_type'      => 'attachment',
-				'post_parent'    => $post_id,
-				'post_status'    => 'any',
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
-				'no_found_rows'  => true,
-			)
-		);
-		foreach ( $attachments as $att_id ) {
-			wp_delete_attachment( (int) $att_id, true );
-		}
-
-		// Сама запись (событие/площадка/любая автора).
-		wp_delete_post( $post_id, true );
+		IDPG_Media::idpg_delete_post_media( $post_id );
 	}
 
 	/**

@@ -5,7 +5,7 @@ Theme URI: https://idupogorodu.ru
 Author: idpg Team
 Author URI: https://idupogorodu.ru
 Description: Основная тема сайта-афиши ИДПОГОРОДУ.
-Version: 1.0.66
+Version: 1.0.72
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -1278,6 +1278,12 @@ a:focus-visible {
   display: inline-block;
   margin-bottom: 16px;
 }
+/* Логотип на странице авторизации — среднего размера, чем в шапке сайта. */
+.auth__logo-link .custom-logo {
+  width: 120px;
+  height: auto;
+  max-width: 100%;
+}
 .auth__logo-text {
   font-family: "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 1.5rem;
@@ -1393,6 +1399,46 @@ a:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+/* Кнопки соц. входа (плагин idpg-auth): убираем лишний отступ обёртки
+   и приводим разделитель «или» к дизайну auth-страницы. */
+.auth__social .wp-auth-ru-wrap {
+  margin-bottom: 0;
+}
+.auth__social .wp-auth-ru-divider {
+  color: var(--idpg-muted);
+}
+/* Иконки провайдеров у кнопок соц. входа не показываем. */
+.auth__social .wp-auth-ru-icon {
+  display: none;
+}
+.auth__social .wp-auth-ru-divider::before {
+  border-top-color: var(--idpg-hairline);
+}
+.auth__social .wp-auth-ru-divider span {
+  background: var(--idpg-auth-card);
+}
+/* Кнопка соц. входа под формой: разделитель «или» переносим над кнопкой. */
+.auth__social--bottom .wp-auth-ru-wrap {
+  display: flex;
+  flex-direction: column;
+}
+.auth__social--bottom .wp-auth-ru-btn {
+  order: 2;
+}
+.auth__social--bottom .wp-auth-ru-divider {
+  order: 1;
+  display: block;
+  color: var(--idpg-muted);
+  margin: 0 0 30px;
+}
+/* Несколько провайдеров подряд: «или» только перед первым блоком,
+   между кнопками (Яндекс → ВК) разделитель скрываем. */
+.auth__social--bottom .wp-auth-ru-wrap + .wp-auth-ru-wrap .wp-auth-ru-divider {
+  display: none;
+}
+.auth__social--bottom .wp-auth-ru-wrap + .wp-auth-ru-wrap .wp-auth-ru-btn {
+  margin-top: 20px;
 }
 .auth__field {
   display: flex;
@@ -2781,8 +2827,24 @@ a:focus-visible {
   gap: 20px;
 }
 
+/* Рекламный баннер в сайдбаре главной — нижний отступ от следующих виджетов */
+.idpg-home__sidebar .idpg-ad-widget {
+  margin-bottom: 20px;
+}
+
 .idpg-ad-widget {
   background: #fff;
+  border: 1px solid var(--idpg-hairline);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px var(--idpg-surface-soft);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Прочие виджеты сайдбара главной (выбор города, календарь и т.п.)
+   тоже оформляются белой карточкой с обводкой, как рекламный виджет. */
+.idpg-home__sidebar .widget:not(.idpg-ad-widget) {
+  background: var(--idpg-card-bg, #fff);
   border: 1px solid var(--idpg-hairline);
   border-radius: 12px;
   box-shadow: 0 1px 2px var(--idpg-surface-soft);
@@ -2831,7 +2893,37 @@ a:focus-visible {
 }
 
 .idpg-widget-area--before-footer {
-  padding-top: 24px;
+  padding-bottom: 50px;
+}
+
+/* Вертикальный баннер в подвале выводится горизонтальной полосой:
+   обрезка по высоте, без растяжения пропорций. Баннер уже находится
+   в .container — ширина совпадает с блоком карточек. */
+.idpg-widget-area--before-footer .idpg-ad-widget__img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* На десктопе у баннера подвала нет правого сайдбара, а у блока карточек
+   (контента) на главной он есть (320px + gap 24px). Сужаем баннер до ширины
+   контентной колонки главной. На остальных страницах карточки занимают
+   всю ширину контейнера, поэтому сужение не требуется. */
+body.home .idpg-widget-area--before-footer .container {
+  padding-right: calc(16px + 344px);
+}
+
+@media (min-width: 1025px) {
+  body.home .idpg-widget-area--before-footer .container {
+    padding-right: calc(24px + 344px);
+  }
+}
+
+@media (min-width: 1281px) {
+  body.home .idpg-widget-area--before-footer .container {
+    padding-right: calc(32px + 344px);
+  }
 }
 
 .idpg-widget-area--above-content {
@@ -2840,6 +2932,17 @@ a:focus-visible {
 
 .idpg-widget-area--below-content {
   margin-top: 24px;
+}
+
+.idpg-widget-area--event-sidebar {
+  margin-top: 16px;
+}
+
+/* Рекламный баннер в сайдбаре страницы события — нижний отступ от инфоблока.
+   Специфичность выше, чем у .idpg-widget-area__widget:last-child (margin-bottom: 0),
+   иначе обнуление применялось бы к последнему (единственному) виджету зоны. */
+.idpg-event-single__sidebar .idpg-widget-area--event-sidebar .idpg-ad-widget {
+  margin-bottom: 16px;
 }
 
 .idpg-widget-area__widget {

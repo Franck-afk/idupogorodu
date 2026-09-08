@@ -238,7 +238,7 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 		$instance['ip_service'] = array_key_exists( $ip_service, self::ip_services() ) ? $ip_service : 'none';
 
 		// Сброс кэша дерева городов при изменении настроек.
-		$this->purge_tree_cache();
+		self::purge_tree_cache();
 
 		return $instance;
 	}
@@ -669,10 +669,26 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 
 	/**
 	 * Очистка кэшей дерева городов.
+	 *
+	 * Статический метод: вызывается при обновлении виджета,
+	 * а также из хуков изменения таксономии city.
 	 */
-	private function purge_tree_cache() {
+	public static function purge_tree_cache() {
 		foreach ( array( 'alpha', 'popular', 'manual' ) as $sort ) {
 			delete_transient( 'idpg_city_tree_' . md5( $sort ) );
 		}
 	}
 }
+
+/**
+ * Сброс кэша дерева городов при изменении таксономии city.
+ *
+ * Вызывается при создании/обновлении/удалении термина таксономии,
+ * иначе виджет «Выбор города» до суток показывал бы устаревший список.
+ */
+function idpg_city_selector_flush_on_term_change() {
+	IDPG_City_Selector_Widget::purge_tree_cache();
+}
+add_action( 'created_city', 'idpg_city_selector_flush_on_term_change' );
+add_action( 'edited_city', 'idpg_city_selector_flush_on_term_change' );
+add_action( 'delete_city', 'idpg_city_selector_flush_on_term_change' );

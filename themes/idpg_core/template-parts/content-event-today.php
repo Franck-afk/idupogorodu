@@ -36,7 +36,7 @@ if ( ! empty( $idpg_meta['all_day'] ) ) {
 	$idpg_time_live  = false;
 }
 
-$idpg_thumb_id = get_post_thumbnail_id( $idpg_post_id );
+$idpg_thumb_id = IDPG_Media::idpg_get_poster_id( $idpg_post_id );
 
 $idpg_venue      = idpg_core_get_venue( $idpg_post_id );
 $idpg_venue_name = $idpg_venue ? $idpg_venue->post_title : '';

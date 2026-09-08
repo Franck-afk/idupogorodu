@@ -125,11 +125,11 @@ class WP_Auth_Ru_Compliance {
         if ( empty( $foreign ) ) return;
 
         $list = implode( ', ', array_values( $foreign ) );
-        $url  = admin_url( 'options-general.php?page=wp-authorization-ru' );
+        $url  = admin_url( 'options-general.php?page=idpg-auth' );
         ?>
         <div class="notice notice-error">
             <p>
-                <strong>⚠️ WP Authorization RU — Нарушение законодательства РФ!</strong><br>
+                <strong>⚠️ IDPG Auth — Нарушение законодательства РФ!</strong><br>
                 На сайте активны плагины авторизации через <strong>иностранные сервисы</strong>:
                 <em><?php echo esc_html( $list ); ?></em><br>
                 Согласно поправкам в КоАП РФ, авторизация через иностранные сервисы на территории РФ

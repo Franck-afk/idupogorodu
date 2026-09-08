@@ -1115,6 +1115,12 @@
 	margin-bottom: 64px;
 }
 
+/* Последняя секция карточек не отступает снизу — баннер подвала
+   встаёт вплотную к блоку карточек. */
+.idpg-home__inner .idpg-home-section:last-child {
+	margin-bottom: 0;
+}
+
 /* --- Панель фильтров афиши (ЧПУ) --- */
 .idpg-filter-bar {
 	display: flex;
@@ -1910,6 +1916,55 @@ a.idpg-share__btn--native:focus {
 .idpg-search__empty { padding: 12px; font-size: 0.9375rem; color: rgba(0,0,0,0.6); }
 .idpg-search__all { display: block; margin-top: 8px; padding: 10px; text-align: center; font-size: 0.875rem; font-weight: 600; color: var(--idpg-primary, #0052ff); border-top: 1px solid var(--idpg-border, rgba(0,0,0,0.08)); text-decoration: none; }
 .idpg-search__all:hover { background: var(--idpg-muted-bg, rgba(0,0,0,0.04)); border-radius: 0 0 8px 8px; }
+
+/* Группы подсказок и подсветка совпадений */
+.idpg-search__group + .idpg-search__group { margin-top: 10px; }
+.idpg-search__group-title {
+	margin: 2px 8px 6px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: rgba(0,0,0,0.45);
+}
+.idpg-search__mark {
+	background: rgba(255, 193, 7, 0.45);
+	color: inherit;
+	border-radius: 2px;
+	padding: 0 1px;
+}
+
+/* Пустой результат поиска: подсказки */
+.idpg-search-empty__tip {
+	margin: 8px 0 0;
+	font-size: 0.9375rem;
+	color: rgba(0,0,0,0.6);
+}
+.idpg-search-empty__cats-title {
+	margin: 16px 0 8px;
+	font-weight: 700;
+}
+.idpg-search-empty__cats {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+.idpg-search-empty__cats a {
+	display: inline-block;
+	padding: 6px 14px;
+	border: 1px solid var(--idpg-border, rgba(0,0,0,0.12));
+	border-radius: 999px;
+	text-decoration: none;
+	font-size: 0.875rem;
+	color: var(--idpg-text, #1d2327);
+}
+.idpg-search-empty__cats a:hover {
+	border-color: var(--idpg-primary, #0052ff);
+	color: var(--idpg-primary, #0052ff);
+}
 
 /* Оверлей на мобилке — dropdown внутри формы */
 .idpg-search-overlay__form.idpg-search--live .idpg-search__dropdown {

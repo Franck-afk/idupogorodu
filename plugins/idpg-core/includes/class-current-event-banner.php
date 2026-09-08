@@ -168,7 +168,7 @@ class IDPG_Current_Event_Banner {
 		$cached_id = get_transient( $cache_key );
 		if ( $cached_id ) {
 			$cached = get_post( (int) $cached_id );
-			if ( $cached && 'publish' === $cached->post_status && get_post_thumbnail_id( $cached->ID ) ) {
+			if ( $cached && 'publish' === $cached->post_status && absint( IDPG_Media::idpg_get_poster_id( $cached->ID ) ) ) {
 				if ( ! $this->is_full_banner_hidden( $cached->ID ) ) {
 					return $cached;
 				}
@@ -531,7 +531,7 @@ class IDPG_Current_Event_Banner {
 			return '';
 		}
 
-		$image_id = (int) get_post_thumbnail_id( $event->ID );
+		$image_id = (int) IDPG_Media::idpg_get_poster_id( $event->ID );
 		$img_url  = $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '';
 		if ( ! $img_url ) {
 			return '';

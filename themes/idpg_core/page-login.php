@@ -42,7 +42,7 @@ $hero_events    = get_posts(
 	)
 );
 if ( ! empty( $hero_events ) ) {
-	$hero_image_url = get_the_post_thumbnail_url( $hero_events[0], 'large' );
+	$hero_image_url = IDPG_Media::idpg_get_poster_url( $hero_events[0], 'large' );
 }
 
 /**
@@ -65,6 +65,27 @@ if ( isset( $_GET['idpg_social_error'] ) ) {
 		'provider_not_found'     => __( 'Провайдер не найден.', 'idpg-core' ),
 	);
 	$login_error = isset( $map[ $code ] ) ? $map[ $code ] : sprintf( __( 'Ошибка соц. входа: %s', 'idpg-core' ), esc_html( $code ) );
+}
+
+// Ошибки OAuth от плагина авторизации через соцсети (wp-auth-ru / idpg-auth),
+// они редиректят на кастомную страницу входа (см. фильтр login_url в теме).
+foreach ( array( 'yandex', 'vk', 'max' ) as $provider ) {
+	$error_key = $provider . '_oauth_error';
+	if ( isset( $_GET[ $error_key ] ) ) {
+		$details    = sanitize_text_field( wp_unslash( $_GET[ $error_key ] ) );
+		$provider_label = array(
+			'yandex' => __( 'Яндекс', 'idpg_core' ),
+			'vk'     => __( 'ВКонтакте', 'idpg_core' ),
+			'max'    => __( 'MAX', 'idpg_core' ),
+		);
+		$login_error = sprintf(
+			/* translators: %1$s — провайдер авторизации, %2$s — текст ошибки. */
+			__( 'Ошибка входа через %1$s: %2$s', 'idpg_core' ),
+			$provider_label[ $provider ],
+			$details
+		);
+		break;
+	}
 }
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
@@ -195,13 +216,11 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 		<!-- Шапка -->
 		<div class="auth__header">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="auth__logo-link">
-				<?php if ( has_custom_logo() ) : ?>
-					<?php the_custom_logo(); ?>
-				<?php else : ?>
-					<span class="auth__logo-text">Иду по городу</span>
-				<?php endif; ?>
-			</a>
+			<?php if ( has_custom_logo() ) : ?>
+				<div class="auth__logo-link"><?php the_custom_logo(); ?></div>
+			<?php else : ?>
+				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="auth__logo-link"><span class="auth__logo-text">Иду по городу</span></a>
+			<?php endif; ?>
 			<h1 class="auth__title">Добро пожаловать!</h1>
 		</div>
 
@@ -289,14 +308,15 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 					aria-controls="register-organizer-form"
 					data-tab="register-organizer"
 				>
-					Я организатор
+					Регистрация организатора
 				</button>
 			</div>
 
-			<!-- Форма входа -->
+<!-- Форма входа -->
 			<div id="login-form" class="auth__panel auth__panel--active" role="tabpanel" aria-labelledby="tab-login">
 				<form class="auth__form" method="post" autocomplete="on" novalidate>
 					<?php wp_nonce_field( 'idpg_login', 'idpg_login_nonce' ); ?>
+
 					<div class="auth__field">
 						<label for="login-email" class="auth__label">Email</label>
 						<input
@@ -345,13 +365,19 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 							Забыли пароль?
 						</a>
 					</p>
+
+					<?php // Кнопки авторизации через соцсети (плагин idpg-auth). ?>
+					<div class="auth__social auth__social--bottom">
+						<?php do_action( 'login_form' ); ?>
+					</div>
 				</form>
 			</div>
 
-			<!-- Форма регистрации организатора -->
+<!-- Форма регистрации организатора -->
 			<div id="register-organizer-form" class="auth__panel" role="tabpanel" aria-labelledby="tab-register-organizer" hidden>
 				<form class="auth__form" method="post" autocomplete="on" novalidate>
 					<?php wp_nonce_field( 'idpg_login', 'idpg_login_nonce' ); ?>
+
 					<div class="auth__field">
 						<label for="reg-org-name" class="auth__label">Название организации</label>
 						<input

@@ -327,7 +327,9 @@ class IDPG_Ticket_Sync {
 	}
 
 	/**
-	 * Логирование в error_log.
+	 * Логирование.
+	 *
+	 * Запрещено на проде (AGENTS.md, п.11): error_log() в боевом коде не используется.
 	 *
 	 * @param string $message Сообщение.
 	 */
@@ -335,6 +337,6 @@ class IDPG_Ticket_Sync {
 		$timestamp = current_time( 'mysql' );
 		$line      = sprintf( '[IDPG Sync %s] %s' . "\n", $timestamp, $message );
 
-		error_log( $line ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+		// error_log( $line ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 	}
 }

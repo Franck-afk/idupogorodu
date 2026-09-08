@@ -13,27 +13,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Регистрирует зоны виджетов.
  */
 function idpg_core_register_sidebars() {
+	// Статический сайдбар главной страницы (правый сайтбар с рекламой).
 	register_sidebar(
 		array(
 			'name'          => __( 'Боковая колонка (главная страница)', 'idpg_core' ),
 			'id'            => 'home-sidebar',
 			'name_admin'    => 'idpg-home-sidebar',
 			'description'   => __( 'Правый сайтбар на главной странице — рекламные блоки.', 'idpg_core' ),
-			'before_widget' => '<section id="%1$s" class="widget %2$s idpg-ad-widget">',
-			'after_widget'  => '</section>',
-			'before_title'  => '<h3 class="idpg-ad-widget__title">',
-			'after_title'   => '</h3>',
-		)
-	);
-
-	register_sidebar(
-		array(
-			'name'          => __( 'Виджеты: под контентом', 'idpg_core' ),
-			'id'            => 'below-content',
-			'description'   => __( 'Виджеты внизу основного контента.', 'idpg_core' ),
 			'before_widget' => '<section id="%1$s" class="widget %2$s">',
 			'after_widget'  => '</section>',
-			'before_title'  => '<h3 class="widget-title">',
+			'before_title'  => '<h3 class="idpg-ad-widget__title">',
 			'after_title'   => '</h3>',
 		)
 	);
@@ -143,6 +132,27 @@ class IDPG_Ad_Ru_Widget extends WP_Widget {
 				'customize_selective_refresh' => true,
 			)
 		);
+
+		// Класс idpg-ad-widget добавляется только этому виджету
+		// (не всем виджетам в зоне).
+		add_filter( 'dynamic_sidebar_params', array( $this, 'add_ad_widget_class' ) );
+	}
+
+	/**
+	 * Добавляет класс idpg-ad-widget в обёртку текущего рекламного виджета.
+	 *
+	 * @param array $params Параметры виджета.
+	 * @return array
+	 */
+	public function add_ad_widget_class( $params ) {
+		if ( isset( $params[0]['widget_id'] ) && strpos( $params[0]['widget_id'], $this->id_base . '-' ) === 0 ) {
+			$params[0]['before_widget'] = str_replace(
+				'class="widget ',
+				'class="widget idpg-ad-widget ',
+				$params[0]['before_widget']
+			);
+		}
+		return $params;
 	}
 
 	public function widget( $args, $instance ) {
@@ -402,12 +412,158 @@ class IDPG_Recent_Events_Widget extends WP_Widget {
 }
 endif;
 
+if ( ! class_exists( 'IDPG_Subscribe_Widget' ) ) :
+
+/**
+ * Виджет «Подписка на дайджест».
+ *
+ * Форма подписки на email-дайджест: заголовок, текст, поле email,
+ * кнопка и опциональный чекбокс согласия. Отправка — через REST API
+ * (wp-json/idpg/v1/subscribe), логика на assets/js/subscribe.js.
+ */
+class IDPG_Subscribe_Widget extends WP_Widget {
+
+	/**
+	 * Регистрация виджета.
+	 */
+	public function __construct() {
+		parent::__construct(
+			'idpg_subscribe',
+			__( 'IDPG — Подписка на дайджест', 'idpg_core' ),
+			array(
+				'description' => __( 'Форма подписки на email-дайджест событий', 'idpg_core' ),
+			)
+		);
+	}
+
+	/**
+	 * Вывод виджета на фронтенде.
+	 *
+	 * @param array $args     Параметры области виджетов.
+	 * @param array $instance Настройки виджета.
+	 */
+	public function widget( $args, $instance ) {
+		$title         = ! empty( $instance['title'] ) ? apply_filters( 'widget_title', $instance['title'] ) : '';
+		$text          = isset( $instance['text'] ) ? (string) $instance['text'] : '';
+		$button        = ! empty( $instance['button'] ) ? $instance['button'] : __( 'Подписаться', 'idpg_core' );
+		$show_consent  = ! empty( $instance['show_consent'] );
+		$image         = isset( $instance['image'] ) ? absint( $instance['image'] ) : 0;
+
+		if ( $image ) {
+			echo '<div class="idpg-subscribe__image">' . wp_get_attachment_image( $image, 'medium' ) . '</div>';
+		}
+
+		if ( $title ) {
+			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+
+		if ( '' !== $text ) {
+			echo '<div class="idpg-subscribe__text">' . nl2br( esc_html( $text ) ) . '</div>';
+		}
+		?>
+		<form class="idpg-subscribe__form" data-idpg-subscribe
+			data-consent-required="<?php echo $show_consent ? '1' : '0'; ?>" novalidate>
+			<label class="idpg-subscribe__label" for="<?php echo esc_attr( $this->id . '-email' ); ?>">
+				<span class="sr-only"><?php esc_html_e( 'Email', 'idpg_core' ); ?></span>
+			</label>
+			<input class="idpg-subscribe__input" id="<?php echo esc_attr( $this->id . '-email' ); ?>"
+				name="idpg_email" type="email" required autocomplete="email"
+				placeholder="<?php esc_attr_e( 'Ваш email', 'idpg_core' ); ?>">
+			<?php // Honeypot-поле против ботов: люди его не видят и не заполняют. ?>
+			<input class="idpg-subscribe__hp" name="idpg_company" type="text"
+				tabindex="-1" autocomplete="off" aria-hidden="true" value="">
+			<?php if ( $show_consent ) : ?>
+				<label class="idpg-subscribe__consent">
+					<input type="checkbox" name="idpg_consent" value="1" required>
+					<span><?php esc_html_e( 'Согласен на обработку персональных данных', 'idpg_core' ); ?></span>
+				</label>
+			<?php endif; ?>
+			<button class="idpg-subscribe__button" type="submit"><?php echo esc_html( $button ); ?></button>
+			<div class="idpg-subscribe__message" role="status" aria-live="polite" hidden></div>
+		</form>
+		<?php
+
+		echo $args['after_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Форма настроек в админке.
+	 *
+	 * @param array $instance Текущие настройки виджета.
+	 */
+	public function form( $instance ) {
+		$title         = isset( $instance['title'] ) ? $instance['title'] : '';
+		$text          = isset( $instance['text'] ) ? $instance['text'] : '';
+		$button        = isset( $instance['button'] ) && '' !== $instance['button'] ? $instance['button'] : __( 'Подписаться', 'idpg_core' );
+		$show_consent  = ! empty( $instance['show_consent'] );
+		$image         = isset( $instance['image'] ) ? absint( $instance['image'] ) : 0;
+		?>
+		<div class="idpg-ad-widget__media">
+			<label><?php esc_html_e( 'Картинка:', 'idpg_core' ); ?></label>
+			<div class="idpg-ad-widget__image-wrap" style="margin:8px 0">
+				<?php if ( $image ) : ?>
+					<?php echo wp_get_attachment_image( $image, 'medium', false, array( 'style' => 'max-width:300px;height:auto;' ) ); ?>
+				<?php endif; ?>
+			</div>
+			<input type="hidden" class="idpg-ad-widget__image-id"
+				id="<?php echo esc_attr( $this->get_field_id( 'image' ) ); ?>"
+				name="<?php echo esc_attr( $this->get_field_name( 'image' ) ); ?>"
+				value="<?php echo esc_attr( $image ); ?>">
+			<button type="button" class="button idpg-ad-widget__select"><?php esc_html_e( 'Выбрать', 'idpg_core' ); ?></button>
+			<button type="button" class="button idpg-ad-widget__remove"><?php esc_html_e( 'Убрать', 'idpg_core' ); ?></button>
+		</div>
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Заголовок:', 'idpg_core' ); ?></label>
+			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"
+				name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text"
+				value="<?php echo esc_attr( $title ); ?>">
+		</p>
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'text' ) ); ?>"><?php esc_html_e( 'Текст под заголовком:', 'idpg_core' ); ?></label>
+			<textarea class="widefat" rows="3" id="<?php echo esc_attr( $this->get_field_id( 'text' ) ); ?>"
+				name="<?php echo esc_attr( $this->get_field_name( 'text' ) ); ?>"><?php echo esc_textarea( $text ); ?></textarea>
+		</p>
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'button' ) ); ?>"><?php esc_html_e( 'Кнопка:', 'idpg_core' ); ?></label>
+			<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'button' ) ); ?>"
+				name="<?php echo esc_attr( $this->get_field_name( 'button' ) ); ?>" type="text"
+				value="<?php echo esc_attr( $button ); ?>">
+		</p>
+		<p>
+			<input class="checkbox" type="checkbox" <?php checked( $show_consent ); ?>
+				id="<?php echo esc_attr( $this->get_field_id( 'show_consent' ) ); ?>"
+				name="<?php echo esc_attr( $this->get_field_name( 'show_consent' ) ); ?>" value="1">
+			<label for="<?php echo esc_attr( $this->get_field_id( 'show_consent' ) ); ?>"><?php esc_html_e( 'Показывать согласие на обработку данных', 'idpg_core' ); ?></label>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Сохранение настроек.
+	 *
+	 * @param array $new_instance Новые настройки.
+	 * @param array $old_instance Старые настройки.
+	 * @return array
+	 */
+	public function update( $new_instance, $old_instance ) {
+		$instance                  = array();
+		$instance['title']         = ! empty( $new_instance['title'] ) ? sanitize_text_field( $new_instance['title'] ) : '';
+		$instance['text']          = isset( $new_instance['text'] ) ? sanitize_textarea_field( $new_instance['text'] ) : '';
+		$instance['button']        = ! empty( $new_instance['button'] ) ? sanitize_text_field( $new_instance['button'] ) : __( 'Подписаться', 'idpg_core' );
+		$instance['show_consent']  = ! empty( $new_instance['show_consent'] ) ? 1 : 0;
+		$instance['image']         = isset( $new_instance['image'] ) ? absint( $new_instance['image'] ) : 0;
+		return $instance;
+	}
+}
+endif;
+
 /**
  * Регистрирует виджеты.
  */
 function idpg_core_register_widgets() {
 	register_widget( 'IDPG_Ad_Ru_Widget' );
 	register_widget( 'IDPG_Recent_Events_Widget' );
+	register_widget( 'IDPG_Subscribe_Widget' );
 }
 add_action( 'widgets_init', 'idpg_core_register_widgets', 20 );
 
@@ -490,20 +646,113 @@ JS;
 add_action( 'admin_enqueue_scripts', 'idpg_core_ad_widget_admin_assets' );
 
 /**
- * Фронтенд: сортировка виджетов рекламы внутри зоны по полю «позиция».
+ * Фронтенд: сортировка рекламных виджетов внутри зоны по полю «позиция».
  *
- * Читаем instance виджета из опции widget_idpg_ad, сортируем id'шники в зоне.
+ * Применяется только к правому сайтбару главной (home-sidebar).
+ * Рекламные виджеты упорядочиваются по своей «позиции» на тех местах,
+ * где они уже стоят, — не-рекламные виджеты остаются на своих местах,
+ * реклама не переносится в начало зоны.
  */
 function idpg_core_sort_home_sidebar_widgets( $sidebar_widgets ) {
 	if ( is_admin() ) {
 		return $sidebar_widgets;
 	}
 
-	foreach ( array_keys( $sidebar_widgets ) as $zone ) {
-		if ( $zone === 'array_split' ) {
+	$zone = 'home-sidebar';
+	if ( ! isset( $sidebar_widgets[ $zone ] ) || ! is_array( $sidebar_widgets[ $zone ] ) ) {
+		return $sidebar_widgets;
+	}
+
+	$widgets = $sidebar_widgets[ $zone ];
+	if ( empty( $widgets ) ) {
+		return $sidebar_widgets;
+	}
+
+	$ads    = array();
+	$others = array();
+	$marker = array();
+
+	foreach ( $widgets as $widget_id ) {
+		if ( strpos( $widget_id, 'idpg_ad-' ) !== 0 ) {
+			$others[] = $widget_id;
+			$marker[] = 'other';
 			continue;
 		}
-		$widgets = is_array( $sidebar_widgets[ $zone ] ) ? $sidebar_widgets[ $zone ] : array();
+
+		$parts = explode( '-', $widget_id );
+		$num   = isset( $parts[1] ) ? $parts[1] : 0;
+		$inst  = get_option( 'widget_idpg_ad', array() );
+		$pos   = 50;
+		if ( isset( $inst[ $num ] ) && is_array( $inst[ $num ] ) ) {
+			$pos = isset( $inst[ $num ]['position'] ) ? (int) $inst[ $num ]['position'] : 50;
+		}
+
+		$ads[]    = array( 'id' => $widget_id, 'pos' => $pos );
+		$marker[] = 'ad';
+	}
+
+	if ( ! $ads ) {
+		return $sidebar_widgets;
+	}
+
+	usort( $ads, function( $a, $b ) {
+		return $a['pos'] <=> $b['pos'];
+	} );
+
+	$ad_ids     = array_column( $ads, 'id' );
+	$ad_index   = 0;
+	$other_index = 0;
+	$result     = array();
+
+	foreach ( $marker as $kind ) {
+		if ( 'ad' === $kind ) {
+			$result[] = isset( $ad_ids[ $ad_index ] ) ? $ad_ids[ $ad_index ] : '';
+			$ad_index++;
+		} else {
+			$result[] = isset( $others[ $other_index ] ) ? $others[ $other_index ] : '';
+			$other_index++;
+		}
+	}
+
+	$sidebar_widgets[ $zone ] = $result;
+
+	return $sidebar_widgets;
+}
+add_filter( 'sidebars_widgets', 'idpg_core_sort_home_sidebar_widgets' );
+
+/**
+ * Поднимает рекламные виджеты на самый верх сайдбара страниц событий.
+ *
+ * Применяется только к областям виджетов с позицией event-sidebar
+ * (сайдбар страниц события и площадки). Рекламные виджеты переносятся
+ * в начало зоны, остальные виджеты сохраняют свой порядок.
+ *
+ * @param array $sidebar_widgets Массив виджетов по сайдбарам.
+ * @return array
+ */
+function idpg_core_sort_event_sidebar_widgets( $sidebar_widgets ) {
+	if ( is_admin() ) {
+		return $sidebar_widgets;
+	}
+
+	// Собираем id сайдбаров областей с позицией event-sidebar.
+	$event_sidebars = array();
+	foreach ( (array) get_option( 'idpg_widget_areas', array() ) as $slug => $area ) {
+		if ( isset( $area['position'] ) && 'event-sidebar' === $area['position'] ) {
+			$event_sidebars[] = 'idpg-area-' . sanitize_key( $slug );
+		}
+	}
+
+	if ( ! $event_sidebars ) {
+		return $sidebar_widgets;
+	}
+
+	foreach ( $event_sidebars as $zone ) {
+		if ( ! isset( $sidebar_widgets[ $zone ] ) || ! is_array( $sidebar_widgets[ $zone ] ) ) {
+			continue;
+		}
+
+		$widgets = $sidebar_widgets[ $zone ];
 		if ( empty( $widgets ) ) {
 			continue;
 		}
@@ -512,33 +761,20 @@ function idpg_core_sort_home_sidebar_widgets( $sidebar_widgets ) {
 		$others = array();
 
 		foreach ( $widgets as $widget_id ) {
-			if ( strpos( $widget_id, 'idpg_ad-' ) !== 0 ) {
+			if ( strpos( $widget_id, 'idpg_ad-' ) === 0 ) {
+				$ads[] = $widget_id;
+			} else {
 				$others[] = $widget_id;
-				continue;
 			}
-
-			$parts  = explode( '-', $widget_id );
-			$num    = isset( $parts[1] ) ? $parts[1] : 0;
-			$inst   = get_option( 'widget_idpg_ad', array() );
-			$pos    = 50;
-			if ( isset( $inst[ $num ] ) && is_array( $inst[ $num ] ) ) {
-				$pos = isset( $inst[ $num ]['position'] ) ? (int) $inst[ $num ]['position'] : 50;
-			}
-
-			$ads[] = array( 'id' => $widget_id, 'pos' => $pos );
 		}
 
 		if ( ! $ads ) {
 			continue;
 		}
 
-		usort( $ads, function( $a, $b ) {
-			return $a['pos'] <=> $b['pos'];
-		} );
-
-		$sidebar_widgets[ $zone ] = array_merge( array_column( $ads, 'id' ), $others );
+		$sidebar_widgets[ $zone ] = array_merge( $ads, $others );
 	}
 
 	return $sidebar_widgets;
 }
-add_filter( 'sidebars_widgets', 'idpg_core_sort_home_sidebar_widgets' );
+add_filter( 'sidebars_widgets', 'idpg_core_sort_event_sidebar_widgets', 11 );

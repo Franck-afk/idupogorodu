@@ -8,7 +8,7 @@
  */
 
 if ( ! defined( 'IDPG_VERSION' ) ) {
-	define( 'IDPG_VERSION', '1.0.67' );
+	define( 'IDPG_VERSION', '1.0.72' );
 }
 
 
@@ -123,6 +123,20 @@ function idpg_core_scripts() {
 	wp_enqueue_script( 'idpg_core-canvas-fix', get_template_directory_uri() . '/assets/js/canvas-fix.js', array(), IDPG_VERSION, false );
 	wp_enqueue_script( 'idpg_core-navigation', get_template_directory_uri() . '/assets/js/navigation.js', array(), IDPG_VERSION, true );
 	wp_enqueue_script( 'idpg_core-live-search', get_template_directory_uri() . '/assets/js/live-search.js', array(), IDPG_VERSION, true );
+
+	// Виджет «Подписка на дайджест»: AJAX-логика и стили.
+	wp_enqueue_script( 'idpg_core-subscribe', get_template_directory_uri() . '/assets/js/subscribe.js', array(), IDPG_VERSION, true );
+	wp_localize_script(
+		'idpg_core-subscribe',
+		'idpgSubscribe',
+		array(
+			'restUrl' => esc_url_raw( home_url( '/wp-json/idpg/v1' ) ),
+		)
+	);
+	$subscribe_css_ver = file_exists( get_template_directory() . '/assets/css/subscribe.css' )
+		? (string) filemtime( get_template_directory() . '/assets/css/subscribe.css' )
+		: IDPG_VERSION;
+	wp_enqueue_style( 'idpg_core-subscribe', get_template_directory_uri() . '/assets/css/subscribe.css', array( 'idpg_core-style' ), $subscribe_css_ver );
 
 	// Замер высоты шапки → CSS custom property --idpg-header-h.
 	add_action( 'wp_footer', 'idpg_core_header_height_js' );

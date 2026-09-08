@@ -19,8 +19,22 @@
   flex-direction: column;
   gap: 20px;
 }
+/* Рекламный баннер в сайдбаре главной — нижний отступ от следующих виджетов */
+.idpg-home__sidebar .idpg-ad-widget {
+  margin-bottom: 20px;
+}
 .idpg-ad-widget {
   background: #fff;
+  border: 1px solid #e2e4e7;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  padding: 16px;
+  box-sizing: border-box;
+}
+/* Прочие виджеты сайдбара главной (выбор города, календарь и т.п.)
+   тоже оформляются белой карточкой с обводкой, как рекламный виджет. */
+.idpg-home__sidebar .widget:not(.idpg-ad-widget) {
+  background: var(--idpg-card-bg, #fff);
   border: 1px solid #e2e4e7;
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -65,13 +79,51 @@
   padding-top: 88px;
 }
 .idpg-widget-area--before-footer {
-  padding-top: 24px;
+  padding-bottom: 50px;
+}
+/* Вертикальный баннер в подвале выводится горизонтальной полосой:
+   обрезка по высоте, без растяжения пропорций. Баннер уже находится
+   в .container — ширина совпадает с блоком карточек. */
+.idpg-widget-area--before-footer .idpg-ad-widget__img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* На десктопе у баннера подвала нет правого сайдбара, а у блока карточек
+   (контента) на главной он есть (320px + gap 24px). Сужаем баннер до ширины
+   контентной колонки главной. На остальных страницах карточки занимают
+   всю ширину контейнера, поэтому сужение не требуется. */
+body.home .idpg-widget-area--before-footer .container {
+  padding-right: calc(16px + 344px);
+}
+
+@media (min-width: 1025px) {
+  body.home .idpg-widget-area--before-footer .container {
+    padding-right: calc(24px + 344px);
+  }
+}
+
+@media (min-width: 1281px) {
+  body.home .idpg-widget-area--before-footer .container {
+    padding-right: calc(32px + 344px);
+  }
 }
 .idpg-widget-area--above-content {
   margin-bottom: 24px;
 }
 .idpg-widget-area--below-content {
   margin-top: 24px;
+}
+.idpg-widget-area--event-sidebar {
+  margin-top: 16px;
+}
+/* Рекламный баннер в сайдбаре страницы события — нижний отступ от инфоблока.
+   Специфичность выше, чем у .idpg-widget-area__widget:last-child (margin-bottom: 0),
+   иначе обнуление применялось бы к последнему (единственному) виджету зоны. */
+.idpg-event-single__sidebar .idpg-widget-area--event-sidebar .idpg-ad-widget {
+  margin-bottom: 16px;
 }
 .idpg-widget-area__widget {
   margin-bottom: 20px;

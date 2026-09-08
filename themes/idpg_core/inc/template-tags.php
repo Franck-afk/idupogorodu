@@ -807,8 +807,8 @@ if ( ! function_exists( 'idpg_core_event_jsonld' ) ) {
 		}
 
 		// --- Изображение ---
-		if ( has_post_thumbnail( $post_id ) ) {
-			$img = wp_get_attachment_image_url( get_post_thumbnail_id( $post_id ), 'large' );
+		if ( IDPG_Media::idpg_get_poster_id( $post_id ) ) {
+			$img = IDPG_Media::idpg_get_poster_url( $post_id, 'large' );
 
 			if ( $img ) {
 				$data['image'] = $img;
@@ -886,8 +886,8 @@ if ( ! function_exists( 'idpg_core_event_share_buttons' ) ) {
 		$text    = rawurlencode( sprintf( __( 'Событие «%s» на «Иду по городу»', 'idpg_core' ), get_the_title( $post_id ) ) );
 		$subject = rawurlencode( get_the_title( $post_id ) );
 		$image   = '';
-		if ( has_post_thumbnail( $post_id ) ) {
-			$image = rawurlencode( (string) wp_get_attachment_image_url( get_post_thumbnail_id( $post_id ), 'large' ) );
+		if ( IDPG_Media::idpg_get_poster_id( $post_id ) ) {
+			$image = rawurlencode( (string) IDPG_Media::idpg_get_poster_url( $post_id, 'large' ) );
 		}
 
 		/**

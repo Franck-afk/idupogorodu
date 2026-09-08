@@ -15,11 +15,12 @@ delete_option( 'idpg_auth_settings' );
 delete_option( 'idpg_auth_log' );
 
 // 2. OAuth user_meta провайдеров (VK, Яндекс, MAX)
+// Фактические ключи пишутся провайдерами с префиксом wp_auth_ru_.
 $meta_keys = array(
-    'idpg_auth_yandex_oauth_id',
-    'idpg_auth_vk_oauth_id',
-    'idpg_auth_max_oauth_id',
-    'idpg_auth_provider',
+    'wp_auth_ru_yandex_oauth_id',
+    'wp_auth_ru_vk_oauth_id',
+    'wp_auth_ru_max_oauth_id',
+    'wp_auth_ru_provider',
 );
 foreach ( $meta_keys as $meta_key ) {
     delete_metadata( 'user', 0, $meta_key, '', true );

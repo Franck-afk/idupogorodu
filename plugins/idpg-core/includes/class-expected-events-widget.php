@@ -276,7 +276,7 @@ class IDPG_Expected_Events_Widget extends WP_Widget {
 
 				$post_id    = get_the_ID();
 				$views      = (int) get_post_meta( $post_id, self::META_VIEWS, true );
-				$thumb      = get_the_post_thumbnail( $post_id, 'event-card', array( 'class' => 'idpg-expected-events__img' ) );
+				$thumb      = IDPG_Media::idpg_get_poster( $post_id, 'event-card', array( 'class' => 'idpg-expected-events__img' ) );
 				$date_start = get_post_meta( $post_id, self::META_START, true );
 
 				// Дата в компактном виде: «12 сентября».

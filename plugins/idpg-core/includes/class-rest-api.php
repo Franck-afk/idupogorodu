@@ -229,6 +229,53 @@ class IDPG_REST_API {
 			)
 		);
 
+		// GET /search/popular — популярное для подсказок при фокусе (без запроса).
+		register_rest_route(
+			self::NAMESPACE,
+			'/search/popular',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'search_popular' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'city' => array(
+						'required'          => false,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+			)
+		);
+
+		// POST /subscribe — подписка на дайджест из виджета IDPG_Subscribe_Widget.
+		// Публичный маршрут: honeypot + rate limiter вместо nonce.
+		register_rest_route(
+			self::NAMESPACE,
+			'/subscribe',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'subscribe' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'email' => array(
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_email',
+					),
+					'idpg_company' => array(
+						'required'          => false,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'consent' => array(
+						'required'          => false,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'consent_required' => array(
+						'required'          => false,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+			)
+		);
+
 		// POST /city/select — смена города (установка cookie idpg_selected_city).
 		// Публичный маршрут: не требует авторизации, но обязателен valid nonce 'wp_rest'.
 		register_rest_route(
@@ -497,7 +544,7 @@ class IDPG_REST_API {
 			'ticket_url'      => get_post_meta( $post->ID, '_idpg_ticket_url', true ),
 			'city'            => ! is_wp_error( $terms_city ) ? $terms_city : array(),
 			'category'        => ! is_wp_error( $terms_cat ) ? $terms_cat : array(),
-			'thumbnail'       => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '',
+			'thumbnail'       => IDPG_Media::idpg_get_poster_url( $post->ID, 'medium' ),
 			'views'           => (int) get_post_meta( $post->ID, '_idpg_views', true ),
 			'clicks'          => (int) get_post_meta( $post->ID, '_idpg_clicks', true ),
 			'venue_id'        => $venue_id,
@@ -698,7 +745,7 @@ class IDPG_REST_API {
 			'website'    => get_post_meta( $post->ID, '_idpg_venue_website', true ),
 			'capacity'   => (int) get_post_meta( $post->ID, '_idpg_venue_capacity', true ),
 			'city'       => ! is_wp_error( $terms_city ) ? $terms_city : array(),
-			'thumbnail'  => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '',
+			'thumbnail'  => IDPG_Media::idpg_get_poster_url( $post->ID, 'medium' ),
 		);
 	}
 
@@ -1058,7 +1105,7 @@ class IDPG_REST_API {
 
 		foreach ( $query->posts as $post ) {
 			$url = class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::event_url( $post->ID ) : get_permalink( $post->ID );
-			$thumb = get_the_post_thumbnail_url( $post->ID, 'thumbnail' );
+			$thumb = IDPG_Media::idpg_get_poster_url( $post->ID, 'thumbnail' );
 			$date  = get_post_meta( $post->ID, '_idpg_start_date', true );
 			$venue = '';
 			$venue_id = (int) get_post_meta( $post->ID, '_idpg_venue', true );
@@ -1078,7 +1125,286 @@ class IDPG_REST_API {
 			);
 		}
 
-		return new WP_REST_Response( array( 'results' => $results ), 200 );
+		// Группы подсказок: события + площадки + рубрики.
+		// Ключ results оставлен для обратной совместимости.
+		$groups = array();
+		if ( $results ) {
+			array_unshift(
+				$groups,
+				array(
+					'type'  => 'events',
+					'title' => __( 'События', 'idpg-core' ),
+					'items' => $results,
+				)
+			);
+		}
+		if ( ! empty( $venue_ids ) ) {
+			$venue_items = array();
+			foreach ( array_slice( array_map( 'intval', (array) $venue_ids ), 0, 3 ) as $venue_id ) {
+				$venue_post = get_post( $venue_id );
+				if ( ! $venue_post || 'venue' !== $venue_post->post_type ) {
+					continue;
+				}
+				$venue_items[] = array(
+					'id'    => $venue_id,
+					'title' => $venue_post->post_title,
+					'url'   => get_permalink( $venue_id ),
+				);
+			}
+			if ( $venue_items ) {
+				$groups[] = array(
+					'type'  => 'venues',
+					'title' => __( 'Площадки', 'idpg-core' ),
+					'items' => $venue_items,
+				);
+			}
+		}
+		if ( ! empty( $cat_ids ) ) {
+			$cat_items = array();
+			foreach ( array_slice( array_unique( array_map( 'intval', (array) $cat_ids ) ), 0, 4 ) as $term_id ) {
+				$term = get_term( $term_id );
+				if ( ! $term instanceof WP_Term ) {
+					continue;
+				}
+				$term_link = get_term_link( $term );
+				if ( is_wp_error( $term_link ) ) {
+					continue;
+				}
+				$cat_items[] = array(
+					'id'    => $term_id,
+					'title' => $term->name,
+					'url'   => $term_link,
+				);
+			}
+			if ( $cat_items ) {
+				$groups[] = array(
+					'type'  => 'cats',
+					'title' => __( 'Рубрики', 'idpg-core' ),
+					'items' => $cat_items,
+				);
+			}
+		}
+
+		return new WP_REST_Response( array( 'results' => $results, 'groups' => $groups ), 200 );
+	}
+
+	/**
+	 * Популярное для подсказок при фокусе на пустом поле поиска.
+	 *
+	 * Возвращает ближайшие события города и топ рубрик. Публичный маршрут.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public function search_popular( $request ) {
+		$city = trim( (string) $request->get_param( 'city' ) );
+
+		// Город — как в search_live().
+		$city_id = 0;
+		if ( $city ) {
+			$term = get_term_by( 'slug', $city, 'city' );
+			if ( $term && ! is_wp_error( $term ) ) {
+				$city_id = (int) $term->term_id;
+			}
+		} elseif ( class_exists( 'IDPG_City_Filter' ) ) {
+			$city_id = (int) IDPG_City_Filter::get_current_city_id();
+		}
+		$city_tax = array();
+		if ( $city_id && get_term( $city_id, 'city' ) instanceof WP_Term ) {
+			$city_tax = array(
+				array(
+					'taxonomy'         => 'city',
+					'field'            => 'term_id',
+					'terms'            => $city_id,
+					'include_children' => true,
+				),
+			);
+		}
+
+		// Ближайшие события города по дате начала.
+		$events = array();
+		$query  = new WP_Query( array(
+			'post_type'      => 'event',
+			'post_status'    => 'publish',
+			'posts_per_page' => 5,
+			'tax_query'      => $city_tax, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				array(
+					'key'     => '_idpg_start_date',
+					'value'   => current_time( 'Y-m-d' ),
+					'compare' => '>=',
+					'type'    => 'DATE',
+				),
+			),
+			'orderby'        => 'meta_value',
+			'order'          => 'ASC',
+			'meta_key'       => '_idpg_start_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		) );
+		foreach ( $query->posts as $post ) {
+			$url   = class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::event_url( $post->ID ) : get_permalink( $post->ID );
+			$thumb = IDPG_Media::idpg_get_poster_url( $post->ID, 'thumbnail' );
+			$date  = get_post_meta( $post->ID, '_idpg_start_date', true );
+			$events[] = array(
+				'id'    => $post->ID,
+				'title' => $post->post_title,
+				'url'   => $url,
+				'thumb' => $thumb ?: '',
+				'date'  => $date ?: '',
+				'venue' => '',
+			);
+		}
+
+		// Топ рубрик по количеству событий.
+		$cats  = array();
+		$terms = get_terms( array(
+			'taxonomy'   => 'event_category',
+			'hide_empty' => true,
+			'orderby'    => 'count',
+			'order'      => 'DESC',
+			'number'     => 6,
+		) );
+		if ( ! is_wp_error( $terms ) && $terms ) {
+			foreach ( $terms as $term ) {
+				$term_link = get_term_link( $term );
+				if ( is_wp_error( $term_link ) ) {
+					continue;
+				}
+				$cats[] = array(
+					'id'    => $term->term_id,
+					'title' => $term->name,
+					'url'   => $term_link,
+				);
+			}
+		}
+
+		return new WP_REST_Response( array( 'events' => $events, 'cats' => $cats ), 200 );
+	}
+
+	/**
+	 * Подписка на дайджест из виджета.
+	 *
+	 * Проверяет email, honeypot-капчу и rate limiter (не более 3 подписок
+	 * в час с одного IP), сохраняет email в таблицу подписчиков
+	 * и отправляет приветственное письмо. Публичный маршрут.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function subscribe( $request ) {
+		$email = sanitize_email( (string) $request->get_param( 'email' ) );
+		if ( '' === $email || ! is_email( $email ) ) {
+			return new WP_Error(
+				'idpg_subscribe_bad_email',
+				__( 'Укажите корректный email.', 'idpg-core' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Honeypot: заполненное скрытое поле = бот. Отвечаем «успехом»,
+		// чтобы не выдавать защиту, но ничего не сохраняем.
+		$honeypot = trim( (string) $request->get_param( 'idpg_company' ) );
+		if ( '' !== $honeypot ) {
+			return new WP_REST_Response(
+				array(
+					'success' => true,
+					'message' => __( 'Спасибо! Проверьте почту для подтверждения подписки.', 'idpg-core' ),
+				),
+				200
+			);
+		}
+
+		// Согласие на обработку данных, если виджет его требует.
+		if ( '1' === (string) $request->get_param( 'consent_required' )
+			&& '1' !== (string) $request->get_param( 'consent' ) ) {
+			return new WP_Error(
+				'idpg_subscribe_no_consent',
+				__( 'Подтвердите согласие на обработку персональных данных.', 'idpg-core' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Rate limiter: не более 3 подписок в час с одного IP (Transients API).
+		$ip      = IDPG_Auth_Rate_Limiter::instance()->get_client_ip();
+		$rl_key  = 'idpg_sub_attempts_' . md5( $ip );
+		$rl_data = get_transient( $rl_key );
+		if ( false === $rl_data ) {
+			$rl_data = array(
+				'count'         => 0,
+				'first_attempt' => time(),
+			);
+		}
+		if ( $rl_data['count'] >= 3 ) {
+			if ( time() - $rl_data['first_attempt'] < HOUR_IN_SECONDS ) {
+				return new WP_Error(
+					'idpg_subscribe_rate_limited',
+					__( 'Слишком много попыток. Попробуйте позже.', 'idpg-core' ),
+					array( 'status' => 429 )
+				);
+			}
+			$rl_data = array(
+				'count'         => 0,
+				'first_attempt' => time(),
+			);
+		}
+		$rl_data['count']++;
+		set_transient( $rl_key, $rl_data, HOUR_IN_SECONDS );
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'idpg_subscribers';
+
+		// Таблица создаётся при активации; если её нет — честная ошибка.
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) !== $table ) {
+			return new WP_Error(
+				'idpg_subscribe_no_table',
+				__( 'Сервис временно недоступен. Попробуйте позже.', 'idpg-core' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		// Повторная подписка — дружелюбный успех вместо ошибки.
+		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table WHERE email = %s", $email ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		if ( $exists ) {
+			return new WP_REST_Response(
+				array(
+					'success' => true,
+					'message' => __( 'Этот email уже подписан на дайджест.', 'idpg-core' ),
+				),
+				200
+			);
+		}
+
+		$inserted = $wpdb->insert(
+			$table,
+			array(
+				'email'      => $email,
+				'ip'         => $ip,
+				'created_at' => current_time( 'mysql' ),
+			),
+			array( '%s', '%s', '%s' )
+		);
+		if ( false === $inserted ) {
+			return new WP_Error(
+				'idpg_subscribe_db_error',
+				__( 'Не удалось сохранить подписку. Попробуйте позже.', 'idpg-core' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		// Приветственное письмо (ошибка отправки подписку не отменяет).
+		wp_mail(
+			$email,
+			__( 'Спасибо за подписку на дайджест!', 'idpg-core' ),
+			'<p>' . esc_html__( 'Вы подписались на дайджест событий «Иду по городу».', 'idpg-core' ) . '</p>'
+				. '<p>' . esc_html__( 'Раз в неделю будем присылать самое интересное.', 'idpg-core' ) . '</p>'
+		);
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Спасибо! Проверьте почту для подтверждения подписки.', 'idpg-core' ),
+			),
+			200
+		);
 	}
 }
 

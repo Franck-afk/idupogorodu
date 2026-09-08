@@ -10,6 +10,10 @@ $current_city_name = class_exists( 'IDPG_City_Filter' )
 	? IDPG_City_Filter::get_current_city_name()
 	: ( isset( $_COOKIE['idpg_city'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['idpg_city'] ) ) : 'Ижевск' );
 
+// Подсказка об автоопределении города по IP — инициализируем до первого вывода
+// (мобильная модалка ниже использует эту переменную; значение подставится ниже).
+$idpg_city_ipnote = '';
+
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>

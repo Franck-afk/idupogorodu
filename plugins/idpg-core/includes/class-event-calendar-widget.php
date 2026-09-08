@@ -281,8 +281,8 @@ class IDPG_Event_Calendar_Widget extends WP_Widget {
 		$scheme   = isset( $instance['scheme'] ) ? $instance['scheme'] : 'light';
 
 		// Опорный месяц: из ?calym=YYYY-MM или текущий.
-		$y = (int) gmdate( 'Y', current_time( 'timestamp' ) );
-		$m = (int) gmdate( 'n', current_time( 'timestamp' ) );
+		$y = (int) wp_date( 'Y', current_time( 'timestamp' ) );
+		$m = (int) wp_date( 'n', current_time( 'timestamp' ) );
 		if ( isset( $_GET['calym'] ) && preg_match( '/^(\d{4})-(\d{1,2})$/', sanitize_text_field( wp_unslash( $_GET['calym'] ) ), $mt ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$yy = (int) $mt[1];
 			$mm = (int) $mt[2];
@@ -417,7 +417,7 @@ class IDPG_Event_Calendar_Widget extends WP_Widget {
 		global $wpdb;
 
 		$start = sprintf( '%04d-%02d-01 00:00:00', $y, $m );
-		$end   = sprintf( '%04d-%02d-%02d 23:59:59', $y, $m, (int) gmdate( 't', mktime( 0, 0, 0, $m, 1, $y ) ) );
+		$end   = sprintf( '%04d-%02d-%02d 23:59:59', $y, $m, (int) wp_date( 't', mktime( 0, 0, 0, $m, 1, $y ) ) );
 
 		$args = array(
 			'post_type'               => self::POST_TYPE,
@@ -538,7 +538,7 @@ class IDPG_Event_Calendar_Widget extends WP_Widget {
 		$prev_m = $m - 1; $prev_y = $y; if ( 0 === $prev_m ) { $prev_m = 12; $prev_y--; }
 		$next_m = $m + 1; $next_y = $y; if ( 13 === $next_m ) { $next_m = 1; $next_y++; }
 
-		$today = gmdate( 'Y-m-d', current_time( 'timestamp' ) );
+		$today = wp_date( 'Y-m-d', current_time( 'timestamp' ) );
 		$ym    = sprintf( '%04d-%02d', $y, $m );
 
 		$html  = '<div class="idpg-cal__nav">';
@@ -625,7 +625,7 @@ class IDPG_Event_Calendar_Widget extends WP_Widget {
 	 * @return string
 	 */
 	private function render_week( $y, $m, $data ) {
-		$today = gmdate( 'Y-m-d', current_time( 'timestamp' ) );
+		$today = wp_date( 'Y-m-d', current_time( 'timestamp' ) );
 		$week  = isset( $data['grid'][0] ) ? $data['grid'][0] : array_fill( 0, 7, 0 );
 
 		$html = '<div class="idpg-cal__weekgrid" data-cal-grid>';
@@ -658,7 +658,7 @@ class IDPG_Event_Calendar_Widget extends WP_Widget {
 
 		$html = '<ul class="idpg-cal__list" data-cal-grid>';
 		foreach ( $data['events'] as $day => $evs ) {
-			$label = gmdate( 'd.m.Y', strtotime( $day ) );
+			$label = wp_date( 'd.m.Y', strtotime( $day ) );
 			foreach ( $evs as $e ) {
 				$html .= '<li class="idpg-cal__list-item">';
 				$html .= '<span class="idpg-cal__list-date">' . esc_html( $label ) . '</span>';
@@ -698,18 +698,33 @@ class IDPG_Event_Calendar_Widget extends WP_Widget {
 	}
 
 	/**
-	 * Очистка кэшей календаря (по текущему и соседним месяцам).
+	 * Очистка кэшей календаря (все варианты фильтров месяц/категория/город).
 	 */
 	private function purge_caches() {
-		$y = (int) gmdate( 'Y', current_time( 'timestamp' ) );
-		$m = (int) gmdate( 'n', current_time( 'timestamp' ) );
+		idpg_core_calendar_flush_all_caches();
+	}
+}
 
-		for ( $i = -2; $i <= 2; $i++ ) {
-			$t  = mktime( 0, 0, 0, $m + $i, 1, $y );
-			$ym = gmdate( 'Y-m', $t );
-			// Сбрасываем все варианты фильтров для этого месяца (cat/city = 0..N).
-			delete_transient( 'idpg_cal_' . md5( $ym . '|0|0' ) );
-		}
+/**
+ * Полный сброс кэшей календаря событий.
+ *
+ * Удаляет все транзиенты idpg_cal_* независимо от месяца и фильтров
+ * (категория/город), чтобы после сохранения события не оставались
+ * устаревшие кэши с конкретными фильтрами.
+ */
+function idpg_core_calendar_flush_all_caches() {
+	global $wpdb;
+
+	// Ищем только фактические транзиенты (без строк *timeout).
+	$keys = $wpdb->get_col(
+		"SELECT option_name FROM {$wpdb->options}
+		 WHERE option_name LIKE '_transient_idpg_cal_%'
+		   AND option_name NOT LIKE '_transient_timeout_idpg_cal_%'"
+	);
+
+	foreach ( $keys as $key ) {
+		$transient = substr( $key, strlen( '_transient_' ) );
+		delete_transient( $transient );
 	}
 }
 
@@ -725,13 +740,7 @@ function idpg_core_calendar_flush_on_save( $post_id ) {
 	if ( 'event' !== get_post_type( $post_id ) ) {
 		return;
 	}
-	$y = (int) gmdate( 'Y', current_time( 'timestamp' ) );
-	$m = (int) gmdate( 'n', current_time( 'timestamp' ) );
-	for ( $i = -2; $i <= 2; $i++ ) {
-		$t  = mktime( 0, 0, 0, $m + $i, 1, $y );
-		$ym = gmdate( 'Y-m', $t );
-		delete_transient( 'idpg_cal_' . md5( $ym . '|0|0' ) );
-	}
+	idpg_core_calendar_flush_all_caches();
 }
 add_action( 'save_post_event', 'idpg_core_calendar_flush_on_save' );
 add_action( 'delete_post_event', 'idpg_core_calendar_flush_on_save' );

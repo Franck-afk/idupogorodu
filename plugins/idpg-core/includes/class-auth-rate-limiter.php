@@ -109,16 +109,17 @@ class IDPG_Auth_Rate_Limiter {
 			$elapsed = time() - $data['first_attempt'];
 
 			if ( $elapsed < self::LOGIN_WINDOW ) {
-				error_log(
-					sprintf(
-						'[IDPG Rate Limiter] Превышен лимит входа. IP: %s, попыток: %d',
-						$ip,
-						$data['count']
-					)
-				);
+			// Запрещено на проде (AGENTS.md, п.11): error_log() в боевом коде не используется.
+			// error_log(
+			// 	sprintf(
+			// 		'[IDPG Rate Limiter] Превышен лимит входа. IP: %s, попыток: %d',
+			// 		$ip,
+			// 		$data['count']
+			// 	)
+			// );
 
-				return new WP_Error(
-					'too_many_attempts',
+			return new WP_Error(
+				'too_many_attempts',
 					__( 'Слишком много попыток. Подождите 1 минуту.', 'idpg-core' ),
 					array( 'status' => 429 )
 				);
@@ -161,16 +162,17 @@ class IDPG_Auth_Rate_Limiter {
 			$elapsed = time() - $data['first_attempt'];
 
 			if ( $elapsed < self::REGISTRATION_WINDOW ) {
-				error_log(
-					sprintf(
-						'[IDPG Rate Limiter] Превышен лимит регистраций. IP: %s, попыток: %d',
-						$ip,
-						$data['count']
-					)
-				);
+			// Запрещено на проде (AGENTS.md, п.11): error_log() в боевом коде не используется.
+			// error_log(
+			// 	sprintf(
+			// 		'[IDPG Rate Limiter] Превышен лимит регистраций. IP: %s, попыток: %d',
+			// 		$ip,
+			// 		$data['count']
+			// 	)
+			// );
 
-				return new WP_Error(
-					'too_many_registrations',
+			return new WP_Error(
+				'too_many_registrations',
 					__( 'Слишком много регистраций с этого IP. Попробуйте позже.', 'idpg-core' ),
 					array( 'status' => 429 )
 				);
@@ -212,16 +214,17 @@ class IDPG_Auth_Rate_Limiter {
 			$elapsed = time() - $data['first_attempt'];
 
 			if ( $elapsed < self::RESET_WINDOW ) {
-				error_log(
-					sprintf(
-						'[IDPG Rate Limiter] Превышен лимит сброса пароля. Email: %s, попыток: %d',
-						$email,
-						$data['count']
-					)
-				);
+			// Запрещено на проде (AGENTS.md, п.11): error_log() в боевом коде не используется.
+			// error_log(
+			// 	sprintf(
+			// 		'[IDPG Rate Limiter] Превышен лимит сброса пароля. Email: %s, попыток: %d',
+			// 		$email,
+			// 		$data['count']
+			// 	)
+			// );
 
-				return new WP_Error(
-					'too_many_resets',
+			return new WP_Error(
+				'too_many_resets',
 					__( 'Слишком много запросов сброса пароля. Попробуйте позже.', 'idpg-core' ),
 					array( 'status' => 429 )
 				);
@@ -251,12 +254,13 @@ class IDPG_Auth_Rate_Limiter {
 
 		delete_transient( $key );
 
-		error_log(
-			sprintf(
-				'[IDPG Rate Limiter] Сброс попыток входа. IP: %s',
-				$ip
-			)
-		);
+		// Запрещено на проде (AGENTS.md, п.11): error_log() в боевом коде не используется.
+		// error_log(
+		// 	sprintf(
+		// 		'[IDPG Rate Limiter] Сброс попыток входа. IP: %s',
+		// 		$ip
+		// 	)
+		// );
 	}
 
 	/**

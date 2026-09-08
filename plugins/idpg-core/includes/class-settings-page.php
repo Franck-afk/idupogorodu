@@ -2,7 +2,7 @@
 /**
  * Страница настроек плагина IDPG Core.
  *
- * Вкладки: Общие, Главная (Блоки), Области виджетов, Баннеры,
+ * Вкладки: Главная (Блоки), Области виджетов,
  * Экспорт / О плагине.
  *
  * @package IDPG_Core
@@ -32,13 +32,6 @@ class IDPG_Settings_Page {
 	const PAGE_SLUG = 'idpg-settings';
 
 	/**
-	 * Название группы настроек.
-	 *
-	 * @var string
-	 */
-	const OPTION_GROUP = 'idpg_settings_group';
-
-	/**
 	 * Nonce action.
 	 *
 	 * @var string
@@ -51,7 +44,6 @@ class IDPG_Settings_Page {
 	 * @var array
 	 */
 	const EXPORT_OPTIONS = array(
-		'idpg_settings',
 		'idpg_maintenance_enabled',
 		'idpg_maintenance_login_link',
 		'idpg_maintenance_title',
@@ -84,8 +76,6 @@ class IDPG_Settings_Page {
 	private function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_page' ) );
 		add_action( 'admin_menu', array( $this, 'hide_legacy_menus' ), 9999 );
-		add_action( 'admin_init', array( $this, 'register_settings' ) );
-		add_action( 'admin_init', array( $this, 'maybe_save_banners' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_init', array( $this, 'redirect_legacy_urls' ) );
 		add_action( 'wp_ajax_idpg_export_settings', array( $this, 'ajax_export' ) );
@@ -99,29 +89,19 @@ class IDPG_Settings_Page {
 	 * Функционал перенесён на единую страницу «Иду по городу»:
 	 * - Внешний вид → Настройки главной;
 	 * - Внешний вид → Области виджетов (страница скрыта, но остаётся
-	 *   обработчиком для редиректа старых прямых ссылок на вкладку);
-	 * - Карбон-поля → Баннеры (вкладка «Баннеры»).
+	 *   обработчиком для редиректа старых прямых ссылок на вкладку).
 	 *
 	 * @return void
 	 */
 	public function hide_legacy_menus() {
 		remove_submenu_page( 'themes.php', 'idpg-home-sections' );
 		remove_submenu_page( 'themes.php', 'idpg-widget-areas' );
-
-		// Прячем отдельную страницу «Баннеры» Carbon Fields — её поля
-		// теперь отображаются во вкладке «Баннеры» единой страницы.
-		if ( class_exists( 'IDPG_Banners' ) ) {
-			$container = IDPG_Banners::get_container();
-			if ( $container ) {
-				remove_menu_page( $container->get_page_file() );
-			}
-		}
 	}
 
 	/**
 	 * Регистрация единой страницы настроек как верхнего пункта меню.
 	 *
-	 * Вкладки: Общие, Главная (Блоки), Области виджетов, Баннеры,
+	 * Вкладки: Главная (Блоки), Области виджетов,
 	 * Экспорт / О плагине.
 	 */
 	public function register_page() {
@@ -159,60 +139,20 @@ class IDPG_Settings_Page {
 		}
 
 		if ( isset( $_GET['page'] ) && 'idpg-widget-areas' === $_GET['page'] ) {
-			wp_safe_redirect( $base( 'widgets' ) );
-			exit;
-		}
+			$target = $base( 'widgets' );
 
-		if ( isset( $_GET['page'] )
-			&& class_exists( 'IDPG_Banners' )
-			&& ( $container = IDPG_Banners::get_container() )
-			&& $_GET['page'] === $container->get_page_file() ) {
-			wp_safe_redirect( $base( 'banners' ) );
+			// Сохраняем сообщение-плашку темы после сохранения области.
+			if ( isset( $_GET['idpg_msg'] ) ) {
+				$target = add_query_arg( 'idpg_msg', sanitize_key( wp_unslash( $_GET['idpg_msg'] ) ), $target );
+			}
+
+			wp_safe_redirect( $target );
 			exit;
 		}
 
 		if ( isset( $_GET['page'] ) && 'idpg-settings' === $_GET['page'] && isset( $_GET['dummy'] ) ) {
 			// Резерв — оставлено для будущих перенаправлений настроек.
 		}
-	}
-
-	/**
-	 * Регистрация настроек.
-	 */
-	public function register_settings() {
-		register_setting(
-			self::OPTION_GROUP,
-			'idpg_settings',
-			array(
-				'type'              => 'array',
-				'sanitize_callback' => array( $this, 'sanitize_settings' ),
-				'default'           => array(
-					'default_city_id' => 0,
-					'events_per_page' => 12,
-				),
-			)
-		);
-	}
-
-	/**
-	 * Санитизация настроек.
-	 *
-	 * @param array $input Входные данные.
-	 * @return array
-	 */
-	public function sanitize_settings( $input ) {
-		$output = array();
-
-		if ( isset( $input['default_city_id'] ) ) {
-			$output['default_city_id'] = absint( $input['default_city_id'] );
-		}
-
-		if ( isset( $input['events_per_page'] ) ) {
-			$per_page = absint( $input['events_per_page'] );
-			$output['events_per_page'] = ( $per_page > 0 ) ? $per_page : 12;
-		}
-
-		return $output;
 	}
 
 	/**
@@ -225,7 +165,7 @@ class IDPG_Settings_Page {
 			return;
 		}
 
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'obshie';
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'glavnaya';
 
 		wp_enqueue_style(
 			'idpg-settings',
@@ -283,22 +223,22 @@ class IDPG_Settings_Page {
 			return;
 		}
 
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'obshie';
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'glavnaya';
 
 		$tabs = array(
-			'obshie'   => __( 'Общие', 'idpg-core' ),
 			'glavnaya' => __( 'Главная (Блоки)', 'idpg-core' ),
 			'widgets'  => __( 'Области виджетов', 'idpg-core' ),
-			'banners'  => __( 'Баннеры', 'idpg-core' ),
 			'export'   => __( 'Экспорт / О плагине', 'idpg-core' ),
 		);
 
 		if ( ! isset( $tabs[ $active_tab ] ) ) {
-			$active_tab = 'obshie';
+			$active_tab = 'glavnaya';
 		}
 		?>
 		<div class="wrap idpg-settings-wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+
+			<?php $this->render_saved_notice(); ?>
 
 			<nav class="nav-tab-wrapper idpg-settings-nav">
 				<?php foreach ( $tabs as $key => $label ) : ?>
@@ -317,19 +257,36 @@ class IDPG_Settings_Page {
 					case 'widgets':
 						$this->render_widgets_tab();
 						break;
-					case 'banners':
-						$this->render_banners_tab();
-						break;
 					case 'export':
 						$this->render_export_tab();
-						break;
-					default:
-						$this->render_general_tab();
 						break;
 				}
 				?>
 			</div>
 				</div>
+		<?php
+	}
+
+	/**
+	 * Плашка уведомления о сохранении настроек.
+	 *
+	 * Показывает стандартное WP-уведомление «Настройки сохранены»
+	 * после сабмита формы на options.php: ядро добавляет
+	 * settings-updated=true в URL-редиректа.
+	 *
+	 * Плашку вкладки «Области виджетов» (idpg_msg) выводит собственная
+	 * страница темы — здесь она не дублируется.
+	 *
+	 * @return void
+	 */
+	private function render_saved_notice() {
+		if ( empty( $_GET['settings-updated'] ) || 'true' !== wp_unslash( $_GET['settings-updated'] ) ) {
+			return;
+		}
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php esc_html_e( 'Настройки сохранены.', 'idpg-core' ); ?></p>
+		</div>
 		<?php
 	}
 
@@ -373,89 +330,6 @@ class IDPG_Settings_Page {
 			return;
 		}
 		idpg_widget_areas_admin_page();
-	}
-
-	/**
-	 * Вкладка «Баннеры» — внедряемые поля Carbon Fields.
-	 *
-	 * Переиспользует контейнер баннеров CF: активирует его и рендерит
-	 * родную форму (поля + кнопку сохранения). См. IDPG_Banners::render_settings_tab().
-	 *
-	 * @return void
-	 */
-	private function render_banners_tab() {
-		if ( ! class_exists( 'IDPG_Banners' ) ) {
-			echo '<p>' . esc_html__( 'Модуль баннеров не активен.', 'idpg-core' ) . '</p>';
-			return;
-		}
-		IDPG_Banners::render_settings_tab();
-	}
-
-	/**
-	 * Сохранение полей «Баннеров» на единой странице настроек.
-	 *
-	 * Вызывается на admin_init только для вкладки «Баннеры», делегирует
-	 * сохранение в контейнер CF (там проверяется nonce и права доступа).
-	 *
-	 * @return void
-	 */
-	public function maybe_save_banners() {
-		if ( ! is_admin() ) {
-			return;
-		}
-
-		if ( ! isset( $_GET['page'] ) || self::PAGE_SLUG !== $_GET['page'] ) {
-			return;
-		}
-
-		if ( ! isset( $_GET['tab'] ) || 'banners' !== $_GET['tab'] ) {
-			return;
-		}
-
-		if ( ! class_exists( 'IDPG_Banners' ) ) {
-			return;
-		}
-
-		IDPG_Banners::maybe_save();
-	}
-
-	/**
-	 * Вкладка «Общие».
-	 */
-	private function render_general_tab() {
-		$settings = get_option( 'idpg_settings', array() );
-		$cities   = get_terms( array( 'taxonomy' => 'city', 'hide_empty' => false ) );
-		?>
-		<form method="post" action="options.php">
-			<?php settings_fields( self::OPTION_GROUP ); ?>
-			<table class="form-table">
-				<tr>
-					<th scope="row"><label for="idpg_default_city_id"><?php esc_html_e( 'Город по умолчанию', 'idpg-core' ); ?></label></th>
-					<td>
-						<select name="idpg_settings[default_city_id]" id="idpg_default_city_id">
-							<option value="0"><?php esc_html_e( '— Автоопределение —', 'idpg-core' ); ?></option>
-							<?php if ( ! empty( $cities ) && ! is_wp_error( $cities ) ) : ?>
-								<?php foreach ( $cities as $city ) : ?>
-									<option value="<?php echo esc_attr( $city->term_id ); ?>" <?php selected( isset( $settings['default_city_id'] ) ? $settings['default_city_id'] : 0, $city->term_id ); ?>>
-										<?php echo esc_html( $city->name ); ?>
-									</option>
-								<?php endforeach; ?>
-							<?php endif; ?>
-						</select>
-						<p class="description"><?php esc_html_e( 'Город, который будет выбран при первом посещении сайта.', 'idpg-core' ); ?></p>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><label for="idpg_events_per_page"><?php esc_html_e( 'Событий на странице', 'idpg-core' ); ?></label></th>
-					<td>
-						<input type="number" name="idpg_settings[events_per_page]" id="idpg_events_per_page" value="<?php echo esc_attr( isset( $settings['events_per_page'] ) ? $settings['events_per_page'] : 12 ); ?>" min="1" max="100" class="small-text">
-						<p class="description"><?php esc_html_e( 'Количество событий на страницах архивов.', 'idpg-core' ); ?></p>
-					</td>
-				</tr>
-			</table>
-			<?php submit_button(); ?>
-			</form>
-		<?php
 	}
 
 	/**

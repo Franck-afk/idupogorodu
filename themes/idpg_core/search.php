@@ -32,13 +32,15 @@ $idpg_s_query = get_search_query();
 					?>
 				</h1>
 
-				<form class="idpg-search-form" role="search" method="get"
-					action="<?php echo esc_url( $idpg_s_city ? home_url( user_trailingslashit( '/afisha/' . $idpg_s_city . '/search/' ) ) : home_url( '/' ) ); ?>">
+				<form class="idpg-search-form idpg-search--live" role="search" method="get"
+					action="<?php echo esc_url( $idpg_s_city ? home_url( user_trailingslashit( '/afisha/' . $idpg_s_city . '/search/' ) ) : home_url( '/' ) ); ?>" data-idpg-live-search>
 					<input type="search" class="idpg-search-form__input" name="s"
 						value="<?php echo esc_attr( $idpg_s_query ); ?>"
 						placeholder="<?php esc_attr_e( 'Название события…', 'idpg_core' ); ?>"
-						aria-label="<?php esc_attr_e( 'Поиск', 'idpg_core' ); ?>">
+						aria-label="<?php esc_attr_e( 'Поиск', 'idpg_core' ); ?>"
+						autocomplete="off" data-idpg-live-input>
 					<button type="submit" class="idpg-btn idpg-btn--primary"><?php esc_html_e( 'Найти', 'idpg_core' ); ?></button>
+					<div class="idpg-search__dropdown" hidden></div>
 				</form>
 
 				<div class="idpg-archive-header__back">
@@ -79,6 +81,35 @@ $idpg_s_query = get_search_query();
 
 				<div class="idpg-archive-header__empty">
 					<?php esc_html_e( 'По вашему запросу ничего не найдено. Попробуйте изменить формулировку.', 'idpg_core' ); ?>
+					<p class="idpg-search-empty__tip">
+						<?php esc_html_e( 'Проверьте орфографию или попробуйте более короткий запрос — например, одно слово.', 'idpg_core' ); ?>
+					</p>
+					<?php
+					// Подсказка: популярные рубрики города.
+					$idpg_empty_cats = get_terms(
+						array(
+							'taxonomy'   => 'event_category',
+							'hide_empty' => true,
+							'orderby'    => 'count',
+							'order'      => 'DESC',
+							'number'     => 8,
+						)
+					);
+					if ( ! is_wp_error( $idpg_empty_cats ) && $idpg_empty_cats ) :
+						?>
+						<p class="idpg-search-empty__cats-title"><?php esc_html_e( 'Популярные рубрики:', 'idpg_core' ); ?></p>
+						<ul class="idpg-search-empty__cats">
+							<?php foreach ( $idpg_empty_cats as $idpg_empty_cat ) : ?>
+								<?php $idpg_empty_link = get_term_link( $idpg_empty_cat ); ?>
+								<?php if ( is_wp_error( $idpg_empty_link ) ) continue; ?>
+								<li>
+									<a href="<?php echo esc_url( $idpg_empty_link ); ?>">
+										<?php echo esc_html( $idpg_empty_cat->name ); ?>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
 				</div>
 
 			<?php endif; ?>

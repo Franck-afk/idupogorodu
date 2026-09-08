@@ -3,7 +3,7 @@
  * Plugin Name:       IDPG Core
  * Plugin URI:        https://example.com/idpg-core
  * Description:       Ядро плагина для сайта-афиши. Регистрирует CPT, таксономии, роли и API для событий и площадок.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            IDPG Team
@@ -76,25 +76,24 @@ require_once IDPG_CORE_DIR . 'includes/class-cpt.php';
 require_once IDPG_CORE_DIR . 'includes/class-roles.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-filter.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-url.php';
+require_once IDPG_CORE_DIR . 'includes/class-media.php';
 require_once IDPG_CORE_DIR . 'includes/class-favorites.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-scope.php';
 require_once IDPG_CORE_DIR . 'includes/class-template-helpers.php';
 require_once IDPG_CORE_DIR . 'includes/class-ticket-sync.php';
 require_once IDPG_CORE_DIR . 'includes/class-rest-api.php';
 require_once IDPG_CORE_DIR . 'includes/class-ical-export.php';
-require_once IDPG_CORE_DIR . 'includes/class-banners.php';
 require_once IDPG_CORE_DIR . 'includes/class-current-event-banner.php';
 require_once IDPG_CORE_DIR . 'includes/class-settings-page.php';
 
 /**
- * Инициализация системы баннеров (file-load).
+ * Инициализация баннера текущего события (file-load).
  *
  * Синглтон создаётся на этапе загрузки файла (а не в idpg_core_init),
  * чтобы подписка на carbon_fields_register_fields — выполняемая в
  * конструкторе — успевала сработать до init priority 0, на котором CF
  * диспатчит этот хук.
  */
-IDPG_Banners::instance();
 IDPG_Current_Event_Banner::instance();
 require_once IDPG_CORE_DIR . 'includes/class-meta.php';
 require_once IDPG_CORE_DIR . 'includes/class-geo-service.php';
@@ -108,6 +107,7 @@ require_once IDPG_CORE_DIR . 'includes/class-auth-emails.php';
 require_once IDPG_CORE_DIR . 'includes/class-maintenance.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-selector-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-calendar-widget.php';
+require_once IDPG_CORE_DIR . 'includes/class-expected-events-widget.php';
 /**
  * Инициализация компонентов плагина.
  *
@@ -117,6 +117,7 @@ function idpg_core_init() {
 	IDPG_CPT::instance();
 	IDPG_Roles::instance();
 	IDPG_City_Filter::instance();
+	IDPG_Media::instance();
 	IDPG_Ticket_Sync::instance();
 	IDPG_REST_API::instance();
 	IDPG_iCal_Export::instance();
@@ -138,6 +139,7 @@ add_action( 'init', 'idpg_core_init' );
 function idpg_core_register_plugin_widgets() {
 	register_widget( 'IDPG_City_Selector_Widget' );
 	register_widget( 'IDPG_Event_Calendar_Widget' );
+	register_widget( 'IDPG_Expected_Events_Widget' );
 }
 add_action( 'widgets_init', 'idpg_core_register_plugin_widgets' );
 
@@ -175,7 +177,8 @@ function idpg_core_get_avatar_url( $url, $id_or_email, $args ) {
 		return $url;
 	}
 
-	$attachment_id = get_user_meta( $user_id, 'idpg_avatar_attachment_id', true );
+	// Через единый медиа-хелпер: ID вложения аватара и его URL.
+	$attachment_id = IDPG_Media::idpg_get_avatar_id( $user_id );
 	if ( ! $attachment_id ) {
 		return $url;
 	}
@@ -194,6 +197,35 @@ function idpg_core_get_avatar_url( $url, $id_or_email, $args ) {
 add_filter( 'get_avatar_url', 'idpg_core_get_avatar_url', 10, 3 );
 
 /**
+ * Создаёт таблицу подписчиков дайджеста.
+ *
+ * Таблица {$wpdb->prefix}idpg_subscribers: email (уникальный), IP и дата подписки.
+ * Вызывается при активации плагина; безопасна при повторном вызове (dbDelta).
+ *
+ * @return void
+ */
+function idpg_core_create_subscribers_table() {
+	global $wpdb;
+
+	$table           = $wpdb->prefix . 'idpg_subscribers';
+	$charset_collate = $wpdb->get_charset_collate();
+
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+	$sql = "CREATE TABLE $table (
+		id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+		email VARCHAR(100) NOT NULL,
+		ip VARCHAR(45) NOT NULL DEFAULT '',
+		created_at DATETIME NOT NULL,
+		PRIMARY KEY  (id),
+		UNIQUE KEY email (email),
+		KEY created_at (created_at)
+	) $charset_collate;";
+
+	dbDelta( $sql );
+}
+
+/**
  * Действия при активации плагина.
  *
  * Регистрирует CPT, таксономии, создаёт роли и планирует крон.
@@ -204,6 +236,9 @@ function idpg_core_activate() {
 	IDPG_Roles::instance()->create_roles();
 
 	IDPG_Ticket_Sync::instance()->schedule_sync();
+
+	// Таблица подписчиков дайджеста (виджет IDPG_Subscribe_Widget).
+	idpg_core_create_subscribers_table();
 
 	// Перенос мета-полей на единый префикс _idpg_.
 	IDPG_Migrations::run_all();

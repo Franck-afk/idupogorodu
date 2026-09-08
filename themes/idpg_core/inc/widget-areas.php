@@ -49,6 +49,7 @@ function idpg_widget_areas_positions() {
 	return array(
 		'below-header'  => __( 'Сразу под шапкой', 'idpg_core' ),
 		'above-content' => __( 'Над контентом', 'idpg_core' ),
+		'event-sidebar' => __( 'Сайдбар страницы события', 'idpg_core' ),
 		'below-content' => __( 'Под контентом', 'idpg_core' ),
 		'before-footer' => __( 'Перед футером', 'idpg_core' ),
 	);

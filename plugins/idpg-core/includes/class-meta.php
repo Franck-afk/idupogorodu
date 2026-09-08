@@ -127,59 +127,14 @@ class IDPG_Meta {
 
 		wp_enqueue_style( 'idpg-editor', IDPG_CORE_URL . 'assets/css/editor.css', array(), $css_version );
 
-		// Современная библиотека медиафайлов для постера события — только для event.
+		// Библиотека медиафайлов для метабокса постера события — только для event.
+		// Нужна штатному flow ядра (wp.media.featuredImage).
 		if ( 'event' === $screen->post_type ) {
 			wp_enqueue_media();
 
-			$inline_js = <<<IDPG_JS
-(function(){
-  function idpgSetPoster(){
-    if(typeof wp==='undefined'||!wp.media)return;
-    var frame=wp.media({
-      title:'Выберите постер события',
-      multiple:false,
-      library:{type:'image'},
-      button:{text:'Установить постер'}
-    });
-    frame.on('select',function(){
-      var attachment=frame.state().get('selection').first().toJSON();
-      if(!attachment||!attachment.id)return;
-      var thumbInput=document.getElementById('_thumbnail_id');
-      var thumbWrap=document.getElementById('postimagediv');
-      if(thumbInput){thumbInput.value=attachment.id;}
-      if(thumbWrap){
-        var inner=thumbWrap.querySelector('.inside');
-        if(inner){
-          var url=attachment.sizes&&attachment.sizes.thumbnail?attachment.sizes.thumbnail.url:attachment.url;
-          inner.innerHTML='<p class="js" style="text-align:center;margin:8px 0"><img src="'+url+'" style="max-width:100%;height:auto;border-radius:4px" /></p>'
-            +'<p style="text-align:center;margin:8px 0"><a href="#" id="idpg-remove-poster" style="color:#b32d2e;cursor:pointer">Удалить постер</a></p>';
-          var removeBtn=document.getElementById('idpg-remove-poster');
-          if(removeBtn){
-            removeBtn.addEventListener('click',function(ev){
-              ev.preventDefault();
-              if(thumbInput)thumbInput.value='-1';
-              inner.innerHTML='<p class="hide-if-no-js"><a href="#" id="set-post-thumbnail" class="thickbox">Задать постер</a></p><input type="hidden" id="_thumbnail_id" name="_thumbnail_id" value="-1" />';
-              document.getElementById('set-post-thumbnail').addEventListener('click',function(e){e.preventDefault();idpgSetPoster();});
-            });
-          }
-        }
-      }
-    });
-    frame.open();
-  }
-  document.addEventListener('click',function(e){
-    var a=e.target.closest('#set-post-thumbnail');
-    if(!a)return;
-    e.preventDefault();
-    idpgSetPoster();
-  },true);
-})();
-IDPG_JS;
-
 			// Выводим JS через admin_footer, так как idpg-editor — это CSS-хендл
 			// и wp_add_inline_script не работает со стилями.
-			add_action( 'admin_footer', function() use ( $inline_js ) {
-				echo '<script>' . $inline_js . '</script>';
+			add_action( 'admin_footer', function() {
 				// Организатору — скрыть "Добавить" для возраста/города, но оставить для категорий (может создавать свои).
 				if ( current_user_can( 'event_organizer' ) && ! current_user_can( 'manage_categories' ) ) {
 					echo '<script>(function(){["age_rating","city"].forEach(function(t){var a=document.getElementById(t+"-adder");if(a)a.style.display="none";var b=document.querySelector("#"+t+"div .category-add, #tagsdiv-"+t+" .category-add");if(b)b.style.display="none";});})();</script>';

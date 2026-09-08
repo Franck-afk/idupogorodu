@@ -12,13 +12,13 @@
 		<?php the_title( sprintf( '<h2 class="entry-title"><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h2>' ); ?>
 	</header>
 
-	<?php if ( has_post_thumbnail() ) : ?>
-		<div class="event-thumbnail">
-			<a href="<?php echo esc_url( get_permalink() ); ?>">
-				<?php the_post_thumbnail( 'medium' ); ?>
-			</a>
-		</div>
-	<?php endif; ?>
+<?php if ( IDPG_Media::idpg_get_poster_id( get_the_ID() ) ) : ?>
+	<div class="event-thumbnail">
+		<a href="<?php echo esc_url( get_permalink() ); ?>">
+			<?php echo IDPG_Media::idpg_get_poster( get_the_ID(), 'medium' ); ?>
+		</a>
+	</div>
+<?php endif; ?>
 
 	<div class="entry-summary">
 		<?php the_excerpt(); ?>
