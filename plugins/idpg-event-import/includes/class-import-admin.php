@@ -63,18 +63,19 @@ class IDPG_Import_Admin {
 	}
 
 	/**
-	 * Пункт подменю внутри меню idpg-core.
+	 * Отдельный пункт главного меню (не подменю idpg-core).
 	 *
 	 * @return void
 	 */
 	public function register_menu() {
-		add_submenu_page(
-			'idpg-settings', // PAGE_SLUG ядра.
+		add_menu_page(
 			__( 'Импорт событий', 'idpg-event-import' ),
 			__( 'Импорт событий', 'idpg-event-import' ),
 			'manage_options',
 			self::PAGE_SLUG,
-			array( $this, 'render_page' )
+			array( $this, 'render_page' ),
+			'dashicons-calendar-alt',
+			30
 		);
 	}
 
