@@ -30,6 +30,11 @@ class IDPG_Import_Admin {
 	const PAGE_SLUG = 'idpgei-sources';
 
 	/**
+	 * Slug страницы документации.
+	 */
+	const DOCS_SLUG = 'idpgei-docs';
+
+	/**
 	 * Действие ручного запуска.
 	 */
 	const RUN_ACTION = 'idpgei_run_now';
@@ -60,6 +65,30 @@ class IDPG_Import_Admin {
 		add_action( 'admin_post_' . self::RUN_ACTION, array( $this, 'handle_run_now' ) );
 		add_action( 'admin_post_idpgei_save_source', array( $this, 'handle_save_source' ) );
 		add_action( 'admin_post_idpgei_delete_source', array( $this, 'handle_delete_source' ) );
+		add_action( 'admin_init', array( $this, 'maybe_serve_raw_readme' ) );
+	}
+
+	/**
+	 * Отдать README.md как текст, если запрошена страница документации с ?raw=1.
+	 *
+	 * @return void
+	 */
+	public function maybe_serve_raw_readme() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( self::DOCS_SLUG !== $page ) {
+			return;
+		}
+
+		$raw = isset( $_GET['raw'] ) ? sanitize_key( wp_unslash( $_GET['raw'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( '1' === $raw ) {
+			$this->serve_raw_readme();
+		}
 	}
 
 	/**
@@ -77,6 +106,15 @@ class IDPG_Import_Admin {
 			'dashicons-calendar-alt',
 			30
 		);
+
+		add_submenu_page(
+			self::PAGE_SLUG,
+			__( 'Документация', 'idpg-event-import' ),
+			__( 'Документация', 'idpg-event-import' ),
+			'manage_options',
+			self::DOCS_SLUG,
+			array( $this, 'render_docs_page' )
+		);
 	}
 
 	/**
@@ -86,6 +124,15 @@ class IDPG_Import_Admin {
 	 */
 	public static function page_url() {
 		return admin_url( 'admin.php?page=' . self::PAGE_SLUG );
+	}
+
+	/**
+	 * URL страницы документации.
+	 *
+	 * @return string
+	 */
+	public static function docs_url() {
+		return admin_url( 'admin.php?page=' . self::DOCS_SLUG );
 	}
 
 	/**
@@ -107,7 +154,12 @@ class IDPG_Import_Admin {
 		$editing = $edit ? $importer->get_source( $edit ) : null;
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Импорт событий с площадок партнёров', 'idpg-event-import' ); ?></h1>
+			<h1>
+				<?php esc_html_e( 'Импорт событий с площадок партнёров', 'idpg-event-import' ); ?>
+				<a class="page-title-action" href="<?php echo esc_url( self::docs_url() ); ?>">
+					<?php esc_html_e( 'Документация', 'idpg-event-import' ); ?>
+				</a>
+			</h1>
 
 			<?php if ( $msg ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php echo esc_html( $msg ); ?></p></div>
@@ -393,6 +445,121 @@ class IDPG_Import_Admin {
 		IDPG_Event_Import::instance()->delete_source( $source_id );
 
 		wp_safe_redirect( add_query_arg( 'idpgei_msg', rawurlencode( __( 'Источник удалён. Импортированные события остались.', 'idpg-event-import' ) ), self::page_url() ) );
+		exit;
+	}
+
+	/**
+	 * Рендер страницы документации (справка в админке).
+	 *
+	 * @return void
+	 */
+	public function render_docs_page() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Недостаточно прав.', 'idpg-event-import' ) );
+		}
+
+		$readme_path = IDPGEI_DIR . 'README.md';
+		$has_readme  = file_exists( $readme_path );
+		?>
+		<div class="wrap about-wrap">
+			<h1><?php esc_html_e( 'Импорт событий — документация', 'idpg-event-import' ); ?></h1>
+			<p class="description">
+				<?php esc_html_e( 'Как подключить партнёра, настроить REST/iCal источник, импортировать вручную и по расписанию, а также расширить плагин.', 'idpg-event-import' ); ?>
+			</p>
+
+			<?php if ( $has_readme ) : ?>
+				<p>
+					<a class="button button-secondary" href="<?php echo esc_url( self::docs_url() . '&raw=1' ); ?>" target="_blank" rel="noopener">
+						<?php esc_html_e( 'Открыть полный README.md (Markdown)', 'idpg-event-import' ); ?>
+					</a>
+				</p>
+			<?php endif; ?>
+
+			<hr />
+
+			<h2><?php esc_html_e( 'Быстрый старт', 'idpg-event-import' ); ?></h2>
+			<ol>
+				<li><?php esc_html_e( 'Откройте «Импорт событий» и добавьте источник партнёра.', 'idpg-event-import' ); ?></li>
+				<li><?php esc_html_e( 'Проверьте настройку без записи в БД: wp idpgei test <id>.', 'idpg-event-import' ); ?></li>
+				<li><?php esc_html_e( 'Запустите первый импорт кнопкой «Импортировать» или wp idpgei import <id>.', 'idpg-event-import' ); ?></li>
+				<li><?php esc_html_e( 'Проверьте события в «События → Все события» (по умолчанию — черновики).', 'idpg-event-import' ); ?></li>
+			</ol>
+
+			<h2><?php esc_html_e( 'Типы источников', 'idpg-event-import' ); ?></h2>
+			<ul>
+				<li><strong><?php esc_html_e( 'JSON REST API', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'пагинация по страницам, Bearer-авторизация, настраиваемый путь к списку (list_path) и маппинг полей (field_map).', 'idpg-event-import' ); ?></li>
+				<li><strong><?php esc_html_e( 'iCal (.ics)', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'календарные ленты по RFC 5545: VEVENT, unfold строк, DTSTART/DTEND, SUMMARY, LOCATION, URL.', 'idpg-event-import' ); ?></li>
+			</ul>
+
+			<h2><?php esc_html_e( 'Ключевые поля конфига', 'idpg-event-import' ); ?></h2>
+			<table class="widefat striped" style="max-width:720px">
+				<thead>
+					<tr><th><?php esc_html_e( 'Поле', 'idpg-event-import' ); ?></th><th><?php esc_html_e( 'Назначение', 'idpg-event-import' ); ?></th></tr>
+				</thead>
+				<tbody>
+					<tr><td><code>source_id</code></td><td><?php esc_html_e( 'Уникальный slug (латиница).', 'idpg-event-import' ); ?></td></tr>
+					<tr><td><code>provider</code></td><td><?php esc_html_e( 'rest | ical.', 'idpg-event-import' ); ?></td></tr>
+					<tr><td><code>endpoint</code></td><td><?php esc_html_e( 'URL API или .ics (только http/https).', 'idpg-event-import' ); ?></td></tr>
+					<tr><td><code>list_path</code></td><td><?php esc_html_e( 'Путь к массиву событий в JSON: пусто | data | data.items.', 'idpg-event-import' ); ?></td></tr>
+					<tr><td><code>field_map</code></td><td><?php esc_html_e( 'Имена полей партнёра → наши (json).', 'idpg-event-import' ); ?></td></tr>
+					<tr><td><code>city_term</code></td><td><?php esc_html_e( 'Город по умолчанию для всех событий источника.', 'idpg-event-import' ); ?></td></tr>
+					<tr><td><code>organizer_id</code></td><td><?php esc_html_e( 'Автор (определяет права организатора).', 'idpg-event-import' ); ?></td></tr>
+					<tr><td><code>post_status</code></td><td><?php esc_html_e( 'draft | publish | pending.', 'idpg-event-import' ); ?></td></tr>
+					<tr><td><code>schedule</code></td><td><?php esc_html_e( 'Период автоимпорта, сек (900…604800).', 'idpg-event-import' ); ?></td></tr>
+					<tr><td><code>overwrite</code></td><td><?php esc_html_e( 'Перезаписывать заголовок/описание при изменении в API.', 'idpg-event-import' ); ?></td></tr>
+				</tbody>
+			</table>
+
+			<h2><?php esc_html_e( 'Дедупликация и политики', 'idpg-event-import' ); ?></h2>
+			<p>
+				<?php esc_html_e( 'Событие уникально по паре «источник + внешний ID» (_idpg_source + _idpg_external_id). Повторные прогоны обновляют существующие события, а не создают дубли. Обязательные поля: title, starts_at, external_id — без них событие пропускается.', 'idpg-event-import' ); ?>
+			</p>
+
+			<h2><?php esc_html_e( 'Автоимпорт (cron)', 'idpg-event-import' ); ?></h2>
+			<p>
+				<?php esc_html_e( 'Единый хук idpgei_cron_import (раз в час) обрабатывает источники, у которых наступило время (last_run + schedule). Для строгого расписания настройте системный cron на wp-cron.php.', 'idpg-event-import' ); ?>
+			</p>
+
+			<h2><?php esc_html_e( 'WP-CLI', 'idpg-event-import' ); ?></h2>
+			<pre style="max-width:720px"><code>wp idpgei sources
+wp idpgei test &lt;source-id&gt;
+wp idpgei import &lt;source-id&gt; [--force]
+wp idpgei import --all [--force]</code></pre>
+
+			<h2><?php esc_html_e( 'Расширение', 'idpg-event-import' ); ?></h2>
+			<p>
+				<?php esc_html_e( 'Доступны фильтры idpgei_http_transport и idpgei_provider_class (кастомные провайдеры) и действие idpgei_import_completed. Подробности — в README.', 'idpg-event-import' ); ?>
+			</p>
+
+			<?php if ( $has_readme ) : ?>
+				<p>
+					<a class="button button-secondary" href="<?php echo esc_url( self::docs_url() . '&raw=1' ); ?>" target="_blank" rel="noopener">
+						<?php esc_html_e( 'Полная документация (README.md)', 'idpg-event-import' ); ?>
+					</a>
+				</p>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Отдать содержимое README.md как текст (для вывода в браузере).
+	 *
+	 * Используется параметром ?raw=1 на странице документации.
+	 *
+	 * @return void
+	 */
+	public function serve_raw_readme() {
+		$readme_path = IDPGEI_DIR . 'README.md';
+
+		if ( ! file_exists( $readme_path ) ) {
+			wp_die( esc_html__( 'Файл README.md не найден.', 'idpg-event-import' ) );
+		}
+
+		$content = (string) file_get_contents( $readme_path );
+
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- текстовый Markdown для просмотра.
 		exit;
 	}
 }
