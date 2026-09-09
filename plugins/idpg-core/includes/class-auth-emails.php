@@ -187,7 +187,6 @@ class IDPG_Auth_Emails {
 	 * Содержит разный текст для обычных пользователей и организаторов.
 	 * Для организаторов (роль event_organizer) собирается отдельный HTML-шаблон
 	 * с данными для входа и ссылкой на страницу авторизации.
-	 *
 	 * @param int $user_id ID нового пользователя.
 	 * @return void
 	 */
@@ -305,7 +304,7 @@ class IDPG_Auth_Emails {
 		<td align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:40px 32px 36px;border-radius:0 0 16px 16px;">
 			<h1 style="margin:0 0 12px;font-size:26px;line-height:1.3;font-weight:800;color:#1a2332;letter-spacing:-0.3px;">Добро пожаловать, <?php echo esc_html( $display_name ?: $email ); ?>!</h1>
 			<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#5a6473;">Ваш кабинет организатора на платформе <strong style="color:#1a2332;">IDU POGORODU</strong> создан. Теперь вы можете публиковать мероприятия, получать заявки и следить за посещаемостью — всё в одном месте.</p>
-			<p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#5a6473;">Ниже — данные для входа и все доступные способы авторизации.</p>
+			<p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#5a6473;">Ниже — данные для входа.</p>
 
 			<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:440px;width:100%;margin:0 auto 24px;">
 				<tr>
@@ -320,9 +319,9 @@ class IDPG_Auth_Emails {
 			<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:440px;width:100%;margin:0 auto 26px;">
 				<tr>
 					<td align="left" style="padding:2px 24px;">
-						<p style="margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#8a94a6;">Способы входа</p>
-						<p style="margin:0 0 10px;font-size:15px;line-height:1.6;color:#5a6473;">🔑&nbsp; По паролю — email и пароль из блока выше</p>
-						<p style="margin:0;font-size:15px;line-height:1.6;color:#5a6473;">📧&nbsp; По ссылке из письма — переход по ссылке ниже</p>
+						<p style="margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#8a94a6;">Как войти</p>
+						<p style="margin:0 0 10px;font-size:15px;line-height:1.6;color:#5a6473;">🔑&nbsp; Войдите на сайте по email и паролю из блока выше</p>
+						<p style="margin:0;font-size:15px;line-height:1.6;color:#5a6473;">Кнопка ниже просто откроет страницу входа — залогиниться можно только по паролю.</p>
 					</td>
 				</tr>
 			</table>
