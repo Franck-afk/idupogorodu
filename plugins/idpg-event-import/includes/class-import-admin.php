@@ -66,6 +66,26 @@ class IDPG_Import_Admin {
 		add_action( 'admin_post_idpgei_save_source', array( $this, 'handle_save_source' ) );
 		add_action( 'admin_post_idpgei_delete_source', array( $this, 'handle_delete_source' ) );
 		add_action( 'admin_init', array( $this, 'maybe_serve_raw_readme' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_docs_assets' ) );
+	}
+
+	/**
+	 * Подключить стили страницы документации (только на этой странице).
+	 *
+	 * @param string $hook_suffix Текущая страница админки.
+	 * @return void
+	 */
+	public function enqueue_docs_assets( $hook_suffix ) {
+		if ( self::DOCS_SLUG !== $hook_suffix ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'idpgei-admin-docs',
+			IDPGEI_URL . 'assets/css/admin-docs.css',
+			array(),
+			IDPGEI_VERSION
+		);
 	}
 
 	/**
@@ -461,73 +481,82 @@ class IDPG_Import_Admin {
 		$readme_path = IDPGEI_DIR . 'README.md';
 		$has_readme  = file_exists( $readme_path );
 		?>
-		<div class="wrap about-wrap">
-			<h1><?php esc_html_e( 'Импорт событий — как это работает', 'idpg-event-import' ); ?></h1>
-			<p class="description">
-				<?php esc_html_e( 'Этот плагин сам забирает ваши события с сайтов партнёров и добавляет их на афишу. Разберёмся, как всё настроить, по-простому.', 'idpg-event-import' ); ?>
-			</p>
+		<div class="wrap about-wrap idpgei-docs">
 
-			<?php if ( $has_readme ) : ?>
-				<p>
-					<a class="button button-secondary" href="<?php echo esc_url( self::docs_url() . '&raw=1' ); ?>" target="_blank" rel="noopener">
-						<?php esc_html_e( 'Технические подробности (README)', 'idpg-event-import' ); ?>
-					</a>
+			<div class="idpgei-docs__hero">
+				<h1><?php esc_html_e( 'Импорт событий — как это работает', 'idpg-event-import' ); ?></h1>
+				<p class="idpgei-docs__lead">
+					<?php esc_html_e( 'Этот плагин сам забирает ваши события с сайтов партнёров и добавляет их на афишу. Разберёмся, как всё настроить, по-простому.', 'idpg-event-import' ); ?>
 				</p>
-			<?php endif; ?>
 
-			<hr />
+				<?php if ( $has_readme ) : ?>
+					<p class="idpgei-docs__actions">
+						<a class="button button-secondary" href="<?php echo esc_url( self::docs_url() . '&raw=1' ); ?>" target="_blank" rel="noopener">
+							<?php esc_html_e( 'Технические подробности (README)', 'idpg-event-import' ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
+			</div>
 
-			<h2><?php esc_html_e( 'Что нужно сделать, чтобы события появились', 'idpg-event-import' ); ?></h2>
-			<ol>
-				<li><?php esc_html_e( 'Откройте «Импорт событий» и нажмите «Новый источник». Это как объявить: «есть партнёр, следите за ним».', 'idpg-event-import' ); ?></li>
-				<li><?php esc_html_e( 'Укажите, откуда брать события — ссылку на сайт партнёра (REST) или на календарь (iCal).', 'idpg-event-import' ); ?></li>
-				<li><?php esc_html_e( 'Нажмите кнопку «Импортировать», чтобы плагин забрал события прямо сейчас.', 'idpg-event-import' ); ?></li>
-				<li><?php esc_html_e( 'Проверьте результат в разделе «События» — новые события появятся там как черновики и дождутся вашей проверки.', 'idpg-event-import' ); ?></li>
-				<li><?php esc_html_e( 'Дальше плагин обновляет события сам, по расписанию. Вам остаётся только вовремя их проверять.', 'idpg-event-import' ); ?></li>
-			</ol>
+			<div class="idpgei-docs__section">
+				<h2 class="idpgei-docs__title"><?php esc_html_e( 'Что нужно сделать, чтобы события появились', 'idpg-event-import' ); ?></h2>
+				<ol class="idpgei-docs__steps">
+					<li><span><?php esc_html_e( 'Откройте «Импорт событий» и нажмите «Новый источник». Это как объявить: «есть партнёр, следите за ним».', 'idpg-event-import' ); ?></span></li>
+					<li><span><?php esc_html_e( 'Укажите, откуда брать события — ссылку на сайт партнёра (REST) или на календарь (iCal).', 'idpg-event-import' ); ?></span></li>
+					<li><span><?php esc_html_e( 'Нажмите кнопку «Импортировать», чтобы плагин забрал события прямо сейчас.', 'idpg-event-import' ); ?></span></li>
+					<li><span><?php esc_html_e( 'Проверьте результат в разделе «События» — новые события появятся там как черновики и дождутся вашей проверки.', 'idpg-event-import' ); ?></span></li>
+					<li><span><?php esc_html_e( 'Дальше плагин обновляет события сам, по расписанию. Вам остаётся только вовремя их проверять.', 'idpg-event-import' ); ?></span></li>
+				</ol>
+			</div>
 
-			<h2><?php esc_html_e( 'Откуда можно брать события', 'idpg-event-import' ); ?></h2>
-			<ul>
-				<li><strong><?php esc_html_e( 'Сайт партнёра (REST)', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'если у партнёра есть специальная страница-«выдача» событий. Подходит, когда событий много и они регулярно обновляются.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'Календарь (iCal)', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'обычная календарная лента с сайта партнёра. Проще всего: партнёр даёт ссылку на свой календарь, и мы берём оттуда мероприятия.', 'idpg-event-import' ); ?></li>
-			</ul>
+			<div class="idpgei-docs__section">
+				<h2 class="idpgei-docs__title"><?php esc_html_e( 'Откуда можно брать события', 'idpg-event-import' ); ?></h2>
+				<ul class="idpgei-docs__list">
+					<li><strong><?php esc_html_e( 'Сайт партнёра (REST)', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'если у партнёра есть специальная страница-«выдача» событий. Подходит, когда событий много и они регулярно обновляются.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'Календарь (iCal)', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'обычная календарная лента с сайта партнёра. Проще всего: партнёр даёт ссылку на свой календарь, и мы берём оттуда мероприятия.', 'idpg-event-import' ); ?></li>
+				</ul>
+			</div>
 
-			<h2><?php esc_html_e( 'Что заполнить при создании источника', 'idpg-event-import' ); ?></h2>
-			<ul>
-				<li><strong><?php esc_html_e( 'Название и короткий ID', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'просто чтобы вы понимали, что это за партнёр.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'Ссылка на события', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'адрес, откуда плагин будет брать данные.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'API-ключ', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'специальный «пароль доступа», если партнёр его выдал. Обычно не нужен.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'Город', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'если у партнёра город не приходит сам, выберите его здесь.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'Автор (организатор)', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'какой сотрудник будет «владельцем» этих событий. Важно, потому что даёт этому человеку права на них.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'Статус публикации', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'сначала лучше «Черновик», чтобы посмотреть, всё ли верно, а потом можно «Публиковать сразу».', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'Как часто обновлять', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'как часто плагин будет проверять, не изменилось ли что-то у партнёра.', 'idpg-event-import' ); ?></li>
-			</ul>
+			<div class="idpgei-docs__section">
+				<h2 class="idpgei-docs__title"><?php esc_html_e( 'Что заполнить при создании источника', 'idpg-event-import' ); ?></h2>
+				<ul class="idpgei-docs__list">
+					<li><strong><?php esc_html_e( 'Название и короткий ID', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'просто чтобы вы понимали, что это за партнёр.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'Ссылка на события', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'адрес, откуда плагин будет брать данные.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'API-ключ', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'специальный «пароль доступа», если партнёр его выдал. Обычно не нужен.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'Город', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'если у партнёра город не приходит сам, выберите его здесь.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'Автор (организатор)', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'какой сотрудник будет «владельцем» этих событий. Важно, потому что даёт этому человеку права на них.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'Статус публикации', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'сначала лучше «Черновик», чтобы посмотреть, всё ли верно, а потом можно «Публиковать сразу».', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'Как часто обновлять', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'как часто плагин будет проверять, не изменилось ли что-то у партнёра.', 'idpg-event-import' ); ?></li>
+				</ul>
+			</div>
 
-			<h2><?php esc_html_e( 'Почему события не дублируются', 'idpg-event-import' ); ?></h2>
-			<p>
-				<?php esc_html_e( 'У каждого события есть свой номер. Если плагин видит, что такое событие уже было, он просто обновляет его, а не создаёт второе. Так что при каждом новом запуске список не разрастается.', 'idpg-event-import' ); ?>
-			</p>
+			<div class="idpgei-docs__section idpgei-docs__section--highlight">
+				<h2 class="idpgei-docs__title"><?php esc_html_e( 'Почему события не дублируются', 'idpg-event-import' ); ?></h2>
+				<p><?php esc_html_e( 'У каждого события есть свой номер. Если плагин видит, что такое событие уже было, он просто обновляет его, а не создаёт второе. Так что при каждом новом запуске список не разрастается.', 'idpg-event-import' ); ?></p>
+			</div>
 
-			<h2><?php esc_html_e( 'Что делать, если что-то не получилось', 'idpg-event-import' ); ?></h2>
-			<ul>
-				<li><strong><?php esc_html_e( 'Событий нет вовсе', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'проверьте, что ссылка на события верная и доступ к сайту партнёра работает.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'Часть событий пропущена', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'плагин пропускает то, что похоже на черновик партнёра: без названия, без даты или без номера. Это нормально.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'События появились, но без города или категории', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'нужно, чтобы такой город/категория уже существовали на сайте. Добавьте их вручную, и при следующем обновлении они подтянутся.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'Дата сбилась на несколько часов', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'мы храним время так, как указал партнёр. Если у него другой часовой пояс, поправьте настройки — напишите нам, подскажем.', 'idpg-event-import' ); ?></li>
-				<li><strong><?php esc_html_e( 'Картинка к событию не появилась', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'проверьте, что ссылка на картинку открывается в браузере. Если у события уже есть своя картинка, новая не ставится — так задумано.', 'idpg-event-import' ); ?></li>
-			</ul>
+			<div class="idpgei-docs__section">
+				<h2 class="idpgei-docs__title"><?php esc_html_e( 'Что делать, если что-то не получилось', 'idpg-event-import' ); ?></h2>
+				<ul class="idpgei-docs__list idpgei-docs__list--faq">
+					<li><strong><?php esc_html_e( 'Событий нет вовсе', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'проверьте, что ссылка на события верная и доступ к сайту партнёра работает.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'Часть событий пропущена', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'плагин пропускает то, что похоже на черновик партнёра: без названия, без даты или без номера. Это нормально.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'События появились, но без города или категории', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'нужно, чтобы такой город/категория уже существовали на сайте. Добавьте их вручную, и при следующем обновлении они подтянутся.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'Дата сбилась на несколько часов', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'мы храним время так, как указал партнёр. Если у него другой часовой пояс, поправьте настройки — напишите нам, подскажем.', 'idpg-event-import' ); ?></li>
+					<li><strong><?php esc_html_e( 'Картинка к событию не появилась', 'idpg-event-import' ); ?></strong> — <?php esc_html_e( 'проверьте, что ссылка на картинку открывается в браузере. Если у события уже есть своя картинка, новая не ставится — так задумано.', 'idpg-event-import' ); ?></li>
+				</ul>
+			</div>
 
-			<h2><?php esc_html_e( 'Обновление по расписанию', 'idpg-event-import' ); ?></h2>
-			<p>
-				<?php esc_html_e( 'Плагин сам проверяет обновления примерно раз в час, если сайт посещается. Если нужно, чтобы всё обновлялось строго вовремя (например, для продаж билетов), лучше добавить системную задачу на сервере — напишите нам, поможем настроить.', 'idpg-event-import' ); ?>
-			</p>
+			<div class="idpgei-docs__section">
+				<h2 class="idpgei-docs__title"><?php esc_html_e( 'Обновление по расписанию', 'idpg-event-import' ); ?></h2>
+				<p><?php esc_html_e( 'Плагин сам проверяет обновления примерно раз в час, если сайт посещается. Если нужно, чтобы всё обновлялось строго вовремя (например, для продаж билетов), лучше добавить системную задачу на сервере — напишите нам, поможем настроить.', 'idpg-event-import' ); ?></p>
+			</div>
 
 			<?php if ( $has_readme ) : ?>
-				<p>
+				<div class="idpgei-docs__footer">
 					<a class="button button-secondary" href="<?php echo esc_url( self::docs_url() . '&raw=1' ); ?>" target="_blank" rel="noopener">
 						<?php esc_html_e( 'Полные технические подробности', 'idpg-event-import' ); ?>
 					</a>
-				</p>
+				</div>
 			<?php endif; ?>
 		</div>
 		<?php
