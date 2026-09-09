@@ -111,6 +111,7 @@ require_once IDPG_CORE_DIR . 'includes/class-event-calendar-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-expected-events-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-user-purge.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-page.php';
+require_once IDPG_CORE_DIR . 'includes/class-dashboard-stats.php';
 // Интеграция с Rank Math SEO (schema/OG; работает только при активном Rank Math).
 require_once IDPG_CORE_DIR . 'includes/class-seo-integration.php';
 /**
@@ -135,6 +136,9 @@ function idpg_core_init() {
 	IDPG_Auth_Emails::instance();
 	IDPG_Maintenance::instance();
 	IDPG_Settings_Page::instance();
+
+	// Статистика проекта на dashboard (админ / организатор).
+	IDPG_Dashboard_Stats::instance();
 
 	// Страница доуполнения анкеты организатора /organizer/complete/.
 	IDPG_Organizer_Page::init();
