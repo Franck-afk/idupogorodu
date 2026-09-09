@@ -64,6 +64,7 @@ wp idpgei test <source-id>
 | `post_status` | строка | `draft` | `draft` (модерация), `publish` (сразу) или `pending`. |
 | `schedule` | секунды | `21600` | Период автоимпорта: 900 … 604800 (15 мин … 7 дней). |
 | `overwrite` | bool | `false` | Перезаписывать ли заголовок и описание при изменении в API. |
+| `auto_publish` | bool | `false` | Объявлен в дефолтах и санитизируется, но в админ-форме не выводится и поведением не управляет (см. «Справка по полям» в разделе «Расширяемость»). |
 | `create_missing_venues` | bool | `false` | Создавать ли площадки, если не найдены по названию. |
 
 Служебные поля (проставляет ядро, заполняются после прогона): `last_run`, `last_status` (`ok`/`error`), `last_error`, `stats` (`created`/`updated`/`skipped`/`errors`).
@@ -90,7 +91,9 @@ wp idpgei test <source-id>
 
 Запрос: `GET <endpoint>?<page_param>=<номер страницы>` с заголовком `Accept: application/json` и, при наличии ключа, `Authorization: Bearer <api_key>`.
 
-Пагинация — по номеру страницы. Максимум **20 страниц** за прогон (защита от бесконечной пагинации); `idpg-event-import` дополнительно ограничивает **500 событий** на источник за прогон (`RUN_LIMIT`, `includes/class-event-import.php:41`).
+Пагинация — по номеру страницы (`page_param`, по умолчанию `page`). Реальным ограничением прогона является **`RUN_LIMIT = 500` событий** на источник (`includes/class-event-import.php:41`): ядро итерирует страницы, пока не соберёт 500 элементов или не получит пустую страницу. В `class-provider-rest.php` объявлена константа `MAX_PAGES = 20`, однако на практике ограничение по числу страниц в цикле ядра не применяется — лимит срабатывает по общему числу событий; это сделано, чтобы страницы с большими объёмами не обрывались преждевременно. Пагинация прекращается на первой пустой странице (пустой массив списка).
+
+> **Важно для партнёров REST**: если API отдаёт одно и то же при запросе следующей страницы (некорректная пагинация), за прогон будет обработано до 500 одинаковых записей с дедупликацией по `external_id` (они попадут в `updated`/`skipped`, а не задвоятся). После первого пустого ответа страницы прогон завершается.
 
 #### Где искать список событий (`list_path`)
 
@@ -174,6 +177,203 @@ wp idpgei test <source-id>
 - iCal **не пагинируется** — вся лента отдаётся за один запрос.
 
 Одно событие в результате = один `VEVENT`. События без заголовка пропускаются на этапе парсера.
+
+---
+
+## Чек-лист подключения партнёра
+
+Пошагово, от получения доступа до первого импорта:
+
+1. **Получите от партнёра** формат выдачи: JSON REST API или iCal-лента.
+   - Для REST уточните: URL endpoint, параметр страницы, авторизация (Bearer?),
+     имена полей (дата, цена, билеты, площадка), как помечены отменённые события.
+   - Для iCal — только URL `.ics` (если защищён, может потребоваться код или валидный referer).
+2. **Создайте источник** в админке («Иду по городу → Импорт событий»):
+   - ID (slug) — латиницей, например `kassir` или `park-gorkogo`.
+   - Тип (REST/iCal), endpoint, при необходимости Bearer-ключ.
+   - Для REST — `list_path` и `page_param` по фактической структуре ответа (см. «Полный пример»).
+   - Город по умолчанию (если у партнёра город не приходит — задайте терм здесь).
+   - Автор (организатор) — важный шаг: от него зависят права доступа организаторов.
+   - Статус публикаций: сначала `draft`, чтобы события прошли модерацию.
+   - Частота автоимпорта и политики (overwrite / создание площадок).
+3. **Проверьте без записи в БД**:
+   ```bash
+   wp idpgei test kassir
+   ```
+   Вы увидите «Получено элементов: N» и первые валидные события с их датами и
+   `external_id`. Если элементов 0 или «пропущен» — проверьте `list_path` и имена полей.
+   Любые нестандартные имена полей решаются через `field_map` в опции источника
+   (см. «Полный пример», «Расширяемость»).
+4. **Выполните первый импорт вручную**:
+   ```bash
+   wp idpgei import kassir          # или кнопка «Импортировать» в админке
+   ```
+   Статус: «новых: N, обновлено: 0, пропущено: M, ошибок: 0».
+5. **Проверьте события**: «События → Все события» — черновики должны быть
+   с датой, ценой, билетами, площадкой, городом, категорией, постером.
+   Пропущенные (`skipped`) — это пустые `title`/`starts_at`/`external_id`.
+6. **Если всё ок** — при необходимости переключите источник на `publish`
+   (публиковать сразу) и установите частоту. Cron «раз в час» подхватит сам.
+
+---
+
+## Полный пример: REST-партнёр
+
+Допустим, партнёр отдаёт следующий JSON по `https://api.partner.ru/v2/events`:
+
+```json
+{
+  "result": {
+    "items": [
+      {
+        "event_id": "ev_1024",
+        "title": "Концерт группы «Апельсин»",
+        "annot": "Живое выступление в центре города.",
+        "date_from": "2026-09-10T19:00:00+03:00",
+        "date_to": "2026-09-10T22:30:00+03:00",
+        "stage_name": "Клуб «Космос»",
+        "stage_addr": "Москва, ул. Тверская 20",
+        "min_price": "от 1200 ₽",
+        "max_price": "от 4500 ₽",
+        "tickets": "https://api.partner.ru/buy/ev_1024",
+        "state": "active",
+        "img": "https://cdn.partner.ru/ev_1024.jpg",
+        "genre": "Концерт"
+      }
+    ]
+  }
+}
+```
+
+Поля **не совпадают** с нашими синонимами по умолчанию, а список лежит не в
+`data`, а в `result.items`. Настройка источника:
+
+| Настройка | Значение | Основание |
+|---|---|---|
+| `list_path` | `result.items` | список событий лежит в `result → items` |
+| `page_param` | `page` | пагинация по строкам `?page=N` (по умолчанию) |
+| `field_map` | см. ниже | имена `event_id`, `annot`, `date_from` … отличаются от типовых |
+
+`field_map` для этого API:
+
+```json
+{
+  "external_id": "event_id",
+  "description": "annot",
+  "starts_at": "date_from",
+  "ends_at": "date_to",
+  "venue_name": "stage_name",
+  "venue_address": "stage_addr",
+  "price_min": "min_price",
+  "price_max": "max_price",
+  "buy_url": "tickets",
+  "status": "state",
+  "image": "img",
+  "category": "genre"
+}
+```
+
+(Поля `title` в маппинге нет — заголовок ищется по синонимам `title|name|summary` и в нашем примере совпадает с `title`.)
+
+В поле `api_key` укажите Bearer-токен, если API требует авторизацию.
+
+Пример токена не сохраняется в открытом виде (поле ввода типа password в админке, при правке пустое поле = сохранить старый ключ).
+
+---
+
+## Полный пример: iCal-партнёр
+
+Input `.ics` (свёрнутые строки разворачиваются, `VTIMEZONE` игнорируется):
+
+```
+BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+UID:20260910@partner.ru
+DTSTART;TZID=Europe/Moscow:20260910T190000
+DTEND:20260910T223000
+SUMMARY:Спектакль «Три сестры»
+DESCRIPTION:Премьера в театре.
+LOCATION:Театр драмы
+URL:https://partner.ru/buy/20260910
+END:VEVENT
+END:VCALENDAR
+```
+
+Записи в `idpgei_sources`:
+
+```json
+{
+  "source_id": "teatr",
+  "name": "Театр драмы",
+  "provider": "ical",
+  "endpoint": "https://partner.ru/feed.ics",
+  "list_path": "data",
+  "page_param": "page",
+  "field_map": {},
+  "defaults": { "city": "Москва" },
+  "city_term": 0,
+  "organizer_id": 3,
+  "post_status": "publish",
+  "schedule": 21600,
+  "overwrite": true,
+  "auto_publish": false,
+  "create_missing_venues": true
+}
+```
+
+Результат: событие `2026-09-10T19:00` на площадке «Театр драмы» (создастся,
+т.к. `create_missing_venues=true`), город «Москва» из дефолтов, статус `publish`.
+
+---
+
+## Справочник опции `idpgei_sources`
+
+Реестр хранится как `WP Option` с именем `idpgei_sources` — ассоциативный массив
+`source_id => конфиг`. Служебные поля дозаполняются ядром после каждого прогона.
+
+Полный формат одного источника:
+
+```json
+{
+  "source_id": "kassir",
+  "name": "Кассир.ру",
+  "provider": "rest",
+  "endpoint": "https://api.kassir.ru/v1/events",
+  "api_key": "секретный-bearer-токен",
+  "list_path": "data",
+  "page_param": "page",
+  "field_map": { "title": "eventName" },
+  "defaults": { "currency": "RUB", "city": "Москва" },
+  "city_term": 12,
+  "organizer_id": 5,
+  "post_status": "draft",
+  "schedule": 21600,
+  "overwrite": false,
+  "auto_publish": false,
+  "create_missing_venues": true,
+  "last_run": 1725000000,
+  "last_status": "ok",
+  "last_error": "",
+  "stats": { "created": 12, "updated": 3, "skipped": 1, "errors": 0 }
+}
+```
+
+| Служебное поле | Тип | Описание |
+|---|---|---|
+| `last_run` | int (unix ts) | момент последнего прогона |
+| `last_status` | string | `ok` или `error` |
+| `last_error` | string | текст ошибки (пусто = успех) |
+| `stats` | array | счётчики `created`/`updated`/`skipped`/`errors` |
+
+> `api_key` хранится как есть (без жёсткой санитизации — токены содержат
+> спецсимволы). Надёжно защищайте БД/бэкапы; ещё безопаснее — вторым способом
+> передавать ключ из секретов окружения через кастомный провайдер или фильтр
+> `idpgei_http_transport`.
+
+**Перемещение/бэкап**: бэкап делается экспортом/импортом этой опции (например,
+`wp option get idpgei_sources --format=json` / `wp option update idpgei_sources < json`).
+Сам плагин таблиц не создаёт — перенос сводится к копированию папки плагина + опции.
 
 ---
 
@@ -327,6 +527,72 @@ add_filter( 'idpgei_provider_class', function ( $class, $source ) {
 
 3. Маппинг полей выполняет `IDPG_Import_Mapper::map_event( $raw, $source )` — верните из `fetch_page()` массив «сырых» элементов с теми же ключами, что и REST-провайдер (`external_id`, `title`, `starts_at`, …) или используйте `field_map` источника.
 
+Полный пример провайдера, читающего CSV:
+
+```php
+class IDPGEI_Provider_CSV extends IDPG_Import_Provider {
+
+	public static function get_label() {
+		return 'CSV';
+	}
+
+	public static function get_slug() {
+		return 'csv';
+	}
+
+	public function fetch_page( $page ) {
+		if ( $page > 1 ) {
+			return array(); // CSV без пагинации — одна страница.
+		}
+
+		$response = $this->http_get( $this->source['endpoint'] );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$lines = array_filter( explode( "\n", wp_remote_retrieve_body( $response ) ) );
+		$items = array();
+
+		foreach ( $lines as $line ) {
+			$cols = str_getcsv( $line, ';' );
+			$items[] = array(
+				'external_id' => $cols[0],
+				'title'       => $cols[1],
+				'starts_at'   => $cols[2],
+				'is_free'     => '1' === $cols[3],
+			);
+		}
+
+		return $items;
+	}
+}
+
+add_filter( 'idpgei_provider_class', function ( $class, $source ) {
+	if ( isset( $source['provider'] ) && 'csv' === $source['provider'] ) {
+		return 'IDPGEI_Provider_CSV';
+	}
+	return $class;
+}, 10, 2 );
+```
+
+Затем создайте источник с типом `csv` (через `wp idpgei` нет прямого CLI-создания —
+добавьте через админку либо `IDPG_Event_Import::instance()->save_source()`) — и провайдер подхватится автоматически.
+
+### Точные сигнатуры хуков
+
+| Хук | Сигнатура колбэка |
+|---|---|
+| `idpgei_http_transport` | `function ( ?callable $transport, string $url )` — вернуть `callable(float $url, array $args)` или `null` для штатного похода. |
+| `idpgei_provider_class` | `function ( ?string $provider_class, array $source )` — вернуть FQCN класса-провайдера или `null`. |
+| `idpgei_import_completed` | `function ( string $source_id, array $stats )` — `$stats = ['created'=>int,'updated'=>int,'skipped'=>int,'errors'=>int]`. |
+
+> **Справка по ряду полей конфига** (`sanitize_source`):
+> - `schedule` приводится к интервалу `900 … 604800` сек (15 мин … 7 суток), меньший/больший — обрезается;
+> - `post_status` — только `draft` / `publish` / `pending`, иначе `draft`;
+> - `endpoint` — `esc_url_raw()` с разрешёнными `http`/`https`;
+> - `organization/auto_publish` — поле `auto_publish` объявлено в дефолтах и санитизируется, но в текущей версии админ-форма его не выводит и upsert им не управляется (логика публикации строится на `post_status` источника). Если вы включаете `auto_publish` напрямую в опции — учтите, что это не меняет поведение без доработки кода.
+
 ---
 
 ## Каталог файлов
@@ -360,6 +626,151 @@ $env:WP_TESTS_PHPUNIT_POLYFILLS_PATH = "D:\laragon\www\idupogorodu\wp-content\pl
 ```
 
 Покрытие: нормализация дат и статусов, `to_float`, iCal-парсер (unfold, VEVENT, DTSTART/DTEND), upsert/дедуп, политики `overwrite`, автосоздание площадок, термы, HTTP-ошибки, сквозной iCal-импорт.
+
+---
+
+## Поток импорта (как это работает)
+
+```
+Активация плагина
+   │
+   ▼
+Планируется cron-хук idpgei_cron_import (раз в час)
+   │
+   ▼  (каждый тик — WP cron / wp-cron.php)
+run_cron(): перебор всех источников
+   │  если last_run + schedule <= now() — берёмся за источник
+   ▼
+process_source(<id>)
+   │  1. get_source(<id>)            → конфиг из опции idpgei_sources
+   │  2. get_provider($source)       → REST | iCal | кастомный (через фильтр)
+   │  3. цикл страниц (1..50, но реальный лимит — 500 элементов):
+   │       fetch_page($page)
+   │         ├─ пустая страница       → break (страницы кончились)
+   │         ├─ WP_Error (стр. 1)     → finish_source_run(error); abort
+   │         └─ иначе: для каждого элемента
+   │              map_event($raw, $source)      → null? → skipped++
+   │              upsert_event($mapped, $source)→ created | updated | errors
+   │              (если total >= 500 → break 2)
+   ▼
+finish_source_run(): last_run/last_status/last_error/stats -> в опцию
+   ▼
+do_action('idpgei_import_completed', source_id, stats)
+```
+
+upsert_event() внутри:
+```
+find_existing(source_id, external_id)  // по _idpg_source + _idpg_external_id, любой статус
+   ├─ существует →
+   │    meta-поля: всегда
+   │    title/description: только если overwrite
+   │    если статус уже publish — не переводим в draft/pending
+   │    wp_update_post → 'updated'
+   └─ нет →
+        wp_insert_post (post_status источника) → 'created'
+затем: assign_terms (city, event_category) → sideload_poster (если image и нет миниатюры)
+```
+
+---
+
+## Частые вопросы и решение проблем
+
+**Импортируется 0 событий (test показывает «Получено элементов: 0»).**
+Скорее всего неверный `list_path` либо поле списка отсутствует. Сверьте
+структуру: `data`, `result.items`, `''` для корневого массива. Проверка через
+`wp idpgei test <id>` покажет текст ошибки «В ответе API не найден список событий».
+
+**События пропускаются (skipped), хотя данные на месте.**
+Причины: пустой `title`, пустой/нераспознанный `starts_at`, пустой `external_id`.
+Проверьте, что в ответе есть эти три поля и дата парсится (`normalize_date`).
+Имена полей партнёра, не совпадающие с синонимами, задайте через `field_map`.
+
+**События создаются, но без города/категории.**
+Город ставится из `city_term` источника или из названия города в API только
+**если существует терм с таким именем** в таксономии `city`. Категория — только
+по уже существующему терму `event_category`. Создайте недостающие термы вручную.
+
+**Дата сдвинулась на несколько часов.**
+Плагин **намеренно** хранит время «как заявлено» (без пересчёта таймзоны).
+Время с `+03:00` или `TZID` парсится как локальное. Если партнёр отдаёт время в
+другой зоне и нужна конвертация — правьте `IDPG_Import_Mapper::normalize_date()`.
+
+**События не публикуются, хотя источник на `publish`.**
+`publish` применим к **новым** событиям. Уже существующее **опубликованное**
+событие повторным прогоном не откатывается в `draft/pending`; но и источник,
+настроенный на `draft`, не «прижмёт» опубликованное событие — статус `publish`
+сохраняется.
+
+**Как убрать лишние события после удаления источника?**
+Удаление источника **не удаляет** импортированные события (сознательно). Чтобы
+удалить, используйте «События → Корзина» или расширение через хук
+`idpgei_import_completed`/кастомный код. Фильтрация по источнику — по мете
+`_idpg_source` (SQL/NVP: `meta_key=_idpg_source&meta_value=<source_id>`).
+
+**Импорт не запускается по расписанию.**
+WP-cron срабатывает только при посещении сайта. Для гарантированного расписания
+настройте системный cron на `wp-cron.php` (см. раздел «Cron»). Проверить, что хук
+запланирован: `wp cron event list --fields=hook,next_run_relative,recurrence`.
+
+**События задваиваются.**
+Дедупликация возможна только при корректном `external_id`. Если поле не приходит
+или меняется между прогонами — события будут создаваться заново. Проверьте, что
+`external_id` стабилен в выдаче API (тот же ID для того же события).
+
+**Ошибка «API вернул код 401/403» для REST.**
+Проверьте Bearer-ключ. Напомним: при правке источника пустое поле ключа сохраняет
+старый ключ — если ключ был, но стал «пуст» в реальности, проверьте опцию
+`idpgei_sources` на сервере (не перезатёрли ли ключ при сохранении с формата,
+который не знает о существующем ключе).
+
+**Постер не загружается.**
+Загрузка идёт только для `http(s)` URL и только если у события ещё нет миниатюры.
+Имя файла берётся из пути URL; при отсутствии расширения подставляется
+`import-<post_id>.jpg`. Убедитесь, что URL изображения отдаёт бинарный контент
+за 15 секунд.
+
+**Нужно добавить источник кодом (нет CLI-команды создания).**
+Используйте публичный API ядра:
+
+```php
+IDPG_Event_Import::instance()->save_source( array(
+	'source_id'   => 'mypartner',
+	'name'        => 'Мой партнёр',
+	'provider'    => 'rest',
+	'endpoint'    => 'https://api.partner.ru/v1/events',
+	'list_path'   => 'data',
+	'post_status' => 'draft',
+	'schedule'    => 3600,
+) );
+```
+
+`save_source()` сам санитизирует конфиг и перепланирует cron.
+
+---
+
+## Безопасность и права доступа
+
+- **Админка**: все обращения к странице и admin-post обработчикам
+  (`idpgei_save_source`, `idpgei_delete_source`, `idpgei_run_now`)
+  проверяют `current_user_can( 'manage_options' )` и `check_admin_referer()`
+  (nonce `idpgei_admin`). Права ниже `manage_options` доступа не имеют.
+- **WP-CLI**: команды требуют запуска от пользователя с правами WP-CLI
+  (обычно это администратор/sudo) — дополнительных проверок внутри нет,
+  рассчитывайте на это при настройке прав доступа к `wp`.
+- **Автор (организатор)**: события создаются с `post_author = organizer_id`
+  (или текущего пользователя, если 0). Это важно: права организаторов в
+  idpg-core (`event_organizer`) строятся на владельце записи — назначайте
+  корректный `organizer_id`, чтобы доступ дали тому организатору.
+- **Endpoint/URL** принимается только по схеме `http`/`https`
+  (`esc_url_raw`); иных протоколов (`file://`, `data:` и т.п.) нет.
+- **API-ключ** (Bearer) хранится в опции `idpgei_sources` как есть. Не
+  выводится на страницах/в логах WordPress; при правке источника пустое
+  поле ключа сохраняет старый (не перезатирает).
+- **Постер**: загрузка идёт только с `http(s)`, через `media_handle_sideload()`
+  (обычная WP-проверка типа файла). На удалённые бинарные данные тратит до
+  15 секунд таймаута.
+- **Лимиты**: не более 500 событий за прогон источника — защита от
+  «бесконечной» пагинации партнёра.
 
 ---
 
