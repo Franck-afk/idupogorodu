@@ -85,6 +85,40 @@ class Test_Auth_Emails extends WP_UnitTestCase {
 	}
 
 	/**
+	 * get_login_url возвращает permalink страницы с шаблоном page-login.
+	 */
+	public function test_get_login_url_uses_template_page() {
+		$page_id = $this->factory()->post->create( array(
+			'post_type'   => 'page',
+			'post_title'  => 'Вход',
+			'post_status' => 'publish',
+		) );
+		update_post_meta( $page_id, '_wp_page_template', 'page-login.php' );
+
+		$ref = new ReflectionMethod( 'IDPG_Auth_Emails', 'get_login_url' );
+		$ref->setAccessible( true );
+		$instance = IDPG_Auth_Emails::instance();
+
+		$actual = $ref->invoke( $instance );
+
+		$this->assertStringContainsString( '?page_id=', $actual );
+		$this->assertStringContainsString( (string) $page_id, $actual );
+	}
+
+	/**
+	 * get_login_url: fallback на /login/, если страницы с шаблоном нет.
+	 */
+	public function test_get_login_url_fallback() {
+		$ref = new ReflectionMethod( 'IDPG_Auth_Emails', 'get_login_url' );
+		$ref->setAccessible( true );
+		$instance = IDPG_Auth_Emails::instance();
+
+		$actual = $ref->invoke( $instance );
+
+		$this->assertStringContainsString( '/login/', $actual );
+	}
+
+	/**
 	 * Обычный подписчик не получает организаторское письмо.
 	 */
 	public function test_send_welcome_email_subscriber_branch() {

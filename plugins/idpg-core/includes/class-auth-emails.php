@@ -230,12 +230,40 @@ class IDPG_Auth_Emails {
 		$display_name = ! empty( $user->display_name ) ? $user->display_name : '';
 		$email        = $user->user_email;
 
-		$login_url = home_url( '/login/' );
+		$login_url = $this->get_login_url();
 
 		$body    = $this->render_organizer_email_template( $display_name, $email, $password, $login_url );
 		$subject = 'Добро пожаловать, ' . ( $display_name ?: $email ) . '! Ваш кабинет организатора готов';
 
 		wp_mail( $email, $subject, $body );
+	}
+
+	/**
+	 * Возвращает URL страницы входа.
+	 *
+	 * Ищем страницу с шаблоном page-login.php (её слаг может быть /login/,
+	 * /vhod/ и т.п. — на проде отличался). Если не найдена — fallback на /login/.
+	 *
+	 * @return string URL страницы входа.
+	 */
+	private function get_login_url() {
+		$login_pages = get_posts( array(
+			'post_type'      => 'page',
+			'post_status'    => 'publish',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+			'meta_key'       => '_wp_page_template', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value'     => 'page-login.php',
+		) );
+
+		if ( ! empty( $login_pages ) ) {
+			$permalink = get_permalink( $login_pages[0] );
+			if ( $permalink ) {
+				return $permalink;
+			}
+		}
+
+		return home_url( '/login/' );
 	}
 
 	/**
