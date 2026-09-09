@@ -1007,131 +1007,20 @@ class IDPG_REST_API {
 			return new WP_REST_Response( array( 'results' => array() ), 200 );
 		}
 
-		// Базовый город для всех подзапросов.
-		$city_id = 0;
-		if ( $city ) {
-			$term = get_term_by( 'slug', $city, 'city' );
-			if ( $term && ! is_wp_error( $term ) ) {
-				$city_id = (int) $term->term_id;
-			}
-		} elseif ( class_exists( 'IDPG_City_Filter' ) ) {
-			$city_id = (int) IDPG_City_Filter::get_current_city_id();
-		}
-		$city_tax = array();
-		if ( $city_id && get_term( $city_id, 'city' ) instanceof WP_Term ) {
-			$city_tax = array(
-				array(
-					'taxonomy'         => 'city',
-					'field'            => 'term_id',
-					'terms'            => $city_id,
-					'include_children' => true,
-				),
-			);
-		}
-
-		// 1) По заголовку/контенту (WP s).
-		$ids = array();
-		$q1 = new WP_Query( array(
-			'post_type'      => 'event',
-			'post_status'    => 'publish',
-			's'              => $q,
-			'posts_per_page' => 6,
-			'orderby'        => 'relevance',
-			'tax_query'      => $city_tax, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-			'fields'         => 'ids',
-		) );
-		$ids = array_merge( $ids, (array) $q1->posts );
-
-		// 2) По площадкам: venue title LIKE %q%.
-		$venue_ids = get_posts( array(
-			'post_type'      => 'venue',
-			'post_status'    => 'publish',
-			's'              => $q,
-			'posts_per_page' => 10,
-			'fields'         => 'ids',
-		) );
-		if ( $venue_ids ) {
-			$q2 = new WP_Query( array(
-				'post_type'      => 'event',
-				'post_status'    => 'publish',
-				'posts_per_page' => 6,
-				'tax_query'      => $city_tax, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					array(
-						'key'     => '_idpg_venue',
-						'value'   => array_map( 'strval', $venue_ids ),
-						'compare' => 'IN',
-					),
-				),
-				'fields'         => 'ids',
-			) );
-			$ids = array_merge( $ids, (array) $q2->posts );
-		}
-
-		// 3) По категориям/рубрикам (event_category) и возрастным рейтингам (age_rating).
-		// ID каждой таксономии держим отдельно, чтобы не смешивать совпадающие
-		// term_id разных таксономий в одном списке.
-		$event_cat_ids = array();
-		$age_rating_ids = array();
-		foreach ( array( 'event_category' => &$event_cat_ids, 'age_rating' => &$age_rating_ids ) as $tax => &$target ) {
-			$terms = get_terms( array(
-				'taxonomy'   => $tax,
-				'hide_empty' => false,
-				'search'     => $q,
-				'number'     => 5,
-			) );
-			if ( ! is_wp_error( $terms ) && $terms ) {
-				foreach ( $terms as $t ) {
-					$target[] = $t->term_id;
-				}
-			}
-		}
-		unset( $target );
-
-		// Есть ли вообще совпадения по категориям/рейтингам поискового запроса.
-		$cat_ids_found = ( ! empty( $event_cat_ids ) || ! empty( $age_rating_ids ) );
-		if ( $cat_ids_found ) {
-			// Объединяем в один блок только для удобства: подзапросы ниже
-			// используют правильные ID в соответствующих таксономиях.
-			$sub_tax = array();
-			if ( ! empty( $event_cat_ids ) ) {
-				$sub_tax[] = array( 'taxonomy' => 'event_category', 'field' => 'term_id', 'terms' => $event_cat_ids );
-			}
-			if ( ! empty( $age_rating_ids ) ) {
-				$sub_tax[] = array( 'taxonomy' => 'age_rating', 'field' => 'term_id', 'terms' => $age_rating_ids );
-			}
-
-			$q3 = new WP_Query( array(
-				'post_type'      => 'event',
-				'post_status'    => 'publish',
-				'posts_per_page' => 6,
-				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-					'relation' => 'AND',
-					$city_tax[0] ?? array( 'taxonomy' => 'city', 'field' => 'term_id', 'terms' => $city_id ),
-					array(
-						'relation' => 'OR',
-						$sub_tax,
-					),
-				),
-				'fields'         => 'ids',
-			) );
-			// Fallback если город не задан — без city_tax.
-			if ( empty( $city_tax ) ) {
-				$q3 = new WP_Query( array(
-					'post_type'      => 'event',
-					'post_status'    => 'publish',
-					'posts_per_page' => 6,
-					'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-						'relation' => 'OR',
-						$sub_tax,
-					),
-					'fields'         => 'ids',
-				) );
-			}
-			$ids = array_merge( $ids, (array) $q3->posts );
-		}
-
-		$ids = array_unique( array_map( 'intval', $ids ) );
+		// Расширенный поиск: заголовок/контент + площадки + категории/возраст
+		// (общая логика вынесена в IDPG_Search, как и для темы).
+		$city_id = IDPG_Search::resolve_city_id( $city );
+		$ids     = IDPG_Search::find_event_ids(
+			$q,
+			$city_id,
+			array(
+				's_events'     => 6,
+				'venues'       => 10,
+				'venue_events' => 6,
+				'terms'        => 5,
+				'tax_events'   => 6,
+			)
+		);
 		$ids = array_slice( $ids, 0, 6 );
 
 		if ( empty( $ids ) ) {

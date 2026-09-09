@@ -368,6 +368,11 @@ class IDPG_REST_Auth {
 			);
 		}
 
+		// Запоминаем пароль для приветственного письма организатору (до хэширования).
+		if ( 'organizer' === $type ) {
+			IDPG_Auth_Emails::remember_password( $email, $password );
+		}
+
 		$user_id = wp_create_user( $email, $password, $email );
 
 		if ( is_wp_error( $user_id ) ) {

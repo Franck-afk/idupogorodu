@@ -29,6 +29,8 @@ define( 'IDPG_AUTH_OPTIONS_KEY',     'idpg_auth_settings' );
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-logger.php';
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-compliance.php';
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-admin.php';
+require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-provider.php';
+require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-oauth-provider.php';
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-yandex.php';
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-vk.php';
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-max.php';

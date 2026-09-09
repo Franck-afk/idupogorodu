@@ -76,6 +76,7 @@ require_once IDPG_CORE_DIR . 'includes/class-cpt.php';
 require_once IDPG_CORE_DIR . 'includes/class-roles.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-filter.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-url.php';
+require_once IDPG_CORE_DIR . 'includes/class-search.php';
 require_once IDPG_CORE_DIR . 'includes/class-media.php';
 require_once IDPG_CORE_DIR . 'includes/class-favorites.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-scope.php';

@@ -4,140 +4,54 @@
  *
  * Redirect URI: https://ВАШ-САЙТ.ru/wp-json/wp-auth-ru/v1/yandex/callback
  * Права:        login:info, login:email
+ *
+ * Общий OAuth-флоу реализован в WP_Auth_Ru_OAuth_Provider.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class WP_Auth_Ru_Yandex {
+class WP_Auth_Ru_Yandex extends WP_Auth_Ru_OAuth_Provider {
 
-    const PROVIDER        = 'yandex';
-    const REST_NAMESPACE  = 'wp-auth-ru/v1';
-    const AUTH_URL        = 'https://oauth.yandex.ru/authorize';
-    const TOKEN_URL       = 'https://oauth.yandex.ru/token';
-    const USERINFO_URL    = 'https://login.yandex.ru/info?format=json';
-    const STATE_META_KEY  = 'wp_auth_ru_yandex_oauth_id';
-    const NONCE_KEY       = 'wp_auth_ru_yandex_state';
+    const PROVIDER           = 'yandex';
+    const PROVIDER_LABEL     = 'Яндекс';
+    const ENABLED_KEY        = 'yandex_enabled';
+    const CLIENT_ID_KEY      = 'yandex_client_id';
+    const CLIENT_SECRET_KEY  = 'yandex_client_secret';
+    const START_ROUTE        = 'yandex/start';
+    const CALLBACK_ROUTE     = 'yandex/callback';
+    const ERROR_QUERY_ARG    = 'yandex_oauth_error';
+    const ERROR_HEADER       = 'Ошибка входа через Яндекс:';
+    const STATE_META_KEY     = 'wp_auth_ru_yandex_oauth_id';
+    const NONCE_KEY          = 'wp_auth_ru_yandex_state';
+    const AUTH_URL           = 'https://oauth.yandex.ru/authorize';
+    const TOKEN_URL          = 'https://oauth.yandex.ru/token';
+    const USERINFO_URL       = 'https://login.yandex.ru/info?format=json';
+    const DEFAULT_USERNAME_BASE = 'yandex_user';
 
-    private static $instance = null;
-    private $settings;
-
-    public static function instance() {
-        if ( null === self::$instance ) self::$instance = new self();
-        return self::$instance;
+    protected function get_rest_routes() {
+        return array(
+            array( 'route' => '/yandex/start',    'methods' => 'GET', 'callback' => array( $this, 'rest_start' ) ),
+            array( 'route' => '/yandex/callback', 'methods' => 'GET', 'callback' => array( $this, 'rest_callback' ) ),
+        );
     }
 
-    private function __construct() {
-        $this->settings = get_option( IDPG_AUTH_OPTIONS_KEY, array() );
-        add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
-        if ( empty( $this->settings['yandex_enabled'] ) ) return;
-        add_action( 'login_form',            array( $this, 'render_button_wp' ) );
-        add_action( 'register_form',         array( $this, 'render_button_wp' ) );
-        add_action( 'login_enqueue_scripts', array( $this, 'output_styles' ) );
-        add_action( 'login_message',         array( $this, 'show_error' ) );
-        if ( class_exists( 'WooCommerce' ) ) {
-            add_action( 'woocommerce_login_form_start',     array( $this, 'render_button_woo' ) );
-            add_action( 'woocommerce_register_form_start',  array( $this, 'render_button_woo' ) );
-            add_action( 'woocommerce_before_checkout_form', array( $this, 'render_checkout_banner' ) );
-        }
-        add_action( 'wp_head', array( $this, 'maybe_output_frontend_styles' ) );
-    }
-
-    public function register_rest_routes() {
-        register_rest_route( self::REST_NAMESPACE, '/yandex/start', array(
-            'methods' => 'GET', 'callback' => array( $this, 'rest_start' ), 'permission_callback' => '__return_true',
-        ) );
-        register_rest_route( self::REST_NAMESPACE, '/yandex/callback', array(
-            'methods' => 'GET', 'callback' => array( $this, 'rest_callback' ), 'permission_callback' => '__return_true',
-        ) );
-    }
-
-    public static function get_callback_url() {
-        return rest_url( self::REST_NAMESPACE . '/yandex/callback' );
-    }
-
-    public static function get_start_url( $redirect_to = '' ) {
-        $url = rest_url( self::REST_NAMESPACE . '/yandex/start' );
-        if ( $redirect_to ) $url = add_query_arg( 'redirect_to', rawurlencode( $redirect_to ), $url );
-        return $url;
-    }
-
-    // ─── REST: старт ──────────────────────────────────────────────────────────
-
-    public function rest_start( WP_REST_Request $request ) {
-        if ( is_user_logged_in() ) { wp_safe_redirect( home_url() ); exit; }
-
-        $state = wp_create_nonce( self::NONCE_KEY );
-        set_transient( 'wp_auth_ru_yandex_state_' . $state, 1, 10 * MINUTE_IN_SECONDS );
-
-        WP_Auth_Ru_Logger::log( 'INFO', 'yandex', 'OAuth flow начат', array( 'ip' => $_SERVER['REMOTE_ADDR'] ?? '' ) );
-
-        $redirect_to = $request->get_param( 'redirect_to' );
-        if ( $redirect_to ) set_transient( 'wp_auth_ru_yandex_redir_' . $state, esc_url_raw( urldecode( $redirect_to ) ), 10 * MINUTE_IN_SECONDS );
-
-        wp_redirect( self::AUTH_URL . '?' . http_build_query( array(
+    protected function auth_params( $state ) {
+        return array(
             'response_type' => 'code',
             'client_id'     => $this->settings['yandex_client_id'] ?? '',
-            'redirect_uri'  => self::get_callback_url(),
+            'redirect_uri'  => static::get_callback_url(),
             'state'         => $state,
             'force_confirm' => 'yes',
-        ) ) );
-        exit;
+        );
     }
 
-    // ─── REST: callback ────────────────────────────────────────────────────────
-
-    public function rest_callback( WP_REST_Request $request ) {
-        $error = $request->get_param( 'error' );
-        if ( $error ) {
-            $msg = sanitize_text_field( $error );
-            WP_Auth_Ru_Logger::log( 'ERROR', 'yandex', 'Яндекс вернул ошибку: ' . $msg );
-            wp_safe_redirect( add_query_arg( 'yandex_oauth_error', urlencode( $msg ), wp_login_url() ) );
-            exit;
-        }
-
-        $code  = sanitize_text_field( $request->get_param( 'code' )  ?? '' );
-        $state = sanitize_text_field( $request->get_param( 'state' ) ?? '' );
-
-        if ( empty( $code ) ) {
-            $this->redirect_with_error( 'Яндекс не вернул код авторизации.' );
-            return;
-        }
-
-        if ( empty( $state ) || ! get_transient( 'wp_auth_ru_yandex_state_' . $state ) ) {
-            WP_Auth_Ru_Logger::log( 'WARNING', 'yandex', 'Недействительный state — возможна CSRF-атака', array( 'state' => substr( $state, 0, 8 ) ) );
-            $this->redirect_with_error( 'Недействительный state. Попробуйте снова.' );
-            return;
-        }
-        delete_transient( 'wp_auth_ru_yandex_state_' . $state );
-
-        $token = $this->exchange_code_for_token( $code );
-        if ( is_wp_error( $token ) ) { $this->redirect_with_error( $token->get_error_message() ); return; }
-
-        $profile = $this->get_user_profile( $token );
-        if ( is_wp_error( $profile ) ) { $this->redirect_with_error( $profile->get_error_message() ); return; }
-
-        $user_id = $this->login_or_create_user( $profile );
-        if ( is_wp_error( $user_id ) ) { $this->redirect_with_error( $user_id->get_error_message() ); return; }
-
-        wp_set_current_user( $user_id );
-        wp_set_auth_cookie( $user_id, true );
-        $user_obj = get_userdata( $user_id );
-        if ( $user_obj ) do_action( 'wp_login', $user_obj->user_login, $user_obj );
-
-        $redirect_to = get_transient( 'wp_auth_ru_yandex_redir_' . $state );
-        delete_transient( 'wp_auth_ru_yandex_redir_' . $state );
-        if ( empty( $redirect_to ) || strpos( $redirect_to, home_url() ) !== 0 ) {
-            $redirect_to = apply_filters( 'wp_auth_ru_yandex_after_login_redirect', home_url() );
-        }
-        wp_safe_redirect( $redirect_to );
-        exit;
+    protected function no_callback_message() {
+        return 'Яндекс не вернул код авторизации.';
     }
 
-    // ─── Обмен кода на токен ──────────────────────────────────────────────────
-
-    private function exchange_code_for_token( $code ) {
+    protected function exchange_code_for_token( $code ) {
         $response = wp_remote_post( self::TOKEN_URL, array(
             'timeout' => 20,
             'body'    => array(
@@ -145,13 +59,13 @@ class WP_Auth_Ru_Yandex {
                 'code'          => $code,
                 'client_id'     => $this->settings['yandex_client_id']     ?? '',
                 'client_secret' => $this->settings['yandex_client_secret'] ?? '',
-                'redirect_uri'  => self::get_callback_url(),
+                'redirect_uri'  => static::get_callback_url(),
             ),
         ) );
 
         if ( is_wp_error( $response ) ) {
             $msg = 'Ошибка запроса токена: ' . $response->get_error_message();
-            WP_Auth_Ru_Logger::log( 'ERROR', 'yandex', $msg );
+            WP_Auth_Ru_Logger::log( 'ERROR', self::PROVIDER, $msg );
             return new WP_Error( 'yandex_token_request', $msg );
         }
 
@@ -160,23 +74,21 @@ class WP_Auth_Ru_Yandex {
 
         if ( ! empty( $body['error'] ) ) {
             $msg = 'Яндекс: ' . ( $body['error_description'] ?? $body['error'] );
-            WP_Auth_Ru_Logger::log( 'ERROR', 'yandex', $msg, array( 'http' => $http_code ) );
+            WP_Auth_Ru_Logger::log( 'ERROR', self::PROVIDER, $msg, array( 'http' => $http_code ) );
             return new WP_Error( 'yandex_token_error', $msg );
         }
 
         if ( empty( $body['access_token'] ) ) {
             $msg = 'Яндекс не вернул access_token.';
-            WP_Auth_Ru_Logger::log( 'ERROR', 'yandex', $msg, array( 'http' => $http_code, 'body' => wp_remote_retrieve_body( $response ) ) );
+            WP_Auth_Ru_Logger::log( 'ERROR', self::PROVIDER, $msg, array( 'http' => $http_code, 'body' => wp_remote_retrieve_body( $response ) ) );
             return new WP_Error( 'yandex_no_token', $msg );
         }
 
-        WP_Auth_Ru_Logger::log( 'SUCCESS', 'yandex', 'Токен получен (HTTP ' . $http_code . ')' );
+        WP_Auth_Ru_Logger::log( 'SUCCESS', self::PROVIDER, 'Токен получен (HTTP ' . $http_code . ')' );
         return $body['access_token'];
     }
 
-    // ─── Получение профиля ────────────────────────────────────────────────────
-
-    private function get_user_profile( $access_token ) {
+    protected function get_user_profile( $access_token ) {
         $response = wp_remote_get( self::USERINFO_URL, array(
             'timeout' => 20,
             'headers' => array( 'Authorization' => 'OAuth ' . $access_token ),
@@ -184,7 +96,7 @@ class WP_Auth_Ru_Yandex {
 
         if ( is_wp_error( $response ) ) {
             $msg = 'Ошибка запроса профиля: ' . $response->get_error_message();
-            WP_Auth_Ru_Logger::log( 'ERROR', 'yandex', $msg );
+            WP_Auth_Ru_Logger::log( 'ERROR', self::PROVIDER, $msg );
             return new WP_Error( 'yandex_profile_request', $msg );
         }
 
@@ -192,100 +104,56 @@ class WP_Auth_Ru_Yandex {
 
         if ( empty( $body ) || ! is_array( $body ) ) {
             $msg = 'Не удалось получить данные профиля от Яндекс.';
-            WP_Auth_Ru_Logger::log( 'ERROR', 'yandex', $msg, array( 'http' => wp_remote_retrieve_response_code( $response ) ) );
+            WP_Auth_Ru_Logger::log( 'ERROR', self::PROVIDER, $msg, array( 'http' => wp_remote_retrieve_response_code( $response ) ) );
             return new WP_Error( 'yandex_profile_empty', $msg );
         }
 
-        WP_Auth_Ru_Logger::log( 'INFO', 'yandex', 'Профиль получен: ' . WP_Auth_Ru_Logger::mask_email( $body['default_email'] ?? '' ) );
+        WP_Auth_Ru_Logger::log( 'INFO', self::PROVIDER, 'Профиль получен: ' . WP_Auth_Ru_Logger::mask_email( $body['default_email'] ?? '' ) );
         return $body;
     }
 
-    // ─── Создание / вход пользователя ─────────────────────────────────────────
-
-    private function login_or_create_user( $profile ) {
-        $yandex_id  = (string) ( $profile['id'] ?? '' );
-        $email      = sanitize_email( $profile['default_email'] ?? '' );
-        $first_name = sanitize_text_field( $profile['first_name']  ?? '' );
-        $last_name  = sanitize_text_field( $profile['last_name']   ?? '' );
-        $login      = sanitize_text_field( $profile['login']       ?? '' );
-        $real_name  = sanitize_text_field( $profile['real_name']   ?? '' );
+    protected function normalize_profile( $profile ) {
+        $first_name = sanitize_text_field( $profile['first_name'] ?? '' );
+        $last_name  = sanitize_text_field( $profile['last_name']  ?? '' );
+        $login      = sanitize_text_field( $profile['login']      ?? '' );
+        $real_name  = sanitize_text_field( $profile['real_name']  ?? '' );
         $display    = $real_name ?: trim( $first_name . ' ' . $last_name ) ?: $login ?: 'Яндекс Пользователь';
 
-        // 1. Найти по Яндекс ID
-        if ( $yandex_id ) {
-            $found = get_users( array( 'meta_key' => self::STATE_META_KEY, 'meta_value' => $yandex_id, 'number' => 1, 'fields' => 'ids' ) );
-            if ( ! empty( $found ) ) {
-                $uid = (int) $found[0];
-                wp_update_user( array( 'ID' => $uid, 'display_name' => $display, 'first_name' => $first_name, 'last_name' => $last_name ) );
-                if ( $email ) {
-                    $existing = get_userdata( $uid );
-                    if ( $existing && $existing->user_email !== $email && ! email_exists( $email ) ) {
-                        wp_update_user( array( 'ID' => $uid, 'user_email' => $email ) );
-                    }
-                }
-                WP_Auth_Ru_Logger::log( 'SUCCESS', 'yandex', 'Вход: пользователь #' . $uid . ' (' . WP_Auth_Ru_Logger::mask_email( $email ) . ')' );
-                return $uid;
-            }
-        }
-
-        // 2. Найти по email
-        if ( $email ) {
-            $user_by_email = get_user_by( 'email', $email );
-            if ( $user_by_email ) {
-                $uid = $user_by_email->ID;
-                if ( $yandex_id ) update_user_meta( $uid, self::STATE_META_KEY, $yandex_id );
-                wp_update_user( array( 'ID' => $uid, 'display_name' => $display, 'first_name' => $first_name, 'last_name' => $last_name ) );
-                WP_Auth_Ru_Logger::log( 'SUCCESS', 'yandex', 'Вход по email: пользователь #' . $uid . ' (' . WP_Auth_Ru_Logger::mask_email( $email ) . ')' );
-                return $uid;
-            }
-        }
-
-        // 3. Создать нового пользователя с ролью organizer
-        if ( empty( $email ) ) {
-            $msg = 'Яндекс не предоставил email. Разрешите доступ к email в настройках OAuth-приложения.';
-            WP_Auth_Ru_Logger::log( 'ERROR', 'yandex', $msg );
-            return new WP_Error( 'yandex_no_email', $msg );
-        }
-
-        $username = $this->make_unique_username( $login ?: $display );
-        $user_id  = wp_insert_user( array(
-            'user_login'   => $username,
-            'user_email'   => $email,
-            'user_pass'    => wp_generate_password( 24, true, true ),
-            'display_name' => $display,
-            'first_name'   => $first_name,
-            'last_name'    => $last_name,
-            'role'         => 'event_organizer',
-        ) );
-
-        if ( is_wp_error( $user_id ) ) {
-            WP_Auth_Ru_Logger::log( 'ERROR', 'yandex', 'Ошибка создания пользователя: ' . $user_id->get_error_message() );
-            return $user_id;
-        }
-
-        if ( $yandex_id ) update_user_meta( $user_id, self::STATE_META_KEY, $yandex_id );
-        update_user_meta( $user_id, 'wp_auth_ru_provider', 'yandex' );
-        WP_Auth_Ru_Logger::log( 'SUCCESS', 'yandex', 'Регистрация: новый пользователь #' . $user_id . ' (' . WP_Auth_Ru_Logger::mask_email( $email ) . ')' );
-        return $user_id;
+        return array(
+            'id'            => (string) ( $profile['id'] ?? '' ),
+            'email'         => $profile['default_email'] ?? '',
+            'first_name'    => $first_name,
+            'last_name'     => $last_name,
+            'display'       => $display,
+            'username_base' => $login ?: $display,
+        );
     }
 
-    private function make_unique_username( $base_name ) {
-        $base = sanitize_user( strtolower( str_replace( array( ' ', '-', '.' ), '_', $base_name ) ), true );
-        if ( empty( $base ) ) $base = 'yandex_user';
-        $username = $base; $i = 1;
-        while ( username_exists( $username ) ) $username = $base . '_' . $i++;
-        return $username;
+    protected function email_required() {
+        return true;
     }
 
-    public static function get_auth_start_url( $redirect_to = '' ) { return self::get_start_url( $redirect_to ); }
+    protected function no_email_message() {
+        return 'Яндекс не предоставил email. Разрешите доступ к email в настройках OAuth-приложения.';
+    }
 
-    // ─── Рендер кнопок ────────────────────────────────────────────────────────
+    protected function sync_email_on_login() {
+        return true;
+    }
+
+    protected function log_subject( $email, $provider_id ) {
+        return WP_Auth_Ru_Logger::mask_email( $email );
+    }
+
+    private function yandex_icon() {
+        return '<svg class="wp-auth-ru-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#FC3F1D"/><path d="M13.8 6H12.12C10.08 6 8.88 7.08 8.88 8.88C8.88 10.44 9.6 11.4 11.04 12.36L12.12 13.08L8.76 18H11.04L14.16 13.44L13.2 12.84C12.0 12.0 11.28 11.28 11.28 8.76C11.28 8.04 11.64 7.44 12.48 7.44H13.8V6Z" fill="white"/><path d="M13.8 6H15.12V18H13.8V6Z" fill="white"/></svg>';
+    }
 
     public function render_button_wp() {
         $redirect_to = ! empty( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
         ?>
         <div class="wp-auth-ru-wrap">
-            <a href="<?php echo esc_url( self::get_start_url( $redirect_to ) ); ?>" class="wp-auth-ru-btn wp-auth-ru-btn--yandex">
+            <a href="<?php echo esc_url( static::get_start_url( $redirect_to ) ); ?>" class="wp-auth-ru-btn wp-auth-ru-btn--yandex">
                 <?php echo $this->yandex_icon(); ?> Войти через Яндекс
             </a>
             <div class="wp-auth-ru-divider"><span>или</span></div>
@@ -298,7 +166,7 @@ class WP_Auth_Ru_Yandex {
         $redirect_to = ! empty( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
         ?>
         <div class="wp-auth-ru-wrap wp-auth-ru-wrap--woo">
-            <a href="<?php echo esc_url( self::get_start_url( $redirect_to ) ); ?>" class="wp-auth-ru-btn wp-auth-ru-btn--yandex">
+            <a href="<?php echo esc_url( static::get_start_url( $redirect_to ) ); ?>" class="wp-auth-ru-btn wp-auth-ru-btn--yandex">
                 <?php echo $this->yandex_icon(); ?> Войти через Яндекс
             </a>
             <div class="wp-auth-ru-divider"><span>или</span></div>
@@ -308,7 +176,7 @@ class WP_Auth_Ru_Yandex {
 
     public function render_checkout_banner() {
         if ( is_user_logged_in() ) return;
-        $url = self::get_start_url( wc_get_checkout_url() );
+        $url = static::get_start_url( wc_get_checkout_url() );
         $this->output_styles();
         ?>
         <div class="wp-auth-ru-checkout-banner">
@@ -319,30 +187,6 @@ class WP_Auth_Ru_Yandex {
             <p class="wp-auth-ru-hint">После входа вернётесь к оформлению заказа</p>
         </div>
         <?php
-    }
-
-    private function yandex_icon() {
-        return '<svg class="wp-auth-ru-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#FC3F1D"/><path d="M13.8 6H12.12C10.08 6 8.88 7.08 8.88 8.88C8.88 10.44 9.6 11.4 11.04 12.36L12.12 13.08L8.76 18H11.04L14.16 13.44L13.2 12.84C12.0 12.0 11.28 11.28 11.28 8.76C11.28 8.04 11.64 7.44 12.48 7.44H13.8V6Z" fill="white"/><path d="M13.8 6H15.12V18H13.8V6Z" fill="white"/></svg>';
-    }
-
-    public function show_error( $message ) {
-        if ( ! empty( $_GET['yandex_oauth_error'] ) ) {
-            $err = sanitize_text_field( wp_unslash( $_GET['yandex_oauth_error'] ) );
-            $message .= '<p class="message" style="color:#d63638;background:#fff3f3;padding:8px 12px;border-radius:4px;margin-top:8px;"><strong>Ошибка входа через Яндекс:</strong> ' . esc_html( $err ) . '</p>';
-        }
-        return $message;
-    }
-
-    private function redirect_with_error( $message ) {
-        WP_Auth_Ru_Logger::log( 'ERROR', 'yandex', $message );
-        wp_safe_redirect( add_query_arg( 'yandex_oauth_error', urlencode( $message ), wp_login_url() ) );
-        exit;
-    }
-
-    public function maybe_output_frontend_styles() {
-        if ( is_page( 'login' ) || ( function_exists( 'is_account_page' ) && is_account_page() ) || ( function_exists( 'is_checkout' ) && is_checkout() ) ) {
-            $this->output_styles();
-        }
     }
 
     public function output_styles() {

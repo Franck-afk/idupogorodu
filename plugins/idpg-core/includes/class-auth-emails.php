@@ -48,6 +48,17 @@ class IDPG_Auth_Emails {
 	private $logo_url = '';
 
 	/**
+	 * Временный буфер пароля для нового организатора.
+	 *
+	 * Заполняется в момент регистрации (до wp_create_user), т.к. после
+	 * создания пользователя пароль хранится только в виде хэша и его
+	 * нельзя передать в письмо. Ключ — email, значение — plain-пароль.
+	 *
+	 * @var array
+	 */
+	private static $pending_passwords = array();
+
+	/**
 	 * Получение экземпляра синглтона.
 	 *
 	 * @return IDPG_Auth_Emails
@@ -140,9 +151,42 @@ class IDPG_Auth_Emails {
 	}
 
 	/**
+	 * Запоминает пароль нового организатора до срабатывания хука user_register.
+	 *
+	 * Вызывается в точке регистрации ПЕРЕД wp_create_user(). После отправки
+	 * приветственного письма значение очищается.
+	 *
+	 * @param string $email    Email нового пользователя.
+	 * @param string $password Plain-пароль, введённый при регистрации.
+	 * @return void
+	 */
+	public static function remember_password( $email, $password ) {
+		if ( $email ) {
+			self::$pending_passwords[ $email ] = $password;
+		}
+	}
+
+	/**
+	 * Извлекает и очищает отложенный пароль по email.
+	 *
+	 * @param string $email Email организатора.
+	 * @return string Plain-пароль или пустая строка.
+	 */
+	private static function take_password( $email ) {
+		if ( isset( self::$pending_passwords[ $email ] ) ) {
+			$password = self::$pending_passwords[ $email ];
+			unset( self::$pending_passwords[ $email ] );
+			return $password;
+		}
+		return '';
+	}
+
+	/**
 	 * Отправляет приветственное письмо после регистрации.
 	 *
 	 * Содержит разный текст для обычных пользователей и организаторов.
+	 * Для организаторов (роль event_organizer) собирается отдельный HTML-шаблон
+	 * с данными для входа и ссылкой на страницу авторизации.
 	 *
 	 * @param int $user_id ID нового пользователя.
 	 * @return void
@@ -151,6 +195,13 @@ class IDPG_Auth_Emails {
 		$user = get_userdata( $user_id );
 
 		if ( ! $user || is_wp_error( $user ) ) {
+			return;
+		}
+
+		// Организатор получает отдельное письмо с данными для входа.
+		if ( in_array( 'event_organizer', (array) $user->roles, true ) ) {
+			$password = self::take_password( $user->user_email );
+			$this->send_organizer_welcome_email( $user, $password );
 			return;
 		}
 
@@ -166,6 +217,106 @@ class IDPG_Auth_Emails {
 		$body    = $this->render_email_template( $content, $title );
 
 		wp_mail( $user->user_email, $subject, $body );
+	}
+
+	/**
+	 * Собирает и отправляет приветственное письмо организатору.
+	 *
+	 * @param WP_User $user     Объект нового организатора.
+	 * @param string  $password Plain-пароль (или пустая строка, если недоступен).
+	 * @return void
+	 */
+	private function send_organizer_welcome_email( WP_User $user, $password = '' ) {
+		$display_name = ! empty( $user->display_name ) ? $user->display_name : '';
+		$email        = $user->user_email;
+
+		$login_url = home_url( '/login/' );
+
+		$body    = $this->render_organizer_email_template( $display_name, $email, $password, $login_url );
+		$subject = 'Добро пожаловать, ' . ( $display_name ?: $email ) . '! Ваш кабинет организатора готов';
+
+		wp_mail( $email, $subject, $body );
+	}
+
+	/**
+	 * HTML-шаблон приветственного письма организатора.
+	 *
+	 * Адаптивная табличная вёрстка, инлайновые стили, максимальная ширина 600px.
+	 *
+	 * @param string $display_name Имя организатора.
+	 * @param string $email        Email организатора.
+	 * @param string $password     Plain-пароль (может быть пустым).
+	 * @param string $login_url    URL страницы входа.
+	 * @return string Полный HTML-документ письма.
+	 */
+	private function render_organizer_email_template( $display_name, $email, $password, $login_url ) {
+		$logo_url = $this->get_logo_url();
+		$year     = date( 'Y' );
+
+		// Карточка с данными для входа; строка пароля показывается, только если он известен.
+		$password_row = '';
+		if ( $password ) {
+			$password_row = '<p style="margin:0;font-size:15px;line-height:1.6;color:#1a2332;">Пароль: <strong style="color:#1a2332;">' . esc_html( $password ) . '</strong></p>';
+		} else {
+			$password_row = '<p style="margin:0;font-size:15px;line-height:1.6;color:#1a2332;">Пароль: <strong style="color:#1a2332;">задан при регистрации</strong></p>';
+		}
+
+		ob_start();
+		?>
+<table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px;width:100%;margin:0 auto;background-color:#f5f7fa;">
+	<tr>
+		<td align="center" bgcolor="#1a2332" style="background-color:#1a2332;padding:36px 32px 32px;border-radius:16px 16px 0 0;">
+			<?php if ( ! empty( $logo_url ) ) : ?>
+				<img src="<?php echo esc_url( $logo_url ); ?>" alt="IDU POGORODU" width="600" style="display:block;width:150px;height:auto;max-width:100%;border:0;outline:none;text-decoration:none;" />
+			<?php else : ?>
+				<span style="font-size:26px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">IDU POGORODU</span>
+			<?php endif; ?>
+		</td>
+	</tr>
+	<tr>
+		<td align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:40px 32px 36px;border-radius:0 0 16px 16px;">
+			<h1 style="margin:0 0 12px;font-size:26px;line-height:1.3;font-weight:800;color:#1a2332;letter-spacing:-0.3px;">Добро пожаловать, <?php echo esc_html( $display_name ?: $email ); ?>!</h1>
+			<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#5a6473;">Ваш кабинет организатора на платформе <strong style="color:#1a2332;">IDU POGORODU</strong> создан. Теперь вы можете публиковать мероприятия, получать заявки и следить за посещаемостью — всё в одном месте.</p>
+			<p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#5a6473;">Ниже — данные для входа и все доступные способы авторизации.</p>
+
+			<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:440px;width:100%;margin:0 auto 24px;">
+				<tr>
+					<td style="padding:20px 24px;background-color:#fbfcfe;border-left:4px solid #4CAF50;border-radius:0 12px 12px 0;">
+						<p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#4CAF50;">Данные для входа</p>
+						<p style="margin:0 0 10px;font-size:15px;line-height:1.6;color:#1a2332;">Email: <strong style="color:#1a2332;"><?php echo esc_html( $email ); ?></strong></p>
+						<?php echo $password_row; ?>
+					</td>
+				</tr>
+			</table>
+
+			<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:440px;width:100%;margin:0 auto 26px;">
+				<tr>
+					<td align="left" style="padding:2px 24px;">
+						<p style="margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#8a94a6;">Способы входа</p>
+						<p style="margin:0 0 10px;font-size:15px;line-height:1.6;color:#5a6473;">🔑&nbsp; По паролю — email и пароль из блока выше</p>
+						<p style="margin:0;font-size:15px;line-height:1.6;color:#5a6473;">📧&nbsp; По ссылке из письма — переход по ссылке ниже</p>
+					</td>
+				</tr>
+			</table>
+
+			<table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:440px;width:100%;margin:0 auto 8px;">
+				<tr>
+					<td align="center" bgcolor="#4CAF50" style="background-color:#4CAF50;border-radius:12px;">
+						<a href="<?php echo esc_url( $login_url ); ?>" target="_blank" style="display:block;padding:16px 28px;font-size:16px;line-height:1.2;font-weight:700;color:#ffffff;text-decoration:none;">Перейти на страницу входа</a>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td align="center" bgcolor="#1a2332" style="background-color:#1a2332;padding:28px 32px;border-radius:0 0 16px 16px;">
+			<p style="margin:0 0 10px;font-size:13px;line-height:1.6;color:#aeb6c4;">Нужна помощь? Напишите нам:&nbsp;<a href="mailto:support@idupogorodu.ru" style="color:#4CAF50;font-weight:600;text-decoration:underline;text-underline-offset:2px;">support@idupogorodu.ru</a></p>
+			<p style="margin:0;font-size:12px;line-height:1.6;color:#6b7683;">&copy; <?php echo esc_html( $year ); ?> IDU POGORODU — платформа для организаторов мероприятий. Все права защищены.</p>
+		</td>
+	</tr>
+</table>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**

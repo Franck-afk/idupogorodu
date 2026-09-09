@@ -720,102 +720,22 @@ function idpg_core_pre_get_posts_filters( $query ) {
 		}
 
 		// Расширяем поиск: заголовок/контент + площадки + категории (в пределах того же города).
+		// Логика вынесена в IDPG_Search (общая для темы и REST).
 		$q = trim( (string) $query->get( 's' ) );
-		if ( mb_strlen( $q ) >= 2 ) {
-			$all_ids = array();
+		if ( mb_strlen( $q ) < 2 ) {
+			return;
+		}
 
-			// 1) s-поиск (заголовок/контент) — собираем ID отдельно, чтобы сделать OR с остальными.
-			$s_ids = get_posts( array(
-				'post_type'            => 'event',
-				'post_status'          => 'publish',
-				's'                    => $q,
-				'posts_per_page'       => 50,
-				'fields'               => 'ids',
-				'tax_query'            => $city_tax, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				'idpg_search_extended' => true,
-			) );
-			$all_ids = array_merge( $all_ids, (array) $s_ids );
+		$all_ids = class_exists( 'IDPG_Search' ) ? IDPG_Search::find_event_ids( $q, $city_id ) : array();
 
-			// 2) По площадкам: venue title LIKE %q% → события с этой площадкой.
-			$venue_ids = get_posts( array(
-				'post_type'              => 'venue',
-				'post_status'            => 'publish',
-				's'                      => $q,
-				'posts_per_page'         => 20,
-				'fields'                 => 'ids',
-				'idpg_search_extended'   => true,
-			) );
-			if ( $venue_ids ) {
-				$q2 = new WP_Query( array(
-					'post_type'            => 'event',
-					'post_status'          => 'publish',
-					'posts_per_page'       => -1,
-					'tax_query'            => $city_tax, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-					'meta_query'           => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-						array(
-							'key'     => '_idpg_venue',
-							'value'   => array_map( 'strval', $venue_ids ),
-							'compare' => 'IN',
-						),
-					),
-					'fields'               => 'ids',
-					'idpg_search_extended' => true,
-				) );
-				$all_ids = array_merge( $all_ids, (array) $q2->posts );
-			}
-
-			// 3) По категориям/возрасту.
-			$cat_ids = array();
-			foreach ( array( 'event_category', 'age_rating' ) as $tax_name ) {
-				$terms = get_terms( array(
-					'taxonomy'   => $tax_name,
-					'hide_empty' => false,
-					'search'     => $q,
-					'number'     => 10,
-				) );
-				if ( ! is_wp_error( $terms ) && $terms ) {
-					foreach ( $terms as $t ) {
-						$cat_ids[] = $t->term_id;
-					}
-				}
-			}
-			if ( $cat_ids ) {
-				$tax_q = array(
-					'relation' => 'AND',
-					$city_tax[0] ?? array( 'taxonomy' => 'city', 'field' => 'term_id', 'terms' => $city_id, 'include_children' => true ),
-					array( 'relation' => 'OR',
-						array( 'taxonomy' => 'event_category', 'field' => 'term_id', 'terms' => $cat_ids ),
-						array( 'taxonomy' => 'age_rating', 'field' => 'term_id', 'terms' => $cat_ids ),
-					),
-				);
-				if ( empty( $city_tax ) ) {
-					$tax_q = array(
-						'relation' => 'OR',
-						array( 'taxonomy' => 'event_category', 'field' => 'term_id', 'terms' => $cat_ids ),
-						array( 'taxonomy' => 'age_rating', 'field' => 'term_id', 'terms' => $cat_ids ),
-					);
-				}
-				$q3 = new WP_Query( array(
-					'post_type'            => 'event',
-					'post_status'          => 'publish',
-					'posts_per_page'       => -1,
-					'tax_query'            => $tax_q, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-					'fields'               => 'ids',
-					'idpg_search_extended' => true,
-				) );
-				$all_ids = array_merge( $all_ids, (array) $q3->posts );
-			}
-
-			if ( $all_ids ) {
-				$all_ids = array_unique( array_map( 'intval', $all_ids ) );
-				// Заменяем s-поиск на точный список ID (OR-результат).
-				$query->set( 's', '' );
-				$query->set( 'post__in', $all_ids );
-				$query->set( 'orderby', 'post__in' );
-			} else {
-				// Ничего не найдено ни в заголовках, ни в площадках/категориях — оставляем пустой s (покажет 0 результатов).
-				$query->set( 'post__in', array( 0 ) );
-			}
+		if ( $all_ids ) {
+			// Заменяем s-поиск на точный список ID (OR-результат).
+			$query->set( 's', '' );
+			$query->set( 'post__in', $all_ids );
+			$query->set( 'orderby', 'post__in' );
+		} else {
+			// Ничего не найдено ни в заголовках, ни в площадках/категориях — оставляем пустой s (покажет 0 результатов).
+			$query->set( 'post__in', array( 0 ) );
 		}
 		return;
 	}

@@ -4,48 +4,33 @@
  *
  * MAX не поддерживает стандартный OAuth 2.0.
  * Авторизация через initData + HMAC-SHA256 (аналогично Telegram Web App).
+ *
+ * Общая логика входа/создания пользователя унаследована от WP_Auth_Ru_Provider.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class WP_Auth_Ru_Max {
+class WP_Auth_Ru_Max extends WP_Auth_Ru_Provider {
 
-    const PROVIDER        = 'max';
-    const REST_NAMESPACE  = 'wp-auth-ru/v1';
-    const NONCE_ACTION    = 'wp_auth_ru_max_nonce';
-    const STATE_META_KEY  = 'wp_auth_ru_max_oauth_id';
+    const PROVIDER           = 'max';
+    const PROVIDER_LABEL     = 'MAX';
+    const ENABLED_KEY        = 'max_enabled';
+    const ERROR_QUERY_ARG    = 'max_oauth_error';
+    const ERROR_HEADER       = 'Ошибка входа через MAX:';
+    const NONCE_ACTION       = 'wp_auth_ru_max_nonce';
+    const STATE_META_KEY     = 'wp_auth_ru_max_oauth_id';
+    const DEFAULT_USERNAME_BASE = 'max_user';
 
-    private static $instance = null;
-    private $settings;
-
-    public static function instance() {
-        if ( null === self::$instance ) self::$instance = new self();
-        return self::$instance;
+    protected function get_rest_routes() {
+        return array(
+            array( 'route' => '/max/validate', 'methods' => 'POST', 'callback' => array( $this, 'rest_validate_initdata' ) ),
+        );
     }
 
-    private function __construct() {
-        $this->settings = get_option( IDPG_AUTH_OPTIONS_KEY, array() );
-        add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
-        if ( empty( $this->settings['max_enabled'] ) ) return;
-        add_action( 'login_form',            array( $this, 'render_button_wp' ) );
-        add_action( 'register_form',         array( $this, 'render_button_wp' ) );
-        add_action( 'login_enqueue_scripts', array( $this, 'output_styles' ) );
-        add_action( 'login_message',         array( $this, 'show_error' ) );
-        if ( class_exists( 'WooCommerce' ) ) {
-            add_action( 'woocommerce_login_form_start',     array( $this, 'render_button_woo' ) );
-            add_action( 'woocommerce_register_form_start',  array( $this, 'render_button_woo' ) );
-            add_action( 'woocommerce_before_checkout_form', array( $this, 'render_checkout_banner' ) );
-        }
-        add_action( 'wp_head',   array( $this, 'maybe_output_frontend_styles' ) );
+    protected function register_additional_hooks() {
         add_action( 'wp_footer', array( $this, 'inject_miniapp_js' ) );
-    }
-
-    public function register_rest_routes() {
-        register_rest_route( self::REST_NAMESPACE, '/max/validate', array(
-            'methods' => 'POST', 'callback' => array( $this, 'rest_validate_initdata' ), 'permission_callback' => '__return_true',
-        ) );
     }
 
     // ─── HMAC-SHA256 валидация initData ──────────────────────────────────────
@@ -133,52 +118,30 @@ class WP_Auth_Ru_Max {
         return new WP_REST_Response( array( 'success' => true, 'redirect' => $redirect ) );
     }
 
-    // ─── Создание / вход пользователя ────────────────────────────────────────
+    // ─── Приведение профиля к общему формату ─────────────────────────────────
 
-    private function login_or_create_user( $user_info ) {
-        $max_id  = (string) ( $user_info['id'] ?? '' );
+    protected function normalize_profile( $user_info ) {
         $fname   = sanitize_text_field( $user_info['first_name'] ?? '' );
         $lname   = sanitize_text_field( $user_info['last_name']  ?? '' );
         $uname   = sanitize_text_field( $user_info['username']   ?? '' );
         $display = trim( $fname . ' ' . $lname ) ?: $uname ?: 'MAX Пользователь';
 
-        if ( $max_id ) {
-            $found = get_users( array( 'meta_key' => self::STATE_META_KEY, 'meta_value' => $max_id, 'number' => 1, 'fields' => 'ids' ) );
-            if ( ! empty( $found ) ) {
-                $uid = (int) $found[0];
-                wp_update_user( array( 'ID' => $uid, 'display_name' => $display, 'first_name' => $fname, 'last_name' => $lname ) );
-                WP_Auth_Ru_Logger::log( 'SUCCESS', 'max', 'Вход: пользователь #' . $uid . ' (MAX ID: ' . $max_id . ')' );
-                return $uid;
-            }
-        }
-
-        $username = $this->make_unique_username( $uname ?: $display );
-        $user_id  = wp_insert_user( array(
-            'user_login'   => $username,
-            'user_pass'    => wp_generate_password( 24, true, true ),
-            'display_name' => $display,
-            'first_name'   => $fname,
-            'last_name'    => $lname,
-            'role'         => get_option( 'default_role', 'subscriber' ),
-        ) );
-
-        if ( is_wp_error( $user_id ) ) {
-            WP_Auth_Ru_Logger::log( 'ERROR', 'max', 'Ошибка создания пользователя: ' . $user_id->get_error_message() );
-            return $user_id;
-        }
-
-        if ( $max_id ) update_user_meta( $user_id, self::STATE_META_KEY, $max_id );
-        update_user_meta( $user_id, 'wp_auth_ru_provider', 'max' );
-        WP_Auth_Ru_Logger::log( 'SUCCESS', 'max', 'Регистрация: новый пользователь #' . $user_id . ' (MAX ID: ' . $max_id . ')' );
-        return $user_id;
+        return array(
+            'id'            => (string) ( $user_info['id'] ?? '' ),
+            'email'         => '',
+            'first_name'    => $fname,
+            'last_name'     => $lname,
+            'display'       => $display,
+            'username_base' => $uname ?: $display,
+        );
     }
 
-    private function make_unique_username( $base_name ) {
-        $base = sanitize_user( strtolower( str_replace( array( ' ', '-', '.' ), '_', $base_name ) ), true );
-        if ( empty( $base ) ) $base = 'max_user';
-        $username = $base; $i = 1;
-        while ( username_exists( $username ) ) $username = $base . '_' . $i++;
-        return $username;
+    protected function new_user_role() {
+        return get_option( 'default_role', 'subscriber' );
+    }
+
+    protected function log_subject( $email, $provider_id ) {
+        return 'MAX ID: ' . $provider_id;
     }
 
     private function get_bot_url() {
@@ -233,18 +196,6 @@ class WP_Auth_Ru_Max {
 })();
 </script>
         <?php
-    }
-
-    public function show_error( $message ) {
-        if ( ! empty( $_GET['max_oauth_error'] ) ) {
-            $err = sanitize_text_field( wp_unslash( $_GET['max_oauth_error'] ) );
-            $message .= '<p class="message" style="color:#d63638;background:#fff3f3;padding:8px 12px;border-radius:4px;margin-top:8px;"><strong>Ошибка входа через MAX:</strong> ' . esc_html( $err ) . '</p>';
-        }
-        return $message;
-    }
-
-    public function maybe_output_frontend_styles() {
-        if ( is_page( 'login' ) || ( function_exists( 'is_account_page' ) && is_account_page() ) || ( function_exists( 'is_checkout' ) && is_checkout() ) ) $this->output_styles();
     }
 
     public function output_styles() {
