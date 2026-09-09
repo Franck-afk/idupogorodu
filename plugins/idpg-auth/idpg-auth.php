@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       IDPG Auth
- * Plugin URI:        https://idupogorodu.test
+ * Plugin URI:        https://idupogorodu.ru
  * Description:       Авторизация через ВКонтакте, Яндекс ID и MAX. Блокировка иностранных сервисов (КоАП РФ). Журнал событий.
  * Version:           1.0.0
  * Author:            idpg

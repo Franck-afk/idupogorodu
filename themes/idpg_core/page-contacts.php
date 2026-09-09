@@ -34,8 +34,8 @@ get_header();
 					<div class="idpg-page-contacts__icon">✉️</div>
 					<h3 class="idpg-page-contacts__title">Редакция</h3>
 					<p class="idpg-page-contacts__desc">Вопросы по контенту и сотрудничеству</p>
-					<a href="mailto:info@idupogorodu.test" class="idpg-btn idpg-btn--primary">
-						info@idupogorodu.test
+					<a href="mailto:info@idupogorodu.ru" class="idpg-btn idpg-btn--primary">
+						info@idupogorodu.ru
 					</a>
 				</div>
 
@@ -43,8 +43,8 @@ get_header();
 					<div class="idpg-page-contacts__icon">📢</div>
 					<h3 class="idpg-page-contacts__title">Реклама на сайте</h3>
 					<p class="idpg-page-contacts__desc">Размещение рекламы и партнёрство</p>
-					<a href="mailto:ads@idupogorodu.test" class="idpg-btn idpg-btn--secondary">
-						ads@idupogorodu.test
+					<a href="mailto:ads@idupogorodu.ru" class="idpg-btn idpg-btn--secondary">
+						ads@idupogorodu.ru
 					</a>
 				</div>
 			</div>

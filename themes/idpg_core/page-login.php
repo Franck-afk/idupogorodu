@@ -42,7 +42,7 @@ $hero_events    = get_posts(
 	)
 );
 if ( ! empty( $hero_events ) ) {
-	$hero_image_url = IDPG_Media::idpg_get_poster_url( $hero_events[0], 'large' );
+	$hero_image_url = IDPG_Media::idpg_get_poster_url( $hero_events[0]->ID, 'large' );
 }
 
 /**
