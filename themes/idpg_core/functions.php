@@ -8,7 +8,7 @@
  */
 
 if ( ! defined( 'IDPG_VERSION' ) ) {
-	define( 'IDPG_VERSION', '1.0.72' );
+	define( 'IDPG_VERSION', '1.0.73' );
 }
 
 

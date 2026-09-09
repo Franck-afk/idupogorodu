@@ -37,8 +37,12 @@
 			$wrap.find('.idpg-ad-widget__image-wrap').empty();
 
 			if (id) {
-				wp.media.attachment(id).fetch().then(function (a) {
-					$wrap.find('.idpg-ad-widget__image-wrap').html('<img src="' + a.get('url') + '" alt="">');
+				var attachment = wp.media.attachment(id);
+				attachment.fetch().done(function () {
+					var url = attachment.get('url');
+					if (url) {
+						$wrap.find('.idpg-ad-widget__image-wrap').html('<img src="' + url + '" alt="">');
+					}
 				});
 			}
 		});

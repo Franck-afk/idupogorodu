@@ -29,6 +29,8 @@ $is_forgot = isset( $_GET['action'] ) && 'forgot' === $_GET['action'];
 
 /**
  * Тематическая картинка для правой панели: обложка случайного события.
+ * Если опубликованных событий с обложкой нет (например, пустая локальная
+ * копия) — берём случайное изображение из медиатеки.
  */
 $hero_image_url = '';
 $hero_events    = get_posts(
@@ -43,6 +45,22 @@ $hero_events    = get_posts(
 );
 if ( ! empty( $hero_events ) ) {
 	$hero_image_url = IDPG_Media::idpg_get_poster_url( $hero_events[0]->ID, 'large' );
+}
+
+if ( empty( $hero_image_url ) ) {
+	$hero_fallback = get_posts(
+		array(
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'post_mime_type' => 'image',
+			'posts_per_page' => 1,
+			'orderby'        => 'rand',
+			'no_found_rows'  => true,
+		)
+	);
+	if ( ! empty( $hero_fallback ) ) {
+		$hero_image_url = wp_get_attachment_image_url( $hero_fallback[0]->ID, 'large' );
+	}
 }
 
 /**
