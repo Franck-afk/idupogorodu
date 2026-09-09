@@ -415,6 +415,33 @@ endif;
 if ( ! class_exists( 'IDPG_Subscribe_Widget' ) ) :
 
 /**
+ * Возвращает <img> вложения, подбирая реально существующий размер.
+ *
+ * В медиабиблиотеке может не оказаться размера 'medium' (например, при
+ * сторонней генерации размеров или отключённых ресайзах), из-за чего
+ * wp_get_attachment_image( $id, 'medium' ) вернёт пустую строку.
+ * Хелпер перебирает приоритетные размеры и использует первый доступный,
+ * иначе — оригинал.
+ *
+ * @param int   $attachment_id ID вложения.
+ * @param array $attr          Атрибуты тега img.
+ * @return string HTML-тег <img> либо пустая строка.
+ */
+function idpg_get_attachment_image_any( $attachment_id, $attr = array() ) {
+	if ( ! $attachment_id || ! wp_attachment_is_image( $attachment_id ) ) {
+		return '';
+	}
+
+	foreach ( array( 'medium', 'large', 'thumbnail' ) as $size ) {
+		if ( false !== wp_get_attachment_image_src( $attachment_id, $size ) ) {
+			return wp_get_attachment_image( $attachment_id, $size, false, $attr );
+		}
+	}
+
+	return wp_get_attachment_image( $attachment_id, 'full', false, $attr );
+}
+
+/**
  * Виджет «Подписка на дайджест».
  *
  * Форма подписки на email-дайджест: заголовок, текст, поле email,
@@ -449,8 +476,12 @@ class IDPG_Subscribe_Widget extends WP_Widget {
 		$show_consent  = ! empty( $instance['show_consent'] );
 		$image         = isset( $instance['image'] ) ? absint( $instance['image'] ) : 0;
 
+		// Открываем обёртку виджета (section.widget) — без неё карточная
+		// вёрстка сайдбара (белый фон) не применяется.
+		echo $args['before_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 		if ( $image ) {
-			echo '<div class="idpg-subscribe__image">' . wp_get_attachment_image( $image, 'medium' ) . '</div>';
+			echo '<div class="idpg-subscribe__image">' . idpg_get_attachment_image_any( $image ) . '</div>';
 		}
 
 		if ( $title ) {
@@ -502,7 +533,7 @@ class IDPG_Subscribe_Widget extends WP_Widget {
 			<label><?php esc_html_e( 'Картинка:', 'idpg_core' ); ?></label>
 			<div class="idpg-ad-widget__image-wrap" style="margin:8px 0">
 				<?php if ( $image ) : ?>
-					<?php echo wp_get_attachment_image( $image, 'medium', false, array( 'style' => 'max-width:300px;height:auto;' ) ); ?>
+					<?php echo idpg_get_attachment_image_any( $image, array( 'style' => 'max-width:300px;height:auto;' ) ); ?>
 				<?php endif; ?>
 			</div>
 			<input type="hidden" class="idpg-ad-widget__image-id"
