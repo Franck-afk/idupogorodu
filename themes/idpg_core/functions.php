@@ -42,6 +42,58 @@ function idpg_core_disable_parent_menu_items( $items ) {
 add_filter( 'wp_nav_menu_objects', 'idpg_core_disable_parent_menu_items' );
 
 /**
+ * Возвращает URL страницы входа (страница с шаблоном page-login.php,
+ * иначе дефолтный /login/). Нужен для фильтра футер-меню.
+ *
+ * @return string
+ */
+function idpg_core_get_login_url_in_theme() {
+	$login_page = get_posts(
+		array(
+			'post_type'   => 'page',
+			'numberposts' => 1,
+			'meta_key'    => '_wp_page_template',
+			'meta_value'  => 'page-login.php',
+			'fields'      => 'ids',
+		)
+	);
+
+	if ( ! empty( $login_page ) ) {
+		return trailingslashit( get_permalink( $login_page[0] ) );
+	}
+
+	return trailingslashit( home_url( '/login/' ) );
+}
+
+/**
+ * Убирает пункт «Войти» из футер-меню.
+ *
+ * Вход доступен в шапке, дублирование ссылки в подвале не требуется.
+ * Пункт определяется по URL страницы входа, поэтому работает и на проде,
+ * независимо от слага страницы (/login/, /vhod/ и т.п.).
+ *
+ * @param array    $items Элементы меню.
+ * @param stdClass $args  Аргументы wp_nav_menu().
+ * @return array
+ */
+function idpg_core_remove_footer_login_item( $items, $args ) {
+	if ( empty( $args->theme_location ) || 'footer' !== $args->theme_location ) {
+		return $items;
+	}
+
+	$login_url = untrailingslashit( idpg_core_get_login_url_in_theme() );
+
+	foreach ( $items as $key => $item ) {
+		if ( untrailingslashit( (string) $item->url ) === $login_url ) {
+			unset( $items[ $key ] );
+		}
+	}
+
+	return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'idpg_core_remove_footer_login_item', 20, 2 );
+
+/**
  * Composer autoload.
  *
  * ПЕРЕНЕСЕНО В ПЛАГИН idpg-core (см. idpg-core.php):
