@@ -197,6 +197,13 @@ class IDPG_Auth_Emails {
 			return;
 		}
 
+		// Новый организатор в процессе регистрации: письмо подтверждения уходит
+		// отдельно из точки регистрации, поэтому приветственное письмо не шлём,
+		// а буфер пароля очищаем (он планировался только для старого сценария).
+		if ( self::take_password( $user->user_email ) ) {
+			return;
+		}
+
 		// Организатор получает отдельное письмо с данными для входа.
 		if ( in_array( 'event_organizer', (array) $user->roles, true ) ) {
 			$password = self::take_password( $user->user_email );
@@ -219,6 +226,49 @@ class IDPG_Auth_Emails {
 	}
 
 	/**
+	 * Отправляет письмо с подтверждением регистрации организатора.
+	 *
+	 * Ссылка ведёт на страницу входа с параметрами action=confirm.
+	 *
+	 * @param int    $user_id ID нового организатора.
+	 * @param string $key     Plain-ключ подтверждения.
+	 * @return void
+	 */
+	public function send_organizer_verification_email( $user_id, $key ) {
+		$user = get_userdata( $user_id );
+
+		if ( ! $user || is_wp_error( $user ) ) {
+			return;
+		}
+
+		$confirm_url = add_query_arg(
+			array(
+				'action'    => 'confirm',
+				'idpg_user' => $user->ID,
+				'idpg_key'  => $key,
+			),
+			$this->get_login_url()
+		);
+
+		$content  = '<p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #4a4a4a;">';
+		$content .= 'Вы зарегистрировались на платформе «Иду по городу» как организатор. ';
+		$content .= 'Чтобы активировать аккаунт и получить доступ к кабинету организатора, ';
+		$content .= 'подтвердите ваш email по кнопке ниже:';
+		$content .= '</p>';
+
+		$content .= $this->render_button( 'Подтвердить регистрацию', $confirm_url );
+
+		$content .= '<p style="margin: 28px 0 0; font-size: 14px; line-height: 1.5; color: #888888;">';
+		$content .= 'Если вы не регистрировались на сайте, просто проигнорируйте это письмо.';
+		$content .= '</p>';
+
+		$subject = 'Подтверждение регистрации организатора — Иду по городу';
+		$body    = $this->render_email_template( $content, 'Подтверждение регистрации' );
+
+		wp_mail( $user->user_email, $subject, $body );
+	}
+
+	/**
 	 * Собирает и отправляет приветственное письмо организатору.
 	 *
 	 * @param WP_User $user     Объект нового организатора.
@@ -235,6 +285,18 @@ class IDPG_Auth_Emails {
 		$subject = 'Добро пожаловать, ' . ( $display_name ?: $email ) . '! Ваш кабинет организатора готов';
 
 		wp_mail( $email, $subject, $body );
+	}
+
+	/**
+	 * Возвращает URL страницы входа (публичная обёртка).
+	 *
+	 * Нужен другим классам (например, формированию ссылки подтверждения
+	 * регистрации организатора), чтобы не дублировать поиск страницы.
+	 *
+	 * @return string URL страницы входа.
+	 */
+	public function get_login_page_url() {
+		return $this->get_login_url();
 	}
 
 	/**

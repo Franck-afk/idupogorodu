@@ -244,6 +244,15 @@ class IDPG_REST_Auth {
 			);
 		}
 
+		// Организатор, не подтвердивший регистрацию по ссылке из письма, не может войти.
+		if ( IDPG_Organizer_Verify::instance()->is_pending( $user->ID ) ) {
+			return new WP_Error(
+				'registration_pending',
+				__( 'Подтвердите регистрацию по ссылке из письма, отправленного на ваш email.', 'idpg-core' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		wp_set_current_user( $user->ID );
 		wp_set_auth_cookie( $user->ID, $remember );
 		do_action( 'wp_login', $user->user_login, $user );
@@ -397,13 +406,14 @@ class IDPG_REST_Auth {
 			)
 		);
 
-		// Назначение роли.
-		$user = new WP_User( $user_id );
-
+		// Дополнительные поля организатора сохраняем сразу (до подтверждения),
+		// чтобы после перехода по ссылке аккаунт был полностью готов.
 		if ( 'organizer' === $type ) {
-			$user->set_role( 'event_organizer' );
+			// Роль event_organizer выдаётся только после подтверждения по ссылке.
+			// default_role может быть event_organizer, поэтому явно ставим subscriber.
+			$org_user = new WP_User( $user_id );
+			$org_user->set_role( 'subscriber' );
 
-			// Дополнительные поля для организатора.
 			$org_name     = $request->get_param( 'org_name' );
 			$contact_name = $request->get_param( 'contact_name' );
 			$phone        = $request->get_param( 'phone' );
@@ -419,9 +429,34 @@ class IDPG_REST_Auth {
 			if ( ! empty( $phone ) ) {
 				update_user_meta( $user_id, 'idpg_phone', sanitize_text_field( $phone ) );
 			}
+
+			// Ключ подтверждения и письмо со ссылкой. Роль event_organizer
+			// выдаётся только после перехода по ссылке из письма.
+			$verify_key = IDPG_Organizer_Verify::instance()->prepare( $user_id );
+			IDPG_Auth_Emails::instance()->send_organizer_verification_email( $user_id, $verify_key );
+
+			/**
+			 * Действие после регистрации организатора.
+			 *
+			 * @param int    $user_id ID нового пользователя.
+			 * @param string $type    Тип регистрации: user|organizer.
+			 */
+			do_action( 'idpg_auth_after_register', $user_id, $type );
+
+			return new WP_REST_Response(
+				array(
+					'success'       => true,
+					'user_id'       => $user_id,
+					'pending_email' => true,
+					'message'       => __( 'Регистрация почти готова! Мы отправили на ваш email письмо со ссылкой для подтверждения. Перейдите по ней, чтобы войти в кабинет организатора.', 'idpg-core' ),
+					'redirect_url'  => home_url( '/login/' ),
+				),
+				201
+			);
 		}
 
-		// Автоматическая авторизация после регистрации.
+		// Автоматическая авторизация после регистрации (обычный пользователь).
+		$user          = new WP_User( $user_id );
 		wp_set_current_user( $user_id );
 		wp_set_auth_cookie( $user_id );
 

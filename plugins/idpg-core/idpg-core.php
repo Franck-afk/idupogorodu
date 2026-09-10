@@ -105,6 +105,7 @@ require_once IDPG_CORE_DIR . 'includes/class-auth.php';
 require_once IDPG_CORE_DIR . 'includes/class-rest-auth.php';
 require_once IDPG_CORE_DIR . 'includes/class-auth-rate-limiter.php';
 require_once IDPG_CORE_DIR . 'includes/class-auth-emails.php';
+require_once IDPG_CORE_DIR . 'includes/class-organizer-verify.php';
 require_once IDPG_CORE_DIR . 'includes/class-maintenance.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-selector-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-calendar-widget.php';
@@ -112,6 +113,7 @@ require_once IDPG_CORE_DIR . 'includes/class-expected-events-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-user-purge.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-page.php';
 require_once IDPG_CORE_DIR . 'includes/class-dashboard-stats.php';
+require_once IDPG_CORE_DIR . 'includes/class-event-moderation.php';
 // Интеграция с Rank Math SEO (schema/OG; работает только при активном Rank Math).
 require_once IDPG_CORE_DIR . 'includes/class-seo-integration.php';
 /**
@@ -134,6 +136,7 @@ function idpg_core_init() {
 	IDPG_Auth::instance();
 	IDPG_REST_Auth::instance();
 	IDPG_Auth_Emails::instance();
+	IDPG_Organizer_Verify::instance();
 	IDPG_Maintenance::instance();
 	IDPG_Settings_Page::instance();
 
@@ -142,6 +145,9 @@ function idpg_core_init() {
 
 	// Страница доуполнения анкеты организатора /organizer/complete/.
 	IDPG_Organizer_Page::init();
+
+	// Модерация публикации событий организаторов (pending + уведомления).
+	IDPG_Event_Moderation::instance();
 
 	// Интеграция с Rank Math SEO (хуки вешаются только если плагин активен).
 	IDPG_SEO_Integration::instance();

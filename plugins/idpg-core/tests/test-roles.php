@@ -37,12 +37,15 @@ class Test_Roles extends WP_UnitTestCase {
 
 	/**
 	 * Организатор умеет совершать базовые действия с событиями.
+	 *
+	 * Публикация событий — только через модерацию: publish_events
+	 * у организатора отсутствует, его события уходят в pending.
 	 */
 	public function test_organizer_event_caps() {
 		IDPG_Roles::instance()->create_roles();
 		$role = get_role( IDPG_Roles::ROLE_SLUG );
 		$this->assertTrue( $role->has_cap( 'edit_events' ) );
-		$this->assertTrue( $role->has_cap( 'publish_events' ) );
+		$this->assertFalse( $role->has_cap( 'publish_events' ) );
 		$this->assertTrue( $role->has_cap( 'delete_events' ) );
 		$this->assertFalse( $role->has_cap( 'edit_others_events' ) );
 		$this->assertFalse( $role->has_cap( 'manage_options' ) );

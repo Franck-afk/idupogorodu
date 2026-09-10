@@ -41,7 +41,7 @@ class IDPG_Roles {
 	 *
 	 * @var int
 	 */
-	const ROLE_VERSION = 5;
+	const ROLE_VERSION = 6;
 
 	/**
 	 * Получение экземпляра синглтона.
@@ -84,6 +84,8 @@ class IDPG_Roles {
 			$organizer->add_cap( 'edit_posts' );
 			$organizer->add_cap( 'delete_published_events' );
 			$organizer->add_cap( 'delete_private_events' );
+			// Модерация: снимаем право прямой публикации событий.
+			$organizer->remove_cap( 'publish_events' );
 			// Доступ к площадкам.
 			$organizer->add_cap( 'edit_venues' );
 			$organizer->add_cap( 'publish_venues' );
@@ -162,11 +164,13 @@ class IDPG_Roles {
 			'edit_posts'                 => true,
 
 			// Capabilities для CPT event.
-				'edit_events'                => true,
-				'publish_events'             => true,
-				'delete_events'              => true,
-				'edit_published_events'      => true,
-				'delete_published_events'    => true,
+			// Модерация: организатор создаёт/редактирует свои события,
+			// но публикует их администратор (publish_events отсутствует).
+			'edit_events'                => true,
+			'publish_events'             => false,
+			'delete_events'              => true,
+			'edit_published_events'      => true,
+			'delete_published_events'    => true,
 				'delete_private_events'      => true,
 				'edit_others_events'         => false,
 				'delete_others_events'       => false,

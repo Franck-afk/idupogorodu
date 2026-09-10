@@ -310,6 +310,12 @@
 				if ( result.ok && result.json.success ) {
 					showMessage( result.json.message || 'Успешно!', 'success' );
 
+					// Регистрация с подтверждением по email: письмо со ссылкой уже
+					// отправлено, редирект не делаем — остаёмся на странице входа.
+					if ( result.json.pending_email ) {
+						return;
+					}
+
 					setTimeout( function () {
 						var redir = result.json.redirect_url || '/';
 						if ( redir.indexOf( '/' ) !== 0 || redir.indexOf( '//' ) !== -1 ) {

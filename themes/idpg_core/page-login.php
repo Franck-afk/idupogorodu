@@ -8,6 +8,24 @@
  * @package idpg_core
  */
 
+// Ссылка подтверждения регистрации организатора (?action=confirm&idpg_user=..&idpg_key=..).
+if ( isset( $_GET['action'] ) && 'confirm' === $_GET['action'] ) {
+	$confirm_user_id = isset( $_GET['idpg_user'] ) ? absint( $_GET['idpg_user'] ) : 0;
+	$confirm_key     = isset( $_GET['idpg_key'] ) ? sanitize_text_field( wp_unslash( $_GET['idpg_key'] ) ) : '';
+
+	$confirm_result = IDPG_Organizer_Verify::instance()->confirm( $confirm_user_id, $confirm_key );
+
+	if ( is_wp_error( $confirm_result ) ) {
+		$register_error = $confirm_result->get_error_message();
+	} else {
+		// Подтверждено: авторизуем организатора и ведём в его админку.
+		wp_set_current_user( $confirm_result->ID );
+		wp_set_auth_cookie( $confirm_result->ID );
+		wp_safe_redirect( admin_url() );
+		exit;
+	}
+}
+
 // Редирект авторизованных пользователей.
 if ( is_user_logged_in() ) {
 	$user = wp_get_current_user();
@@ -49,8 +67,9 @@ if ( ! empty( $hero_events ) ) {
  * PHP-обработка форм (fallback при отключённом JS).
  */
 $login_error   = '';
-$register_error = '';
-$forgot_sent   = false;
+	$register_error = '';
+	$forgot_sent   = false;
+	$register_sent = false;
 
 // Соц. вход: отображение ошибки из редиректа (?idpg_social_error=...).
 if ( isset( $_GET['idpg_social_error'] ) ) {
@@ -127,6 +146,9 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 			if ( is_wp_error( $user ) ) {
 				$login_error = __( 'Неверный email или пароль.', 'idpg_core' );
+			} elseif ( IDPG_Organizer_Verify::instance()->is_pending( $user->ID ) ) {
+				// Организатор ещё не подтвердил регистрацию по ссылке из письма.
+				$login_error = __( 'Подтвердите регистрацию по ссылке из письма, отправленного на ваш email.', 'idpg_core' );
 			} else {
 				$roles = (array) $user->roles;
 
@@ -172,6 +194,8 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		} elseif ( email_exists( $email ) ) {
 			$register_error = __( 'Этот email уже зарегистрирован.', 'idpg_core' );
 		} else {
+			// Запоминаем пароль, чтобы приветственное письмо не ушло
+			// на этапе wp_create_user (см. IDPG_Auth_Emails::send_welcome_email).
 			IDPG_Auth_Emails::remember_password( $email, $password );
 			$user_id = wp_create_user( $email, $password, $email );
 
@@ -184,16 +208,19 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 						'display_name' => $contact_name,
 					)
 				);
-				$user = new WP_User( $user_id );
-				$user->set_role( 'event_organizer' );
 				update_user_meta( $user_id, 'idpg_org_name', $org_name );
 				update_user_meta( $user_id, 'idpg_contact_name', $contact_name );
 				update_user_meta( $user_id, 'idpg_phone', $phone );
-				wp_set_current_user( $user_id );
-				wp_set_auth_cookie( $user_id );
-				do_action( 'wp_login', $email, $user_id );
-				wp_safe_redirect( home_url( '/' ) );
-				exit;
+
+				// Роль event_organizer выдаётся только после подтверждения по ссылке из письма.
+				// default_role может быть event_organizer, поэтому явно ставим subscriber.
+				$org_user = new WP_User( $user_id );
+				$org_user->set_role( 'subscriber' );
+
+				$verify_key = IDPG_Organizer_Verify::instance()->prepare( $user_id );
+				IDPG_Auth_Emails::instance()->send_organizer_verification_email( $user_id, $verify_key );
+
+				$register_sent = true;
 			}
 		}
 	}
@@ -245,6 +272,12 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		<?php if ( $forgot_sent ) : ?>
 			<div class="auth__message auth__message--success" role="alert" style="margin-bottom:16px;">
 				<p class="auth__message-text" style="margin:0;color:#0a0;"><?php esc_html_e( 'Если email существует, инструкции отправлены.', 'idpg_core' ); ?></p>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $register_sent ) : ?>
+			<div class="auth__message auth__message--success" role="alert" style="margin-bottom:16px;">
+				<p class="auth__message-text" style="margin:0;color:#0a0;"><?php esc_html_e( 'Регистрация почти готова! Мы отправили на ваш email письмо со ссылкой для подтверждения. Перейдите по ней, чтобы войти в кабинет организатора.', 'idpg_core' ); ?></p>
 			</div>
 		<?php endif; ?>
 

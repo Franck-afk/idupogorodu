@@ -64,7 +64,7 @@ echo.
 rem ---------------------------------------------------------------------------
 rem 1. Скачивание и распаковка wordpress-develop (если ещё нет)
 rem ---------------------------------------------------------------------------
-if not exist "%WP_CORE_DIR%\wp-includes\version.php" goto :have_core
+if exist "%WP_CORE_DIR%\wp-includes\version.php" goto :have_core
 echo Скачивание wordpress-develop...
 set "ZIP=%TEMP%\wordpress-develop.zip"
 powershell -NoProfile -Command "Invoke-WebRequest -Uri 'https://github.com/WordPress/wordpress-develop/archive/refs/heads/trunk.zip' -OutFile '%ZIP%' -UseBasicParsing"
