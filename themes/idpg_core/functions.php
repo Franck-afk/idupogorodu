@@ -8,7 +8,7 @@
  */
 
 if ( ! defined( 'IDPG_VERSION' ) ) {
-	define( 'IDPG_VERSION', '1.0.74' );
+	define( 'IDPG_VERSION', '1.0.75' ); // 1.0.75: bump для сброса кэша style.css (фикс отступа оверлея поиска)
 }
 
 
