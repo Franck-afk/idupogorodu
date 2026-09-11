@@ -1309,6 +1309,11 @@
 }
 
 @media (max-width: 767px) {
+	/* Воздух сверху на мобильной странице поиска */
+	body.search .idpg-breadcrumbs-wrap {
+		padding-top: 132px;
+	}
+
 	.idpg-search-form {
 		gap: 8px;
 		max-width: none;
