@@ -1308,6 +1308,30 @@
 	max-width: 560px;
 }
 
+@media (max-width: 767px) {
+	.idpg-search-form {
+		gap: 8px;
+		max-width: none;
+		width: 100%;
+	}
+
+	.idpg-search-form__input {
+		min-width: 0;
+		flex: 1 1 auto;
+		padding: 11px 14px;
+		font-size: 16px;
+		width: auto;
+		-webkit-appearance: none;
+		appearance: none;
+	}
+
+	.idpg-search-form .idpg-btn {
+		flex: 0 0 auto;
+		padding: 8px 18px;
+		white-space: nowrap;
+	}
+}
+
 .idpg-search-form__input {
 	flex: 1;
 	padding: 11px 18px;
@@ -1977,4 +2001,47 @@ a.idpg-share__btn--native:focus {
 	top: calc(100% + 8px);
 	left: 0;
 	right: 0;
+}
+
+/* --- Мобильные доработки страницы поиска (≤767px) --- */
+@media (max-width: 767px) {
+	.idpg-archive-header__title {
+		font-size: 1.3rem;
+		margin-bottom: 16px;
+	}
+
+	.idpg-archive-header__back {
+		margin-top: 10px;
+		line-height: 1.5;
+	}
+
+	.idpg-search-count {
+		margin-bottom: 16px;
+	}
+
+	/* Карточки чуть компактнее на маленьких экранах. */
+	.idpg-events-grid {
+		gap: 16px;
+		margin-bottom: 16px;
+	}
+
+	.idpg-event-card__info {
+		padding: 14px 14px 16px;
+		gap: 8px;
+	}
+
+	.idpg-event-card__footer {
+		gap: 10px;
+	}
+
+	/* Подсказки пустого результата — удобные тач-зоны. */
+	.idpg-search-empty__cats a {
+		padding: 8px 14px;
+	}
+}
+
+@media (max-width: 380px) {
+	.idpg-search-form .idpg-btn {
+		padding: 8px 14px;
+	}
 }
