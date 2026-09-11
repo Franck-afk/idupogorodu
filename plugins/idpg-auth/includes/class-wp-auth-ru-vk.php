@@ -26,16 +26,19 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
     const STATE_META_KEY     = 'wp_auth_ru_vk_oauth_id';
     const NONCE_KEY          = 'wp_auth_ru_vk_state';
     const AUTH_URL           = 'https://id.vk.com/authorize';
-    const TOKEN_URL          = 'https://id.vk.com/oauth/token';
+    const TOKEN_URL          = 'https://id.vk.com/oauth2/auth';
+    const USERINFO_URL       = 'https://id.vk.com/oauth2/user_info';
     const USERS_API_URL      = 'https://api.vk.com/method/users.get';
     const API_VERSION        = '5.199';
     const DEFAULT_USERNAME_BASE = 'vk_user';
 
     /**
      * VK ID-приложения работают только через OAuth 2.1 с PKCE:
-     * authorize — id.vk.com/authorize, обмен кода — id.vk.com/oauth/token
-     * с параметром code_verifier (client_secret не используется).
-     * Старый oauth.vk.com для VK ID-приложений возвращает Security Error.
+     * authorize — GET id.vk.com/authorize (code_challenge S256), обмен кода —
+     * POST id.vk.com/oauth2/auth?grant_type=…&code_verifier=… (code в form-теле,
+     * client_secret не используется), профиль — POST id.vk.com/oauth2/user_info
+     * (формат по эталону официального SDK @vkid/sdk). Старый oauth.vk.com для
+     * VK ID-приложений возвращает Security Error.
      */
     const USE_PKCE           = true;
 
@@ -60,9 +63,8 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
             'client_id'    => $this->settings['vk_client_id'] ?? '',
             'redirect_uri' => static::get_callback_url(),
             'response_type' => 'code',
-            'scope'        => 'email',
+            'scope'        => 'vkid.personal_info email',
             'state'        => $state,
-            'v'            => self::API_VERSION,
         );
     }
 
@@ -143,38 +145,41 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
     protected function exchange_code_for_token( $code ) {
         // VK ID (OAuth 2.1): обмен кода требует code_verifier из PKCE-флоу.
         // Он сохранён в transient под ключом verifier_transient_key(state) —
-        // вытаскиваем по state из callback-запроса.
+        // вытаскиваем по state из callback-запроса. VK отдаёт device_id
+        // вместе с code в callback-URL.
         $request_state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
+        $device_id     = isset( $_GET['device_id'] ) ? sanitize_text_field( wp_unslash( $_GET['device_id'] ) ) : '';
         $verifier      = $request_state ? $this->get_pkce_verifier( $request_state ) : '';
 
-        // VK ID-эндпоинт ожидает JSON-тело (OAuth 2.1).
-        $body = array(
-            'grant_type'   => 'authorization_code',
-            'client_id'    => $this->settings['vk_client_id']     ?? '',
-            'redirect_uri' => static::get_callback_url(),
-            'code'         => $code,
-        );
-
         if ( '' !== $verifier ) {
-            // Основной путь: VK ID-приложение (PKCE, OAuth 2.1).
-            $body['code_verifier'] = $verifier;
-            if ( '' !== $request_state ) {
-                $body['state'] = $request_state;
-            }
+            // Основной путь — VK ID (по эталону официального SDK @vkid/sdk):
+            // POST /oauth2/auth?grant_type=authorization_code&redirect_uri=…
+            // &client_id=…&code_verifier=…&state=…&device_id=…
+            // code передаётся в form-теле, client_secret НЕ используется.
+            $query = add_query_arg( array(
+                'grant_type'    => 'authorization_code',
+                'redirect_uri'  => static::get_callback_url(),
+                'client_id'     => $this->settings['vk_client_id'] ?? '',
+                'code_verifier' => $verifier,
+                'state'         => $request_state,
+                'device_id'     => $device_id,
+            ), self::TOKEN_URL );
 
-            $response = wp_remote_post( self::TOKEN_URL, array(
+            $response = wp_remote_post( $query, array(
                 'timeout' => 20,
-                'headers' => array( 'Content-Type' => 'application/json' ),
-                'body'    => wp_json_encode( $body ),
+                'body'    => array( 'code' => $code ),
             ) );
         } else {
             // Fallback на классический обмен (для старых standalone-приложений
             // oauth.vk.com, если приложение когда-либо сменят обратно).
-            $body['client_secret'] = $this->settings['vk_client_secret'] ?? '';
-
             $response = wp_remote_post( 'https://oauth.vk.com/access_token', array(
                 'timeout' => 20,
-                'body'    => $body,
+                'body'    => array(
+                    'client_id'     => $this->settings['vk_client_id']     ?? '',
+                    'client_secret' => $this->settings['vk_client_secret'] ?? '',
+                    'redirect_uri'  => static::get_callback_url(),
+                    'code'          => $code,
+                ),
             ) );
         }
 
@@ -186,6 +191,13 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
 
         $http_code = wp_remote_retrieve_response_code( $response );
         $body      = json_decode( wp_remote_retrieve_body( $response ), true );
+
+        if ( ! is_array( $body ) ) {
+            // Не-JSON (например, HTML 404) — логируем фрагмент для диагностики.
+            $msg = 'VK ответил не-JSON на запрос токена (HTTP ' . $http_code . ').';
+            WP_Auth_Ru_Logger::log( 'ERROR', self::PROVIDER, $msg, array( 'http' => $http_code, 'body' => mb_substr( (string) wp_remote_retrieve_body( $response ), 0, 200 ) ) );
+            return new WP_Error( 'vk_token_bad_response', $msg );
+        }
 
         if ( ! empty( $body['error'] ) ) {
             $msg = 'VK: ' . ( $body['error_description'] ?? $body['error'] );
@@ -200,10 +212,45 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
         }
 
         WP_Auth_Ru_Logger::log( 'SUCCESS', self::PROVIDER, 'Токен получен (HTTP ' . $http_code . ', email: ' . WP_Auth_Ru_Logger::mask_email( $body['email'] ?? '' ) . ')' );
-        return $body; // VK возвращает email и user_id прямо здесь
+        return $body;
     }
 
     protected function get_user_profile( $token_data ) {
+        // 1. Основной путь VK ID: POST id.vk.com/oauth2/user_info.
+        // Возвращает {"user": {user_id, first_name, last_name, email, avatar}}.
+        $response = wp_remote_post( self::USERINFO_URL, array(
+            'timeout' => 20,
+            'body'    => array(
+                'client_id'    => $this->settings['vk_client_id'] ?? '',
+                'access_token' => $token_data['access_token'],
+            ),
+        ) );
+
+        if ( ! is_wp_error( $response ) ) {
+            $data = json_decode( wp_remote_retrieve_body( $response ), true );
+
+            if ( is_array( $data ) && ! empty( $data['user']['user_id'] ) ) {
+                $u = $data['user'];
+
+                $profile = array(
+                    'first_name' => (string) ( $u['first_name'] ?? '' ),
+                    'last_name'  => (string) ( $u['last_name']  ?? '' ),
+                    'email'      => (string) ( $u['email']      ?? '' ),
+                    'photo'      => (string) ( $u['avatar']     ?? '' ),
+                    'vk_id'      => (string) ( $u['user_id'] ?? '' ),
+                );
+
+                WP_Auth_Ru_Logger::log( 'INFO', self::PROVIDER, 'Профиль получен (user_info): vk_id=' . $profile['vk_id'] . ', email=' . WP_Auth_Ru_Logger::mask_email( $profile['email'] ) );
+                return $profile;
+            }
+
+            WP_Auth_Ru_Logger::log( 'WARNING', self::PROVIDER, 'user_info не вернул профиль, пробую users.get', array( 'http' => wp_remote_retrieve_response_code( $response ) ) );
+        } else {
+            WP_Auth_Ru_Logger::log( 'WARNING', self::PROVIDER, 'Ошибка запроса user_info: ' . $response->get_error_message() . ', пробую users.get' );
+        }
+
+        // 2. Fallback: legacy API users.get (токен VK ID обычно работает
+        // и с ним, формат ответа — response[0]).
         $response = wp_remote_get( add_query_arg( array(
             'user_ids'     => $token_data['user_id'] ?? '',
             'fields'       => 'first_name,last_name,photo_100',
@@ -230,7 +277,7 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
         $profile['email']     = $token_data['email'] ?? '';
         $profile['vk_id']     = (string) ( $token_data['user_id'] ?? $profile['id'] ?? '' );
 
-        WP_Auth_Ru_Logger::log( 'INFO', self::PROVIDER, 'Профиль получен: vk_id=' . $profile['vk_id'] . ', email=' . WP_Auth_Ru_Logger::mask_email( $profile['email'] ) );
+        WP_Auth_Ru_Logger::log( 'INFO', self::PROVIDER, 'Профиль получен (users.get): vk_id=' . $profile['vk_id'] . ', email=' . WP_Auth_Ru_Logger::mask_email( $profile['email'] ) );
         return $profile;
     }
 
