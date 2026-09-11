@@ -8,7 +8,7 @@
  */
 
 if ( ! defined( 'IDPG_VERSION' ) ) {
-	define( 'IDPG_VERSION', '1.0.73' );
+	define( 'IDPG_VERSION', '1.0.74' );
 }
 
 
@@ -332,7 +332,6 @@ function idpg_core_legal_render( $doc ) {
 function idpg_core_image_sizes() {
 	add_image_size( 'event-card', 400, 300, true );       // Карточка события (обрезка)
 	add_image_size( 'event-featured', 800, 450, true );   // Главное изображение события
-	add_image_size( 'event-thumb', 150, 150, true );      // Миниатюра
 }
 add_action( 'after_setup_theme', 'idpg_core_image_sizes' );
 
@@ -745,7 +744,7 @@ function idpg_core_pre_get_posts_filters( $query ) {
 
 		// Город: из URL или текущий.
 		$city_id = 0;
-		$qvar_city = get_query_var( IDPG_City_URL::QVAR );
+		$qvar_city = get_query_var( idpg_core_city_qvar() );
 		if ( $qvar_city ) {
 			$term = get_term_by( 'slug', $qvar_city, 'city' );
 			if ( $term && ! is_wp_error( $term ) ) {
@@ -1056,8 +1055,15 @@ function idpg_core_logo_css() {
 		max-width: 100%;
 	}
 	@media (max-width: 767px) {
+		/* Шапка в одну строку: логотип уменьшается до 70 % от заданной
+		   ширины и никогда не выталкивает кнопку меню за экран. */
+		.idpg-header__logo {
+			flex-shrink: 1;
+			min-width: 0;
+			max-width: calc(100% - 64px);
+		}
 		.idpg-logo img {
-			width: 70%;
+			width: calc(var(--idpg-logo-w) * 0.7);
 			height: auto;
 		}
 	}

@@ -74,6 +74,29 @@ abstract class WP_Auth_Ru_OAuth_Provider extends WP_Auth_Ru_Provider {
     }
 
     /**
+     * Дополнительные параметры authorize-запроса (по умолчанию пусто).
+     * Провайдеры с PKCE (например, VK ID, OAuth 2.1) добавляют здесь
+     * code_challenge/code_challenge_method.
+     *
+     * @param string $state    State.
+     * @param string $verifier Сгенерированный code_verifier (для S256-челленджа).
+     *
+     * @return array
+     */
+    protected function extra_auth_params( $state, $verifier ) {
+        return array();
+    }
+
+    /**
+     * Использует ли провайдер PKCE (OAuth 2.1). Переопределяется в провайдере.
+     *
+     * @return bool
+     */
+    protected function uses_pkce() {
+        return false;
+    }
+
+    /**
      * REST: старт OAuth-потока (редирект на authorize-URL провайдера).
      *
      * @param WP_REST_Request $request Запрос.
@@ -102,7 +125,24 @@ abstract class WP_Auth_Ru_OAuth_Provider extends WP_Auth_Ru_Provider {
             exit;
         }
 
-        wp_redirect( static::AUTH_URL . '?' . http_build_query( $this->auth_params( $state ) ) );
+        // PKCE (OAuth 2.1): генерируем code_verifier, отдаём провайдеру
+        // только S256-челлендж; verifier сохраняем до обмена кода.
+        $params   = $this->auth_params( $state );
+        $verifier = '';
+        if ( $this->uses_pkce() ) {
+            $verifier = WP_Auth_Ru_VK::pkce_generate_verifier();
+            $this->store_pkce_verifier( $state, $verifier );
+            $params = array_merge( $params, $this->extra_auth_params( $state, $verifier ) );
+        }
+
+        // Диагностика Security Error от провайдера: логируем точный
+        // authorize-URL — в нём виден redirect_uri, который должен
+        // совпадать с настройками приложения провайдера (например,
+        // VK ID возвращает invalid_request/Security Error при
+        // несовпадении redirect_uri или HTTP вместо HTTPS).
+        WP_Auth_Ru_Logger::log( 'INFO', static::PROVIDER, 'Redirect на authorize: ' . static::AUTH_URL . '?' . http_build_query( $params ) );
+
+        wp_redirect( static::AUTH_URL . '?' . http_build_query( $params ) );
         exit;
     }
 

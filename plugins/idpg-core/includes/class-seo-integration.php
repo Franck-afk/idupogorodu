@@ -1,19 +1,22 @@
 <?php
 /**
- * Интеграция с плагином Rank Math SEO.
+ * Интеграция с плагином Yoast SEO.
  *
- * Когда Rank Math активен:
+ * Когда Yoast активен:
  *  - в его граф JSON-LD добавляются сущности Event (страница события)
  *    и Place (страница площадки) с гео-данными площадки (GeoCoordinates),
  *    городом события (addressLocality) и ценами (Offer);
- *  - дублирующая разметка Event в теме отключается (одна сущность на страницу);
- *  - хлебные крошки Rank Math объявляются поддерживаемыми темой.
+ *  - og:image/twitter:image для событий и площадок гарантированно берётся
+ *    из постера (миниатюра записи = постер проекта);
+ *  - тема объявляет поддержку крошек Yoast (yoast_breadcrumb), вывод оборачивается
+ *    в собственные стили темы (breadcrumbs.php).
  *
- * og:image/twitter:image Rank Math берёт из миниатюры записи — у нас
- * это и есть постер события/площадки, дополнительной подстановки не требуется.
+ * Дублирующую разметку Event, которую раньше печатала тема, при активном Yoast
+ * отключает сам шаблонный тег idpg_core_event_jsonld() (см. template-tags.php) —
+ * одна сущность на страницу.
  *
- * Модуль самодостаточен: не зависит от функций темы. Если Rank Math
- * не активен, хуки не вешаются и разметку продолжает выводить тема.
+ * Модуль самодостаточен: не зависит от функций темы. Если Yoast не активен,
+ * хуки не вешаются и разметку продолжает выводить тема.
  *
  * @package Idpg_Core
  */
@@ -37,7 +40,7 @@ class IDPG_SEO_Integration {
 	/**
 	 * Константа версии модуля (для будущих апгрейдов).
 	 */
-	const VERSION = '1.0.0';
+	const VERSION = '2.0.0';
 
 	/**
 	 * Получение единственного экземпляра класса.
@@ -53,31 +56,26 @@ class IDPG_SEO_Integration {
 	}
 
 	/**
-	 * Конструктор: проверка Rank Math и навешивание хуков.
+	 * Конструктор: проверка Yoast и навешивание хуков.
 	 */
 	private function __construct() {
 		// Плагин интеграции должен быть активен.
-		if ( ! $this->is_rank_math_active() ) {
+		if ( ! $this->is_yoast_active() ) {
 			return;
 		}
 
-		// --- Schema.org (JSON-LD граф Rank Math) ---
-		add_filter( 'rank_math/json_ld', array( $this, 'add_event_schema' ), 10, 2 );
-		add_filter( 'rank_math/json_ld', array( $this, 'add_venue_schema' ), 11, 2 );
+		// --- Schema.org (JSON-LD граф Yoast) ---
+		add_filter( 'wpseo_schema_graph', array( $this, 'add_event_schema' ), 10, 2 );
+		add_filter( 'wpseo_schema_graph', array( $this, 'add_venue_schema' ), 11, 2 );
 
-		// Дефолтные Article-схемы Rank Math для event/venue заменяются нашими.
-		add_filter( 'rank_math/schema/default_type', array( $this, 'filter_default_type' ), 10, 3 );
+		// --- Open Graph / Twitter Cards: постер события/площадки как запасная картинка ---
+		add_filter( 'wpseo_opengraph_image', array( $this, 'filter_opengraph_image' ), 10, 2 );
+		add_filter( 'wpseo_twitter_image', array( $this, 'filter_twitter_image' ), 10, 2 );
 
-		// --- Open Graph / Twitter Cards ---
-		// Постер события = миниатюра записи: Rank Math подставляет её в
-		// og:image/twitter:image самостоятельно. Дополнительно не добавляем —
-		// иначе получался дубль тегов. get_seo_image() остаётся публичным API.
-
-		// --- Sitemap: подключаем CPT проекта ---
-		add_filter( 'rank_math/excluded_post_types', array( $this, 'excluded_post_types' ) );
-
-		// --- Хлебные крошки: Rank Math должен знать о поддержке темой ---
-		add_action( 'after_setup_theme', array( $this, 'declare_breadcrumb_support' ) );
+		// --- Крошки Yoast: тема должна знать о поддержке ---
+		// Вызываем сразу: модуль стартует на init/plugins_loaded, а after_setup_theme
+		// к этому моменту уже отработал — хук на него не сработает.
+		$this->declare_breadcrumb_support();
 	}
 
 	// =========================================================================
@@ -85,15 +83,15 @@ class IDPG_SEO_Integration {
 	// =========================================================================
 
 	/**
-	 * Активен ли Rank Math SEO.
+	 * Активен ли плагин Yoast SEO.
 	 *
-	 * Проверка по функции-флагу самого плагина (надёжнее is_plugin_active:
-	 * работает и при загрузке классов раньше плагинов).
+	 * Проверка по константе самого плагина (работает и при ранней загрузке
+	 * классов — не зависит от is_plugin_active).
 	 *
 	 * @return bool
 	 */
-	public function is_rank_math_active() {
-		return defined( 'RANK_MATH_VERSION' ) || function_exists( 'rank_math_the_breadcrumbs' );
+	public function is_yoast_active() {
+		return defined( 'WPSEO_VERSION' ) || function_exists( 'yoast_breadcrumb' );
 	}
 
 	// =========================================================================
@@ -101,47 +99,50 @@ class IDPG_SEO_Integration {
 	// =========================================================================
 
 	/**
-	 * Добавить сущность Event в граф Rank Math.
+	 * Добавить сущность Event в граф Yoast на странице отдельного события.
 	 *
-	 * @param array                       $data   Собранный граф.
-	 * @param RankMath\Schema\JsonLD|null $jsonld Экземпляр JsonLD.
+	 * @param array $graph Собранный граф Yoast.
+	 * @param mixed $context Контекст Meta_Tags_Context (не используется).
 	 * @return array
 	 */
-	public function add_event_schema( $data, $jsonld = null ) {
+	public function add_event_schema( $graph, $context = null ) {
 		// Только страница отдельного события.
 		if ( ! is_singular( 'event' ) ) {
-			return $data;
+			return $graph;
 		}
 
 		$schema = $this->build_event_schema( get_the_ID() );
 
 		if ( $schema ) {
-			$data['idpg-event'] = $schema;
+			// Свой @id, чтобы не конфликтовать с WebPage (main_schema_id страницы).
+			$schema['@id'] = get_permalink( get_the_ID() ) . '#idpg-event';
+			$graph[]       = $schema;
 		}
 
-		return $data;
+		return $graph;
 	}
 
 	/**
-	 * Добавить сущность Place в граф Rank Math.
+	 * Добавить сущность Place в граф Yoast на странице отдельной площадки.
 	 *
-	 * @param array                       $data   Собранный граф.
-	 * @param RankMath\Schema\JsonLD|null $jsonld Экземпляр JsonLD.
+	 * @param array $graph Собранный граф Yoast.
+	 * @param mixed $context Контекст Meta_Tags_Context (не используется).
 	 * @return array
 	 */
-	public function add_venue_schema( $data, $jsonld = null ) {
+	public function add_venue_schema( $graph, $context = null ) {
 		// Только страница отдельной площадки.
 		if ( ! is_singular( 'venue' ) ) {
-			return $data;
+			return $graph;
 		}
 
 		$schema = $this->build_venue_schema( get_the_ID() );
 
 		if ( $schema ) {
-			$data['idpg-venue'] = $schema;
+			$schema['@id'] = get_permalink( get_the_ID() ) . '#idpg-venue';
+			$graph[]       = $schema;
 		}
 
-		return $data;
+		return $graph;
 	}
 
 	/**
@@ -177,7 +178,7 @@ class IDPG_SEO_Integration {
 		}
 
 		// --- Статус (перенесено/отменено) ---
-		$status = get_post_meta( $post_id, '_idpg_ticket_status', true );
+		$status   = get_post_meta( $post_id, '_idpg_ticket_status', true );
 		$statuses = array(
 			'postponed' => 'https://schema.org/EventPostponed',
 			'cancelled' => 'https://schema.org/EventCancelled',
@@ -263,7 +264,7 @@ class IDPG_SEO_Integration {
 			}
 		} elseif ( $address ) {
 			$place['address'] = array(
-				'@type'        => 'PostalAddress',
+				'@type'         => 'PostalAddress',
 				'streetAddress' => $address,
 			);
 		}
@@ -431,10 +432,7 @@ class IDPG_SEO_Integration {
 	// =========================================================================
 
 	/**
-	 * Постер текущего события/площадки для og:image.
-	 *
-	 * Публичный API: Rank Math подставляет миниатюру (= постер) сам,
-	 * метод полезен для кастомных сценариев и тестов.
+	 * Постер текущего события/площадки (из контекста запроса) для og:image.
 	 *
 	 * @return string URL или пустая строка.
 	 */
@@ -452,48 +450,59 @@ class IDPG_SEO_Integration {
 		return (string) IDPG_Media::idpg_get_poster_url( $post_id, 'large' );
 	}
 
-	// =========================================================================
-	// Мелкие фильтры
-	// =========================================================================
-
 	/**
-	 * Дефолтные Article-схемы Rank Math для event/venue не нужны:
-	 * сущности Event/Place добавляет этот модуль.
+	 * Подставить постер события/площадки в og:image, если Yoast не нашёл картинку.
 	 *
-	 * @param string $schema    Тип схемы.
-	 * @param string $post_type Тип записи.
-	 * @param int    $post_id   ID записи.
+	 * @param string $image_url Текущий URL og:image.
+	 * @param mixed  $presentation Indexable_Presentation (не используется).
 	 * @return string
 	 */
-	public function filter_default_type( $schema, $post_type, $post_id ) {
-		if ( 'event' === $post_type ) {
-			return '';
+	public function filter_opengraph_image( $image_url, $presentation = null ) {
+		if ( '' !== (string) $image_url ) {
+			return $image_url;
 		}
 
-		if ( 'venue' === $post_type ) {
-			return '';
+		// На фронте og генерится только для сингулярных страниц.
+		if ( ! is_singular( 'event' ) && ! is_singular( 'venue' ) ) {
+			return $image_url;
 		}
 
-		return $schema;
+		$poster = $this->get_seo_image();
+
+		return $poster ? $poster : $image_url;
 	}
 
 	/**
-	 * Исключить «служебные» типы записей из SEO-метабоксов Rank Math.
+	 * Подставить постер события/площадки в twitter:image, если Yoast не нашёл картинку.
 	 *
-	 * @param array $types Исключённые типы.
-	 * @return array
+	 * @param string $image_url Текущий URL twitter:image.
+	 * @param mixed  $presentation Indexable_Presentation (не используется).
+	 * @return string
 	 */
-	public function excluded_post_types( $types ) {
-		// События и площадки — SEO-значимые, остальное решение за администратором.
-		return $types;
+	public function filter_twitter_image( $image_url, $presentation = null ) {
+		if ( '' !== (string) $image_url ) {
+			return $image_url;
+		}
+
+		if ( ! is_singular( 'event' ) && ! is_singular( 'venue' ) ) {
+			return $image_url;
+		}
+
+		$poster = $this->get_seo_image();
+
+		return $poster ? $poster : $image_url;
 	}
 
+	// =========================================================================
+	// Крошки Yoast
+	// =========================================================================
+
 	/**
-	 * Объявить поддержку хлебных крошек Rank Math (активирует их в теме).
+	 * Объявить поддержку крошек Yoast (активирует их в теме).
 	 *
 	 * @return void
 	 */
 	public function declare_breadcrumb_support() {
-		add_theme_support( 'rank-math-breadcrumbs' );
+		add_theme_support( 'yoast-seo-breadcrumbs' );
 	}
 }

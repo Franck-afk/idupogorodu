@@ -10,9 +10,20 @@ $current_city_name = class_exists( 'IDPG_City_Filter' )
 	? IDPG_City_Filter::get_current_city_name()
 	: ( isset( $_COOKIE['idpg_city'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['idpg_city'] ) ) : 'Ижевск' );
 
-// Подсказка об автоопределении города по IP — инициализируем до первого вывода
-// (мобильная модалка ниже использует эту переменную; значение подставится ниже).
-$idpg_city_ipnote = '';
+// Дерево регионов/городов, текущий ID и подсказка об автоопределении по IP.
+// Вычисляем ДО первого вывода: мобильная модалка (#idpg-city-modal) — в начале
+// шапки, поэтому переменные подготавливаем заранее, иначе select останется пустым.
+$city_tree  = class_exists( 'IDPG_City_Filter' ) ? IDPG_City_Filter::get_city_tree() : array();
+$current_id = class_exists( 'IDPG_City_Filter' ) ? IDPG_City_Filter::get_current_city_id() : 0;
+
+// Подсказка об автоопределении по IP — та же, что в виджете
+// (class-city-selector-widget.php): показывается, если город был
+// определён автоматически при первом визите, а не выбран вручную.
+$idpg_city_ipnote = class_exists( 'IDPG_City_Filter' ) && IDPG_City_Filter::was_detected_from_ip()
+	? '<p class="idpg-city-selector__ipnote">'
+		. esc_html__( 'Мы определили ваш город автоматически. При необходимости выберите другой:', 'idpg_core' )
+		. '</p>'
+	: '';
 
 ?>
 <!doctype html>
@@ -139,19 +150,7 @@ $idpg_city_ipnote = '';
 		</form>
 
 		<!-- Выбор города (вне actions, чтобы не скрывался на мобилке) -->
-		<?php
-		$city_tree  = class_exists( 'IDPG_City_Filter' ) ? IDPG_City_Filter::get_city_tree() : array();
-		$current_id = class_exists( 'IDPG_City_Filter' ) ? IDPG_City_Filter::get_current_city_id() : 0;
-
-		// Подсказка об автоопределении по IP — та же, что в виджете
-		// (class-city-selector-widget.php): показывается, если город был
-		// определён автоматически при первом визите, а не выбран вручную.
-		$idpg_city_ipnote = class_exists( 'IDPG_City_Filter' ) && IDPG_City_Filter::was_detected_from_ip()
-			? '<p class="idpg-city-selector__ipnote">'
-				. esc_html__( 'Мы определили ваш город автоматически. При необходимости выберите другой:', 'idpg_core' )
-				. '</p>'
-			: '';
-		?>
+		<?php /* $city_tree, $current_id и $idpg_city_ipnote вычисляются в начале шапки. */ ?>
 		<div class="idpg-city-selector" id="idpg-city-dropdown">
 			<button
 				type="button"

@@ -53,9 +53,9 @@ get_header();
 						! $idpg_f_fd && ! $idpg_f_ff
 					);
 
-					$idpg_pill_base( __( 'Сегодня', 'idpg_core' ), IDPG_City_URL::filter_url( 'today' ), 'today' === $idpg_f_fd );
-					$idpg_pill_base( __( 'Завтра', 'idpg_core' ), IDPG_City_URL::filter_url( 'tomorrow' ), 'tomorrow' === $idpg_f_fd );
-					$idpg_pill_base( __( 'Уикенд', 'idpg_core' ), IDPG_City_URL::filter_url( 'weekend' ), 'weekend' === $idpg_f_fd );
+					$idpg_pill_base( __( 'Сегодня', 'idpg_core' ), idpg_core_city_filter_url( 'today' ), 'today' === $idpg_f_fd );
+					$idpg_pill_base( __( 'Завтра', 'idpg_core' ), idpg_core_city_filter_url( 'tomorrow' ), 'tomorrow' === $idpg_f_fd );
+					$idpg_pill_base( __( 'Уикенд', 'idpg_core' ), idpg_core_city_filter_url( 'weekend' ), 'weekend' === $idpg_f_fd );
 
  					// Дата: кастомный выпадающий календарь.
  					$idpg_date_base = class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::afisha_url() : home_url( '/afisha/' );
@@ -69,7 +69,7 @@ get_header();
 						<div class="idpg-datedrop" id="idpg-datedrop"></div>
 					</div>
 					<a class="idpg-fpill idpg-fpill--free<?php echo $idpg_f_ff ? ' is-active' : ''; ?>"
-					   href="<?php echo esc_url( $idpg_f_ff && class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::afisha_url() : IDPG_City_URL::filter_url( 'free' ) ); ?>">
+					   href="<?php echo esc_url( $idpg_f_ff ? idpg_core_city_afisha_url() : idpg_core_city_filter_url( 'free' ) ); ?>">
 						<span class="idpg-fpill__box" aria-hidden="true"></span>
 						<?php esc_html_e( 'Бесплатные', 'idpg_core' ); ?>
 					</a>

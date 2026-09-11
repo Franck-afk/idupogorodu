@@ -1,8 +1,8 @@
 <?php
 /**
- * Юнит-тесты SEO-интеграции с Rank Math (IDPG_SEO_Integration).
+ * Юнит-тесты SEO-интеграции с Yoast (IDPG_SEO_Integration).
  *
- * Builders — чистые методы: тестируются без активного Rank Math.
+ * Builders — чистые методы: тестируются без активного Yoast.
  *
  * @package Idpg_Core
  */
@@ -219,19 +219,10 @@ class Test_SEO_Integration extends WP_UnitTestCase {
 	}
 
 	/**
-	 * filter_default_type отключает Article для event и venue.
+	 * Модуль не создаёт экземпляр-хуки при неактивном Yoast
+	 * (is_yoast_active проверяем отдельно от состояния окружения).
 	 */
-	public function test_filter_default_type() {
-		$this->assertSame( '', $this->seo->filter_default_type( 'Article', 'event', 1 ) );
-		$this->assertSame( '', $this->seo->filter_default_type( 'Article', 'venue', 1 ) );
-		$this->assertSame( 'Article', $this->seo->filter_default_type( 'Article', 'post', 1 ) );
-	}
-
-	/**
-	 * Модуль не создаёт экземпляр-хуки при неактивном Rank Math
-	 * (is_rank_math_active проверяем отдельно от состояния окружения).
-	 */
-	public function test_is_rank_math_active_returns_bool() {
-		$this->assertIsBool( $this->seo->is_rank_math_active() );
+	public function test_is_yoast_active_returns_bool() {
+		$this->assertIsBool( $this->seo->is_yoast_active() );
 	}
 }

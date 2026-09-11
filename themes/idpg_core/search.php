@@ -10,7 +10,7 @@
 
 get_header();
 
-$idpg_s_city  = (string) get_query_var( IDPG_City_URL::QVAR );
+$idpg_s_city  = (string) get_query_var( idpg_core_city_qvar() );
 $idpg_s_query = get_search_query();
 ?>
 

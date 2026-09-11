@@ -254,6 +254,8 @@ class IDPG_Migrations {
 
 			case '_idpg_hide_from_banner':
 			case '_idpg_hide_full_banner':
+			case '_idpg_banner_request':
+			case '_idpg_banner_approved':
 				// Чекбоксы Carbon Fields хранят строку "yes".
 				return in_array( (string) $value, array( 'yes', '1', 'true' ), true ) ? 'yes' : '';
 		}

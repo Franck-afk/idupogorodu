@@ -25,27 +25,6 @@ if ( ! function_exists( 'idpg_core_breadcrumbs' ) ) {
 		$label = esc_attr__( 'Хлебные крошки', 'idpg_core' );
 
 		/*
-		 * Поддержка Rank Math SEO.
-		 *
-		 * Rank Math — целевой SEO-плагин проекта: если активен, выводим
-		 * его крошки (rank_math_the_breadcrumbs) с BreadcrumbList-разметкой.
-		 * Тема лишь оборачивает вывод в свою навигационную обёртку.
-		 */
-		if ( function_exists( 'rank_math_the_breadcrumbs' ) ) {
-			ob_start();
-			rank_math_the_breadcrumbs( array(
-				'wrap_before' => '<nav class="idpg-breadcrumbs" aria-label="' . $label . '"><ol class="idpg-breadcrumbs__list">',
-				'wrap_after'  => '</ol></nav>',
-			) );
-			$idpg_rm_html = trim( (string) ob_get_clean() );
-
-			// Пустой вывод = крошки Rank Math выключены в настройках — идём дальше.
-			if ( '' !== trim( (string) wp_strip_all_tags( $idpg_rm_html ) ) || false !== strpos( $idpg_rm_html, '<a' ) ) {
-				return $idpg_rm_html;
-			}
-		}
-
-		/*
 		 * Поддержка Yoast SEO.
 		 *
 		 * Цепочка совместимости с версиями плагина:

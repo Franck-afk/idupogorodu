@@ -5,7 +5,7 @@ Theme URI: https://idupogorodu.ru
 Author: idpg Team
 Author URI: https://idupogorodu.ru
 Description: Основная тема сайта-афиши ИДПОГОРОДУ.
-Version: 1.0.72
+Version: 1.0.73
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -2910,17 +2910,7 @@ a:focus-visible {
    (контента) на главной он есть (320px + gap 24px). Сужаем баннер до ширины
    контентной колонки главной. На остальных страницах карточки занимают
    всю ширину контейнера, поэтому сужение не требуется. */
-body.home .idpg-widget-area--before-footer .container {
-  padding-right: calc(16px + 344px);
-}
-
-@media (min-width: 1025px) {
-  body.home .idpg-widget-area--before-footer .container {
-    padding-right: calc(24px + 344px);
-  }
-}
-
-@media (min-width: 1281px) {
+@media (min-width: 1201px) {
   body.home .idpg-widget-area--before-footer .container {
     padding-right: calc(32px + 344px);
   }

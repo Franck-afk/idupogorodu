@@ -3,7 +3,7 @@
  * Plugin Name:       IDPG Core
  * Plugin URI:        https://example.com/idpg-core
  * Description:       Ядро плагина для сайта-афиши. Регистрирует CPT, таксономии, роли и API для событий и площадок.
- * Version:           1.1.0
+ * Version:           1.1.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            IDPG Team
@@ -51,7 +51,7 @@ function idpg_carbon_fields_boot() {
 /**
  * Константы плагина.
  */
-define( 'IDPG_CORE_VERSION', '1.1.0' );
+define( 'IDPG_CORE_VERSION', '1.1.2' );
 define( 'IDPG_CORE_FILE', __FILE__ );
 define( 'IDPG_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'IDPG_CORE_URL', plugin_dir_url( __FILE__ ) );
@@ -114,7 +114,8 @@ require_once IDPG_CORE_DIR . 'includes/class-user-purge.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-page.php';
 require_once IDPG_CORE_DIR . 'includes/class-dashboard-stats.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-moderation.php';
-// Интеграция с Rank Math SEO (schema/OG; работает только при активном Rank Math).
+
+// Интеграция с Yoast SEO (schema/OG/крошки; работает только при активном Yoast).
 require_once IDPG_CORE_DIR . 'includes/class-seo-integration.php';
 /**
  * Инициализация компонентов плагина.
@@ -149,7 +150,7 @@ function idpg_core_init() {
 	// Модерация публикации событий организаторов (pending + уведомления).
 	IDPG_Event_Moderation::instance();
 
-	// Интеграция с Rank Math SEO (хуки вешаются только если плагин активен).
+	// Интеграция с Yoast SEO (хуки вешаются только если плагин активен).
 	IDPG_SEO_Integration::instance();
 }
 add_action( 'init', 'idpg_core_init' );
@@ -247,6 +248,76 @@ function idpg_core_create_subscribers_table() {
 }
 
 /**
+ * Добавляет namespace «idpg» в белый список REST-маршрутов AIOS.
+ *
+ * AIOS-опция «Disallow Unauthorized REST Requests» блокирует все
+ * незалогиненные запросы к /wp-json/*, включая idpg/v1/* (поиск,
+ * календарь, подписка, избранное, авторизация). Маршрут в белом списке
+ * не блокируется. Вызывается при активации плагина и защищён фильтром
+ * на случай, если админ пересохранил настройки AIOS и затёр список.
+ *
+ * @return void
+ */
+function idpg_core_aios_whitelist_rest() {
+	// AIOS не активен — whitelist не нужен.
+	if ( ! class_exists( 'AIO_WP_Security' ) ) {
+		return;
+	}
+
+	$configs = get_option( 'aio_wp_security_configs', array() );
+	if ( ! is_array( $configs ) ) {
+		$configs = array();
+	}
+
+	// Блокировка незалогиненных REST-запросов не включена — whitelist не нужен.
+	if ( ! isset( $configs['aiowps_disallow_unauthorized_rest_requests'] ) || '1' != $configs['aiowps_disallow_unauthorized_rest_requests'] ) {
+		return;
+	}
+
+	$whitelist = isset( $configs['aios_whitelisted_rest_routes'] ) && is_array( $configs['aios_whitelisted_rest_routes'] )
+		? $configs['aios_whitelisted_rest_routes']
+		: array();
+
+	// Маршрут уже в списке.
+	if ( in_array( 'idpg', $whitelist, true ) ) {
+		return;
+	}
+
+	$whitelist[] = 'idpg';
+
+	// Через API AIOS (если доступен глобальный объект) — с сохранением в БД.
+	if ( isset( $GLOBALS['aio_wp_security'] ) && is_object( $GLOBALS['aio_wp_security'] ) && ! empty( $GLOBALS['aio_wp_security']->configs ) ) {
+		$GLOBALS['aio_wp_security']->configs->set_value( 'aios_whitelisted_rest_routes', $whitelist, true );
+		return;
+	}
+
+	// Fallback: прямое обновление опции (структура та же, что сохраняет AIOS).
+	$configs['aios_whitelisted_rest_routes'] = $whitelist;
+	update_option( 'aio_wp_security_configs', $configs );
+}
+
+/**
+ * Safety-net: маршрут idpg всегда в whitelist AIOS на этапе запроса.
+ *
+ * Работает даже если настройки AIOS пересохранены и «idpg» удалили из
+ * списка — фильтр aios_whitelisted_rest_routes применяется AIOS при
+ * проверке каждого REST-запроса (wp-security-general-init-tasks.php).
+ *
+ * @param array $routes Белый список маршрутов AIOS.
+ * @return array
+ */
+function idpg_core_aios_whitelist_filter( $routes ) {
+	if ( ! is_array( $routes ) ) {
+		$routes = array();
+	}
+	if ( ! in_array( 'idpg', $routes, true ) ) {
+		$routes[] = 'idpg';
+	}
+	return $routes;
+}
+add_filter( 'aios_whitelisted_rest_routes', 'idpg_core_aios_whitelist_filter' );
+
+/**
  * Действия при активации плагина.
  *
  * Регистрирует CPT, таксономии, создаёт роли и планирует крон.
@@ -260,6 +331,9 @@ function idpg_core_activate() {
 
 	// Таблица подписчиков дайджеста (виджет IDPG_Subscribe_Widget).
 	idpg_core_create_subscribers_table();
+
+	// Белый список REST-маршрутов AIOS: без него AIOS блокирует idpg/v1/*.
+	idpg_core_aios_whitelist_rest();
 
 	// Перенос мета-полей на единый префикс _idpg_.
 	IDPG_Migrations::run_all();
@@ -277,3 +351,91 @@ function idpg_core_deactivate() {
 	flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'idpg_core_deactivate' );
+
+/**
+ * Предупреждение администратору о конфликте с All-In-One WP Security (AIOS).
+ *
+ * Плагин активно использует REST API (поиск, подписки, избранное, авторизация,
+ * синк билетов, календарь) и кастомный URL входа /login/.
+ * Если в AIOS включено «Disallow Unauthorized REST Requests» без белого списка
+ * маршрута idpg, или включено «Rename Login Page» — функционал плагина ломается.
+ * Показываем notice только администраторам и только когда AIOS реально активен.
+ *
+ * @return void
+ */
+function idpg_core_aios_compat_notice() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	// AIOS не установлен/активен — конфликта быть не может.
+	if ( ! class_exists( 'AIO_WP_Security' ) ) {
+		return;
+	}
+
+	// Все настройки AIOS хранятся одной опцией с ключами aiowps_*.
+	$aios_config = get_option( 'aio_wp_security_configs', array() );
+	if ( ! is_array( $aios_config ) ) {
+		return;
+	}
+
+	$issues = array();
+
+	// 1. REST API заблокирован для неавторизованных запросов (затрагивает весь idpg/v1/*).
+	if ( isset( $aios_config['aiowps_disallow_unauthorized_rest_requests'] ) && '1' == $aios_config['aiowps_disallow_unauthorized_rest_requests'] ) {
+		// Маршрут idpg уже в белом списке AIOS — блокировка плагин не задевает.
+		$whitelist      = isset( $aios_config['aios_whitelisted_rest_routes'] ) ? $aios_config['aios_whitelisted_rest_routes'] : array();
+		$idpg_whitelisted = false;
+		if ( is_array( $whitelist ) ) {
+			foreach ( $whitelist as $route ) {
+				if ( is_string( $route ) && 0 === strpos( $route, 'idpg' ) ) {
+					$idpg_whitelisted = true;
+					break;
+				}
+			}
+		}
+
+		if ( ! $idpg_whitelisted ) {
+			$issues[] = __( 'REST API заблокирован для незалогиненных пользователей (AIOS «Disallow Unauthorized REST Requests»). Без этого плагин IDPG не работает: поиск, календарь, подписка, избранное, вход по ссылкам. Добавьте маршрут «idpg» в белый список AIOS: WP Security → Firewall → WAF Config → REST API → Whitelist.', 'idpg-core' );
+		}
+	}
+
+	// 2. Включено переименование страницы входа — конфликтует с кастомным /login/.
+	if ( isset( $aios_config['aiowps_enable_rename_login_page'] ) && '1' == $aios_config['aiowps_enable_rename_login_page'] ) {
+		$issues[] = __( 'Включено «Rename Login Page» (AIOS). Плагин IDPG использует собственную страницу входа /login/, поэтому редиректы и защита AIOS не работают. Отключите переименование в AIOS (Brute Force → Rename Login Page) либо не используйте кастомную страницу IDPG.', 'idpg-core' );
+	}
+
+	if ( empty( $issues ) ) {
+		return;
+	}
+
+	echo '<div class="notice notice-warning idpg-aios-notice"><p><strong>' . esc_html__( 'Совместимость с All-In-One WP Security', 'idpg-core' ) . '</strong></p><ul>';
+	foreach ( $issues as $issue ) {
+		echo '<li>' . esc_html( $issue ) . '</li>';
+	}
+	echo '</ul></div>';
+}
+add_action( 'admin_notices', 'idpg_core_aios_compat_notice' );
+
+/**
+ * Предупреждение о заглушке внешнего API агрегатора билетов.
+ *
+ * Показывается только администраторам сайта и только когда
+ * IDPG_TICKET_API_URL не переопределён в wp-config.php реальным
+ * адресом (т.е. используется заглушка example.com).
+ *
+ * @return void
+ */
+function idpg_core_ticket_api_notice() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	// Реальный адрес задан в wp-config.php — предупреждение не нужно.
+	if ( defined( 'IDPG_TICKET_API_URL' ) && ! empty( IDPG_TICKET_API_URL ) && false === strpos( IDPG_TICKET_API_URL, 'example.com' ) ) {
+		return;
+	}
+
+	echo '<div class="notice notice-warning idpg-ticket-api-notice"><p>' . esc_html__( 'IDPG Core: для синхронизации статусов билетов задан адрес по умолчанию (заглушка example.com). Укажите реальный IDPG_TICKET_API_URL в wp-config.php перед запуском в продакшене.', 'idpg-core' ) . '</p></div>';
+}
+add_action( 'admin_notices', 'idpg_core_ticket_api_notice' );

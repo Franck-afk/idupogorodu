@@ -151,10 +151,26 @@ class IDPG_Auth {
 	 *
 	 * Перенаправляет /wp-login.php?action=register на /login/.
 	 * Перенаправляет /wp-login.php?action=lostpassword на /reset-password/.
+	 * Перенаправляет прямой заход на /wp-login.php (без action) на /login/,
+	 * чтобы стандартная форма WordPress не была доступна снаружи.
+	 *
+	 * Не трогает POST-запросы (сама форма входа на wp-login.php работает
+	 * через POST и редиректится только после обработки), а также служебные
+	 * action: logout (выход), postpass (пароль записи) — их обрабатывает ядро.
 	 *
 	 * @return void
 	 */
 	public function disable_default_registration() {
+		// POST-запросы не редиректим: ядро WP само обработает вход
+		// и после login_redirect отправит на кастомную страницу.
+		$request_method = isset( $_SERVER['REQUEST_METHOD'] )
+			? strtoupper( (string) $_SERVER['REQUEST_METHOD'] )
+			: 'GET';
+
+		if ( 'POST' === $request_method ) {
+			return;
+		}
+
 		$action = isset( $_GET['action'] )
 			? sanitize_key( wp_unslash( $_GET['action'] ) )
 			: '';
@@ -164,10 +180,23 @@ class IDPG_Auth {
 			exit;
 		}
 
-		if ( 'lostpassword' === $action ) {
+		if ( 'lostpassword' === $action || 'retrievepassword' === $action ) {
 			wp_safe_redirect( home_url( self::RESET_PASSWORD_URL ) );
 			exit;
 		}
+
+		// Служебные action, которые обрабатывает само ядро WordPress
+		// и которые не должны вести на страницу входа.
+		$core_actions = array( 'logout', 'postpass', 'rp', 'resetpass', 'confirmaction' );
+
+		if ( in_array( $action, $core_actions, true ) ) {
+			return;
+		}
+
+		// Прямой GET-заход на /wp-login.php (в т.ч. после неудачного входа,
+		// action=login) — отправляем на кастомную страницу входа.
+		wp_safe_redirect( home_url( self::LOGIN_URL ) );
+		exit;
 	}
 
 	/**

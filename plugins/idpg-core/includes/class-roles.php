@@ -62,6 +62,7 @@ class IDPG_Roles {
 	private function __construct() {
 		add_action( 'init', array( $this, 'sync_role_caps' ), 20 );
 		add_action( 'admin_menu', array( $this, 'hide_unnecessary_menus' ), 999 );
+		add_action( 'wp_before_admin_bar_render', array( $this, 'hide_unnecessary_admin_bar' ), 999 );
 	}
 
 	/**
@@ -355,6 +356,48 @@ class IDPG_Roles {
 		// Инструменты — дополнительно организатору.
 		if ( in_array( 'event_organizer', $roles, true ) ) {
 			remove_menu_page( 'tools.php' );          // Инструменты.
+			remove_menu_page( 'aiowpsec' );           // AIOS (безопасность) — только администратору.
+
+			// Yoast SEO — только администратору.
+			// Yoast добавляет несколько отдельных топ-пунктов с капой edit_posts
+			// (Dashboard, Academy, Brand Insights, Upgrade — см. wpseo_submenu_pages),
+			// поэтому удаляем их все по префиксу слага.
+			if ( isset( $GLOBALS['menu'] ) && is_array( $GLOBALS['menu'] ) ) {
+				foreach ( $GLOBALS['menu'] as $item ) {
+					if ( isset( $item[2] ) && 0 === strpos( $item[2], 'wpseo' ) ) {
+						remove_menu_page( $item[2] );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Скрытие пунктов в верхней админ-панели (admin bar) для организатора.
+	 *
+	 * Yoast SEO показывает свой пункт в admin bar всем, у кого есть edit_posts
+	 * (см. WPSEO_Admin_Bar_Menu::add_menu), поэтому бокового remove_menu_page
+	 * недостаточно — отдельно удаляем пункт из панели.
+	 *
+	 * @return void
+	 */
+	public function hide_unnecessary_admin_bar() {
+		$user = wp_get_current_user();
+
+		if ( ! $user->exists() ) {
+			return;
+		}
+
+		$roles = (array) $user->roles;
+
+		if ( ! in_array( 'event_organizer', $roles, true ) ) {
+			return;
+		}
+
+		global $wp_admin_bar;
+
+		if ( is_object( $wp_admin_bar ) ) {
+			$wp_admin_bar->remove_node( 'wpseo-menu' );
 		}
 	}
 

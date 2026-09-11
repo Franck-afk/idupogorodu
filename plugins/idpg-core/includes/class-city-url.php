@@ -569,8 +569,8 @@ class IDPG_City_URL {
 			return;
 		}
 
-		// Не конфликтуем с SEO-плагинами.
-		if ( defined( 'WPSEO_VERSION' ) || class_exists( 'RankMath' ) ) {
+		// Не конфликтуем с Yoast SEO: canonical для страниц с городом выводит он.
+		if ( defined( 'WPSEO_VERSION' ) ) {
 			return;
 		}
 

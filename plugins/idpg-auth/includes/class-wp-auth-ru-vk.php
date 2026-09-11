@@ -25,17 +25,34 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
     const ERROR_HEADER       = 'Ошибка входа через VK:';
     const STATE_META_KEY     = 'wp_auth_ru_vk_oauth_id';
     const NONCE_KEY          = 'wp_auth_ru_vk_state';
-    const AUTH_URL           = 'https://oauth.vk.com/authorize';
-    const TOKEN_URL          = 'https://oauth.vk.com/access_token';
+    const AUTH_URL           = 'https://id.vk.com/authorize';
+    const TOKEN_URL          = 'https://id.vk.com/oauth/token';
     const USERS_API_URL      = 'https://api.vk.com/method/users.get';
     const API_VERSION        = '5.199';
     const DEFAULT_USERNAME_BASE = 'vk_user';
+
+    /**
+     * VK ID-приложения работают только через OAuth 2.1 с PKCE:
+     * authorize — id.vk.com/authorize, обмен кода — id.vk.com/oauth/token
+     * с параметром code_verifier (client_secret не используется).
+     * Старый oauth.vk.com для VK ID-приложений возвращает Security Error.
+     */
+    const USE_PKCE           = true;
 
     protected function get_rest_routes() {
         return array(
             array( 'route' => '/vk/start',    'methods' => 'GET', 'callback' => array( $this, 'rest_start' ) ),
             array( 'route' => '/vk/callback', 'methods' => 'GET', 'callback' => array( $this, 'rest_callback' ) ),
         );
+    }
+
+    /**
+     * VK ID требует OAuth 2.1 с PKCE.
+     *
+     * @return bool
+     */
+    protected function uses_pkce() {
+        return self::USE_PKCE;
     }
 
     protected function auth_params( $state ) {
@@ -49,20 +66,117 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
         );
     }
 
+    /**
+     * Дополнительные параметры authorize-запроса для OAuth 2.1 (PKCE).
+     *
+     * @param string $state   State.
+     * @param string $verifier code_verifier (S256), сохранённый в transient.
+     *
+     * @return array
+     */
+    protected function extra_auth_params( $state, $verifier ) {
+        return array(
+            'code_challenge'        => self::pkce_s256( $verifier ),
+            'code_challenge_method' => 'S256',
+        );
+    }
+
     protected function no_callback_message() {
         return 'ВКонтакте не вернул код авторизации.';
     }
 
+    /**
+     * Генерация code_verifier для PKCE (43-128 символов base64url).
+     *
+     * @return string
+     */
+    public static function pkce_generate_verifier() {
+        // 48 случайных байт → base64url без padding (64 символа).
+        return rtrim( strtr( base64_encode( random_bytes( 48 ) ), '+/', '-_' ), '=' );
+    }
+
+    /**
+     * Преобразование code_verifier в code_challenge (S256).
+     *
+     * @param string $verifier code_verifier.
+     *
+     * @return string
+     */
+    public static function pkce_s256( $verifier ) {
+        return rtrim( strtr( base64_encode( hash( 'sha256', $verifier, true ) ), '+/', '-_' ), '=' );
+    }
+
+    /**
+     * Ключ transient для code_verifier.
+     *
+     * @param string $state State из authorize-запроса.
+     *
+     * @return string
+     */
+    protected function verifier_transient_key( $state ) {
+        return 'wp_auth_ru_vk_pkce_' . $state;
+    }
+
+    /**
+     * Сохранение code_verifier до обмена кода (10 минут).
+     *
+     * @param string $state    State.
+     * @param string $verifier code_verifier.
+     */
+    protected function store_pkce_verifier( $state, $verifier ) {
+        set_transient( $this->verifier_transient_key( $state ), $verifier, 10 * MINUTE_IN_SECONDS );
+    }
+
+    /**
+     * Извлечение code_verifier (однократное).
+     *
+     * @param string $state State.
+     *
+     * @return string Пустая строка, если verifier не найден/истёк.
+     */
+    protected function get_pkce_verifier( $state ) {
+        $verifier = (string) get_transient( $this->verifier_transient_key( $state ) );
+        delete_transient( $this->verifier_transient_key( $state ) );
+        return $verifier;
+    }
+
     protected function exchange_code_for_token( $code ) {
-        $response = wp_remote_post( self::TOKEN_URL, array(
-            'timeout' => 20,
-            'body'    => array(
-                'client_id'     => $this->settings['vk_client_id']     ?? '',
-                'client_secret' => $this->settings['vk_client_secret'] ?? '',
-                'redirect_uri'  => static::get_callback_url(),
-                'code'          => $code,
-            ),
-        ) );
+        // VK ID (OAuth 2.1): обмен кода требует code_verifier из PKCE-флоу.
+        // Он сохранён в transient под ключом verifier_transient_key(state) —
+        // вытаскиваем по state из callback-запроса.
+        $request_state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
+        $verifier      = $request_state ? $this->get_pkce_verifier( $request_state ) : '';
+
+        // VK ID-эндпоинт ожидает JSON-тело (OAuth 2.1).
+        $body = array(
+            'grant_type'   => 'authorization_code',
+            'client_id'    => $this->settings['vk_client_id']     ?? '',
+            'redirect_uri' => static::get_callback_url(),
+            'code'         => $code,
+        );
+
+        if ( '' !== $verifier ) {
+            // Основной путь: VK ID-приложение (PKCE, OAuth 2.1).
+            $body['code_verifier'] = $verifier;
+            if ( '' !== $request_state ) {
+                $body['state'] = $request_state;
+            }
+
+            $response = wp_remote_post( self::TOKEN_URL, array(
+                'timeout' => 20,
+                'headers' => array( 'Content-Type' => 'application/json' ),
+                'body'    => wp_json_encode( $body ),
+            ) );
+        } else {
+            // Fallback на классический обмен (для старых standalone-приложений
+            // oauth.vk.com, если приложение когда-либо сменят обратно).
+            $body['client_secret'] = $this->settings['vk_client_secret'] ?? '';
+
+            $response = wp_remote_post( 'https://oauth.vk.com/access_token', array(
+                'timeout' => 20,
+                'body'    => $body,
+            ) );
+        }
 
         if ( is_wp_error( $response ) ) {
             $msg = 'Ошибка запроса токена: ' . $response->get_error_message();

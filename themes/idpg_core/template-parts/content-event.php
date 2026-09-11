@@ -14,7 +14,7 @@
 $idpg_post_id  = get_the_ID();
 $idpg_meta     = idpg_core_event_meta( $idpg_post_id );
 $idpg_sessions = idpg_core_event_sessions( $idpg_post_id );
-$idpg_thumb    = IDPG_Media::idpg_get_poster( $idpg_post_id, 'event-card' );
+$idpg_thumb    = idpg_core_event_poster( $idpg_post_id, 'event-card' );
 $idpg_perm     = get_permalink( $idpg_post_id );
 
 $idpg_time = '';

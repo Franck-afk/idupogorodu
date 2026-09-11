@@ -81,6 +81,9 @@ class IDPG_Meta {
 		// Медиа у организатора всегда открыта и видима.
 		add_filter( 'get_user_option_closedpostboxes_event', array( $this, 'force_media_open' ) );
 		add_filter( 'get_user_option_metaboxhidden_event', array( $this, 'force_media_visible' ) );
+		// Колонка «Баннер» в списке событий — статус заявки/оплаты показа на главной.
+		add_filter( 'manage_event_posts_columns', array( $this, 'add_banner_column' ) );
+		add_action( 'manage_event_posts_custom_column', array( $this, 'render_banner_column' ), 10, 2 );
 		// Таксономии (категории, теги, город) не скрыты по умолчанию в Screen Options.
 		// Принудительно убираем их из сохранённого списка скрытых метабоксов
 		// до того, как WordPress прочтёт опцию (надёжнее фильтров).
@@ -309,6 +312,12 @@ class IDPG_Meta {
 			'_idpg_clicks'           => array( 'type' => 'integer', 'default' => 0 ),
 			'_idpg_hide_from_banner' => array( 'type' => 'string' ),
 			'_idpg_hide_full_banner' => array( 'type' => 'string' ),
+
+			// Платный показ события в баннере на главной.
+			// request — заявка организатора на показ; approved — подтверждённая
+			// администратором оплата (показ активируется только при approved=yes).
+			'_idpg_banner_request'   => array( 'type' => 'string' ),
+			'_idpg_banner_approved'  => array( 'type' => 'string' ),
 		);
 
 		foreach ( $fields as $key => $args ) {
@@ -543,12 +552,27 @@ class IDPG_Meta {
 				->set_attribute( 'readOnly', 'readonly' )
 				->set_help_text( __( 'Счётчик заполняется автоматически.', 'idpg-core' ) )
 				->set_width( 50 );
+
+			// Подтверждение оплаты показа в баннере на главной.
+			// Организатор подаёт заявку (idpg_banner_request), админ после
+			// фактической оплаты ставит эту галочку — событие попадает в баннер.
+			$admin_fields[] = \Carbon_Fields\Field::make( 'checkbox', 'idpg_banner_approved', __( 'Показ в баннере оплачен и подтверждён', 'idpg-core' ) )
+				->set_help_text( __( 'Отметьте после получения оплаты за показ. Событие появится в баннере на главной (приоритет перед автоматическим показом).', 'idpg-core' ) )
+				->set_width( 100 );
 		}
+
+		// Заявка организатора на показ события в баннере на главной.
+		// Поле доступно всем ролям: организатор подаёт заявку, админ видит её
+		// и подтверждает после оплаты через idpg_banner_approved.
+		$request_field = \Carbon_Fields\Field::make( 'checkbox', 'idpg_banner_request', __( 'Подать заявку на показ в баннере на главной', 'idpg-core' ) )
+			->set_help_text( __( 'Показ платный. После отправки заявки администратор свяжется с вами для оплаты; событие попадёт в баннер после подтверждения.', 'idpg-core' ) )
+			->set_width( 100 );
 
 		// Онлайн-событие — организатор может включать.
 		return array_merge(
 			$admin_fields,
 			array(
+				$request_field,
 				\Carbon_Fields\Field::make( 'checkbox', 'idpg_is_online', __( 'Онлайн-событие', 'idpg-core' ) )
 					->set_help_text( __( 'Отметьте, если событие проходит онлайн (трансляция в интернете).', 'idpg-core' ) )
 					->set_width( 50 ),
@@ -1050,6 +1074,41 @@ class IDPG_Meta {
 
 		if ( $diff !== $hidden ) {
 			update_user_option( $user_id, 'metaboxhidden_' . $screen->id, $diff );
+		}
+	}
+
+	/**
+	 * Добавляет колонку «Баннер» в список событий.
+	 *
+	 * @param array $columns Существующие колонки.
+	 * @return array
+	 */
+	public function add_banner_column( $columns ) {
+		$columns['idpg_banner'] = __( 'Баннер', 'idpg-core' );
+		return $columns;
+	}
+
+	/**
+	 * Выводит статус заявки/оплаты показа в баннере в списке событий.
+	 *
+	 * @param string $column  Имя колонки.
+	 * @param int    $post_id ID события.
+	 * @return void
+	 */
+	public function render_banner_column( $column, $post_id ) {
+		if ( 'idpg_banner' !== $column ) {
+			return;
+		}
+
+		$approved = 'yes' === get_post_meta( $post_id, '_idpg_banner_approved', true );
+		$request  = 'yes' === get_post_meta( $post_id, '_idpg_banner_request', true );
+
+		if ( $approved ) {
+			echo '<span style="color:#27ae60;">' . esc_html__( 'Оплачен ✓', 'idpg-core' ) . '</span>';
+		} elseif ( $request ) {
+			echo '<span style="color:#e67e22;">' . esc_html__( 'Заявка', 'idpg-core' ) . '</span>';
+		} else {
+			echo '<span aria-hidden="true">—</span>';
 		}
 	}
 }

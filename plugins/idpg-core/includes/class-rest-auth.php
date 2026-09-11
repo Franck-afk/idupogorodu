@@ -209,7 +209,43 @@ class IDPG_REST_Auth {
 	}
 
 	/**
-	 * Авторизация пользователя.
+	 * Проверка блокировки IP плагином All-In-One WP Security (Login Lockout).
+	 *
+	 * AIOS вешает block_ip_if_locked на фильтр authenticate (приоритет 1):
+	 * при заблокированном IP вызов wp_authenticate() завершается HTML-страницей
+	 * wp_die (503) вместо WP_Error — JSON-ответ REST ломается. Поэтому IP
+	 * проверяем до аутентификации и отдаём корректный JSON 429.
+	 *
+	 * @return bool True, если AIOS активен и IP сейчас заблокирован.
+	 */
+	private function is_aios_login_locked() {
+		// AIOS не установлен/активен — блокировки быть не может.
+		if ( ! class_exists( 'AIOWPSecurity_User_Login' ) ) {
+			return false;
+		}
+
+		// Блокировка логином не включена — таблица не участвует.
+		$configs = get_option( 'aio_wp_security_configs', array() );
+		if ( ! is_array( $configs ) || empty( $configs['aiowps_enable_login_lockdown'] ) ) {
+			return false;
+		}
+
+		if ( empty( $GLOBALS['aio_wp_security'] ) || empty( $GLOBALS['aio_wp_security']->user_login_obj ) ) {
+			return false;
+		}
+
+		// AIOS отключил lockout константой — не блокируем.
+		if ( $GLOBALS['aio_wp_security']->is_login_lockdown_by_const() ) {
+			return false;
+		}
+
+		$locked = $GLOBALS['aio_wp_security']->user_login_obj->check_locked_user();
+
+		return ! empty( $locked );
+	}
+
+	/**
+	 * Обработчик входа через REST.
 	 *
 	 * @param WP_REST_Request $request Запрос.
 	 * @return WP_REST_Response|WP_Error
@@ -232,6 +268,16 @@ class IDPG_REST_Auth {
 
 		if ( is_wp_error( $rate_check ) ) {
 			return $rate_check;
+		}
+
+		// Блокировка IP плагином AIOS: отдаём JSON 429 вместо HTML wp_die,
+		// который otherwise ломает ответ REST изнутри wp_authenticate().
+		if ( $this->is_aios_login_locked() ) {
+			return new WP_Error(
+				'too_many_attempts',
+				__( 'Слишком много попыток входа. Подождите немного и попробуйте снова.', 'idpg-core' ),
+				array( 'status' => 429 )
+			);
 		}
 
 		$user = wp_authenticate( $email, $password );

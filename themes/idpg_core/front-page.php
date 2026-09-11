@@ -290,7 +290,7 @@ get_header();
 				array(
 					'heading_id' => 'idpg-home-popular-title',
 					'title'      => __( 'Популярные события', 'idpg_core' ),
-					'link_url'   => add_query_arg( 'sort', 'popular', IDPG_City_URL::afisha_url() ),
+					'link_url'   => add_query_arg( 'sort', 'popular', idpg_core_city_afisha_url() ),
 					'query'      => $idpg_pop_query,
 					'grid_class' => 'idpg-events-grid--3 idpg-events-grid--v',
 				)

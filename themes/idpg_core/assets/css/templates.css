@@ -759,7 +759,7 @@
 	color: var(--idpg-text-tertiary, var(--idpg-muted-soft));
 }
 
-/* Стили для вывода Yoast SEO (свои классы разметки). */
+/* Ссылки в собственной разметке хлебных крошек. */
 .idpg-breadcrumbs a {
 	color: var(--idpg-text-secondary, var(--idpg-body));
 	text-decoration: none;
@@ -772,20 +772,15 @@
 	text-decoration: underline;
 }
 
+/* Стили для вывода Yoast SEO (свои классы разметки в нашей обёртке). */
 .idpg-breadcrumbs .breadcrumb_last,
 .idpg-breadcrumbs [aria-current="page"] {
 	color: var(--idpg-text, var(--idpg-ink));
 	font-weight: 500;
 }
 
-/* Стили для вывода Rank Math SEO (span.separator / span.last в нашей обёртке). */
 .idpg-breadcrumbs .separator {
 	color: var(--idpg-text-tertiary, var(--idpg-muted-soft));
-}
-
-.idpg-breadcrumbs .last {
-	color: var(--idpg-text, var(--idpg-ink));
-	font-weight: 500;
 }
 
 /* Отступы хлебных крошек. */

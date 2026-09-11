@@ -13,7 +13,9 @@ if ( isset( $_GET['action'] ) && 'confirm' === $_GET['action'] ) {
 	$confirm_user_id = isset( $_GET['idpg_user'] ) ? absint( $_GET['idpg_user'] ) : 0;
 	$confirm_key     = isset( $_GET['idpg_key'] ) ? sanitize_text_field( wp_unslash( $_GET['idpg_key'] ) ) : '';
 
-	$confirm_result = IDPG_Organizer_Verify::instance()->confirm( $confirm_user_id, $confirm_key );
+	$confirm_result = class_exists( 'IDPG_Organizer_Verify' )
+		? IDPG_Organizer_Verify::instance()->confirm( $confirm_user_id, $confirm_key )
+		: new WP_Error( 'idpg_verify_unavailable', __( 'Функция подтверждения организатора временно недоступна.', 'idpg_core' ) );
 
 	if ( is_wp_error( $confirm_result ) ) {
 		$register_error = $confirm_result->get_error_message();
@@ -60,7 +62,7 @@ $hero_events    = get_posts(
 	)
 );
 if ( ! empty( $hero_events ) ) {
-	$hero_image_url = IDPG_Media::idpg_get_poster_url( $hero_events[0]->ID, 'large' );
+	$hero_image_url = idpg_core_event_poster_url( $hero_events[0]->ID, 'large' );
 }
 
 /**
@@ -146,7 +148,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 			if ( is_wp_error( $user ) ) {
 				$login_error = __( 'Неверный email или пароль.', 'idpg_core' );
-			} elseif ( IDPG_Organizer_Verify::instance()->is_pending( $user->ID ) ) {
+			} elseif ( class_exists( 'IDPG_Organizer_Verify' ) && IDPG_Organizer_Verify::instance()->is_pending( $user->ID ) ) {
 				// Организатор ещё не подтвердил регистрацию по ссылке из письма.
 				$login_error = __( 'Подтвердите регистрацию по ссылке из письма, отправленного на ваш email.', 'idpg_core' );
 			} else {
@@ -196,7 +198,10 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		} else {
 			// Запоминаем пароль, чтобы приветственное письмо не ушло
 			// на этапе wp_create_user (см. IDPG_Auth_Emails::send_welcome_email).
-			IDPG_Auth_Emails::remember_password( $email, $password );
+			// Без плагина IDPG_Auth_Emails отсутствует — шаг пропускаем.
+			if ( class_exists( 'IDPG_Auth_Emails' ) ) {
+				IDPG_Auth_Emails::remember_password( $email, $password );
+			}
 			$user_id = wp_create_user( $email, $password, $email );
 
 			if ( is_wp_error( $user_id ) ) {
@@ -217,10 +222,16 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 				$org_user = new WP_User( $user_id );
 				$org_user->set_role( 'subscriber' );
 
-				$verify_key = IDPG_Organizer_Verify::instance()->prepare( $user_id );
-				IDPG_Auth_Emails::instance()->send_organizer_verification_email( $user_id, $verify_key );
-
-				$register_sent = true;
+				// Подготовка ключа подтверждения и письма — только при активном плагине.
+				if ( class_exists( 'IDPG_Organizer_Verify' ) && class_exists( 'IDPG_Auth_Emails' ) ) {
+					$verify_key = IDPG_Organizer_Verify::instance()->prepare( $user_id );
+					IDPG_Auth_Emails::instance()->send_organizer_verification_email( $user_id, $verify_key );
+					$register_sent = true;
+				} else {
+					// Без плагина подтверждения нет: роль организатора выдаём сразу.
+					$org_user->set_role( 'event_organizer' );
+					$register_sent = true;
+				}
 			}
 		}
 	}
@@ -513,11 +524,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 						</label>
 					</div>
 
-					<p class="auth__hint">
-						После регистрации нужно будет загрузить документы для верификации.
-					</p>
-
-					<button class="auth__submit" type="submit">
+				<button class="auth__submit" type="submit">
 						<span class="auth__submit-text">Зарегистрироваться</span>
 						<span class="auth__spinner" aria-hidden="true"></span>
 					</button>

@@ -128,6 +128,48 @@ class IDPG_Dashboard_Stats {
 			array(),
 			IDPG_CORE_VERSION
 		);
+
+		// Инлайн-стили как гарант — обходят любой кэш (браузер/CDN/opcache).
+		wp_add_inline_style( 'idpg-dashboard-stats', $this->get_inline_css() );
+	}
+
+	/**
+	 * Критические стили виджета (инлайн).
+	 *
+	 * Дублирует карточный стиль списков и таблиц, чтобы гарантированно
+	 * применяться даже при агрессивном кэшировании внешнего CSS.
+	 *
+	 * @return string CSS-блок.
+	 */
+	private function get_inline_css() {
+		return '
+			.idpg-dash-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+			.idpg-dash-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:#f8fafb;border:1px solid #e4e7ea;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+			.idpg-dash-list li:hover{border-color:#0073aa;box-shadow:0 2px 6px rgba(0,115,170,.12)}
+			.idpg-dash-list__title{color:#1d2327;text-decoration:none;font-weight:500;overflow-wrap:anywhere}
+			.idpg-dash-list__title:hover{color:#0073aa;text-decoration:underline}
+			.idpg-dash-list__date{flex:none;font-size:12px;color:#646970;font-variant-numeric:tabular-nums;white-space:nowrap}
+			.idpg-dash-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+			.idpg-dash-tiles__item{background:#f8fafb;border:1px solid #e4e7ea;border-radius:8px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+			.idpg-dash-tiles__item--accent{background:#0073aa;border-color:#0073aa}
+			.idpg-dash-tiles__item--accent .idpg-dash-tiles__value{color:#fff}
+			.idpg-dash-tiles__item--accent .idpg-dash-tiles__label{color:rgba(255,255,255,.85)}
+			.idpg-dash-tiles__value{font-size:20px;font-weight:700;line-height:1.2;color:#1d2327}
+			.idpg-dash-tiles__label{margin-top:4px;font-size:11.5px;line-height:1.35;color:#646970}
+			.idpg-dash-section{border-top:1px solid #e4e7ea;padding-top:12px;margin-top:4px}
+			.idpg-dash-section__title{margin:0 0 10px;font-size:13px;font-weight:600;color:#1d2327}
+			.idpg-dash-section__empty{margin:0;font-size:12.5px;color:#646970;font-style:italic}
+			.idpg-dash-table{width:100%;border-collapse:separate;border-spacing:0 8px;font-size:12.5px}
+			.idpg-dash-table th{text-align:left;padding:4px 14px;font-size:11.5px;font-weight:600;color:#646970;text-transform:uppercase;letter-spacing:.02em}
+			.idpg-dash-table td{padding:10px 14px;background:#f8fafb;border:1px solid #e4e7ea;color:#1d2327}
+			.idpg-dash-table td:first-child{border-right:none;border-radius:8px 0 0 8px;font-weight:500}
+			.idpg-dash-table td:last-child{border-left:none;border-radius:0 8px 8px 0;text-align:right;font-variant-numeric:tabular-nums}
+			.idpg-dash-table tbody tr:hover td{border-color:#0073aa}
+			.idpg-stats-page{max-width:1080px}
+			.idpg-stats-page>h1{font-size:23px;font-weight:700;margin:0 0 24px;padding:0;border:none;color:#1d2327;letter-spacing:-.02em}
+			.idpg-stats-page .idpg-dash-tiles{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+			.idpg-stats-page .idpg-dash-section{padding:16px 0 8px;margin-top:8px}
+			.idpg-stats-page .idpg-dash-section__title{font-size:15px}';
 	}
 
 	/**

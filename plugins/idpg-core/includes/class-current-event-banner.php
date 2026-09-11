@@ -41,6 +41,37 @@ class IDPG_Current_Event_Banner {
 	const META_HIDE_FROM = '_idpg_hide_from_banner';
 
 	/**
+	 * Мета-ключ заявки организатора на платный показ в баннере.
+	 *
+	 * @var string
+	 */
+	const META_BANNER_REQUEST = '_idpg_banner_request';
+
+	/**
+	 * Мета-ключ подтверждённой администратором оплаты показа в баннере.
+	 *
+	 * Показ активируется только при значении "yes": событие получает
+	 * приоритет перед автоматическим выбором ближайшего события.
+	 *
+	 * @var string
+	 */
+	const META_BANNER_APPROVED = '_idpg_banner_approved';
+
+	/**
+	 * Префикс транзиентов кэша списка оплаченных событий (на город).
+	 *
+	 * @var string
+	 */
+	const PAID_CACHE_PREFIX = 'idpg_paid_banner_ids_';
+
+	/**
+	 * Интервал авто-ротации карусели, мс.
+	 *
+	 * @var int
+	 */
+	const CAROUSEL_INTERVAL = 6000;
+
+	/**
 	 * Таксономия рубрик событий.
 	 *
 	 * @var string
@@ -84,6 +115,12 @@ class IDPG_Current_Event_Banner {
 		$like = $wpdb->esc_like( '_transient_idpg_current_event_id_' ) . '%';
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$like = $wpdb->esc_like( '_transient_timeout_idpg_current_event_id_' ) . '%';
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+		// Кэш списка оплаченных событий (по городам).
+		$like = $wpdb->esc_like( '_transient_' . self::PAID_CACHE_PREFIX ) . '%';
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$like = $wpdb->esc_like( '_transient_timeout_' . self::PAID_CACHE_PREFIX ) . '%';
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 
@@ -133,6 +170,16 @@ class IDPG_Current_Event_Banner {
 			array(),
 			IDPG_CORE_VERSION
 		);
+
+		// JS авто-ротации карусели оплаченных событий (пауза на наведении,
+		// переключение по точкам, swipe на мобильных).
+		wp_enqueue_script(
+			'idpg-current-event-banner',
+			IDPG_CORE_URL . 'assets/js/current-event-banner.js',
+			array(),
+			IDPG_CORE_VERSION,
+			true
+		);
 	}
 
 	/**
@@ -142,6 +189,14 @@ class IDPG_Current_Event_Banner {
 	 */
 	public function render( $position ) {
 		if ( 'hero' !== $position || ! is_front_page() ) {
+			return;
+		}
+
+		// Приоритет — подтверждённые (оплаченные) события: одно — баннер,
+		// несколько — карусель с авто-ротацией.
+		$paid_html = $this->render_paid_html();
+		if ( $paid_html ) {
+			echo $paid_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			return;
 		}
 
@@ -521,7 +576,7 @@ class IDPG_Current_Event_Banner {
 	}
 
 	/**
-	 * Сборка HTML баннера текущего события.
+	 * Сборка HTML баннера для ближайшего события (авто-показ).
 	 *
 	 * @return string
 	 */
@@ -531,6 +586,16 @@ class IDPG_Current_Event_Banner {
 			return '';
 		}
 
+		return $this->render_single_html( $event );
+	}
+
+	/**
+	 * Сборка HTML баннера текущего события.
+	 *
+	 * @param WP_Post $event Событие.
+	 * @return string Пустая строка, если у события нет постера.
+	 */
+	private function render_single_html( $event ) {
 		$image_id = (int) IDPG_Media::idpg_get_poster_id( $event->ID );
 		$img_url  = $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '';
 		if ( ! $img_url ) {
@@ -589,5 +654,165 @@ class IDPG_Current_Event_Banner {
 
 		return '<a class="idpg-current-event-banner" href="' . esc_url( get_permalink( $event ) ) . '">'
 			. $picture . $overlay . $content . '</a>';
+	}
+
+	/**
+	 * Подтверждённые (оплаченные) события для баннера текущего города.
+	 *
+	 * Возвращает опубликованные события, у которых verbose:
+	 *  - _idpg_banner_approved = "yes" — оплата подтверждена администратором;
+	 *  - дата окончания/начала ещё не наступила;
+	 *  - есть постер (баннер без картинки не строится);
+	 *  - событие не скрыто полностью из баннера (META_HIDE_FULL).
+	 *
+	 * Если событий несколько — все попадают в карусель на главной.
+	 * Список кэшируется транзиентом на город (10 минут).
+	 *
+	 * @return WP_Post[] Список подтверждённых событий по дате начала (ASC).
+	 */
+	private function get_paid_events() {
+		$city = $this->get_city_slug();
+		$key  = self::PAID_CACHE_PREFIX . $city;
+
+		$cached = get_transient( $key );
+		if ( is_array( $cached ) ) {
+			$posts = array();
+			foreach ( $cached as $post_id ) {
+				$post = get_post( (int) $post_id );
+				if ( $post && 'publish' === $post->post_status ) {
+					$posts[] = $post;
+				}
+			}
+			return $posts;
+		}
+
+		$args = array(
+			'post_type'              => 'event',
+			'post_status'            => 'publish',
+			'posts_per_page'         => 20,
+			'no_found_rows'          => true,
+			'ignore_sticky_posts'    => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'orderby'                => 'meta_value',
+			'meta_key'               => self::META_START,
+			'order'                  => 'ASC',
+			'tax_query'              => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				array(
+					'taxonomy' => 'city',
+					'field'    => 'slug',
+					'terms'    => $city,
+				),
+			),
+			'meta_query'             => array( // phpcs:ignore WordPress.DB.SlowDBQuery
+				'relation' => 'AND',
+				array(
+					'key'     => self::META_BANNER_APPROVED,
+					'value'   => 'yes',
+					'compare' => '=',
+				),
+				array(
+					'key'     => '_thumbnail_id',
+					'compare' => 'EXISTS',
+				),
+				array(
+					'relation' => 'OR',
+					array(
+						'key'     => self::META_END,
+						'value'   => current_time( 'mysql' ),
+						'compare' => '>=',
+						'type'    => 'DATETIME',
+					),
+					array(
+						'relation' => 'AND',
+						array(
+							'key'     => self::META_END,
+							'compare' => 'NOT EXISTS',
+						),
+						array(
+							'key'     => self::META_START,
+							'value'   => current_time( 'mysql' ),
+							'compare' => '>=',
+							'type'    => 'DATETIME',
+						),
+					),
+					array(
+						'relation' => 'AND',
+						array(
+							'key'     => self::META_END,
+							'value'   => '',
+							'compare' => '=',
+						),
+						array(
+							'key'     => self::META_START,
+							'value'   => current_time( 'mysql' ),
+							'compare' => '>=',
+							'type'    => 'DATETIME',
+						),
+					),
+				),
+			),
+		);
+
+		$posts = get_posts( $args );
+
+		// События, у которых стоит «скрыть баннер полностью», в ротацию не попадают.
+		$paid = array();
+		foreach ( $posts as $post ) {
+			if ( $this->is_full_banner_hidden( (int) $post->ID ) ) {
+				continue;
+			}
+			$paid[] = $post;
+		}
+
+		$ids = wp_list_pluck( $paid, 'ID' );
+		set_transient( $key, $ids, 10 * MINUTE_IN_SECONDS );
+
+		return $paid;
+	}
+
+	/**
+	 * Рендер подтверждённых (оплаченных) событий.
+	 *
+	 * Одно событие — обычный баннер; несколько — карусель с авто-ротацией.
+	 *
+	 * @return string Пустая строка, если подтверждённых событий нет.
+	 */
+	private function render_paid_html() {
+		$paid = $this->get_paid_events();
+		if ( empty( $paid ) ) {
+			return '';
+		}
+
+		if ( 1 === count( $paid ) ) {
+			return $this->render_single_html( $paid[0] );
+		}
+
+		// Собираем слайды и точки в одном цикле, чтобы индексы совпадали.
+		$slides = '';
+		$dots   = '';
+		$index  = 0;
+
+		foreach ( $paid as $event ) {
+			$html = $this->render_single_html( $event );
+			if ( ! $html ) {
+				continue;
+			}
+
+			$current = ( 0 === $index ) ? ' is-active' : '';
+			$slides .= '<div class="idpg-current-event-banner-carousel__slide' . $current . '">' . $html . '</div>';
+			$dots   .= '<button type="button" class="idpg-current-event-banner-carousel__dot' . $current
+				. '" data-slide="' . $index . '" aria-label="' . esc_attr( $event->post_title ) . '"></button>';
+			$index++;
+		}
+
+		if ( ! $slides ) {
+			return '';
+		}
+
+		return '<div class="idpg-current-event-banner-carousel" data-idpg-banner-carousel data-interval="' . self::CAROUSEL_INTERVAL . '">'
+			. '<div class="idpg-current-event-banner-carousel__viewport">' . $slides . '</div>'
+			. '<div class="idpg-current-event-banner-carousel__dots">' . $dots . '</div>'
+			. '</div>';
 	}
 }

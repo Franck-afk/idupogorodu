@@ -94,18 +94,11 @@
 /* На десктопе у баннера подвала нет правого сайдбара, а у блока карточек
    (контента) на главной он есть (320px + gap 24px). Сужаем баннер до ширины
    контентной колонки главной. На остальных страницах карточки занимают
-   всю ширину контейнера, поэтому сужение не требуется. */
-body.home .idpg-widget-area--before-footer .container {
-  padding-right: calc(16px + 344px);
-}
-
-@media (min-width: 1025px) {
-  body.home .idpg-widget-area--before-footer .container {
-    padding-right: calc(24px + 344px);
-  }
-}
-
-@media (min-width: 1281px) {
+   всю ширину контейнера, поэтому сужение не требуется.
+   Только >1200px: ниже сайдбар главной складывается в колонку, а лишний
+   padding-right раздувал контейнер и создавал горизонтальный скролл.
+   При ≥1024px базовый padding .container уже 32px, поэтому единый calc. */
+@media (min-width: 1201px) {
   body.home .idpg-widget-area--before-footer .container {
     padding-right: calc(32px + 344px);
   }

@@ -82,6 +82,180 @@ if ( ! function_exists( 'idpg_core_ticket_button' ) ) {
 	}
 }
 
+// =========================================================================
+// Постеры и галерея (IDPG_Media) — защитные обёртки
+// =========================================================================
+
+if ( ! function_exists( 'idpg_core_event_poster_id' ) ) {
+	/**
+	 * ID постера (миниатюры) записи.
+	 *
+	 * Оборачивает IDPG_Media::idpg_get_poster_id() с fallback на
+	 * стандартную миниатюру WordPress — шаблон работает без плагина.
+	 *
+	 * @param int $post_id ID записи.
+	 * @return int ID вложения или 0.
+	 */
+	function idpg_core_event_poster_id( $post_id ) {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id ) {
+			return 0;
+		}
+
+		if ( class_exists( 'IDPG_Media' ) ) {
+			return (int) IDPG_Media::idpg_get_poster_id( $post_id );
+		}
+
+		return (int) get_post_thumbnail_id( $post_id );
+	}
+}
+
+if ( ! function_exists( 'idpg_core_event_poster_url' ) ) {
+	/**
+	 * URL постера записи указанного размера.
+	 *
+	 * @param int    $post_id ID записи.
+	 * @param string $size    Размер (event-card, event-featured, large, medium и т. д.).
+	 * @return string URL изображения или пустая строка.
+	 */
+	function idpg_core_event_poster_url( $post_id, $size = 'large' ) {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id ) {
+			return '';
+		}
+
+		if ( class_exists( 'IDPG_Media' ) ) {
+			return (string) IDPG_Media::idpg_get_poster_url( $post_id, $size );
+		}
+
+		$id = idpg_core_event_poster_id( $post_id );
+
+		if ( ! $id ) {
+			return '';
+		}
+
+		$url = wp_get_attachment_image_url( $id, $size );
+
+		return $url ? (string) $url : '';
+	}
+}
+
+if ( ! function_exists( 'idpg_core_event_poster' ) ) {
+	/**
+	 * HTML-тег <img> постера записи.
+	 *
+	 * @param int    $post_id  ID записи.
+	 * @param string $size     Размер изображения.
+	 * @param array  $atts     Дополнительные атрибуты (class, loading и пр.).
+	 * @return string HTML-код изображения или пустая строка.
+	 */
+	function idpg_core_event_poster( $post_id, $size = 'large', $atts = array() ) {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id ) {
+			return '';
+		}
+
+		if ( class_exists( 'IDPG_Media' ) ) {
+			return (string) IDPG_Media::idpg_get_poster( $post_id, $size, $atts );
+		}
+
+		$id = idpg_core_event_poster_id( $post_id );
+
+		if ( ! $id ) {
+			return '';
+		}
+
+		return (string) wp_get_attachment_image( $id, $size, false, $atts );
+	}
+}
+
+if ( ! function_exists( 'idpg_core_event_gallery' ) ) {
+	/**
+	 * HTML-галерея события.
+	 *
+	 * @param int    $post_id ID события.
+	 * @param string $size    Размер изображений (по умолчанию event-card).
+	 * @return string HTML-код галереи или пустая строка.
+	 */
+	function idpg_core_event_gallery( $post_id, $size = 'event-card' ) {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id || ! class_exists( 'IDPG_Media' ) ) {
+			return '';
+		}
+
+		return (string) IDPG_Media::idpg_get_gallery( $post_id, $size );
+	}
+}
+
+// =========================================================================
+// Городские URL (IDPG_City_URL) — защитные обёртки
+// =========================================================================
+
+if ( ! function_exists( 'idpg_core_city_qvar' ) ) {
+	/**
+	 * Имя кастомного query var города из URL.
+	 *
+	 * @return string Название query var (idpg_city_path).
+	 */
+	function idpg_core_city_qvar() {
+		return class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::QVAR : 'idpg_city_path';
+	}
+}
+
+if ( ! function_exists( 'idpg_core_city_filter_url' ) ) {
+	/**
+	 * URL фильтра афиши для текущего города.
+	 *
+	 * @param string $type  today|tomorrow|weekend|free|date|category|base.
+	 * @param string $value Значение (для date/category).
+	 * @return string URL афиши (или дефолтный архив событий без плагина).
+	 */
+	function idpg_core_city_filter_url( $type, $value = null ) {
+		if ( class_exists( 'IDPG_City_URL' ) ) {
+			return IDPG_City_URL::filter_url( $type, $value );
+		}
+
+		return get_post_type_archive_link( 'event' );
+	}
+}
+
+if ( ! function_exists( 'idpg_core_city_afisha_url' ) ) {
+	/**
+	 * URL афиши текущего города.
+	 *
+	 * @param string|null $slug     Slug города.
+	 * @param bool        $preserve Сохранять ли фильтры запроса.
+	 * @return string URL афиши (или дефолтный архив событий без плагина).
+	 */
+	function idpg_core_city_afisha_url( $slug = null, $preserve = false ) {
+		if ( class_exists( 'IDPG_City_URL' ) ) {
+			return IDPG_City_URL::afisha_url( $slug, $preserve );
+		}
+
+		return get_post_type_archive_link( 'event' );
+	}
+}
+
+if ( ! function_exists( 'idpg_core_city_venues_url' ) ) {
+	/**
+	 * URL архива площадок текущего города.
+	 *
+	 * @param string|null $slug Slug города.
+	 * @return string URL архива площадок (или дефолтный архив venue).
+	 */
+	function idpg_core_city_venues_url( $slug = null ) {
+		if ( class_exists( 'IDPG_City_URL' ) ) {
+			return IDPG_City_URL::venues_url( $slug );
+		}
+
+		return get_post_type_archive_link( 'venue' );
+	}
+}
+
 if ( ! function_exists( 'idpg_core_currency_symbol' ) ) {
 	/**
 	 * Символ валюты по коду.
@@ -759,11 +933,14 @@ if ( ! function_exists( 'idpg_core_event_jsonld' ) ) {
 		}
 
 		/*
-		 * При активном Rank Math SEO разметку Event в его граф добавляет
-		 * плагин idpg-core (модуль IDPG_SEO_Integration, с гео-данными и
-		 * городом). Свой вывод здесь отключаем, чтобы не дублировать сущности.
+		 * При активном Yoast SEO разметку Event/Place на страницах события
+		 * и площадки отдаёт Yoast (модуль IDPG_SEO_Integration в idpg-core
+		 * добавляет сущности в его граф). Свой вывод на одиночных страницах
+		 * здесь отключаем, чтобы не дублировать сущности. Разметка в карточках
+		 * (главная, афиша) остаётся — на архивных страницах Yoast её не строит.
 		 */
-		if ( defined( 'RANK_MATH_VERSION' ) ) {
+		if ( defined( 'WPSEO_VERSION' ) && ( is_singular( 'event' ) || is_singular( 'venue' ) ) ) {
+			$printed[ $post_id ] = true;
 			return;
 		}
 
@@ -816,8 +993,8 @@ if ( ! function_exists( 'idpg_core_event_jsonld' ) ) {
 		}
 
 		// --- Изображение ---
-		if ( IDPG_Media::idpg_get_poster_id( $post_id ) ) {
-			$img = IDPG_Media::idpg_get_poster_url( $post_id, 'large' );
+		if ( idpg_core_event_poster_id( $post_id ) ) {
+			$img = idpg_core_event_poster_url( $post_id, 'large' );
 
 			if ( $img ) {
 				$data['image'] = $img;
@@ -895,8 +1072,8 @@ if ( ! function_exists( 'idpg_core_event_share_buttons' ) ) {
 		$text    = rawurlencode( sprintf( __( 'Событие «%s» на «Иду по городу»', 'idpg_core' ), get_the_title( $post_id ) ) );
 		$subject = rawurlencode( get_the_title( $post_id ) );
 		$image   = '';
-		if ( IDPG_Media::idpg_get_poster_id( $post_id ) ) {
-			$image = rawurlencode( (string) IDPG_Media::idpg_get_poster_url( $post_id, 'large' ) );
+		if ( idpg_core_event_poster_id( $post_id ) ) {
+			$image = rawurlencode( (string) idpg_core_event_poster_url( $post_id, 'large' ) );
 		}
 
 		/**

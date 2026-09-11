@@ -39,9 +39,17 @@
 			if (id) {
 				var attachment = wp.media.attachment(id);
 				attachment.fetch().done(function () {
+					// Для предпросмотра берём средний размер, если он есть,
+					// и ограничиваем ширину — иначе оригинал растягивает форму.
 					var url = attachment.get('url');
+					var sizes = attachment.get('sizes');
+					if (sizes && sizes.medium && sizes.medium.url) {
+						url = sizes.medium.url;
+					}
 					if (url) {
-						$wrap.find('.idpg-ad-widget__image-wrap').html('<img src="' + url + '" alt="">');
+						$wrap.find('.idpg-ad-widget__image-wrap').html(
+							'<img src="' + url + '" alt="" style="max-width:300px;height:auto;">'
+						);
 					}
 				});
 			}

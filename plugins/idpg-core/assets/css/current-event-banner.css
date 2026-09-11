@@ -207,3 +207,69 @@
 		font-size: 1rem;
 	}
 }
+
+/* -------- Карусель подтверждённых (оплаченных) событий -------- */
+
+.idpg-current-event-banner-carousel {
+	position: relative;
+	margin: 16px 0 4rem;
+}
+
+/* Внутри карусели баннеры не добавляют свои внешние отступы. */
+.idpg-current-event-banner-carousel__slide .idpg-current-event-banner {
+	margin: 0;
+}
+
+.idpg-current-event-banner-carousel__viewport {
+	position: relative;
+}
+
+.idpg-current-event-banner-carousel__slide {
+	display: none;
+}
+
+.idpg-current-event-banner-carousel__slide.is-active {
+	display: block;
+	animation: idpg-banner-carousel-fade 0.5s ease;
+}
+
+@keyframes idpg-banner-carousel-fade {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+/* Точки-индикаторы. */
+.idpg-current-event-banner-carousel__dots {
+	position: absolute;
+	bottom: 18px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 3;
+	display: flex;
+	gap: 8px;
+}
+
+.idpg-current-event-banner-carousel__dot {
+	width: 10px;
+	height: 10px;
+	padding: 0;
+	border: 2px solid rgba(255, 255, 255, 0.7);
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.35);
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.idpg-current-event-banner-carousel__dot.is-active {
+	background: #fff;
+}
+
+@media (max-width: 767px) {
+	.idpg-current-event-banner-carousel {
+		margin: 16px 0 1.5rem;
+	}
+
+	.idpg-current-event-banner-carousel__dots {
+		bottom: 12px;
+	}
+}

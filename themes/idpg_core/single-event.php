@@ -87,9 +87,9 @@ get_header();
 						<?php endif; ?>
 					</header>
 
-<?php if ( IDPG_Media::idpg_get_poster_id( get_the_ID() ) ) : ?>
+<?php if ( idpg_core_event_poster_id( get_the_ID() ) ) : ?>
 					<figure class="idpg-event-single__poster">
-						<?php echo IDPG_Media::idpg_get_poster( get_the_ID(), 'event-featured', array( 'loading' => 'eager' ) ); ?>
+						<?php echo idpg_core_event_poster( get_the_ID(), 'event-featured', array( 'loading' => 'eager' ) ); ?>
 					</figure>
 				<?php endif; ?>
 
@@ -126,7 +126,7 @@ get_header();
 							<?php endif; ?>
 
 <?php
-						$idpg_gallery_html = IDPG_Media::idpg_get_gallery( $idpg_post_id, 'event-card' );
+						$idpg_gallery_html = idpg_core_event_gallery( $idpg_post_id, 'event-card' );
 
 						if ( $idpg_gallery_html ) :
 							?>
