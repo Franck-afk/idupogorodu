@@ -52,7 +52,7 @@ abstract class WP_Auth_Ru_Provider {
      * Конструктор: общие хуки для всех провайдеров.
      */
     private function __construct() {
-        $this->settings = get_option( IDPG_AUTH_OPTIONS_KEY, array() );
+        $this->settings = self::merge_env_settings( get_option( IDPG_AUTH_OPTIONS_KEY, array() ) );
         add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
         if ( empty( $this->settings[ static::ENABLED_KEY ] ) ) {
             return;
@@ -68,6 +68,49 @@ abstract class WP_Auth_Ru_Provider {
         }
         add_action( 'wp_head', array( $this, 'maybe_output_frontend_styles' ) );
         $this->register_additional_hooks();
+    }
+
+    /**
+     * Подстраховка настроек из wp-config.php (константы IDPG_AUTH_*).
+     *
+     * Переносы БД/деплой могут потерять значения опции idpg_auth_settings.
+     * Критичные ключи (client_id/secret, enabled) можно задать константами:
+     *   define( 'IDPG_AUTH_VK_CLIENT_ID', '54748265' );
+     *   define( 'IDPG_AUTH_VK_CLIENT_SECRET', '...' );
+     *   define( 'IDPG_AUTH_YANDEX_CLIENT_ID', '...' );
+     *   define( 'IDPG_AUTH_VK_ENABLED', true );
+     * Константы приоритетнее опции: значение из БД используется, только если
+     * константа не задана (кроме пустой опции — тогда берётся константа).
+     *
+     * @param array $settings Настройки из БД.
+     *
+     * @return array Настройки с наложением констант.
+     */
+    private static function merge_env_settings( $settings ) {
+        if ( ! is_array( $settings ) ) {
+            $settings = array();
+        }
+
+        $map = array(
+            'IDPG_AUTH_VK_ENABLED'         => 'vk_enabled',
+            'IDPG_AUTH_VK_CLIENT_ID'       => 'vk_client_id',
+            'IDPG_AUTH_VK_CLIENT_SECRET'   => 'vk_client_secret',
+            'IDPG_AUTH_YANDEX_ENABLED'     => 'yandex_enabled',
+            'IDPG_AUTH_YANDEX_CLIENT_ID'   => 'yandex_client_id',
+            'IDPG_AUTH_YANDEX_CLIENT_SECRET' => 'yandex_client_secret',
+            'IDPG_AUTH_MAX_ENABLED'        => 'max_enabled',
+            'IDPG_AUTH_MAX_BOT_TOKEN'      => 'max_bot_token',
+            'IDPG_AUTH_MAX_BOT_USERNAME'   => 'max_bot_username',
+            'IDPG_AUTH_COMPLIANCE_MODE'    => 'compliance_mode',
+        );
+
+        foreach ( $map as $const => $key ) {
+            if ( defined( $const ) ) {
+                $settings[ $key ] = constant( $const );
+            }
+        }
+
+        return $settings;
     }
 
     /**
