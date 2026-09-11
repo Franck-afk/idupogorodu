@@ -317,10 +317,6 @@ $idpg_city_ipnote = class_exists( 'IDPG_City_Filter' ) && IDPG_City_Filter::was_
 		<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
 		<span><?php echo esc_html( $current_city_name ); ?></span>
 	</button>
-	<a href="<?php echo esc_url( home_url( '/login/' ) ); ?>" class="idpg-bottom-bar__item" aria-label="<?php esc_attr_e( 'Войти', 'idpg_core' ); ?>">
-		<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-		<span><?php esc_html_e( 'Войти', 'idpg_core' ); ?></span>
-	</a>
 </nav>
 
 <?php
