@@ -199,11 +199,12 @@ class WP_Auth_Ru_Yandex extends WP_Auth_Ru_OAuth_Provider {
 .wp-auth-ru-checkout-banner{margin-bottom:24px;padding:20px;border:1px solid #ffe0d0;border-radius:12px;background:#fff8f6}
 .wp-auth-ru-checkout-title{margin:0 0 10px;font-weight:600;font-size:15px}
 .wp-auth-ru-hint{font-size:12px;color:#6b7280;margin:8px 0 0}
-.wp-auth-ru-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 20px;border-radius:10px;text-decoration:none!important;font-size:15px;font-weight:600;line-height:1;box-sizing:border-box;cursor:pointer;border:none;transition:opacity .18s,transform .1s;color:#fff!important;margin-bottom:10px}
-.wp-auth-ru-btn:hover{opacity:.88;transform:translateY(-1px);color:#fff!important}.wp-auth-ru-btn:active{transform:translateY(0)}
-.wp-auth-ru-btn--yandex{background:#FC3F1D;box-shadow:0 2px 10px rgba(252,63,29,.3)}
-.wp-auth-ru-btn--mailru{background:#005FF9;box-shadow:0 2px 10px rgba(0,95,249,.3)}
-.wp-auth-ru-btn--checkout{font-size:16px;padding:14px 24px}
+.wp-auth-ru-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 24px;border-radius:8px;text-decoration:none!important;font-size:16px;font-weight:600;line-height:1.5;box-sizing:border-box;cursor:pointer;border:none;transition:opacity .2s ease;color:#fff!important;margin-bottom:10px}
+.wp-auth-ru-btn:hover{opacity:.88;color:#fff!important}
+.wp-auth-ru-btn:active{opacity:.8}
+.wp-auth-ru-btn--yandex{background:#FC3F1D}
+.wp-auth-ru-btn--mailru{background:#005FF9}
+.wp-auth-ru-btn--checkout{font-size:16px;padding:12px 24px}
 .wp-auth-ru-icon{width:22px;height:22px;flex-shrink:0;display:block}
 .wp-auth-ru-divider{position:relative;text-align:center;margin:4px 0 14px;color:#aaa;font-size:13px}
 .wp-auth-ru-divider::before{content:"";position:absolute;top:50%;left:0;right:0;border-top:1px solid #ddd}

@@ -333,6 +333,6 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
         static $printed = false;
         if ( $printed ) return;
         $printed = true;
-        ?><style id="wp-auth-ru-vk-styles">.wp-auth-ru-btn--vk{background:#5281B8;box-shadow:0 2px 10px rgba(82,129,184,.35)}</style><?php
+        ?><style id="wp-auth-ru-vk-styles">.wp-auth-ru-btn--vk{background:#5281B8}</style><?php
     }
 }

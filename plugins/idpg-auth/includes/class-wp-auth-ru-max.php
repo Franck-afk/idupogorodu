@@ -201,6 +201,6 @@ class WP_Auth_Ru_Max extends WP_Auth_Ru_Provider {
     public function output_styles() {
         static $printed = false;
         if ( $printed ) return; $printed = true;
-        ?><style id="wp-auth-ru-max-styles">.wp-auth-ru-btn--max{background:linear-gradient(135deg,#4ccfff 0%,#5533ee 66%,#9933dd 100%);box-shadow:0 2px 10px rgba(85,51,238,.35)}.wp-auth-ru-btn--disabled{opacity:.55;cursor:default;pointer-events:none}</style><?php
+        ?><style id="wp-auth-ru-max-styles">.wp-auth-ru-btn--max{background:linear-gradient(135deg,#4ccfff 0%,#5533ee 66%,#9933dd 100%)}.wp-auth-ru-btn--disabled{opacity:.55;cursor:default;pointer-events:none}</style><?php
     }
 }
