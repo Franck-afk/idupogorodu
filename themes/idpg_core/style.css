@@ -3241,10 +3241,11 @@ a:focus-visible {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
-  /* Поиск (оверлей): safe area */
+  /* Поиск (оверлей): safe area + гарантированный отступ 16px сверху/снизу
+     (env() без fallback на устройствах без notch даёт 0px — поиск прилипал к верху) */
   .idpg-search-overlay {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: calc(16px + env(safe-area-inset-top));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
   /* Pikaday fullscreen overlay на мобильных */
   @media (max-width: 767px) {
