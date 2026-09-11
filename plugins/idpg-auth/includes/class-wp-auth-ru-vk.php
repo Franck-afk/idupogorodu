@@ -211,7 +211,7 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
             return new WP_Error( 'vk_no_token', $msg );
         }
 
-        WP_Auth_Ru_Logger::log( 'SUCCESS', self::PROVIDER, 'Токен получен (HTTP ' . $http_code . ', email: ' . WP_Auth_Ru_Logger::mask_email( $body['email'] ?? '' ) . ')' );
+        WP_Auth_Ru_Logger::log( 'SUCCESS', self::PROVIDER, 'Токен получен (HTTP ' . $http_code . ', email: ' . WP_Auth_Ru_Logger::mask_email( $body['email'] ?? '' ) . ', scope: ' . ( $body['scope'] ?? '' ) . ')' );
         return $body;
     }
 
@@ -302,7 +302,7 @@ class WP_Auth_Ru_VK extends WP_Auth_Ru_OAuth_Provider {
     }
 
     protected function no_email_message() {
-        return 'ВКонтакте не предоставил email. Разрешите доступ к email в настройках приложения.';
+        return 'ВКонтакте не предоставил email. Включите доступ к почте в приложении VK ID: кабинет id.vk.ru → приложение → Доступы → Почта (email), затем повторите вход.';
     }
 
     protected function log_subject( $email, $provider_id ) {
