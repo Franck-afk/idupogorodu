@@ -6,6 +6,8 @@
 #
 #   plugins/idpg-core/          плагин: бизнес-логика
 #   plugins/idpg-auth/          плагин: соцвход (wp-auth-ru)
+#   plugins/idpg-event-import/  плагин: импорт событий (CLI, admin, провайдеры)
+#   plugins/wp-cloud-sync/      плагин: синхронизация с облаком
 #   themes/idpg_core/           родительская тема
 #   themes/idpg_core-child/     дочерняя тема
 #   docs/                       документация проекта
@@ -59,9 +61,16 @@ node_modules/
 # -----------------------------------------------------------------------------
 # Любой новый сторонний плагин/тема автоматически игнорируются — их не нужно
 # вручную добавлять в этот файл.
+#
+# ВАЖНО (исправлено после DEV-53): здесь перечислены ВСЕ наши плагины. В первой
+# редакции были только idpg-core и idpg-auth, из-за чего собственные плагины
+# idpg-event-import и wp-cloud-sync молча выпали из репозитория, хотя лежали
+# в ветке main. При добавлении нового своего плагина — обязательно re-include.
 /plugins/*
 !/plugins/idpg-core/
 !/plugins/idpg-auth/
+!/plugins/idpg-event-import/
+!/plugins/wp-cloud-sync/
 # Заглушка WP, запрещающая листинг каталога.
 !/plugins/index.php
 
