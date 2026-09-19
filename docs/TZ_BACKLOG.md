@@ -952,10 +952,14 @@ php <tools>/vendor/bin/phpcs --standard=.phpcs.xml.dist \
   (без него `Fatal error: Class "Forrest79\PhpCsIgnores\File" not found`).
   Оба восстанавливаются из кэша Composer
   (`~/AppData/Local/Composer/files/<vendor>/<package>/*.zip`) без сети.
-- **Baseline применяется на Windows** — вопреки оговорке в DEV-27A. Для этого в
-  `vendor/forrest79/phpcs-ignores/src/PhpCsInjections.php` путь нормализуется
-  `str_replace('\\', '/', $path)`: без этого инъекция не срабатывает и локальный
-  прогон показывает все ~4 тыс. нарушений. Тоже локальный патч вне репозитория.
+- **Baseline применяется на Windows** — вопреки оговорке в DEV-27A. *(Уточнено
+  19.09.2026, DEV-53: прежнее объяснение «локальный патч `PhpCsInjections.php`» неверно —
+  этот файл в `vendor/` **не патчен**, найденный в нём `str_replace( '\\', '/', $path )`
+  относится к поиску `FileList.php` и является штатным upstream-кодом. Baseline
+  сопоставляется на обеих платформах благодаря самому плагину:
+  `Ignores::getAbsolutePath()` нормализует и `/`, и `\` к `DIRECTORY_SEPARATOR`, поэтому
+  записи с обратными слэшами в baseline валидны и на Linux-CI. Локальный патч нужен
+  ровно один — в `BaselineReport.php`, и только при **генерации** baseline.)*
 - **Разделение коммитов при общем файле baseline.** Baseline компонента — один файл,
   а заходов несколько, поэтому «проход = коммит» требует промежуточного состояния:
   временно вернуть правки кода файла-предыдущего-прохода, перегенерировать baseline,
@@ -964,15 +968,66 @@ php <tools>/vendor/bin/phpcs --standard=.phpcs.xml.dist \
 
 #### Состояние CI
 
-`.circleci/config.yml` содержит job `phpcs` (DEV-27A), но **проверить зелёный CI
-нельзя: в репозитории `wp-content` нет ни remote, ни основной части проекта.**
-На 19.09.2026 в git закоммичены ровно 5 файлов — те, что трогали проходы DEV-27B
-(`themes/idpg_core/inc/theme-helpers.php`, `themes/idpg_core/phpcs-baseline.neon`,
-`plugins/idpg-core/includes/class-event-calendar-widget.php`,
-`plugins/idpg-core/includes/class-privacy.php`, `plugins/idpg-core/phpcs-baseline.neon`),
-остальные 63 записи — untracked. Пока это не решено, требование «CI зелёный»
-выполняется только как «локальный прогон с baseline даёт exit 0 по всем трём
-компонентам». Решение по составу репозитория — за владельцем продукта.
+На 19.09.2026 job `phpcs` **проверен на чистом клоне** (см. DEV-53): `git clone` даёт
+215 файлов, прогон с baseline по трём компонентам — **exit 0**. Job `phpunit` на клоне
+локально не воспроизводится (нужны WordPress test library и MySQL) — проверяется
+только в CI.
+
+Осталось для полного закрытия DEV-53: настроить remote, запушить и убедиться, что оба
+job'а зелёные на CircleCI. До этого момента требование «CI зелёный» выполняется как
+«локальный прогон на чистом клоне даёт exit 0».
+
+### DEV-53. Репозиторий и CI: монолит, только наши артефакты
+
+> **Выполнено 19.09.2026, кроме push (нет URL remote).** Уточнение DEV-27A/27B:
+> без репозитория и remote CI физически не запускается, а проходы DEV-27A/27B
+> ничем не защищены от регрессий.
+
+| | |
+|---|---|
+| **Проблема** | `wp-content` — не git-репозиторий проекта: нет remote, закоммичено 5 файлов, всё остальное untracked. `.circleci/config.yml` не запускается, потому что репозиторий некуда пушить. |
+| **Требование** | 1) Выбрать стратегию (монолит / 4 репозитория + infra); 2) `.gitignore` с исключением `uploads/`, бэкапов, `vendor/`, `node_modules/`, сторонних плагинов, `wp-config*.php`; 3) включить только наши артефакты и `docs/`; 4) настроить remote и запушить; 5) проверить CI на чистом клоне. |
+| **Решение владельца** | **Монолит** — один репозиторий проекта в `wp-content` (разделение на 4 репозитория отклонено). Компонент при необходимости выделяется позже с сохранением истории через `git subtree split`. |
+| **Реализация** | `.gitignore` в режиме default-deny: `/plugins/*` + `!/plugins/idpg-core/`, `!/plugins/idpg-auth/`, `!/plugins/index.php`; `/themes/*` + `!/themes/idpg_core/`, `!/themes/idpg_core-child/`, `!/themes/index.php`. Исключены `uploads/`, `languages/`, `wp-config*.php`, каталоги бэкапов (`backups/`, `aiowps_backups/`, `wpvividbackups/`, `wpvivid_uploads/`, `wpvivid_staging/`, `upgrade/`, `upgrade-temp-backup/`), `vendor/`, `node_modules/`, `*.log`, `*.sql`, `*.bak`, `phpcs-tools*/`, `.workbuddy-ai/`, `mu-plugins/`. `.gitattributes`: `* text=auto eol=lf` (единый LF на Linux-CI), `*.bat/*.cmd/*.ps1` — crlf, бинарные расширения и `*.mo` помечены `binary`. Коммит `06fe9bb`. |
+| **Приёмка** | Свежий `git clone` → 215 файлов; среди них нет `uploads/`, `languages/`, сторонних плагинов, `vendor/`, `wp-config*.php` и бэкапов. Все файлы в клоне — LF. PHPCS на клоне: `idpg-core` / `idpg-auth` / тема `idpg_core` — **exit 0**. PHPUnit на клоне локально не проверяется — только в CI. |
+| **Объём** | S |
+
+**Состав репозитория** (215 файлов, ~3,6 МБ): `plugins/idpg-core` — 80,
+`plugins/idpg-auth` — 21, `themes/idpg_core` — 90, `themes/idpg_core-child` — 3,
+`docs/` — 8, `.circleci/config.yml`, `plugins/index.php`, `themes/index.php`,
+`AGENTS.md`, `index.php`, `package.json`, `.gitignore`, `.gitattributes`.
+
+**Что в репозиторий не попало** (замер 19.09.2026): сторонние плагины — 3612 файлов /
+35,9 МБ; `uploads/` — 549 / 33,7 МБ; `wpvividbackups/` — 49 / 95,1 МБ;
+`plugins/idpg-core/vendor/` — 1683 / 14,1 МБ; `languages/` — 187 / 11,9 МБ.
+
+#### Находки и оговорки
+
+- **CI проверяет только ошибки — предупреждения job не валят.** В job `phpcs` стоит
+  `--runtime-set ignore_warnings_on_exit 1`, поэтому exit-код зависит только от errors;
+  предупреждения вне контроля CI.
+- **12 записей baseline устарели** (2 в `idpg-core`: `Generic.Files.LineEndings.InvalidEOLChar`
+  для `includes/class-settings-page.php` и `uninstall.php`; 10 в теме: `Internal.LineEndings.Mixed`
+  и 9 × `Squiz.WhiteSpace.SuperfluousWhitespace.EndLine` для `single-venue.php`).
+  Описываемых ими нарушений в коде больше нет — плагин выводит их как
+  «Ignored sniff … was not matched in report». На exit-код не влияют, но ломают инвариант
+  DEV-27B «baseline == вывод генератора». Чистить — отдельным заходом DEV-27B.
+- **Корневого `composer.json` нет** — `composer install` в корне репозитория нечего
+  устанавливать: job `phpunit` ставит зависимости внутри `plugins/idpg-core`, job `phpcs`
+  разворачивает инструменты в `/tmp/phpcs-tools`. Решение о корневом манифесте — за владельцем.
+- **`composer.lock` не коммитится** — `plugins/idpg-core/.gitignore` его исключает, поэтому
+  `composer install` в CI разрешает зависимости заново (сборка не воспроизводима по версиям).
+- **Легаси-конфиг внутри плагина.** `plugins/idpg-core/.circleci/config.yml` — CircleCI 2.0
+  с job'ами `php56`…`php74`. CircleCI читает только корневой `.circleci/config.yml`, поэтому
+  файл безвреден, но вводит в заблуждение.
+- **Версия PHP в CI — 8.4** (`cimg/php:8.4`), локально 8.2 (CLI) / 8.3 (веб).
+- **`deploy.sh` содержит чужой домен.** Файл лежит в корне WordPress (вне этого репозитория):
+  `WEBROOT="~/domains/potolkicomfort.ru/public_html"` вместо `idupogorodu.ru`. Править перед
+  первым деплоем.
+- **Грабля Git Bash:** `grep -c $'\r' файл` даёт ложное число (показывает примерно число строк),
+  хотя файл без CRLF. Проверять переводы строк только через `tr -cd '\r' < файл | wc -c`.
+- **Грабля клонирования:** `git clone` из локального репозитория под песочницей падает с
+  `detected dubious ownership` (разные SID). Обход на один вызов — `git -c safe.directory='*' clone …`.
 
 ### DEV-32. `set_role( 'subscriber' )` при регистрации пишет несуществующую роль
 
