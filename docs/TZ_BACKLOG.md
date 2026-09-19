@@ -878,7 +878,8 @@
 
 **Разбивка baseline уже сделана в DEV-27A** — три файла:
 `plugins/idpg-core/phpcs-baseline.neon` (531 запись), `plugins/idpg-auth/phpcs-baseline.neon` (424),
-`themes/idpg_core/phpcs-baseline.neon` (398). На 19.09.2026 — **520 / 424 / 398**.
+`themes/idpg_core/phpcs-baseline.neon` (398). На 19.09.2026 — **528 / 424 / 398**
+(520 → 528 после DEV-59: добавлены записи для двух тестов, привезённых из `main`).
 
 #### Объём критичных нарушений в baseline (замер 19.09.2026)
 
@@ -1093,6 +1094,42 @@ fast-forward невозможен. Вариант C и «push в main обычн
 `main` на GitHub остался `c9c10dc` (проверено сетевым `git ls-remote`). Bundle сохранён как
 архив — из него можно распаковать исходную историю и сверить, что ни один файл не потерян.
 
+#### DEV-59. Разрешение конфликта с lint-гейтом
+
+Импорт сломал гейт: `plugins/idpg-core` стал давать **46 ошибок / 2 предупреждения, exit 2**
+в двух привезённых тестах — `tests/test-event-moderation.php` (21) и
+`tests/test-seo-integration.php` (25 + 2). Причина: `.phpcs.xml.dist` плагина содержит
+`<file>.</file>` и исключает только `vendor/`, `node_modules/`, `*.min.js`, то есть `tests/`
+линтуется; а в ветке `main` **не было ни одного `.phpcs.xml.dist`**, поэтому эти файлы никогда
+не проверялись и в baseline их не было.
+
+Решение владельца — внести нарушения в baseline, **не правя код тестов**: так импорт остаётся
+побайтово равным `main`, и при будущем слиянии историй эти файлы смержатся без конфликтов.
+Baseline не дописан вручную, а **перегенерирован** через `BaselineReport` — иначе нарушился бы
+инвариант DEV-27B «baseline == вывод генератора». Коммит **`7858e5f`**.
+
+| | до | после |
+|---|---|---|
+| Записей в baseline `idpg-core` | 520 | **528** (+8) |
+| Дифф файла | — | ровно +48 строк, других изменений нет |
+| Удалений в диффе | — | нет |
+| PHPCS по трём компонентам | `idpg-core` exit 2 | **exit 0** |
+| Инвариант «baseline == генератор» | — | выполнен (повторная генерация совпала побайтово) |
+
+Добавленные записи: `PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket` (10 + 7),
+`...CloseBracketLine` (10 + 7), `Generic.Commenting.DocComment.ShortNotCapital` (10),
+`PSR2.Files.EndFileNewline.NoneFound` (1 + 1),
+`Generic.Formatting.MultipleStatementAlignment.NotSameWarning` (2 warning).
+
+**Побочное уточнение — исправление прежней находки.** Записи
+`Generic.Files.LineEndings.InvalidEOLChar` для `includes/class-settings-page.php` и
+`uninstall.php`, которые в DEV-53/DEV-27B были помечены как «устаревшие — нарушений в коде
+уже нет», **регенерацией воспроизводятся, то есть законны**. Оба файла реально содержат CRLF
+в рабочем дереве (483 и 106 переводов строк). «Устаревшими» они выглядят только в **чистом
+клоне**: `.gitattributes` (`* text=auto eol=lf`) отдаёт там LF, снифф не срабатывает, и плагин
+пишет «Ignored sniff … was not matched in report». Это и наблюдалось при приёмке DEV-53 на
+клоне — отсюда неверный вывод. Для темы 10 записей остаются непроверенными.
+
 **Грабля:** `git diff --name-status` по умолчанию включает детекцию переименований и склеивает
 `plugins/idpg-event-import/phpunit.xml.dist` с `plugins/idpg-auth/phpunit.xml.dist` в пару `R`,
 из-за чего файл выпадает из выборки «только `D`» — выходило 28 вместо 29. Для подобных выборок
@@ -1117,12 +1154,16 @@ fast-forward невозможен. Вариант C и «push в main обычн
 - **CI проверяет только ошибки — предупреждения job не валят.** В job `phpcs` стоит
   `--runtime-set ignore_warnings_on_exit 1`, поэтому exit-код зависит только от errors;
   предупреждения вне контроля CI.
-- **12 записей baseline устарели** (2 в `idpg-core`: `Generic.Files.LineEndings.InvalidEOLChar`
-  для `includes/class-settings-page.php` и `uninstall.php`; 10 в теме: `Internal.LineEndings.Mixed`
-  и 9 × `Squiz.WhiteSpace.SuperfluousWhitespace.EndLine` для `single-venue.php`).
-  Описываемых ими нарушений в коде больше нет — плагин выводит их как
-  «Ignored sniff … was not matched in report». На exit-код не влияют, но ломают инвариант
-  DEV-27B «baseline == вывод генератора». Чистить — отдельным заходом DEV-27B.
+- **12 записей baseline помечены как устаревшие — но для `idpg-core` это оказалось неверно
+  (уточнено в DEV-59).** Речь о `Generic.Files.LineEndings.InvalidEOLChar` для
+  `includes/class-settings-page.php` и `uninstall.php` (2 записи) и о 10 записях в теме
+  (`Internal.LineEndings.Mixed` и 9 × `Squiz.WhiteSpace.SuperfluousWhitespace.EndLine`
+  для `single-venue.php`). Плагин выводил их как «Ignored sniff … was not matched in report»
+  — но это наблюдалось на **чистом клоне**, где `.gitattributes` (`* text=auto eol=lf`)
+  отдаёт файлы с LF и снифф не срабатывает. В рабочем дереве оба файла `idpg-core` реально
+  содержат CRLF, и регенерация baseline (DEV-59) воспроизвела эти записи — они законны.
+  Для темы проверка не проводилась; там возможна та же природа. На exit-код не влияет.
+  Чистить (или уточнять) — отдельным заходом DEV-27B.
 - **Корневого `composer.json` нет** — `composer install` в корне репозитория нечего
   устанавливать: job `phpunit` ставит зависимости внутри `plugins/idpg-core`, job `phpcs`
   разворачивает инструменты в `/tmp/phpcs-tools`. Решение о корневом манифесте — за владельцем.
