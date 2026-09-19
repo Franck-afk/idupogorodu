@@ -13,6 +13,39 @@ baseline перестаёт применяться и PHPCS начинает п�
 | Версия, под которую сделаны патчи | **v0.5.0** |
 | Каталог применения | `vendor/forrest79/phpcs-ignores` (`-p1`) |
 | Локальная обвязка | `D:\laragon\www\idupogorodu\phpcs-tools2` (вне репозитория) |
+| Определение обвязки | `bin/phpcs-patches/tools.composer.json` (в репозитории) |
+
+## Установка обвязки с нуля
+
+Каталог инструментов **не** лежит в репозитории (`vendor/` исключён `.gitignore`), поэтому
+тулчейн задаётся файлом-шаблоном `tools.composer.json`. Версии в нём **пришпилены точно**
+(без `^`): обновление сниффов меняет результат проверки, а вместе с ним и baseline, поэтому
+это должно быть осознанным действием, а не побочным эффектом `composer update`.
+
+```bash
+TOOLS=D:/laragon/www/idupogorodu/phpcs-tools2
+mkdir -p "$TOOLS" && cd "$TOOLS"
+cp /d/laragon/www/idupogorodu/wp-content/bin/phpcs-patches/tools.composer.json composer.json
+composer install
+cd /d/laragon/www/idupogorodu/wp-content && bash bin/phpcs-patches/apply.sh "$TOOLS"
+```
+
+Шаблон фиксирует четыре прямые зависимости:
+
+| Пакет | Версия |
+|---|---|
+| `squizlabs/php_codesniffer` | 3.13.6 |
+| `wp-coding-standards/wpcs` | 3.4.1 |
+| `phpcompatibility/phpcompatibility-wp` | 2.1.8 |
+| `forrest79/phpcs-ignores` | 0.5.0 |
+
+Транзитивные зависимости (`nette/neon`, `phpcompatibility/php-compatibility`,
+`phpcsstandards/*`, `dealerdirect/phpcodesniffer-composer-installer`) фиксируются
+`composer.lock` внутри каталога инструментов — его тоже имеет смысл сохранять.
+
+Приёмка этой процедуры (перепроверена 19.09.2026 на `dev54/pin-check`): `composer install`
+по шаблону → все 10 пакетов встали в ожидаемых версиях → без патчей `idpg-core` даёт
+**636 ошибок / 410 предупреждений, exit 2** → `apply.sh` → **exit 0** по всем трём компонентам.
 
 ## Что патчится
 
@@ -113,8 +146,9 @@ Job `phpcs` в `.circleci/config.yml` ставит обвязку в `/tmp/phpcs
            phpcs-tools2/vendor/forrest79/phpcs-ignores/src/BaselineReport.php
    ```
 
-4. После правки патчей — обновить в этом README версию пакета и таблицу выше,
-   а также раздел DEV-54 в `docs/TZ_BACKLOG.md`.
+4. После правки патчей — обновить версию пакета **в трёх местах**: таблица выше,
+   `tools.composer.json` и `EXPECTED_VERSION` в `apply.sh`. Затем раздел DEV-54
+   в `docs/TZ_BACKLOG.md`.
 
 ## Связанные документы
 

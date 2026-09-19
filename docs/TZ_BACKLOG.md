@@ -1045,7 +1045,7 @@ job'а зелёные на CircleCI. До этого момента требов
 | **Проблема** | Два патча к `forrest79/phpcs-ignores` — `PhpCsInjections.php` (нормализация пути на Windows) и `BaselineReport.php` (не экранировать табы) — лежали прямо в рабочей копии `phpcs-tools2/vendor` и терялись при `composer install` / `composer update` или удалении `vendor`. После потери патча baseline перестаёт применяться, и локальный прогон даёт ~4 тыс. унаследованных нарушений вместо exit 0. |
 | **Требование** | Перенести патчи в `bin/phpcs-patches/` репозитория с инструкцией apply в README. Альтернатива — форк `forrest79/phpcs-ignores` и `nette/neon` в свой composer. |
 | **Решение** | Патч-файлы (от форка отказались — обоснование ниже и в README). |
-| **Реализация** | `bin/phpcs-patches/`: `0001-phpcs-ignores-windows-path.patch`, `0002-phpcs-ignores-baseline-tabs.patch` (unified diff, `-p1` от корня пакета), `apply.sh` (идемпотентный, флаги `--check` и `--help`, сверка версии пакета с `composer.lock`), `apply.cmd` (обёртка для cmd.exe), `README.md`. |
+| **Реализация** | `bin/phpcs-patches/`: `0001-phpcs-ignores-windows-path.patch`, `0002-phpcs-ignores-baseline-tabs.patch` (unified diff, `-p1` от корня пакета), `apply.sh` (идемпотентный, флаги `--check` и `--help`, сверка версии пакета с `composer.lock`), `apply.cmd` (обёртка для cmd.exe), `tools.composer.json` (пришпиленное определение тулчейна), `README.md`. |
 | **Приёмка** | **Пройдена на реальной чистой установке.** `composer install` с нуля (10 пакетов, `forrest79/phpcs-ignores` v0.5.0) → vendor чистый → PHPCS на `idpg-core`: **636 ошибок, exit 2**. Затем `apply.sh` → PHPCS по трём компонентам: **exit 0**. |
 | **Объём** | S |
 
@@ -1082,6 +1082,23 @@ job'а зелёные на CircleCI. До этого момента требов
   к патчу конвертируется через `cygpath -m`.
 - Патчи сделаны под `forrest79/phpcs-ignores` **v0.5.0**; `apply.sh` предупреждает о другой
   версии и возвращает код 1, если контекст не совпал.
+
+#### Фиксация версий обвязки
+
+Каталог инструментов лежит вне репозитория, поэтому тулчейн задан файлом-шаблоном
+`bin/phpcs-patches/tools.composer.json` — четыре прямые зависимости **пришпилены точно**
+(без `^`): `squizlabs/php_codesniffer` 3.13.6, `wp-coding-standards/wpcs` 3.4.1,
+`phpcompatibility/phpcompatibility-wp` 2.1.8, `forrest79/phpcs-ignores` 0.5.0. Раньше стоял
+карет `^0.5.0`, из-за чего `composer update` мог подтянуть 0.6.x и сломать патчи — а вместе
+с ними и baseline. Транзитивные зависимости фиксируются `composer.lock` в каталоге инструментов.
+
+Приёмка этой процедуры (19.09.2026, `dev54/pin-check`): `composer install` по шаблону → все
+10 пакетов встали в ожидаемых версиях → без патчей `idpg-core` даёт **636 ошибок / 410
+предупреждений, exit 2** → `apply.sh` → **exit 0** по трём компонентам. Локальный
+`phpcs-tools2` приведён к тому же пришпиленному определению.
+
+При обновлении пакета версию нужно править **в трёх местах**: таблица в `README.md`,
+`tools.composer.json`, `EXPECTED_VERSION` в `apply.sh`.
 
 ### DEV-32. `set_role( 'subscriber' )` при регистрации пишет несуществующую роль
 
