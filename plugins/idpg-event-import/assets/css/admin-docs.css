@@ -1,0 +1,196 @@
+/**
+ * Стили страницы документации плагина «Импорт событий».
+ *
+ * Подключаются только на странице idpgei-docs.
+ *
+ * @package Idpg_Event_Import
+ */
+
+.idpgei-docs {
+	max-width: 860px;
+}
+
+/* ==== Заголовок (hero) ==== */
+.idpgei-docs__hero {
+	background: #1d2327;
+	background: linear-gradient(135deg, #1d2327 0%, #2c3338 100%);
+	color: #fff;
+	border-radius: 8px;
+	padding: 28px 30px;
+	margin: 0 0 28px;
+}
+
+.idpgei-docs__hero h1 {
+	color: #fff;
+	font-size: 26px;
+	line-height: 1.25;
+	margin: 0 0 12px;
+	padding: 0;
+	font-weight: 600;
+}
+
+.idpgei-docs__lead {
+	color: #c3c4c7;
+	font-size: 15px;
+	line-height: 1.6;
+	margin: 0 0 16px;
+	max-width: 640px;
+}
+
+.idpgei-docs__actions {
+	margin: 0;
+}
+
+.idpgei-docs__actions .button,
+.idpgei-docs__footer .button {
+	background: #fff;
+	border-color: #fff;
+	color: #1d2327;
+}
+
+.idpgei-docs__actions .button:hover,
+.idpgei-docs__actions .button:focus,
+.idpgei-docs__footer .button:hover,
+.idpgei-docs__footer .button:focus {
+	background: #f0f0f1;
+	border-color: #f0f0f1;
+	color: #1d2327;
+}
+
+/* ==== Секции ==== */
+.idpgei-docs__section {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	padding: 24px 26px;
+	margin: 0 0 20px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.idpgei-docs__title {
+	font-size: 18px;
+	line-height: 1.35;
+	margin: 0 0 14px;
+	padding: 0 0 10px;
+	border-bottom: 1px solid #f0f0f1;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* ==== Шаги (нумерованный список) ==== */
+.idpgei-docs__steps {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	counter-reset: idpgei-step;
+}
+
+.idpgei-docs__steps li {
+	position: relative;
+	counter-increment: idpgei-step;
+	padding: 0 0 18px 44px;
+	line-height: 1.6;
+	color: #3c434a;
+}
+
+.idpgei-docs__steps li:last-child {
+	padding-bottom: 0;
+}
+
+.idpgei-docs__steps li::before {
+	content: counter(idpgei-step);
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	background: #2271b1;
+	color: #fff;
+	font-weight: 600;
+	font-size: 15px;
+	line-height: 30px;
+	text-align: center;
+}
+
+.idpgei-docs__steps li::after {
+	content: '';
+	position: absolute;
+	left: 14px;
+	top: 34px;
+	bottom: 2px;
+	width: 2px;
+	background: #e2e6ea;
+}
+
+.idpgei-docs__steps li:last-child::after {
+	display: none;
+}
+
+/* ==== Обычные списки ==== */
+.idpgei-docs__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.idpgei-docs__list li {
+	padding: 10px 0 10px 26px;
+	position: relative;
+	line-height: 1.6;
+	color: #3c434a;
+	border-bottom: 1px solid #f6f7f7;
+}
+
+.idpgei-docs__list li:last-child {
+	border-bottom: none;
+}
+
+/* Маркер-«галочка» для пунктов */
+.idpgei-docs__list--faq li {
+	padding-left: 30px;
+}
+
+.idpgei-docs__list li::before {
+	content: '•';
+	position: absolute;
+	left: 8px;
+	color: #2271b1;
+	font-size: 18px;
+	line-height: 1.35;
+}
+
+.idpgei-docs__list strong {
+	color: #1d2327;
+}
+
+/* ==== Выделенный блок ==== */
+.idpgei-docs__section--highlight {
+	background: #f0f6fc;
+	border-color: #c5d9ed;
+}
+
+.idpgei-docs__section--highlight .idpgei-docs__title {
+	border-bottom-color: #dbe9f7;
+}
+
+.idpgei-docs__section--highlight p {
+	margin: 0;
+	line-height: 1.6;
+	color: #3c434a;
+}
+
+/* ==== Футер: ссылка на README ==== */
+.idpgei-docs__footer {
+	text-align: center;
+	padding: 8px 0 0;
+}
+
+@media (max-width: 600px) {
+	.idpgei-docs__hero {
+		padding: 20px;
+	}
+	.idpgei-docs__section {
+		padding: 18px;
+	}
+}
