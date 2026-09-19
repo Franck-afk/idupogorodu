@@ -1,0 +1,3188 @@
+ignoreErrors:
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 1
+		path: idpg-core.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 6 spaces
+		count: 1
+		path: idpg-core.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function idpg_carbon_fields_boot()'
+		count: 1
+		path: idpg-core.php
+
+	-
+		sniff: Universal.Operators.StrictComparisons.LooseEqual
+		message: 'Loose comparisons are not allowed. Expected: "==="; Found: "=="'
+		count: 2
+		path: idpg-core.php
+
+	-
+		sniff: Universal.Operators.StrictComparisons.LooseNotEqual
+		message: 'Loose comparisons are not allowed. Expected: "!=="; Found: "!="'
+		count: 1
+		path: idpg-core.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$composer_autoload".'
+		count: 1
+		path: idpg-core.php
+
+	-
+		sniff: Generic.Commenting.DocComment.SpacingBeforeTags
+		message: There must be exactly one blank line before the tags in a doc comment
+		count: 1
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 3 spaces
+		count: 1
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: Universal.Operators.DisallowShortTernary.Found
+		message: Using short ternaries is not allowed as they are rarely used correctly
+		count: 2
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		message: 'Detected usage of meta_value, possible slow query.'
+		count: 1
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: WordPress.DateTime.RestrictedFunctions.date_date
+		message: 'date() is affected by runtime timezone changes which can cause date/time to be incorrectly displayed. Use gmdate() instead.'
+		count: 2
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-auth-emails.php, but found class-auth-emails.php.'
+		count: 1
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$password_row''.'
+		count: 1
+		path: includes\class-auth-emails.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 1
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 3 spaces
+		count: 1
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 3'
+		count: 27
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.Indent
+		message: Multi-line function call not indented correctly; expected 12 spaces but found 16
+		count: 3
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.Indent
+		message: Multi-line function call not indented correctly; expected 16 spaces but found 20
+		count: 6
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 4
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.SpacingBefore
+		message: Expected 1 space before comment text but found 2; use block comment if you need indentation
+		count: 8
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.SpacingBefore
+		message: Expected 1 space before comment text but found 6; use block comment if you need indentation
+		count: 11
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$data[''count''].'
+		count: 3
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: Universal.WhiteSpace.DisallowInlineTabs.NonIndentTabsUsed
+		message: Spaces must be used for mid-line alignment; tabs are not allowed
+		count: 19
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-auth-rate-limiter.php, but found class-auth-rate-limiter.php.'
+		count: 1
+		path: includes\class-auth-rate-limiter.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $force_reauth is never used
+		count: 1
+		path: includes\class-auth.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $login_url is never used
+		count: 1
+		path: includes\class-auth.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $redirect is never used
+		count: 1
+		path: includes\class-auth.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-auth.php, but found class-auth.php.'
+		count: 1
+		path: includes\class-auth.php
+
+	-
+		sniff: WordPress.Security.NonceVerification.Recommended
+		message: Processing form data without nonce verification.
+		count: 2
+		path: includes\class-auth.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 5 spaces
+		count: 1
+		path: includes\class-city-filter.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 5
+		path: includes\class-city-filter.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 5
+		path: includes\class-city-filter.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 6
+		path: includes\class-city-filter.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+		message: 'Each item in a multi-line array must be on a new line. Found: 1 space'
+		count: 12
+		path: includes\class-city-filter.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-city-filter.php, but found class-city-filter.php.'
+		count: 1
+		path: includes\class-city-filter.php
+
+	-
+		sniff: Generic.CodeAnalysis.AssignmentInCondition.Found
+		message: Variable assignment found within a condition. Did you mean to do a comparison ?
+		count: 1
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 13 spaces but found 1 space
+		count: 3
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 3
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 1
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
+		message: Assignments must be the first block of code on a line
+		count: 1
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: Universal.Files.SeparateFunctionsFromOO.Mixed
+		message: 'A file should either contain function declarations or OO structure declarations, but not both. Found 1 function declaration(s) and 1 OO structure declaration(s). The first function declaration was found on line 689; the first OO declaration was found on line 20'
+		count: 1
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: Universal.NamingConventions.NoReservedKeywordParameterNames.newFound
+		message: 'It is recommended not to use reserved keyword "new" as function parameter name. Found: $new'
+		count: 1
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 1
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-city-selector-widget.php, but found class-city-selector-widget.php.'
+		count: 1
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''REQUEST_URI'']'
+		count: 1
+		path: includes\class-city-selector-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 1 space
+		count: 4
+		path: includes\class-city-url.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 7
+		path: includes\class-city-url.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 2
+		path: includes\class-city-url.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 2
+		path: includes\class-city-url.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class IDPG_City_URL
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function init()'
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function redirects()'
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function rewrites()'
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$post_id" missing
+		count: 2
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$slug" missing
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$taxonomy" missing
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$term_id" missing
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$tt_id" missing
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.WrongStyle
+		message: You must use "/**" style comments for a function comment
+		count: 3
+		path: includes\class-city-url.php
+
+	-
+		sniff: Squiz.PHP.DisallowMultipleAssignments.Found
+		message: Assignments must be the first block of code on a line
+		count: 3
+		path: includes\class-city-url.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.SpaceBefore
+		message: 'Expected no space between "__CLASS__" and the comma. Found: 1 space'
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: WordPress.DateTime.CurrentTimeTimestamp.Requested
+		message: 'Calling current_time() with a $type of "timestamp" or "U" is strongly discouraged as it will not return a Unix (UTC) timestamp. Please consider using a non-timestamp format or otherwise refactoring this code.'
+		count: 2
+		path: includes\class-city-url.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-city-url.php, but found class-city-url.php.'
+		count: 1
+		path: includes\class-city-url.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''REQUEST_URI'']'
+		count: 3
+		path: includes\class-city-url.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		message: '$_SERVER[''REQUEST_URI''] not unslashed before sanitization. Use wp_unslash() or similar'
+		count: 3
+		path: includes\class-city-url.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 3
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''new_item_name''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''singular_name''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''name''" and double arrow, but found 14.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''add_new_item''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''search_items''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''update_item''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''all_items''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''edit_item''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''menu_name''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-cpt.php, but found class-cpt.php.'
+		count: 1
+		path: includes\class-cpt.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function __construct()'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$index.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+		message: 'Each item in a multi-line array must be on a new line. Found: 1 space'
+		count: 9
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 11 space(s) between "11" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 15 space(s) between "3" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 21 space(s) between "7" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 28 space(s) between "10" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 31 space(s) between "2" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 34 space(s) between "6" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 46 space(s) between "1" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 46 space(s) between "5" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 46 space(s) between "9" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "8" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		message: 'Detected usage of meta_key, possible slow query.'
+		count: 2
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.DateTime.RestrictedFunctions.date_date
+		message: 'date() is affected by runtime timezone changes which can cause date/time to be incorrectly displayed. Use gmdate() instead.'
+		count: 13
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-current-event-banner.php, but found class-current-event-banner.php.'
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 3 found
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "?"; 3 found
+		count: 1
+		path: includes\class-current-event-banner.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 4
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 8 spaces
+		count: 6
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 10 spaces
+		count: 1
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$count.'
+		count: 1
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 6
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''label''" and double arrow, but found 1.'
+		count: 2
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''value''" and double arrow, but found 1.'
+		count: 2
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 9
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.NoCaching
+		message: 'Direct database call without caching detected. Consider using wp_cache_get() / wp_cache_set() or wp_cache_delete().'
+		count: 9
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT COUNT(*) FROM {$table}"'
+		count: 1
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.NotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found $sql'
+		count: 3
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		message: 'Detected usage of meta_query, possible slow query.'
+		count: 1
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-dashboard-stats.php, but found class-dashboard-stats.php.'
+		count: 1
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: WordPress.WP.I18n.MissingTranslatorsComment
+		message: 'A function call to _n() with texts containing placeholders was found, but was not accompanied by a "translators:" comment on the line above to clarify the meaning of the placeholders.'
+		count: 1
+		path: includes\class-dashboard-stats.php
+
+	-
+		sniff: Generic.Formatting.DisallowMultipleStatements.SameLine
+		message: Each PHP statement must be on a line by itself
+		count: 6
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 11 spaces but found 1 space
+		count: 2
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 13 spaces but found 1 space
+		count: 2
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 4
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 1 space
+		count: 3
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 2 spaces
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 2 spaces
+		count: 2
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 1 space
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
+		message: Expected 1 spaces after parameter type; 2 found
+		count: 4
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace
+		message: Newline required after opening brace
+		count: 2
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Universal.Files.SeparateFunctionsFromOO.Mixed
+		message: 'A file should either contain function declarations or OO structure declarations, but not both. Found 2 function declaration(s) and 1 OO structure declaration(s). The first function declaration was found on line 715; the first OO declaration was found on line 23'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Universal.NamingConventions.NoReservedKeywordParameterNames.newFound
+		message: 'It is recommended not to use reserved keyword "new" as function parameter name. Found: $new'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostDecrementFound
+		message: 'Stand-alone post-decrement statement found. Use pre-decrement instead: --$prev_y.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$d.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$next_y.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+		message: 'Each item in a multi-line array must be on a new line. Found: 1 space'
+		count: 10
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 5
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''title''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''update_post_meta_cache''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''update_post_term_cache''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''cache_results''" and double arrow, but found 11.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''no_found_rows''" and double arrow, but found 11.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 12 space(s) between "''post_status''" and double arrow, but found 13.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 13 space(s) between "''meta_query''" and double arrow, but found 14.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 14 space(s) between "''post_type''" and double arrow, but found 15.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''date''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''url''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "12" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 38 space(s) between "11" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 39 space(s) between "1" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 39 space(s) between "3" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 39 space(s) between "5" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 39 space(s) between "7" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 39 space(s) between "9" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''id''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "2" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "4" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "8" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "6" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''posts_per_page''" and double arrow, but found 10.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.NoCaching
+		message: 'Direct database call without caching detected. Consider using wp_cache_get() / wp_cache_set() or wp_cache_delete().'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.DateTime.CurrentTimeTimestamp.Requested
+		message: 'Calling current_time() with a $type of "timestamp" or "U" is strongly discouraged as it will not return a Unix (UTC) timestamp. Please consider using a non-timestamp format or otherwise refactoring this code.'
+		count: 4
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-event-calendar-widget.php, but found class-event-calendar-widget.php.'
+		count: 1
+		path: includes\class-event-calendar-widget.php
+
+	-
+		sniff: Generic.Commenting.DocComment.LongNotCapital
+		message: Doc comment long description must start with a capital letter
+		count: 1
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 2
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 3 spaces
+		count: 1
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 2
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 2
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 1
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 1
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 1
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-event-moderation.php, but found class-event-moderation.php.'
+		count: 1
+		path: includes\class-event-moderation.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 16 spaces but found 3 spaces
+		count: 1
+		path: includes\class-expected-events-widget.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 17 spaces but found 4 spaces
+		count: 1
+		path: includes\class-expected-events-widget.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: includes\class-expected-events-widget.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: includes\class-expected-events-widget.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$index.'
+		count: 1
+		path: includes\class-expected-events-widget.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''date_clause''" and double arrow, but found 1.'
+		count: 3
+		path: includes\class-expected-events-widget.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		message: 'Detected usage of meta_query, possible slow query.'
+		count: 1
+		path: includes\class-expected-events-widget.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-expected-events-widget.php, but found class-expected-events-widget.php.'
+		count: 1
+		path: includes\class-expected-events-widget.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		message: The method parameter $request is never used
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 2
+		path: includes\class-favorites.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 3 spaces
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 4 spaces
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 5 spaces
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 6
+		path: includes\class-favorites.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 6
+		path: includes\class-favorites.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 8
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class IDPG_Favorites
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function count()'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function init()'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function query_vars()'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function rest_add()'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function rest_event_payload()'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function rest_list()'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function rest_remove()'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function save()'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function template()'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$event_id" missing
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.WrongStyle
+		message: You must use "/**" style comments for a function comment
+		count: 4
+		path: includes\class-favorites.php
+
+	-
+		sniff: Universal.Operators.DisallowShortTernary.Found
+		message: Using short ternaries is not allowed as they are rarely used correctly
+		count: 2
+		path: includes\class-favorites.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 3
+		path: includes\class-favorites.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-favorites.php, but found class-favorites.php.'
+		count: 1
+		path: includes\class-favorites.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 1 space
+		count: 1
+		path: includes\class-geo-service.php
+
+	-
+		sniff: PSR2.Classes.ClassDeclaration.CloseBraceAfterBody
+		message: The closing brace for the class must go on the next line after the body
+		count: 1
+		path: includes\class-geo-service.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class IDPG_GeoService
+		count: 1
+		path: includes\class-geo-service.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function __construct()'
+		count: 1
+		path: includes\class-geo-service.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function instance()'
+		count: 1
+		path: includes\class-geo-service.php
+
+	-
+		sniff: Squiz.Commenting.VariableComment.Missing
+		message: Missing member variable doc comment
+		count: 1
+		path: includes\class-geo-service.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-geoservice.php, but found class-geo-service.php.'
+		count: 1
+		path: includes\class-geo-service.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 2
+		path: includes\class-ical-export.php
+
+	-
+		sniff: PEAR.NamingConventions.ValidClassName.Invalid
+		message: Class name is not valid; consider IDPG_ICal_Export instead
+		count: 1
+		path: includes\class-ical-export.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 2
+		path: includes\class-ical-export.php
+
+	-
+		sniff: WordPress.DateTime.CurrentTimeTimestamp.Requested
+		message: 'Calling current_time() with a $type of "timestamp" or "U" is strongly discouraged as it will not return a Unix (UTC) timestamp. Please consider using a non-timestamp format or otherwise refactoring this code.'
+		count: 2
+		path: includes\class-ical-export.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-ical-export.php, but found class-ical-export.php.'
+		count: 1
+		path: includes\class-ical-export.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 3
+		path: includes\class-maintenance.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 1 space
+		count: 1
+		path: includes\class-maintenance.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 2 tabs, found 1'
+		count: 1
+		path: includes\class-maintenance.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 3 tabs, found 2'
+		count: 1
+		path: includes\class-maintenance.php
+
+	-
+		sniff: WordPress.DateTime.CurrentTimeTimestamp.Requested
+		message: 'Calling current_time() with a $type of "timestamp" or "U" is strongly discouraged as it will not return a Unix (UTC) timestamp. Please consider using a non-timestamp format or otherwise refactoring this code.'
+		count: 1
+		path: includes\class-maintenance.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-maintenance.php, but found class-maintenance.php.'
+		count: 1
+		path: includes\class-maintenance.php
+
+	-
+		sniff: WordPress.WP.EnqueuedResourceParameters.NotInFooter
+		message: 'In footer ($in_footer) is not set explicitly wp_enqueue_script; It is recommended to load scripts in the footer. Please set this value to `true` to load it in the footer, or explicitly `false` if it should be loaded in the header.'
+		count: 2
+		path: includes\class-maintenance.php
+
+	-
+		sniff: WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		message: 'Scripts must be registered/enqueued via wp_enqueue_script()'
+		count: 2
+		path: includes\class-maintenance.php
+
+	-
+		sniff: WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		message: 'Stylesheets must be registered/enqueued via wp_enqueue_style()'
+		count: 1
+		path: includes\class-maintenance.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 1
+		path: includes\class-media.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 4 spaces
+		count: 2
+		path: includes\class-media.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 4 spaces
+		count: 1
+		path: includes\class-media.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 5 spaces
+		count: 1
+		path: includes\class-media.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 6 spaces
+		count: 1
+		path: includes\class-media.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 3
+		path: includes\class-media.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 3
+		path: includes\class-media.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-media.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$deleted.'
+		count: 3
+		path: includes\class-media.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 2
+		path: includes\class-media.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.NoCaching
+		message: 'Direct database call without caching detected. Consider using wp_cache_get() / wp_cache_set() or wp_cache_delete().'
+		count: 2
+		path: includes\class-media.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-media.php, but found class-media.php.'
+		count: 1
+		path: includes\class-media.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $meta_key is never used
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $update is never used
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 2 spaces
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 18
+		path: includes\class-meta.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 18
+		path: includes\class-meta.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 3
+		path: includes\class-meta.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterFunction
+		message: Expected 1 space after FUNCTION keyword; 0 found
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: Squiz.PHP.NonExecutableCode.ReturnNotRequired
+		message: Empty return statement not required here
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: Universal.CodeAnalysis.NoDoubleNegative.FoundDouble
+		message: 'Double negative detected. Use a (bool) cast  instead. Found: ! !'
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 5
+		path: includes\class-meta.php
+
+	-
+		sniff: WordPress.DateTime.CurrentTimeTimestamp.Requested
+		message: 'Calling current_time() with a $type of "timestamp" or "U" is strongly discouraged as it will not return a Unix (UTC) timestamp. Please consider using a non-timestamp format or otherwise refactoring this code.'
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-meta.php, but found class-meta.php.'
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''HTTP_HOST'']'
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		message: '$_SERVER[''HTTP_HOST''] not unslashed before sanitization. Use wp_unslash() or similar'
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: WordPress.WP.Capabilities.RoleFound
+		message: 'Capabilities should be used instead of roles. Found "administrator" in function call to current_user_can()'
+		count: 1
+		path: includes\class-meta.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: includes\class-migrations.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: includes\class-migrations.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-migrations.php, but found class-migrations.php.'
+		count: 1
+		path: includes\class-migrations.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $api_response is never used
+		count: 1
+		path: includes\class-notifications.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''sold_out''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-notifications.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''active''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-notifications.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-notifications.php, but found class-notifications.php.'
+		count: 1
+		path: includes\class-notifications.php
+
+	-
+		sniff: WordPress.WP.I18n.InterpolatedVariableText
+		message: 'The $text parameter must not contain interpolated variables or expressions. Found: $s'
+		count: 2
+		path: includes\class-notifications.php
+
+	-
+		sniff: WordPress.WP.I18n.InterpolatedVariableText
+		message: 'The $text parameter must not contain interpolated variables or expressions. Found: $s»'
+		count: 1
+		path: includes\class-notifications.php
+
+	-
+		sniff: WordPress.WP.I18n.MissingTranslatorsComment
+		message: 'A function call to __() with texts containing placeholders was found, but was not accompanied by a "translators:" comment on the line above to clarify the meaning of the placeholders.'
+		count: 1
+		path: includes\class-notifications.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
+		message: Expected 1 spaces after parameter type; 2 found
+		count: 1
+		path: includes\class-organizer-page.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
+		message: Expected 2 spaces after parameter type; 3 found
+		count: 1
+		path: includes\class-organizer-page.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-organizer-page.php, but found class-organizer-page.php.'
+		count: 1
+		path: includes\class-organizer-page.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $request is never used
+		count: 1
+		path: includes\class-organizer-scope.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class IDPG_Organizer_Scope
+		count: 1
+		path: includes\class-organizer-scope.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function init()'
+		count: 1
+		path: includes\class-organizer-scope.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$args" missing
+		count: 1
+		path: includes\class-organizer-scope.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$query" missing
+		count: 1
+		path: includes\class-organizer-scope.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$request" missing
+		count: 1
+		path: includes\class-organizer-scope.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-organizer-scope.php, but found class-organizer-scope.php.'
+		count: 1
+		path: includes\class-organizer-scope.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-organizer-url.php, but found class-organizer-url.php.'
+		count: 1
+		path: includes\class-organizer-url.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-organizer-verify.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-organizer-verify.php, but found class-organizer-verify.php.'
+		count: 1
+		path: includes\class-organizer-verify.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 2
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 12 space(s) between "''meta''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''consent''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''content''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-privacy.php, but found class-privacy.php.'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.Security.NonceVerification.Recommended
+		message: Processing form data without nonce verification.
+		count: 4
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_POST[''idpg_confirm'']'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_POST[''idpg_privacy_confirm'']'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		message: '$_POST[''idpg_confirm''] not unslashed before sanitization. Use wp_unslash() or similar'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		message: '$_POST[''idpg_privacy_confirm''] not unslashed before sanitization. Use wp_unslash() or similar'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		message: 'File operations should use WP_Filesystem methods instead of direct PHP filesystem calls. Found: fclose().'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+		message: 'File operations should use WP_Filesystem methods instead of direct PHP filesystem calls. Found: fwrite().'
+		count: 1
+		path: includes\class-privacy.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 4 spaces
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 5 spaces
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 4 spaces
+		count: 2
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 3
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 1 space
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 2 spaces
+		count: 2
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 1 space
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 3 spaces
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 8
+		path: includes\class-rest-api.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 8
+		path: includes\class-rest-api.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 4
+		path: includes\class-rest-api.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.TooMany
+		message: Expected 1 blank line at end of file; 2 found
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose
+		message: Function closing brace must go on the next line following the body; found 1 blank lines before brace
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamComment
+		message: Missing parameter comment
+		count: 3
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Universal.Operators.DisallowShortTernary.Found
+		message: Using short ternaries is not allowed as they are rarely used correctly
+		count: 5
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$rl_data[''count''].'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 27
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''per_page''" and double arrow, but found 2.'
+		count: 2
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''permalink''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''thumbnail''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''venues''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''video_trailer''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''city''" and double arrow, but found 12.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''consent''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 12 space(s) between "''email''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 12 space(s) between "''id''" and double arrow, but found 14.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''capacity''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''capacity''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''category''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''pages''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''total''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''address''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''address''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''content''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''events''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''search''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''ticket_type''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''website''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''website''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''before''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''date_start''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''pages''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''price_from''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''stream_url''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''ticket_url''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''total''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''venue_name''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''after''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''city''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''email''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''email''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''idpg_company''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''is_online''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''page''" and double arrow, but found 6.'
+		count: 2
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''permalink''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''phone''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''phone''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''thumbnail''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''title''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''title''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''vip_price''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''category''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''city''" and double arrow, but found 5.'
+		count: 2
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''city''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''currency''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''date_end''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''price_to''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''promoted''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''venue_id''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''address''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''all_day''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''is_free''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''lat''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''lat''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''lng''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''lng''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''clicks''" and double arrow, but found 10.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''id''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''status''" and double arrow, but found 10.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''title''" and double arrow, but found 11.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''views''" and double arrow, but found 11.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 5
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.NoCaching
+		message: 'Direct database call without caching detected. Consider using wp_cache_get() / wp_cache_set() or wp_cache_delete().'
+		count: 4
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable $table at "SELECT id FROM $table WHERE email = %s"'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+		message: 'Detected usage of tax_query, possible slow query.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-rest-api.php, but found class-rest-api.php.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: WordPress.PHP.YodaConditions.NotYoda
+		message: 'Use Yoda Condition checks, you must.'
+		count: 1
+		path: includes\class-rest-api.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $param is never used
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $request is never used
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.IncorrectWarning
+		message: Equals sign not aligned correctly; expected 1 space but found 10 spaces
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.IncorrectWarning
+		message: Equals sign not aligned correctly; expected 1 space but found 5 spaces
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 3 spaces
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 5 spaces
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 9 spaces but found 1 space
+		count: 2
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''description''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''required''" and double arrow, but found 10.'
+		count: 5
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''required''" and double arrow, but found 10.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''org_name''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''password''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''type''" and double arrow, but found 14.'
+		count: 5
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''email''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''phone''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''terms''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''type''" and double arrow, but found 14.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''name''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''type''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-rest-auth.php, but found class-rest-auth.php.'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		message: 'Hook names invoked by a theme/plugin should start with the theme/plugin prefix. Found: "wp_login".'
+		count: 1
+		path: includes\class-rest-auth.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.ArrayIndentation.ItemNotAligned
+		message: Array item not aligned correctly; expected 16 spaces but found 12
+		count: 8
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.ArrayIndentation.MultiLineArrayItemNotAligned
+		message: 'Multi-line array item not aligned correctly; expected 16 spaces, but found 12'
+		count: 2
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''delete_published_venues''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''upload_files''" and double arrow, but found 2.'
+		count: 2
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''manage_options''" and double arrow, but found 13.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''publish_venues''" and double arrow, but found 13.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 11 space(s) between "''delete_venues''" and double arrow, but found 14.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 13 space(s) between "''edit_venues''" and double arrow, but found 16.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 14 space(s) between "''publish_events''" and double arrow, but found 13.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 15 space(s) between "''delete_events''" and double arrow, but found 14.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 16 space(s) between "''upload_files''" and double arrow, but found 15.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 17 space(s) between "''edit_events''" and double arrow, but found 16.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 18 space(s) between "''edit_posts''" and double arrow, but found 17.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 24 space(s) between "''read''" and double arrow, but found 23.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''delete_private_events''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''delete_private_venues''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''edit_published_venues''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''delete_others_events''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''delete_others_venues''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''delete_published_events''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''read_private_venues''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''edit_others_events''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''edit_others_venues''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''level_0''" and double arrow, but found 7.'
+		count: 2
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''edit_published_events''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''manage_categories''" and double arrow, but found 10.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''read''" and double arrow, but found 10.'
+		count: 2
+		path: includes\class-roles.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-roles.php, but found class-roles.php.'
+		count: 1
+		path: includes\class-roles.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 1 space
+		count: 1
+		path: includes\class-search.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 1 space
+		count: 2
+		path: includes\class-search.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 5
+		path: includes\class-search.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 5
+		path: includes\class-search.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-search.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 4
+		path: includes\class-search.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-search.php, but found class-search.php.'
+		count: 1
+		path: includes\class-search.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $context is never used
+		count: 2
+		path: includes\class-seo-integration.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $presentation is never used
+		count: 2
+		path: includes\class-seo-integration.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-seo-integration.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-seo-integration.php, but found class-seo-integration.php.'
+		count: 1
+		path: includes\class-seo-integration.php
+
+	-
+		sniff: Generic.CodeAnalysis.EmptyStatement.DetectedIf
+		message: Empty IF statement detected
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: Generic.Files.LineEndings.InvalidEOLChar
+		message: End of line character is invalid; expected "\n" but found "\r\n"
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$imported.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''fileReadError''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''importSuccess''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''resetConfirm''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''resetSuccess''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''unknownError''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''invalidJson''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''uploadError''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''settings''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''fileError''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''version''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''plugin''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-settings-page.php, but found class-settings-page.php.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Security.NonceVerification.Recommended
+		message: Processing form data without nonce verification.
+		count: 15
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_GET[''settings-updated'']'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.WP.I18n.MissingTranslatorsComment
+		message: 'A function call to __() with texts containing placeholders was found, but was not accompanied by a "translators:" comment on the line above to clarify the meaning of the placeholders.'
+		count: 1
+		path: includes\class-settings-page.php
+
+	-
+		sniff: WordPress.WP.I18n.TextDomainMismatch
+		message: Mismatched text domain. Expected 'idpg-core' but got 'idpg_core'.
+		count: 4
+		path: includes\class-settings-page.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 1
+		path: includes\class-template-helpers.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 5 spaces
+		count: 1
+		path: includes\class-template-helpers.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 2
+		path: includes\class-template-helpers.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 2
+		path: includes\class-template-helpers.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 1
+		path: includes\class-template-helpers.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-template-helper.php, but found class-template-helpers.php.'
+		count: 1
+		path: includes\class-template-helpers.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 6
+		path: includes\class-ticket-sync.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 6
+		path: includes\class-ticket-sync.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 1
+		path: includes\class-ticket-sync.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 1
+		path: includes\class-ticket-sync.php
+
+	-
+		sniff: Squiz.PHP.CommentedOutCode.Found
+		message: This comment is 45% valid code; is this commented out code?
+		count: 1
+		path: includes\class-ticket-sync.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''X-IDPG-Sync''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-ticket-sync.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''Accept''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-ticket-sync.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-ticket-sync.php, but found class-ticket-sync.php.'
+		count: 1
+		path: includes\class-ticket-sync.php
+
+	-
+		sniff: WordPress.WP.CronInterval.ChangeDetected
+		message: 'Detected changing of cron_schedules, but could not detect the interval value.'
+		count: 1
+		path: includes\class-ticket-sync.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''posts_per_page''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-user-purge.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''no_found_rows''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-user-purge.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''post_status''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-user-purge.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''post_type''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-user-purge.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''author''" and double arrow, but found 11.'
+		count: 1
+		path: includes\class-user-purge.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''fields''" and double arrow, but found 11.'
+		count: 1
+		path: includes\class-user-purge.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		message: 'Detected usage of meta_query, possible slow query.'
+		count: 1
+		path: includes\class-user-purge.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-user-purge.php, but found class-user-purge.php.'
+		count: 1
+		path: includes\class-user-purge.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+		message: 'Each item in a multi-line array must be on a new line. Found: 1 space'
+		count: 12
+		path: includes\class-views.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-views.php, but found class-views.php.'
+		count: 1
+		path: includes\class-views.php
+
+	-
+		sniff: Modernize.FunctionCalls.Dirname.FileConstant
+		message: 'Use the __DIR__ constant instead of calling dirname(__FILE__) (PHP >= 5.3)'
+		count: 1
+		path: tests\bootstrap.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
+		message: 'Global constants defined by a theme/plugin should start with the theme/plugin prefix. Found: "WP_TESTS_PHPUNIT_POLYFILLS_PATH".'
+		count: 1
+		path: tests\bootstrap.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		message: 'Functions declared in the global namespace by a theme/plugin should start with the theme/plugin prefix. Found: "_manually_load_plugin".'
+		count: 1
+		path: tests\bootstrap.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$_phpunit_polyfills_path".'
+		count: 1
+		path: tests\bootstrap.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$_tests_dir".'
+		count: 2
+		path: tests\bootstrap.php
+
+	-
+		sniff: Generic.Commenting.DocComment.ShortNotCapital
+		message: Doc comment short description must start with a capital letter
+		count: 4
+		path: tests\test-auth-emails.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: tests\test-auth-emails.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: tests\test-auth-emails.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: tests\test-auth-emails.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 3
+		path: tests\test-cpt.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 3
+		path: tests\test-cpt.php
+
+	-
+		sniff: Generic.Commenting.DocComment.ShortNotCapital
+		message: Doc comment short description must start with a capital letter
+		count: 2
+		path: tests\test-geo-service.php
+
+	-
+		sniff: Generic.Commenting.DocComment.ShortNotCapital
+		message: Doc comment short description must start with a capital letter
+		count: 2
+		path: tests\test-ical-export.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.IncorrectWarning
+		message: Equals sign not aligned correctly; expected 1 space but found 2 spaces
+		count: 6
+		path: tests\test-ical-export.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.IncorrectWarning
+		message: Equals sign not aligned correctly; expected 1 space but found 3 spaces
+		count: 1
+		path: tests\test-ical-export.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 3 spaces
+		count: 1
+		path: tests\test-organizer-events.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 4 spaces
+		count: 1
+		path: tests\test-organizer-events.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 10
+		path: tests\test-organizer-events.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 10
+		path: tests\test-organizer-events.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.Indent
+		message: Multi-line function call not indented correctly; expected 12 spaces but found 8
+		count: 1
+		path: tests\test-organizer-events.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 7
+		path: tests\test-organizer-events.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
+		message: Expected 2 spaces after parameter type; 1 found
+		count: 2
+		path: tests\test-organizer-events.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
+		message: Expected 4 spaces after parameter type; 3 found
+		count: 1
+		path: tests\test-organizer-events.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 1
+		path: tests\test-organizer-pending.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: tests\test-organizer-pending.php
+
+	-
+		sniff: Generic.Commenting.DocComment.ShortNotCapital
+		message: Doc comment short description must start with a capital letter
+		count: 1
+		path: tests\test-rest-api.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.IncorrectWarning
+		message: Equals sign not aligned correctly; expected 1 space but found 2 spaces
+		count: 6
+		path: tests\test-rest-api.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 9
+		path: tests\test-rest-api.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 9
+		path: tests\test-rest-api.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 1
+		path: tests\test-rest-api.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.NoCaching
+		message: 'Direct database call without caching detected. Consider using wp_cache_get() / wp_cache_set() or wp_cache_delete().'
+		count: 1
+		path: tests\test-rest-api.php
+
+	-
+		sniff: Generic.Commenting.DocComment.ShortNotCapital
+		message: Doc comment short description must start with a capital letter
+		count: 1
+		path: tests\test-roles.php
+
+	-
+		sniff: Generic.Commenting.DocComment.ShortNotCapital
+		message: Doc comment short description must start with a capital letter
+		count: 5
+		path: tests\test-template-helper.php
+
+	-
+		sniff: Generic.Files.ByteOrderMark.Found
+		message: 'File contains UTF-8 byte order mark, which may corrupt your application'
+		count: 1
+		path: tests\test-template-helper.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 3
+		path: tests\test-template-helper.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 3
+		path: tests\test-template-helper.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 4
+		path: tests\test-template-helper.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 7
+		path: tests\test-theme.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 7
+		path: tests\test-theme.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 3
+		path: tests\test-theme.php
+
+	-
+		sniff: Generic.Files.LineEndings.InvalidEOLChar
+		message: End of line character is invalid; expected "\n" but found "\r\n"
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 2
+		path: uninstall.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.NoCaching
+		message: 'Direct database call without caching detected. Consider using wp_cache_get() / wp_cache_set() or wp_cache_delete().'
+		count: 2
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$direct_options".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$like".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$meta_key".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$option".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$transient_likes".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$user_meta_keys".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.WP.GlobalVariablesOverride.Prohibited
+		message: Overriding WordPress globals is prohibited. Found assignment to $wpdb
+		count: 1
+		path: uninstall.php
+
+
