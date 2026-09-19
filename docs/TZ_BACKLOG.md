@@ -952,14 +952,20 @@ php <tools>/vendor/bin/phpcs --standard=.phpcs.xml.dist \
   (без него `Fatal error: Class "Forrest79\PhpCsIgnores\File" not found`).
   Оба восстанавливаются из кэша Composer
   (`~/AppData/Local/Composer/files/<vendor>/<package>/*.zip`) без сети.
-- **Baseline применяется на Windows** — вопреки оговорке в DEV-27A. *(Уточнено
-  19.09.2026, DEV-53: прежнее объяснение «локальный патч `PhpCsInjections.php`» неверно —
-  этот файл в `vendor/` **не патчен**, найденный в нём `str_replace( '\\', '/', $path )`
-  относится к поиску `FileList.php` и является штатным upstream-кодом. Baseline
-  сопоставляется на обеих платформах благодаря самому плагину:
-  `Ignores::getAbsolutePath()` нормализует и `/`, и `\` к `DIRECTORY_SEPARATOR`, поэтому
-  записи с обратными слэшами в baseline валидны и на Linux-CI. Локальный патч нужен
-  ровно один — в `BaselineReport.php`, и только при **генерации** baseline.)*
+- **Baseline применяется на Windows** — вопреки оговорке в DEV-27A. Для этого в
+  `vendor/forrest79/phpcs-ignores/src/PhpCsInjections.php` перед `str_ends_with()` путь
+  нормализуется: `str_ends_with( str_replace( '\\', '/', $path ), … )`. Без этого
+  сравнение с `vendor/…/FileList.php` не срабатывает (PHP на Windows отдаёт путь с `\`),
+  инъекция класса `File` не происходит и baseline **не применяется вовсе** — PHPCS
+  показывает все ~4 тыс. унаследованных нарушений, exit 2.
+  *(Уточнено 19.09.2026, DEV-54: это **реальный локальный патч** — в апстриме v0.5.0
+  нормализации нет, проверено побайтовым сравнением с пакетом из кэша Composer.
+  Ранее в этом же разделе патч был ошибочно объявлен штатным upstream-кодом.
+  Оба патча теперь хранятся в репозитории — см. DEV-54.)*
+- **Пути в baseline с обратными слэшами валидны и на Linux.** Это отдельное свойство
+  самого плагина: `Ignores::getAbsolutePath()` нормализует и `/`, и `\` к
+  `DIRECTORY_SEPARATOR`, поэтому записи вида `path: includes\class-auth.php` сопоставляются
+  и на Linux-CI. Патчей не требует.
 - **Разделение коммитов при общем файле baseline.** Baseline компонента — один файл,
   а заходов несколько, поэтому «проход = коммит» требует промежуточного состояния:
   временно вернуть правки кода файла-предыдущего-прохода, перегенерировать baseline,
@@ -1028,6 +1034,54 @@ job'а зелёные на CircleCI. До этого момента требов
   хотя файл без CRLF. Проверять переводы строк только через `tr -cd '\r' < файл | wc -c`.
 - **Грабля клонирования:** `git clone` из локального репозитория под песочницей падает с
   `detected dubious ownership` (разные SID). Обход на один вызов — `git -c safe.directory='*' clone …`.
+
+### DEV-54. Сохранить патчи PHPCS-обвязки
+
+> **Выполнено 19.09.2026.** Уточнение DEV-27A/DEV-27B: патчи жили прямо в `vendor/`
+> и стирались при переустановке зависимостей.
+
+| | |
+|---|---|
+| **Проблема** | Два патча к `forrest79/phpcs-ignores` — `PhpCsInjections.php` (нормализация пути на Windows) и `BaselineReport.php` (не экранировать табы) — лежали прямо в рабочей копии `phpcs-tools2/vendor` и терялись при `composer install` / `composer update` или удалении `vendor`. После потери патча baseline перестаёт применяться, и локальный прогон даёт ~4 тыс. унаследованных нарушений вместо exit 0. |
+| **Требование** | Перенести патчи в `bin/phpcs-patches/` репозитория с инструкцией apply в README. Альтернатива — форк `forrest79/phpcs-ignores` и `nette/neon` в свой composer. |
+| **Решение** | Патч-файлы (от форка отказались — обоснование ниже и в README). |
+| **Реализация** | `bin/phpcs-patches/`: `0001-phpcs-ignores-windows-path.patch`, `0002-phpcs-ignores-baseline-tabs.patch` (unified diff, `-p1` от корня пакета), `apply.sh` (идемпотентный, флаги `--check` и `--help`, сверка версии пакета с `composer.lock`), `apply.cmd` (обёртка для cmd.exe), `README.md`. |
+| **Приёмка** | **Пройдена на реальной чистой установке.** `composer install` с нуля (10 пакетов, `forrest79/phpcs-ignores` v0.5.0) → vendor чистый → PHPCS на `idpg-core`: **636 ошибок, exit 2**. Затем `apply.sh` → PHPCS по трём компонентам: **exit 0**. |
+| **Объём** | S |
+
+#### Что именно патчится
+
+| Патч | Файл | Эффект |
+|---|---|---|
+| `0001` | `src/PhpCsInjections.php` | Перед `str_ends_with()` путь нормализуется: `str_replace( '\\', '/', $path )`. Нужен для **применения** baseline на Windows |
+| `0002` | `src/BaselineReport.php` | Убрано `str_replace( "\t", '\t', $message )`. Нужен для **генерации** baseline: NEON в одинарных кавычках не раскрывает escape-последовательности, поэтому запись с литералом `\t` никогда не совпадёт с реальным табом |
+
+#### Проверка состава vendor (19.09.2026)
+
+Побайтовое сравнение `phpcs-tools2/vendor` с пакетами из кэша Composer (с подбором версии по
+`composer.lock`): модифицирован **ровно один** пакет — `forrest79/phpcs-ignores` (два файла выше).
+Все остальные чисты: `nette/neon` v3.4.8, `squizlabs/php_codesniffer` 3.13.6,
+`wp-coding-standards/wpcs` 3.4.1, `phpcompatibility/*`, `phpcsstandards/*`,
+`dealerdirect/phpcodesniffer-composer-installer`. Поэтому форк `nette/neon` не нужен.
+
+#### Почему не форк
+
+Форк требует своего VCS-репозитория, записи в `repositories` и ручной синхронизации с каждым
+апстрим-релизом — инфраструктуры больше, чем сами патчи. Патч-файлы видны в истории git,
+не требуют обслуживания и удаляются одной строкой, когда апстрим исправит поведение.
+Порядок пересборки патчей при апгрейде пакета — в `bin/phpcs-patches/README.md`.
+
+#### Оговорки
+
+- **CI патчи не применяет — и не должен.** Job `phpcs` ставит обвязку в `/tmp/phpcs-tools`:
+  `0001` на Linux ничего не меняет (пути уже с `/`), а `0002` влияет только на генерацию,
+  которую CI не делает. Если генерация в CI понадобится — добавить шаг
+  `bash bin/phpcs-patches/apply.sh /tmp/phpcs-tools`.
+- **Грабля:** `git` — нативная программа Windows и не понимает POSIX-пути вида `/d/...`
+  после смены каталога (`can't open patch … No such file or directory`). В `apply.sh` путь
+  к патчу конвертируется через `cygpath -m`.
+- Патчи сделаны под `forrest79/phpcs-ignores` **v0.5.0**; `apply.sh` предупреждает о другой
+  версии и возвращает код 1, если контекст не совпал.
 
 ### DEV-32. `set_role( 'subscriber' )` при регистрации пишет несуществующую роль
 
