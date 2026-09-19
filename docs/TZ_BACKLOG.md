@@ -979,36 +979,103 @@ php <tools>/vendor/bin/phpcs --standard=.phpcs.xml.dist \
 локально не воспроизводится (нужны WordPress test library и MySQL) — проверяется
 только в CI.
 
-Осталось для полного закрытия DEV-53: настроить remote, запушить и убедиться, что оба
-job'а зелёные на CircleCI. До этого момента требование «CI зелёный» выполняется как
-«локальный прогон на чистом клоне даёт exit 0».
+Осталось для полного закрытия DEV-53: убедиться, что оба job'а зелёные на CircleCI.
+Remote настроен и первый push выполнен 19.09.2026 — но **отдельной веткой**
+`dev/phpcs-baseline`, ветка `main` не тронута (причина — в разделе «Remote и первый push»
+ниже). До проверки CI требование «CI зелёный» выполняется как «локальный прогон на чистом
+клоне даёт exit 0».
 
 ### DEV-53. Репозиторий и CI: монолит, только наши артефакты
 
-> **Выполнено 19.09.2026, кроме push (нет URL remote).** Уточнение DEV-27A/27B:
-> без репозитория и remote CI физически не запускается, а проходы DEV-27A/27B
-> ничем не защищены от регрессий.
+> **Выполнено 19.09.2026.** Push выполнен 19.09.2026 отдельной веткой (см. «Remote и
+> первый push»). Уточнение DEV-27A/27B: без репозитория и remote CI физически не
+> запускается, а проходы DEV-27A/27B ничем не защищены от регрессий.
 
 | | |
 |---|---|
 | **Проблема** | `wp-content` — не git-репозиторий проекта: нет remote, закоммичено 5 файлов, всё остальное untracked. `.circleci/config.yml` не запускается, потому что репозиторий некуда пушить. |
 | **Требование** | 1) Выбрать стратегию (монолит / 4 репозитория + infra); 2) `.gitignore` с исключением `uploads/`, бэкапов, `vendor/`, `node_modules/`, сторонних плагинов, `wp-config*.php`; 3) включить только наши артефакты и `docs/`; 4) настроить remote и запушить; 5) проверить CI на чистом клоне. |
 | **Решение владельца** | **Монолит** — один репозиторий проекта в `wp-content` (разделение на 4 репозитория отклонено). Компонент при необходимости выделяется позже с сохранением истории через `git subtree split`. |
-| **Реализация** | `.gitignore` в режиме default-deny: `/plugins/*` + `!/plugins/idpg-core/`, `!/plugins/idpg-auth/`, `!/plugins/index.php`; `/themes/*` + `!/themes/idpg_core/`, `!/themes/idpg_core-child/`, `!/themes/index.php`. Исключены `uploads/`, `languages/`, `wp-config*.php`, каталоги бэкапов (`backups/`, `aiowps_backups/`, `wpvividbackups/`, `wpvivid_uploads/`, `wpvivid_staging/`, `upgrade/`, `upgrade-temp-backup/`), `vendor/`, `node_modules/`, `*.log`, `*.sql`, `*.bak`, `phpcs-tools*/`, `.workbuddy-ai/`, `mu-plugins/`. `.gitattributes`: `* text=auto eol=lf` (единый LF на Linux-CI), `*.bat/*.cmd/*.ps1` — crlf, бинарные расширения и `*.mo` помечены `binary`. Коммит `06fe9bb`. |
+| **Реализация** | `.gitignore` в режиме default-deny: `/plugins/*` + `!/plugins/idpg-core/`, `!/plugins/idpg-auth/`, `!/plugins/idpg-event-import/`, `!/plugins/wp-cloud-sync/`, `!/plugins/index.php`; `/themes/*` + `!/themes/idpg_core/`, `!/themes/idpg_core-child/`, `!/themes/index.php`. Исключены `uploads/`, `languages/`, `wp-config*.php`, каталоги бэкапов (`backups/`, `aiowps_backups/`, `wpvividbackups/`, `wpvivid_uploads/`, `wpvivid_staging/`, `upgrade/`, `upgrade-temp-backup/`), `vendor/`, `node_modules/`, `*.log`, `*.sql`, `*.bak`, `phpcs-tools*/`, `.workbuddy-ai/`, `mu-plugins/`. `.gitattributes`: `* text=auto eol=lf` (единый LF на Linux-CI), `*.bat/*.cmd/*.ps1` — crlf, бинарные расширения и `*.mo` помечены `binary`. Коммит `06fe9bb`; re-include собственных плагинов — коммит `21bc289`. |
 | **Приёмка** | Свежий `git clone` → 215 файлов; среди них нет `uploads/`, `languages/`, сторонних плагинов, `vendor/`, `wp-config*.php` и бэкапов. Все файлы в клоне — LF. PHPCS на клоне: `idpg-core` / `idpg-auth` / тема `idpg_core` — **exit 0**. PHPUnit на клоне локально не проверяется — только в CI. |
 | **Объём** | S |
 
-**Состав репозитория** (215 файлов, ~3,6 МБ): `plugins/idpg-core` — 80,
+**Состав репозитория** (221 файл на 19.09.2026, ~3,6 МБ): `plugins/idpg-core` — 80,
 `plugins/idpg-auth` — 21, `themes/idpg_core` — 90, `themes/idpg_core-child` — 3,
-`docs/` — 8, `.circleci/config.yml`, `plugins/index.php`, `themes/index.php`,
-`AGENTS.md`, `index.php`, `package.json`, `.gitignore`, `.gitattributes`.
+`docs/` — 8, `bin/phpcs-patches/` — 6, `.circleci/config.yml`, `plugins/index.php`,
+`themes/index.php`, `AGENTS.md`, `index.php`, `package.json`, `.gitignore`,
+`.gitattributes`. На момент первой приёмки DEV-53 было 215 файлов — добавились
+5 файлов DEV-54 и правка `.gitignore`. Плагины `idpg-event-import` и `wp-cloud-sync`
+на диске отсутствуют: их re-include в `.gitignore` сработает при восстановлении из `main`.
 
 **Что в репозиторий не попало** (замер 19.09.2026): сторонние плагины — 3612 файлов /
 35,9 МБ; `uploads/` — 549 / 33,7 МБ; `wpvividbackups/` — 49 / 95,1 МБ;
 `plugins/idpg-core/vendor/` — 1683 / 14,1 МБ; `languages/` — 187 / 11,9 МБ.
 
+#### Remote и первый push (19.09.2026)
+
+Remote: `https://github.com/Franck-afk/idpg-source.git` (`origin`).
+
+Перед пушем выяснилось, что на GitHub **уже есть история проекта**: ветка `main`,
+40 коммитов, 05.09 → 11.09.2026, 204 файла. Локальный репозиторий создавался заново
+19.09.2026 из рабочего дерева, поэтому у линий **нет общего предка** — `git merge-base`
+не находит его.
+
+| | Локальный `master` | GitHub `main` |
+|---|---|---|
+| Коммитов | 8 (DEV-27B/53/54) | 40 |
+| Даты | 19.09.2026 | 05.09 → 11.09.2026 |
+| Файлов | 221 | 204 |
+| Только на этой стороне | 46 файлов | 29 файлов |
+
+**Главное:** на `main` лежали единственные копии артефактов, которых нет ни на диске,
+ни локально:
+
+- `plugins/idpg-event-import/` — **целый плагин, 11 файлов** (CLI, admin, провайдеры
+  ical/REST, тесты, `phpunit.xml.dist`) — судя по составу, заготовка DEV-02;
+- `plugins/wp-cloud-sync/` — 4 файла;
+- корневой `README.md` с описанием структуры репозитория;
+- `plugins/idpg-core/tests/test-event-moderation.php`, `test-seo-integration.php`
+  (локально вместо них `test-organizer-page.php`, `test-organizer-pending.php`);
+- вендорные ассеты, которые локально исключены правилом `vendor/`:
+  `plugins/idpg-core/assets/vendor/{iconify,tom-select}`, `themes/idpg_core/assets/{css,js}/vendor/*`.
+
+Прямой `git push` в `main` (тем более force) уничтожил бы эти файлы безвозвратно,
+поэтому он **не выполнялся**. Решение владельца — пушить отдельной веткой:
+
+```bash
+git push -u origin master:dev/phpcs-baseline
+```
+
+Ветка `dev/phpcs-baseline` = `21bc289`, `main` остался на `c9c10dc`. PR создаётся по ссылке,
+которую печатает GitHub. **Оговорка:** поскольку истории несвязанные, PR покажет все файлы
+как изменённые, а слияние потребует `--allow-unrelated-histories` — то есть обычным
+«Merge pull request» может не пройти.
+
+Страховка: полный слепок `main` (все 40 коммитов) и список 29 уникальных файлов сохранены
+в `D:\laragon\backups\idupogorodu\dev53-push\` (`idpg-source-main.bundle`, `remote-only-files.txt`).
+
+**Грабля:** песочница ассистента отбрасывает записи в `.git/refs/remotes/**` — `git fetch`
+печатает «[new branch]», `git update-ref` возвращает 0, но файлы ref не появляются, и
+`git status` показывает `[gone]`. На реальность пуша это не влияет (проверено сетевым
+`git ls-remote`), лечится одним `git fetch origin` в обычном терминале.
+
 #### Находки и оговорки
 
+- **Дефект состава: собственные плагины выпали из репозитория (исправлен 19.09.2026).**
+  В первой редакции `.gitignore` re-include был только для `plugins/idpg-core/` и
+  `plugins/idpg-auth/`, поэтому собственные плагины проекта `idpg-event-import` и
+  `wp-cloud-sync` молча игнорировались — хотя в ветке `main` они отслеживались.
+  Дефект обнаружился только при настройке remote. Исправлено коммитом `21bc289`
+  (добавлены `!/plugins/idpg-event-import/`, `!/plugins/wp-cloud-sync/`), проверено
+  `git check-ignore`: свои плагины TRACKED, сторонний `wp-mail-smtp` остаётся IGNORED.
+  **Правило: при добавлении своего плагина обязательно дописать re-include.**
+- **Вендорные ассеты в `assets/vendor/` под вопросом.** Правило `vendor/` (без ведущего
+  слэша) матчит каталог на любой глубине, поэтому `plugins/idpg-core/assets/vendor/`
+  (iconify, tom-select) и `themes/idpg_core/assets/{css,js}/vendor/` (toastify, xlsx)
+  локально не отслеживаются, а в `main` они были. В отличие от composer/npm-зависимостей,
+  эти файлы **ничем не восстанавливаются** — после чистого клона тема и плагин останутся
+  без них. Решение за владельцем: либо re-include, либо перенести в сборку.
 - **CI проверяет только ошибки — предупреждения job не валят.** В job `phpcs` стоит
   `--runtime-set ignore_warnings_on_exit 1`, поэтому exit-код зависит только от errors;
   предупреждения вне контроля CI.
