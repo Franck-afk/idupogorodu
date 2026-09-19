@@ -1041,7 +1041,8 @@ Remote: `https://github.com/Franck-afk/idpg-source.git` (`origin`).
 - `plugins/idpg-core/tests/test-event-moderation.php`, `test-seo-integration.php`
   (локально вместо них `test-organizer-page.php`, `test-organizer-pending.php`);
 - вендорные ассеты, которые локально исключены правилом `vendor/`:
-  `plugins/idpg-core/assets/vendor/{iconify,tom-select}`, `themes/idpg_core/assets/{css,js}/vendor/*`.
+  `plugins/idpg-core/assets/vendor/{iconify,tom-select}`, `themes/idpg_core/assets/{css,js}/vendor/*`
+  (забраны импортом в DEV-59, правила исправлены в DEV-60 — см. раздел «DEV-60»).
 
 Прямой `git push` в `main` (тем более force) уничтожил бы эти файлы безвозвратно,
 поэтому он **не выполнялся**. Решение владельца — пушить отдельной веткой:
@@ -1236,6 +1237,68 @@ fast-forward** — запрет на force-push не нарушен ни в ка
 
 Рецепт замера вынесен в `RECIPES.md` («Доказательство «merge ничего не теряет»»).
 
+#### DEV-60. Re-include вендорных фронтенд-ассетов
+
+**Проблема.** Правило `vendor/` (`.gitignore`, блок «Зависимости») матчит каталог на **любой
+глубине**, поэтому под него попадали и наши фронтенд-ассеты в `assets/*/vendor/`. В отличие от
+composer/npm-зависимостей они **не восстанавливаются ни одной командой** — после чистого клона
+фронтенд темы и плагина остался бы без них.
+
+**Уточнение к постановке.** Задача формулировалась как «локально не отслеживаются, нужно
+добавить». Фактически файлы **уже были tracked** — их принёс импорт DEV-59
+(`git checkout tmpmain -- <path>`), и они уже опубликованы на `main`. Поэтому `git add` в шагах
+5–6 не дал изменений в индексе: правка приводит **правила** в соответствие с фактическим
+составом. Ценность правки реальна — без неё ассеты выживали только как tracked и при удалении
+не вернулись бы в индекс без `git add -f`.
+
+**Решение владельца — вариант A, точечные `!`-исключения** (не глобальный `!vendor/`):
+
+```
+!plugins/idpg-core/assets/vendor/
+!plugins/idpg-core/assets/vendor/**
+!themes/idpg_core/assets/css/vendor/
+!themes/idpg_core/assets/css/vendor/**
+!themes/idpg_core/assets/js/vendor/
+!themes/idpg_core/assets/js/vendor/**
+```
+
+В шапку файла добавлен комментарий со ссылкой на DEV-60; рядом с правилами — пояснение,
+почему исключение точечное.
+
+**Состав и объём.** 3 каталога, **6 файлов, 1 094 538 байт = 1,04 МБ**:
+
+| Файл | Размер |
+|---|---|
+| `plugins/idpg-core/assets/vendor/iconify/iconify.min.js` | 68 639 |
+| `plugins/idpg-core/assets/vendor/tom-select/tom-select.complete.min.js` | 50 310 |
+| `plugins/idpg-core/assets/vendor/tom-select/tom-select.min.css` | 15 386 |
+| `themes/idpg_core/assets/css/vendor/toastify.min.css` | 1 523 |
+| `themes/idpg_core/assets/js/vendor/toastify.min.js` | 6 776 |
+| `themes/idpg_core/assets/js/vendor/xlsx.full.min.js` | 951 904 |
+
+Объём мал (порог обсуждения «сборки» — 10 МБ, аварийный — 50 МБ), поэтому **вариант «сборка»
+не нужен**: держать 1 МБ в репозитории дешевле, чем заводить npm-сборку для статичных файлов.
+Клон целиком — 7,6 МБ.
+
+**Проверки (все пройдены).**
+
+| Проверка | Результат |
+|---|---|
+| `check-ignore -q --no-index` на наши ассеты | exit **1** — не игнорируются |
+| `check-ignore -q --no-index` на `wp-mail-smtp/vendor/` | exit **0** — IGNORED (`/plugins/*`) |
+| `check-ignore -q --no-index` на `plugins/idpg-core/vendor/` | exit **0** — IGNORED |
+| Удалить из индекса → `git add` **без `-f`** | все **6** файлов вернулись |
+| Чистый клон (`dev60-clone`, `41488ee`) | все 6 файлов на месте, размеры совпали |
+| Сторонние плагины и composer-vendor в клоне | отсутствуют |
+
+Коммит **`41488ee`**, запушен в `main` (`6dfe73c..41488ee`).
+
+**Грабля, найденная при проверке.** `git check-ignore -v` **возвращает exit 0 всегда, когда
+сматчился хоть один паттерн, включая отрицательный**, и печатает сам `!`-паттерн. Поэтому
+проверка из постановки («`check-ignore -v …` → ожидаемо пусто») по `-v` не проходит: для
+re-include-путей вывод будет `…:!plugins/…/vendor/** <путь>` с exit 0. Истину даёт вызов
+**без `-v`** (или с `-q`): exit 1 = не игнорируется. Записано в `PITFALLS.md`.
+
 #### Находки и оговорки
 
 - **Дефект состава: собственные плагины выпали из репозитория (исправлен 19.09.2026).**
@@ -1246,14 +1309,12 @@ fast-forward** — запрет на force-push не нарушен ни в ка
   (добавлены `!/plugins/idpg-event-import/`, `!/plugins/wp-cloud-sync/`), проверено
   `git check-ignore`: свои плагины TRACKED, сторонний `wp-mail-smtp` остаётся IGNORED.
   **Правило: при добавлении своего плагина обязательно дописать re-include.**
-- **Вендорные ассеты в `assets/vendor/` — уточнено в DEV-59.** Правило `vendor/` (без ведущего
+- **Вендорные ассеты в `assets/vendor/` — ЗАКРЫТО в DEV-60.** Правило `vendor/` (без ведущего
   слэша) матчит каталог на любой глубине, поэтому `plugins/idpg-core/assets/vendor/`
-  (iconify, tom-select) и `themes/idpg_core/assets/{css,js}/vendor/` (toastify, xlsx) были
-  локально не отслеживаемы, а в `main` — отслеживались. **DEV-59 забрал все 6 файлов импортом,
-  и теперь они опубликованы на `main`** — чистый клон их получает, то есть оговорка «ничем не
-  восстанавливаются» снята. Однако противоречие осталось: `git check-ignore --no-index` даёт
-  `IGNORED: .gitignore:52:vendor/`, файлы выживают лишь потому, что уже tracked. **Рекомендация —
-  дописать re-include** (как в `21bc289`); решение за владельцем.
+  (iconify, tom-select) и `themes/idpg_core/assets/{css,js}/vendor/` (toastify, xlsx) попадали
+  под него. DEV-59 забрал все 6 файлов импортом (теперь они на `main`), DEV-60 дописал точечные
+  `!`-исключения — правила приведены в соответствие с составом. Подробности и замеры — в разделе
+  «DEV-60». Сторонние плагины и композерный `plugins/idpg-core/vendor/` по-прежнему IGNORED.
 - **CI проверяет только ошибки — предупреждения job не валят.** В job `phpcs` стоит
   `--runtime-set ignore_warnings_on_exit 1`, поэтому exit-код зависит только от errors;
   предупреждения вне контроля CI.
