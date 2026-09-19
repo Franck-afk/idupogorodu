@@ -821,10 +821,6 @@ ignoreErrors:
 		count: 3
 		path: inc\template-tags.php
 
-
-
-
-
 	-
 		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
