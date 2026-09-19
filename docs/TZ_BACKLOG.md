@@ -980,10 +980,11 @@ php <tools>/vendor/bin/phpcs --standard=.phpcs.xml.dist \
 только в CI.
 
 Осталось для полного закрытия DEV-53: убедиться, что оба job'а зелёные на CircleCI.
-Remote настроен и первый push выполнен 19.09.2026 — но **отдельной веткой**
-`dev/phpcs-baseline`, ветка `main` не тронута (причина — в разделе «Remote и первый push»
-ниже). До проверки CI требование «CI зелёный» выполняется как «локальный прогон на чистом
-клоне даёт exit 0».
+Remote настроен, первый push выполнен 19.09.2026 **отдельной веткой** `dev/phpcs-baseline`,
+ветка `main` не тронута (причина — в разделе «Remote и первый push» ниже). DEV-59 забрал
+из `main` 29 уникальных файлов, но push в `main` отклонён как `non-fast-forward` —
+выбор стратегии слияния остаётся за владельцем. До проверки CI требование «CI зелёный»
+выполняется как «локальный прогон на чистом клоне даёт exit 0».
 
 ### DEV-53. Репозиторий и CI: монолит, только наши артефакты
 
@@ -1000,13 +1001,14 @@ Remote настроен и первый push выполнен 19.09.2026 — н�
 | **Приёмка** | Свежий `git clone` → 215 файлов; среди них нет `uploads/`, `languages/`, сторонних плагинов, `vendor/`, `wp-config*.php` и бэкапов. Все файлы в клоне — LF. PHPCS на клоне: `idpg-core` / `idpg-auth` / тема `idpg_core` — **exit 0**. PHPUnit на клоне локально не проверяется — только в CI. |
 | **Объём** | S |
 
-**Состав репозитория** (221 файл на 19.09.2026, ~3,6 МБ): `plugins/idpg-core` — 80,
-`plugins/idpg-auth` — 21, `themes/idpg_core` — 90, `themes/idpg_core-child` — 3,
-`docs/` — 8, `bin/phpcs-patches/` — 6, `.circleci/config.yml`, `plugins/index.php`,
-`themes/index.php`, `AGENTS.md`, `index.php`, `package.json`, `.gitignore`,
-`.gitattributes`. На момент первой приёмки DEV-53 было 215 файлов — добавились
-5 файлов DEV-54 и правка `.gitignore`. Плагины `idpg-event-import` и `wp-cloud-sync`
-на диске отсутствуют: их re-include в `.gitignore` сработает при восстановлении из `main`.
+**Состав репозитория** (250 файлов на 19.09.2026, сверено `git ls-files`):
+`plugins/idpg-core` — 88, `plugins/idpg-auth` — 21, `plugins/idpg-event-import` — 16,
+`plugins/wp-cloud-sync` — 4, `themes/idpg_core` — 95, `themes/idpg_core-child` — 3,
+`docs/` — 8, `bin/phpcs-patches/` — 6, `plugins/index.php` + `themes/index.php`,
+корневые `README.md`, `AGENTS.md`, `index.php`, `package.json`, `.gitignore`,
+`.gitattributes`, `.circleci/config.yml`. Динамика: 215 на момент первой приёмки
+DEV-53 → +5 файлов DEV-54 и правка `.gitignore` → 221 → +29 файлов, импортированных
+из `main` в DEV-59 → 250.
 
 **Что в репозиторий не попало** (замер 19.09.2026): сторонние плагины — 3612 файлов /
 35,9 МБ; `uploads/` — 549 / 33,7 МБ; `wpvividbackups/` — 49 / 95,1 МБ;
@@ -1047,18 +1049,54 @@ Remote: `https://github.com/Franck-afk/idpg-source.git` (`origin`).
 git push -u origin master:dev/phpcs-baseline
 ```
 
-Ветка `dev/phpcs-baseline` = `21bc289`, `main` остался на `c9c10dc`. PR создаётся по ссылке,
-которую печатает GitHub. **Оговорка:** поскольку истории несвязанные, PR покажет все файлы
-как изменённые, а слияние потребует `--allow-unrelated-histories` — то есть обычным
-«Merge pull request» может не пройти.
+Ветка `dev/phpcs-baseline` = `21bc289` (позже `736bcf4`, затем `19d2ed8` после DEV-59),
+`main` остался на `c9c10dc`. PR создаётся по ссылке, которую печатает GitHub.
+**Оговорка:** поскольку истории несвязанные, PR покажет все файлы как изменённые, а слияние
+потребует `--allow-unrelated-histories` — то есть обычным «Merge pull request» может не пройти.
 
 Страховка: полный слепок `main` (все 40 коммитов) и список 29 уникальных файлов сохранены
 в `D:\laragon\backups\idupogorodu\dev53-push\` (`idpg-source-main.bundle`, `remote-only-files.txt`).
 
-**Грабля:** песочница ассистента отбрасывает записи в `.git/refs/remotes/**` — `git fetch`
-печатает «[new branch]», `git update-ref` возвращает 0, но файлы ref не появляются, и
-`git status` показывает `[gone]`. На реальность пуша это не влияет (проверено сетевым
-`git ls-remote`), лечится одним `git fetch origin` в обычном терминале.
+**Грабля:** песочница ассистента отбрасывает записи в `.git/refs/remotes/**` и создание
+**новых подкаталогов** в `.git/refs/`. `git fetch` печатает «[new branch] main -> origin/main»,
+`git update-ref` возвращает 0, но файлы ref не появляются, и `git status` показывает `[gone]`;
+ветка `tmp/origin-main` (со слэшем) молча не создаётся, а `tmpmain` — создаётся. На реальность
+операций с remote не влияет — результат проверять сетевым `git ls-remote`, а не локальными
+ссылками. Ветки для работы называть без слэша.
+
+#### DEV-59. Импорт уникальных файлов из `main` (вариант C)
+
+> **Выполнено 19.09.2026.** Слияние историй: файлы из `main` забраны в локальную историю,
+> история remote 05–11.09 не переносилась.
+
+Источник — коммит `main` `c9c10dc09de562cdb9959d06524e4249ddfdbb65`, временная локальная
+ветка `tmpmain`. Список из **29** путей получен через `git diff --name-status --no-renames tmpmain master`
+с фильтром `D` и сверен с независимым подсчётом по деревьям (`comm -13` по `git ls-tree`) — оба
+метода дали 29. Файлы забраны побайтово: `git checkout tmpmain -- <path>` (не копированием
+по рабочему дереву). Сверка `git rev-parse :<path>` с `git rev-parse tmpmain:<path>` — **0 расхождений**.
+`git status --short` дал ровно 29 записей со статусом `A`, изменений существующих файлов нет.
+`git check-ignore` по всем 29 путям пуст. Коммит **`19d2ed8`**, файлов в репозитории стало 250.
+
+Состав импорта: `README.md`; `plugins/idpg-event-import/` (15 файлов, включая `phpunit.xml.dist`
+и 4 теста); `plugins/wp-cloud-sync/` (4); `plugins/idpg-core/tests/` (`test-event-moderation.php`,
+`test-seo-integration.php`); вендорные ассеты `plugins/idpg-core/assets/vendor/{iconify,tom-select}`
+и `themes/idpg_core/assets/{css,js}/vendor/*` (6 файлов).
+
+**Push в `main` отклонён.** `git push origin master:main` → `! [rejected] master -> main
+(non-fast-forward)`. Это ожидаемо и есть прямое следствие варианта C: забрав только файлы,
+но не историю `main`, мы получили коммит, **не имеющий `c9c10dc` среди предков**, поэтому
+fast-forward невозможен. Вариант C и «push в main обычным merge без `--allow-unrelated-histories`»
+несовместимы — чтобы `main` продвинулся без force, нужно либо слить истории
+(`--allow-unrelated-histories`), либо перебазировать наши 8+ коммитов на `main`. Force не
+применялся. Решение возвращено владельцу; работа лежит в `dev/phpcs-baseline` (`19d2ed8`).
+
+`main` на GitHub остался `c9c10dc` (проверено сетевым `git ls-remote`). Bundle сохранён как
+архив — из него можно распаковать исходную историю и сверить, что ни один файл не потерян.
+
+**Грабля:** `git diff --name-status` по умолчанию включает детекцию переименований и склеивает
+`plugins/idpg-event-import/phpunit.xml.dist` с `plugins/idpg-auth/phpunit.xml.dist` в пару `R`,
+из-за чего файл выпадает из выборки «только `D`» — выходило 28 вместо 29. Для подобных выборок
+использовать `--no-renames` и перекрёстно сверять с подсчётом по деревьям.
 
 #### Находки и оговорки
 
