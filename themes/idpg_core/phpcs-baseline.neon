@@ -1,0 +1,2394 @@
+ignoreErrors:
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 11 spaces but found 1 space
+		count: 2
+		path: archive-event.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 3
+		path: archive-event.php
+
+	-
+		sniff: Universal.WhiteSpace.PrecisionAlignment.Found
+		message: Found precision alignment of 3 spaces.
+		count: 1
+		path: archive-event.php
+
+	-
+		sniff: WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		message: 'Scripts must be registered/enqueued via wp_enqueue_script()'
+		count: 2
+		path: archive-event.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: archive-event.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: archive-venue.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineAfterStart
+		message: Blank line found at start of control structure
+		count: 1
+		path: archive.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 3
+		path: archive.php
+
+	-
+		sniff: WordPress.DateTime.RestrictedFunctions.date_date
+		message: 'date() is affected by runtime timezone changes which can cause date/time to be incorrectly displayed. Use gmdate() instead.'
+		count: 1
+		path: footer.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$social_icon".'
+		count: 1
+		path: footer.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$social_icon_path".'
+		count: 1
+		path: footer.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$social_icon_svg".'
+		count: 1
+		path: footer.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$social_labels".'
+		count: 1
+		path: footer.php
+
+	-
+		sniff: Generic.Formatting.DisallowMultipleStatements.SameLine
+		message: Each PHP statement must be on a line by itself
+		count: 1
+		path: front-page.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 20 spaces but found 1 space
+		count: 1
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 10
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 3 tabs, found 2'
+		count: 9
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 3 tabs, found 2 tabs and 1 spaces'
+		count: 14
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 2'
+		count: 4
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 2 tabs and 1 spaces'
+		count: 7
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 3'
+		count: 18
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 3 tabs and 1 spaces'
+		count: 13
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 5 tabs, found 4'
+		count: 2
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 6 tabs, found 4'
+		count: 1
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 3 tabs, found 2'
+		count: 3
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 4 tabs, found 3'
+		count: 3
+		path: front-page.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 5 tabs, found 4'
+		count: 1
+		path: front-page.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.MultipleStatements
+		message: Inline PHP statement must contain a single statement; 2 found
+		count: 1
+		path: front-page.php
+
+	-
+		sniff: WordPress.DateTime.CurrentTimeTimestamp.Requested
+		message: 'Calling current_time() with a $type of "timestamp" or "U" is strongly discouraged as it will not return a Unix (UTC) timestamp. Please consider using a non-timestamp format or otherwise refactoring this code.'
+		count: 2
+		path: front-page.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 4
+		path: front-page.php
+
+	-
+		sniff: Generic.Commenting.DocComment.ShortNotCapital
+		message: Doc comment short description must start with a capital letter
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 4 spaces
+		count: 2
+		path: functions.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 11 spaces but found 1 space
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 1 space
+		count: 2
+		path: functions.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 2
+		path: functions.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 1 space
+		count: 2
+		path: functions.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 1 space
+		count: 3
+		path: functions.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 4
+		path: functions.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 4
+		path: functions.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 6
+		path: functions.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 16
+		path: functions.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.SpacingBefore
+		message: Expected 1 space before comment text but found 2; use block comment if you need indentation
+		count: 4
+		path: functions.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.SpacingBefore
+		message: Expected 1 space before comment text but found 6; use block comment if you need indentation
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterFunction
+		message: Expected 1 space after FUNCTION keyword; 0 found
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Squiz.PHP.CommentedOutCode.Found
+		message: This comment is 46% valid code; is this commented out code?
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Squiz.PHP.CommentedOutCode.Found
+		message: This comment is 50% valid code; is this commented out code?
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''url''". Found: 10 spaces'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''url''". Found: 11 spaces'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''url''". Found: 3 spaces'
+		count: 2
+		path: functions.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''url''". Found: 4 spaces'
+		count: 2
+		path: functions.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''url''". Found: 6 spaces'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''url''". Found: 7 spaces'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''url''". Found: 8 spaces'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Universal.WhiteSpace.DisallowInlineTabs.NonIndentTabsUsed
+		message: Spaces must be used for mid-line alignment; tabs are not allowed
+		count: 5
+		path: functions.php
+
+	-
+		sniff: Universal.WhiteSpace.PrecisionAlignment.Found
+		message: Found precision alignment of 3 spaces.
+		count: 1
+		path: functions.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 10
+		path: functions.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''footer''" and double arrow, but found 2.'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''menu-1''" and double arrow, but found 2.'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''menu-item-parent-id''" and double arrow, but found 2.'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''menu-item-status''" and double arrow, but found 5.'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''title''" and double arrow, but found 2.'
+		count: 2
+		path: functions.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''menu-item-title''" and double arrow, but found 6.'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''url''" and double arrow, but found 4.'
+		count: 2
+		path: functions.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''menu-item-url''" and double arrow, but found 8.'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		message: 'Detected usage of meta_key, possible slow query.'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		message: 'Detected usage of meta_value, possible slow query.'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: WordPress.DateTime.CurrentTimeTimestamp.Requested
+		message: 'Calling current_time() with a $type of "timestamp" or "U" is strongly discouraged as it will not return a Unix (UTC) timestamp. Please consider using a non-timestamp format or otherwise refactoring this code.'
+		count: 3
+		path: functions.php
+
+	-
+		sniff: WordPress.WP.AlternativeFunctions.parse_url_parse_url
+		message: 'parse_url() is discouraged because of inconsistency in the output across PHP versions; use wp_parse_url() instead.'
+		count: 1
+		path: functions.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 1 space
+		count: 1
+		path: header.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$city".'
+		count: 2
+		path: header.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$city_tree".'
+		count: 1
+		path: header.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$current_city_name".'
+		count: 1
+		path: header.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$current_id".'
+		count: 1
+		path: header.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$district".'
+		count: 2
+		path: header.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$region".'
+		count: 2
+		path: header.php
+
+	-
+		sniff: WordPress.WP.GlobalVariablesOverride.Prohibited
+		message: Overriding WordPress globals is prohibited. Found assignment to $current_user
+		count: 1
+		path: header.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 10 spaces but found 1 space
+		count: 1
+		path: inc\breadcrumbs.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: inc\breadcrumbs.php
+
+	-
+		sniff: WordPress.WP.I18n.MissingTranslatorsComment
+		message: 'A function call to __() with texts containing placeholders was found, but was not accompanied by a "translators:" comment on the line above to clarify the meaning of the placeholders.'
+		count: 2
+		path: inc\breadcrumbs.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.SpacingAfter
+		message: There must be no blank lines after the class comment
+		count: 1
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.Missing
+		message: Missing file doc comment
+		count: 1
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 5
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		message: 'Hook names invoked by a theme/plugin should start with the theme/plugin prefix. Found: "nav_menu_link_attributes".'
+		count: 1
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		message: 'Hook names invoked by a theme/plugin should start with the theme/plugin prefix. Found: "the_title".'
+		count: 1
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		message: 'Hook names invoked by a theme/plugin should start with the theme/plugin prefix. Found: "walker_nav_menu_start_el".'
+		count: 1
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 5 found
+		count: 1
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 8 found
+		count: 2
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "?"; 5 found
+		count: 1
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "?"; 8 found
+		count: 2
+		path: inc\class-idpg-nav-walker.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 1
+		path: inc\home-sections.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 5 spaces
+		count: 1
+		path: inc\home-sections.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 6 spaces
+		count: 1
+		path: inc\home-sections.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 3 spaces
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 4 spaces
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 2 spaces
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 5 spaces
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 3 spaces
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 6 spaces
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 1 space
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 9 spaces but found 2 spaces
+		count: 2
+		path: inc\template-tags.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Squiz.ControlStructures.ControlSignature.SpaceAfterCloseBrace
+		message: Expected 1 space after closing brace; newline found
+		count: 11
+		path: inc\template-tags.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''pattern''". Found: 10 spaces'
+		count: 2
+		path: inc\template-tags.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''pattern''". Found: 11 spaces'
+		count: 2
+		path: inc\template-tags.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''pattern''". Found: 2 spaces'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''pattern''". Found: 4 spaces'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''pattern''". Found: 5 spaces'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''pattern''". Found: 7 spaces'
+		count: 3
+		path: inc\template-tags.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''pattern''". Found: 8 spaces'
+		count: 2
+		path: inc\template-tags.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''pattern''". Found: 9 spaces'
+		count: 3
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 15
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.ArrayIndentation.CloseBraceNotAligned
+		message: 'Array closer not aligned correctly; expected 16 space(s) but found 20'
+		count: 6
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''player.vimeo.com''" and double arrow, but found 4.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''dzen.ru''" and double arrow, but found 13.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 11 space(s) between "''vk.com''" and double arrow, but found 14.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 12 space(s) between "''ok.ru''" and double arrow, but found 15.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''dailymotion.com''" and double arrow, but found 5.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''viewbox''" and double arrow, but found 1.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''streamable.com''" and double arrow, but found 6.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''label''" and double arrow, but found 3.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''facebook.com''" and double arrow, but found 8.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''icon''" and double arrow, but found 4.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''mode''" and double arrow, but found 4.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''url''" and double arrow, but found 5.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''youtube.com''" and double arrow, but found 9.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''tiktok.com''" and double arrow, but found 10.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''vkvideo.ru''" and double arrow, but found 10.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''rutube.ru''" and double arrow, but found 11.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''twitch.tv''" and double arrow, but found 11.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''vimeo.com''" and double arrow, but found 11.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''@type''" and double arrow, but found 8.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''coub.com''" and double arrow, but found 12.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''youtu.be''" and double arrow, but found 12.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		message: 'Detected usage of meta_key, possible slow query.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		message: 'Detected usage of meta_query, possible slow query.'
+		count: 1
+		path: inc\template-tags.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+		message: 'Detected usage of tax_query, possible slow query.'
+		count: 3
+		path: inc\template-tags.php
+
+
+
+
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 3
+		path: inc\widget-areas.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 3 spaces
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 4 spaces
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 32 spaces but found 1 space
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 1 space
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 6 spaces
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 7 spaces but found 8 spaces
+		count: 2
+		path: inc\widget-areas.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 10 tabs, found 9'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$counter.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+		message: 'Each item in a multi-line array must be on a new line. Found: 1 space'
+		count: 28
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''й''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''ч''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 11 space(s) between "''г''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 11 space(s) between "''р''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 13 space(s) between "''э''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 22 space(s) between "''и''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 23 space(s) between "''в''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 23 space(s) between "''п''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 23 space(s) between "''ц''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 24 space(s) between "''ь''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 34 space(s) between "''з''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 35 space(s) between "''б''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 35 space(s) between "''о''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 35 space(s) between "''х''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 36 space(s) between "''ы''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 47 space(s) between "''а''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 47 space(s) between "''ж''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 47 space(s) between "''н''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 47 space(s) between "''ф''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 47 space(s) between "''ъ''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Security.NonceVerification.Recommended
+		message: Processing form data without nonce verification.
+		count: 4
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_POST[''idpg_widget_areas_nonce'']'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		message: '$_POST[''idpg_widget_areas_nonce''] not unslashed before sanitization. Use wp_unslash() or similar'
+		count: 1
+		path: inc\widget-areas.php
+
+	-
+		sniff: Generic.Files.OneObjectStructurePerFile.MultipleFound
+		message: Only one object structure is allowed in a file
+		count: 2
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 3
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 3 spaces
+		count: 2
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 4 spaces
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 10 spaces but found 1 space
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 13 spaces but found 1 space
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 16 spaces but found 4 spaces
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 17 spaces but found 18 spaces
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 4 spaces
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 3 spaces
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 5 spaces
+		count: 2
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 7 spaces but found 8 spaces
+		count: 3
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 9 spaces
+		count: 6
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 9 spaces but found 10 spaces
+		count: 3
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 1 tabs, found 0'
+		count: 6
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 2 tabs, found 1'
+		count: 18
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 3 tabs, found 2'
+		count: 78
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 3'
+		count: 20
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 5 tabs, found 3'
+		count: 2
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 5 tabs, found 4'
+		count: 8
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 1 tabs, found 0'
+		count: 12
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 2 tabs, found 1'
+		count: 30
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 3 tabs, found 2'
+		count: 35
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 4 tabs, found 3'
+		count: 8
+		path: inc\widgets.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function __construct()'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function form()'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function update()'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function widget()'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$sidebar_widgets" missing
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterFunction
+		message: Expected 1 space after FUNCTION keyword; 0 found
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Universal.Files.SeparateFunctionsFromOO.Mixed
+		message: 'A file should either contain function declarations or OO structure declarations, but not both. Found 8 function declaration(s) and 3 OO structure declaration(s). The first function declaration was found on line 15; the first OO declaration was found on line 124'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Universal.NamingConventions.NoReservedKeywordParameterNames.newFound
+		message: 'It is recommended not to use reserved keyword "new" as function parameter name. Found: $new'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$ad_index.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$other_index.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 2
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''smi2''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''mediavenus''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''vk_reklama''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''charset''" and double arrow, but found 2.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''marketgid''" and double arrow, but found 1.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''async''" and double arrow, but found 4.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''defer''" and double arrow, but found 4.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''type''" and double arrow, but found 5.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''src''" and double arrow, but found 6.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-ad-ru-widget.php, but found widgets.php.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$args[''after_title'']''.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$args[''after_widget'']''.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$args[''before_title'']''.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$args[''before_widget'']''.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$img''.'
+		count: 2
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$title''.'
+		count: 1
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''idpg_get_attachment_image_any''.'
+		count: 2
+		path: inc\widgets.php
+
+	-
+		sniff: WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		message: 'Scripts must be registered/enqueued via wp_enqueue_script()'
+		count: 5
+		path: inc\widgets.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 2 tabs, found 3'
+		count: 1
+		path: index.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineAfterStart
+		message: Blank line found at start of control structure
+		count: 1
+		path: index.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 3
+		path: index.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: page-favorites.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: page-favorites.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: page-favorites.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 1 space
+		count: 1
+		path: page-legal.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 3'
+		count: 4
+		path: page-legal.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 4 tabs, found 3'
+		count: 1
+		path: page-legal.php
+
+	-
+		sniff: Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace
+		message: Newline required after opening brace
+		count: 1
+		path: page-legal.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 3 spaces
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 1 space
+		count: 2
+		path: page-login.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 3 spaces
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 4 spaces
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 9 spaces but found 1 space
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 9 spaces but found 2 spaces
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 2 tabs, found 1'
+		count: 3
+		path: page-login.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 3 tabs, found 2'
+		count: 10
+		path: page-login.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 3'
+		count: 20
+		path: page-login.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 5 tabs, found 4'
+		count: 19
+		path: page-login.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 6 tabs, found 5'
+		count: 8
+		path: page-login.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 2 tabs, found 1'
+		count: 6
+		path: page-login.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 3 tabs, found 2'
+		count: 17
+		path: page-login.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 4 tabs, found 3'
+		count: 9
+		path: page-login.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 5 tabs, found 4'
+		count: 6
+		path: page-login.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: Squiz.PHP.CommentedOutCode.Found
+		message: This comment is 67% valid code; is this commented out code?
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''provider_not_configured''" and double arrow, but found 0.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''profile_failed''" and double arrow, but found 9.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 11 space(s) between "''access_denied''" and double arrow, but found 10.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 11 space(s) between "''invalid_state''" and double arrow, but found 10.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 12 space(s) between "''login_failed''" and double arrow, but found 11.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 12 space(s) between "''token_failed''" and double arrow, but found 11.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''provider_not_found''" and double arrow, but found 5.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		message: 'Detected usage of meta_key, possible slow query.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		message: 'Hook names invoked by a theme/plugin should start with the theme/plugin prefix. Found: "login_form".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$code".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$confirm".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$confirm_key".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$confirm_result".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$confirm_user_id".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$contact_name".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$credentials".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$details".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$email".'
+		count: 3
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$error_key".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$forgot_sent".'
+		count: 2
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$hero_events".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$hero_image_url".'
+		count: 2
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$is_forgot".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$login_error".'
+		count: 9
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$org_name".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$org_user".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$password".'
+		count: 2
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$phone".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$provider".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$provider_label".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$redirect_url".'
+		count: 6
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$register_error".'
+		count: 11
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$register_sent".'
+		count: 3
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$roles".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$terms".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$user".'
+		count: 2
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$user_id".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$verify_key".'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_POST[''password'']'
+		count: 2
+		path: page-login.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_POST[''password_confirm'']'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		message: 'Detected usage of a possibly undefined superglobal array index: $_POST[''contact_name'']. Check that the array index exists before using it.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		message: 'Detected usage of a possibly undefined superglobal array index: $_POST[''password_confirm'']. Check that the array index exists before using it.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		message: 'Detected usage of a possibly undefined superglobal array index: $_POST[''phone'']. Check that the array index exists before using it.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		message: 'Detected usage of a possibly undefined superglobal array index: $_SERVER[''REQUEST_METHOD'']. Check that the array index exists before using it.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.WP.GlobalVariablesOverride.Prohibited
+		message: Overriding WordPress globals is prohibited. Found assignment to $map
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.WP.I18n.MissingTranslatorsComment
+		message: 'A function call to __() with texts containing placeholders was found, but was not accompanied by a "translators:" comment on the line above to clarify the meaning of the placeholders.'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.WP.I18n.TextDomainMismatch
+		message: Mismatched text domain. Expected 'idpg_core' but got 'idpg-core'.
+		count: 6
+		path: page-login.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore
+		message: 'Expected 1 space before "=>"; 0 found'
+		count: 1
+		path: page-login.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 17 spaces but found 1 space
+		count: 1
+		path: page-organizer-complete.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$display_name".'
+		count: 1
+		path: page-organizer-complete.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$first_name".'
+		count: 1
+		path: page-organizer-complete.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$is_pending_organizer".'
+		count: 1
+		path: page-organizer-complete.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$last_name".'
+		count: 1
+		path: page-organizer-complete.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$needs_email".'
+		count: 1
+		path: page-organizer-complete.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$user".'
+		count: 1
+		path: page-organizer-complete.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 1 space
+		count: 1
+		path: page-privacy.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 1 space
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 1 space
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$check".'
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$key_valid".'
+		count: 2
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$new_password".'
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$password_confirm".'
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$reset_error".'
+		count: 4
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$reset_key".'
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$reset_success".'
+		count: 2
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$user".'
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$user_id".'
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		message: 'Detected usage of a possibly undefined superglobal array index: $_POST[''password_confirm'']. Check that the array index exists before using it.'
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		message: 'Detected usage of a possibly undefined superglobal array index: $_SERVER[''REQUEST_METHOD'']. Check that the array index exists before using it.'
+		count: 1
+		path: page-reset-password.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 1 space
+		count: 1
+		path: page-terms.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: page.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 1
+		path: search.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: search.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 10 spaces but found 2 spaces
+		count: 2
+		path: single-event.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 11 spaces but found 3 spaces
+		count: 4
+		path: single-event.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 12 spaces but found 4 spaces
+		count: 4
+		path: single-event.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 1 space
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 1 space
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 9 spaces but found 1 space
+		count: 3
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 13 tabs, found 5'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 19 tabs, found 11'
+		count: 3
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 19 tabs, found 12'
+		count: 9
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 0'
+		count: 2
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 2'
+		count: 5
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 5 tabs, found 3'
+		count: 2
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 5 tabs, found 4'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 3 tabs, found 4'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 4 tabs, found 2'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 4 tabs, found 6'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 5 tabs, found 7'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.Indent
+		message: Multi-line function call not indented correctly; expected 12 spaces but found 16
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.Indent
+		message: Multi-line function call not indented correctly; expected 16 spaces but found 20
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.ContentAfterOpen
+		message: Opening PHP tag must be on a line by itself
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.ContentBeforeEnd
+		message: Closing PHP tag must be on a line by itself
+		count: 2
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.ArrayIndentation.CloseBraceNotAligned
+		message: 'Array closer not aligned correctly; expected 0 space(s) but found 40'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.ArrayIndentation.ItemNotAligned
+		message: Array item not aligned correctly; expected 4 spaces but found 44
+		count: 4
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.ArrayIndentation.MultiLineArrayItemNotAligned
+		message: 'Multi-line array item not aligned correctly; expected 8 spaces, but found 48'
+		count: 4
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''height''" and double arrow, but found 6.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''allow''" and double arrow, but found 7.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''title''" and double arrow, but found 7.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''video''" and double arrow, but found 1.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''width''" and double arrow, but found 7.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''div''" and double arrow, but found 3.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''src''" and double arrow, but found 9.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		message: 'Detected usage of meta_key, possible slow query.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		message: 'Detected usage of meta_query, possible slow query.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''idpg_core_event_poster''.'
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: WordPress.WP.I18n.TextDomainMismatch
+		message: Mismatched text domain. Expected 'idpg_core' but got 'idpg-core'.
+		count: 1
+		path: single-event.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 0'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: Internal.LineEndings.Mixed
+		message: File has mixed line endings; this may cause incorrect results
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: Squiz.WhiteSpace.SuperfluousWhitespace.EndLine
+		message: Whitespace found at end of line
+		count: 18
+		path: single-venue.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''compare''". Found: a new line'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''meta_key''". Found: a new line'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''meta_query''". Found: a new line'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''order''". Found: a new line'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''orderby''". Found: a new line'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''post_status''". Found: a new line'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''posts_per_page''". Found: a new line'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''value''". Found: a new line'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		message: 'Detected usage of meta_key, possible slow query.'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''idpg_core_event_poster''.'
+		count: 1
+		path: single-venue.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: single.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: taxonomy-city.php
+
+	-
+		sniff: WordPress.Files.FileName.NotHyphenatedLowercase
+		message: 'Filenames should be all lowercase with hyphens as word separators. Expected taxonomy-event-category.php, but found taxonomy-event_category.php.'
+		count: 1
+		path: taxonomy-event_category.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: taxonomy-event_category.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 1
+		path: template-parts\content-event-today.php
+
+	-
+		sniff: WordPress.DateTime.CurrentTimeTimestamp.Requested
+		message: 'Calling current_time() with a $type of "timestamp" or "U" is strongly discouraged as it will not return a Unix (UTC) timestamp. Please consider using a non-timestamp format or otherwise refactoring this code.'
+		count: 1
+		path: template-parts\content-event-today.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 1
+		path: template-parts\content-event.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: template-parts\content-event.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 4 spaces
+		count: 1
+		path: template-parts\content-event.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 7 spaces
+		count: 1
+		path: template-parts\content-event.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 6
+		path: template-parts\content-event.php
+
+	-
+		sniff: WordPress.WhiteSpace.ControlStructureSpacing.BlankLineBeforeEnd
+		message: Blank line found at end of control structure
+		count: 1
+		path: template-parts\home-section.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between ")" and double arrow, but found 2.'
+		count: 1
+		path: template-parts\organizer\section-profile.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 11 space(s) between ")" and double arrow, but found 12.'
+		count: 1
+		path: template-parts\organizer\section-profile.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between ")" and double arrow, but found 4.'
+		count: 1
+		path: template-parts\organizer\section-profile.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between ")" and double arrow, but found 6.'
+		count: 1
+		path: template-parts\organizer\section-profile.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between ")" and double arrow, but found 10.'
+		count: 1
+		path: template-parts\organizer\section-profile.php
+
+
