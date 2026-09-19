@@ -1,0 +1,295 @@
+/* ==========================================================================
+   Кабинет организатора (/organizer/)
+   Стили только для страницы кабинета — область ограничена .idpg-org-page,
+   глобальные классы темы не переопределяются.
+   ========================================================================== */
+
+.idpg-org-page {
+	padding: 32px 0 64px;
+}
+
+/* --- Шапка кабинета --- */
+.idpg-org-header {
+	margin-bottom: 24px;
+}
+
+.idpg-org-header__title {
+	margin: 0 0 6px;
+	font-size: clamp(24px, 3vw, 34px);
+	line-height: 1.2;
+	color: var(--idpg-ink);
+}
+
+.idpg-org-header__subtitle {
+	margin: 0;
+	font-size: 15px;
+	color: var(--idpg-body);
+}
+
+/* --- Раскладка: сайдбар + контент --- */
+.idpg-org-layout {
+	display: grid;
+	grid-template-columns: 260px minmax(0, 1fr);
+	gap: 24px;
+	align-items: start;
+}
+
+/* --- Сайдбар --- */
+.idpg-org-sidebar {
+	padding: 8px;
+	background: var(--idpg-canvas);
+	border: 1px solid var(--idpg-hairline);
+	border-radius: 16px;
+}
+
+.idpg-org-nav {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.idpg-org-nav__item + .idpg-org-nav__item {
+	margin-top: 2px;
+}
+
+.idpg-org-nav__link {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 11px 14px;
+	font-size: 15px;
+	font-weight: 500;
+	color: var(--idpg-ink);
+	text-decoration: none;
+	border-radius: 12px;
+	transition: background-color var(--idpg-transition), color var(--idpg-transition);
+}
+
+.idpg-org-nav__link:hover {
+	background: var(--idpg-surface-soft);
+}
+
+.idpg-org-nav__link.is-active,
+.idpg-org-nav__link[aria-current="page"] {
+	color: var(--idpg-primary);
+	background: var(--idpg-primary-bg);
+}
+
+.idpg-org-nav__icon {
+	display: inline-flex;
+	justify-content: center;
+	width: 20px;
+	font-size: 15px;
+	line-height: 1;
+	opacity: 0.85;
+}
+
+/* --- Контент-область --- */
+.idpg-org-content {
+	min-width: 0;
+}
+
+.idpg-org-section {
+	padding: 24px;
+	background: var(--idpg-canvas);
+	border: 1px solid var(--idpg-hairline);
+	border-radius: 16px;
+}
+
+/* Явно гасим скрытые разделы: любое объявление display в CSS
+   перебивает служебный display:none от атрибута hidden. */
+.idpg-org-section[hidden] {
+	display: none;
+}
+
+.idpg-org-section__title {
+	margin: 0 0 8px;
+	font-size: 22px;
+	line-height: 1.25;
+	color: var(--idpg-ink);
+	outline: none;
+}
+
+.idpg-org-section__lead {
+	margin: 0 0 20px;
+	font-size: 15px;
+	color: var(--idpg-body);
+}
+
+/* --- Карточки сводки (значения — заглушки) --- */
+.idpg-org-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 12px;
+	margin-bottom: 20px;
+}
+
+.idpg-org-card {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 16px;
+	background: var(--idpg-surface-soft);
+	border: 1px solid var(--idpg-hairline);
+	border-radius: 14px;
+}
+
+.idpg-org-card__label {
+	font-size: 13px;
+	color: var(--idpg-body);
+}
+
+.idpg-org-card__value {
+	font-size: 28px;
+	font-weight: 600;
+	line-height: 1.1;
+	color: var(--idpg-muted-soft);
+}
+
+.idpg-org-card__hint {
+	font-size: 12px;
+	color: var(--idpg-muted);
+}
+
+/* --- Заглушка раздела --- */
+.idpg-org-empty {
+	padding: 24px;
+	text-align: center;
+	background: var(--idpg-surface-soft);
+	border: 1px dashed var(--idpg-hairline);
+	border-radius: 14px;
+}
+
+.idpg-org-empty__title {
+	margin: 0 0 8px;
+	font-size: 17px;
+	font-weight: 600;
+	color: var(--idpg-ink);
+}
+
+.idpg-org-empty__text {
+	margin: 0 0 8px;
+	font-size: 14px;
+	color: var(--idpg-body);
+}
+
+.idpg-org-empty__actions {
+	margin: 16px 0 0;
+}
+
+/* --- Поля профиля --- */
+.idpg-org-fields {
+	margin: 0 0 20px;
+	padding: 0;
+}
+
+.idpg-org-fields__row {
+	display: grid;
+	grid-template-columns: 200px minmax(0, 1fr);
+	gap: 12px;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--idpg-hairline-soft);
+}
+
+.idpg-org-fields__row:last-child {
+	border-bottom: 0;
+}
+
+.idpg-org-fields__label {
+	margin: 0;
+	font-size: 14px;
+	color: var(--idpg-body);
+}
+
+.idpg-org-fields__value {
+	margin: 0;
+	font-size: 15px;
+	color: var(--idpg-ink);
+	word-break: break-word;
+}
+
+.idpg-org-fields__empty {
+	color: var(--idpg-muted-soft);
+}
+
+/* --- Информационные блоки внутри кабинета ---
+   Глобальный класс .idpg-notice в теме не стилизован, поэтому задаём
+   оформление локально, не затрагивая другие страницы. */
+.idpg-org-page .idpg-notice {
+	margin: 0;
+	padding: 14px 16px;
+	font-size: 14px;
+	color: var(--idpg-body);
+	background: var(--idpg-surface-soft);
+	border: 1px solid var(--idpg-hairline);
+	border-radius: 12px;
+}
+
+/* --- 403: нет доступа --- */
+.idpg-org-denied {
+	max-width: 620px;
+	margin: 40px auto;
+	padding: 32px 24px;
+	text-align: center;
+	background: var(--idpg-canvas);
+	border: 1px solid var(--idpg-hairline);
+	border-radius: 16px;
+}
+
+.idpg-org-denied__title {
+	margin: 0 0 12px;
+	font-size: 26px;
+	color: var(--idpg-ink);
+}
+
+.idpg-org-denied__text {
+	margin: 0 0 20px;
+	font-size: 15px;
+	color: var(--idpg-body);
+}
+
+.idpg-org-denied__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	justify-content: center;
+	margin: 0;
+}
+
+/* --- Адаптив --- */
+@media (max-width: 900px) {
+	.idpg-org-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.idpg-org-sidebar {
+		padding: 6px;
+	}
+
+	/* Меню в одну строку с горизонтальной прокруткой — как вкладки. */
+	.idpg-org-nav {
+		display: flex;
+		gap: 4px;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.idpg-org-nav__item + .idpg-org-nav__item {
+		margin-top: 0;
+	}
+
+	.idpg-org-nav__link {
+		white-space: nowrap;
+	}
+}
+
+@media (max-width: 640px) {
+	.idpg-org-section {
+		padding: 18px;
+	}
+
+	.idpg-org-fields__row {
+		grid-template-columns: 1fr;
+		gap: 2px;
+	}
+}

@@ -1,0 +1,101 @@
+version: 2.1
+
+jobs:
+  phpunit:
+    docker:
+      - image: cimg/php:8.4
+      - image: cimg/mysql:8.4
+        environment:
+          MYSQL_DATABASE: wordpress_test
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+    environment:
+      WP_VERSION: 7.1.1
+      WP_DB_NAME: wordpress_test
+      WP_DB_USER: root
+      WP_DB_PASS: ""
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+    steps:
+      - checkout
+      - run:
+          name: Wait for MySQL
+          command: dockerize -wait tcp://localhost:3306 -timeout 120s
+      - run:
+          name: Install system deps
+          command: sudo apt-get update && sudo apt-get install -y subversion default-mysql-client
+      - run:
+          name: Install WordPress test library
+          command: |
+            cd plugins/idpg-core
+            chmod +x bin/install-wp-tests.sh
+            bash bin/install-wp-tests.sh $WP_DB_NAME $WP_DB_USER "$WP_DB_PASS" 127.0.0.1 $WP_VERSION true
+      - run:
+          name: Install PHPUnit (idpg-core dev deps)
+          command: |
+            cd plugins/idpg-core
+            composer install --no-interaction --no-progress
+      - run:
+          name: PHPUnit — idpg-core
+          command: |
+            cd plugins/idpg-core
+            composer dump-autoload
+            vendor/bin/phpunit -c phpunit.xml.dist
+      - run:
+          name: PHPUnit — idpg-auth
+          command: |
+            cd plugins/idpg-auth
+            ../idpg-core/vendor/bin/phpunit -c phpunit.xml.dist
+
+  phpcs:
+    docker:
+      - image: cimg/php:8.4
+    steps:
+      - checkout
+      # PHPCS нельзя ставить через `composer create-project`: для baseline-плагина
+      # forrest79/phpcs-ignores точка инъекции жёстко привязана к пути
+      # vendor/squizlabs/php_codesniffer/src/Files/FileList.php, поэтому PHPCS
+      # должен быть обычной зависимостью в vendor/ (а не корневым проектом).
+      - run:
+          name: Install PHPCS + WordPress Coding Standards + baseline
+          command: |
+            mkdir -p /tmp/phpcs-tools
+            cd /tmp/phpcs-tools
+            composer init --no-interaction --name=idpg/phpcs-tools \
+              --description="PHPCS tooling for IDPG CI"
+            composer config --no-interaction allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+            composer require --dev --no-interaction --no-progress \
+              "squizlabs/php_codesniffer:^3.12" \
+              "wp-coding-standards/wpcs:^3.0" \
+              "phpcompatibility/phpcompatibility-wp:^2.1" \
+              "forrest79/phpcs-ignores:^0.5"
+            vendor/bin/phpcs -i
+      - run:
+          name: PHPCS — idpg-core (baseline)
+          command: |
+            cd plugins/idpg-core
+            /tmp/phpcs-tools/vendor/bin/phpcs --standard=.phpcs.xml.dist \
+              --bootstrap=/tmp/phpcs-tools/vendor/forrest79/phpcs-ignores/src/bootstrap.php \
+              --runtime-set ignore_warnings_on_exit 1 \
+              --report=full --no-colors
+      - run:
+          name: PHPCS — idpg-auth (baseline)
+          command: |
+            cd plugins/idpg-auth
+            /tmp/phpcs-tools/vendor/bin/phpcs --standard=.phpcs.xml.dist \
+              --bootstrap=/tmp/phpcs-tools/vendor/forrest79/phpcs-ignores/src/bootstrap.php \
+              --runtime-set ignore_warnings_on_exit 1 \
+              --report=full --no-colors
+      - run:
+          name: PHPCS — theme idpg_core (baseline)
+          command: |
+            cd themes/idpg_core
+            /tmp/phpcs-tools/vendor/bin/phpcs --standard=.phpcs.xml.dist \
+              --bootstrap=/tmp/phpcs-tools/vendor/forrest79/phpcs-ignores/src/bootstrap.php \
+              --runtime-set ignore_warnings_on_exit 1 \
+              --report=full --no-colors
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - phpunit
+      - phpcs

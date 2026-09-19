@@ -1,0 +1,44 @@
+# =============================================================================
+# Нормализация переводов строк (DEV-53).
+#
+# Рабочая копия — Windows, CI — Linux. Без этого файла git конвертирует LF в
+# CRLF при checkout (и предупреждает об этом на каждом коммите), из-за чего:
+#   * PHPCS на чистом клоне может дать другие результаты, чем локально;
+#   * в диффах появляется шум «вся строка изменилась».
+# Поэтому в репозитории всегда LF, включая рабочую копию.
+# =============================================================================
+* text=auto eol=lf
+
+# --- Скрипты: оболочка и Windows требуют разных переводов строк ---
+*.sh    text eol=lf
+*.bash  text eol=lf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+
+# --- Бинарные файлы: git не должен их трогать ---
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.ttf   binary
+*.otf   binary
+*.woff  binary
+*.woff2 binary
+*.eot   binary
+*.zip   binary
+*.gz    binary
+*.tar   binary
+*.mo    binary
+*.pdf   binary
+
+# --- Локализация: текстовые, но с фиксированными переводами строк ---
+*.po    text eol=lf
+*.pot   text eol=lf
+
+# --- Диффы: помечать сгенерированное как сгенерированное ---
+# Собранный CSS темы (assets/css/*.css) собирается из assets/scss/style.scss.
+# Показывать его в диффе целиком бессмысленно, но и терять нельзя.
+themes/idpg_core/assets/css/*.css linguist-generated=true

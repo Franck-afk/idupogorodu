@@ -1,0 +1,2546 @@
+ignoreErrors:
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 5 found
+		count: 2
+		path: idpg-auth.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 6 found
+		count: 2
+		path: idpg-auth.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 9 found
+		count: 1
+		path: idpg-auth.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 14
+		path: idpg-auth.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: idpg-auth.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: idpg-auth.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 3
+		path: idpg-auth.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: idpg-auth.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function idpg_auth_init()'
+		count: 1
+		path: idpg-auth.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 1
+		path: idpg-auth.php
+
+	-
+		sniff: Universal.WhiteSpace.PrecisionAlignment.Found
+		message: Found precision alignment of 1 spaces.
+		count: 1
+		path: idpg-auth.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 9
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.DisallowMultipleStatements.SameLine
+		message: Each PHP statement must be on a line by itself
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 32 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 33 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 3 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 6 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 5 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 7 spaces but found 6 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 4 found
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 812
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 3 tabs, found 2'
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.Incorrect
+		message: 'Line indented incorrectly; expected at least 4 tabs, found 3'
+		count: 3
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.WhiteSpace.ScopeIndent.IncorrectExact
+		message: 'Line indented incorrectly; expected 4 tabs, found 3'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.Indent
+		message: Multi-line function call not indented correctly; expected 8 spaces but found 12
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_Admin
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function __construct()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function add_menu()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function handle_clear_login_log()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function handle_clear_logs()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function handle_clear_security()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function handle_unblock_ip()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function instance()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function maybe_show_setup_notice()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function register_settings()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function sanitize_settings()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function security_enabled()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function show_blocked_message()'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.WrongStyle
+		message: You must use "/**" style comments for a function comment
+		count: 5
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.Commenting.VariableComment.Missing
+		message: Missing member variable doc comment
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace
+		message: Newline required after opening brace
+		count: 3
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.ContentAfterOpen
+		message: Opening PHP tag must be on a line by itself
+		count: 3
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.ContentBeforeEnd
+		message: Closing PHP tag must be on a line by itself
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.MultipleStatements
+		message: Inline PHP statement must contain a single statement; 2 found
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''callback_fn''". Found: 14 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''callback_fn''". Found: 8 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''color''". Found: 5 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''color''". Found: 7 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''max_bot_token''". Found: 7 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''max_bot_username''". Found: 7 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''note''". Found: 4 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''vk_client_id''". Found: 8 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''vk_client_secret''". Found: 8 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''yandex_client_id''". Found: 4 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''yandex_client_secret''". Found: 4 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Universal.WhiteSpace.PrecisionAlignment.Found
+		message: Found precision alignment of 3 spaces.
+		count: 6
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+		message: 'Each item in a multi-line array must be on a new line. Found: 4 spaces'
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+		message: 'Each item in a multi-line array must be on a new line. Found: 7 spaces'
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+		message: 'Each item in a multi-line array must be on a new line. Found: 8 spaces'
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 6
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''compliance''" and double arrow, but found 0.'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''system''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''yandex''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''max''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''vk''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.PHP.YodaConditions.NotYoda
+		message: 'Use Yoda Condition checks, you must.'
+		count: 8
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''WP_Auth_Ru_Logger''.'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''paginate_links''.'
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.Security.NonceVerification.Recommended
+		message: Processing form data without nonce verification.
+		count: 30
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore
+		message: 'Expected 1 space before "=>"; 0 found'
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 2 found
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 20 found
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 21 found
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 23 found
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 24 found
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 3 found
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before ":"; 4 found
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "?"; 2 found
+		count: 3
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "?"; 3 found
+		count: 3
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "?"; 4 found
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "?"; 5 found
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "?"; 6 found
+		count: 1
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "?"; 7 found
+		count: 2
+		path: includes\class-wp-auth-ru-admin.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 3
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 6 found
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 151
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_Compliance
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function __construct()'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function block_foreign_login()'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function instance()'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function maybe_block_foreign_registration()'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.WrongStyle
+		message: You must use "/**" style comments for a function comment
+		count: 5
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 14
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.VariableComment.Missing
+		message: Missing member variable doc comment
+		count: 2
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Squiz.Commenting.VariableComment.MissingVar
+		message: Missing @var tag in member variable comment
+		count: 2
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''google-authenticator/google-authenticator.php''" and double arrow, but found 26.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''nextend-social-login/nextend-social-login.php''" and double arrow, but found 26.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 13 space(s) between "''instagram-feed/instagram-feed.php''" and double arrow, but found 38.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 17 space(s) between "''affiliate-wp/affiliate-wp.php''" and double arrow, but found 42.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 17 space(s) between "''google-login/google-login.php''" and double arrow, but found 42.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 17 space(s) between "''social-login/social-login.php''" and double arrow, but found 42.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 21 space(s) between "''loginpress/loginpress.php''" and double arrow, but found 46.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''miniorange-google-login/google_signon.php''" and double arrow, but found 30.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''easy-google-login/easy-google-login.php''" and double arrow, but found 32.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''login-with-google/login-with-google.php''" and double arrow, but found 32.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''super-socializer/super-socializer.php''" and double arrow, but found 34.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''woo-social-login/woo-social-login.php''" and double arrow, but found 34.'
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow
+		message: Expected 1 space between "'facebook-for-woocommerce/facebook-for-woocommerce.php'" and double arrow; 18 found.
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow
+		message: Expected 1 space between "'heateor-super-socializer/heateor-super-socializer.php'" and double arrow; 18 found.
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow
+		message: Expected 1 space between "'nextend-social-login-pro/nextend-social-login-pro.php'" and double arrow; 18 found.
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow
+		message: Expected 1 space between "'woocommerce-google-login/woocommerce-google-login.php'" and double arrow; 18 found.
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow
+		message: Expected 1 space between "'woocommerce-social-login/woocommerce-social-login.php'" and double arrow; 18 found.
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow
+		message: Expected 1 space between "'wordpress-social-login/wordpress-social-login.php'" and double arrow; 22 found.
+		count: 1
+		path: includes\class-wp-auth-ru-compliance.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 3
+		path: includes\class-wp-auth-ru-logger.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 90
+		path: includes\class-wp-auth-ru-logger.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_Logger
+		count: 1
+		path: includes\class-wp-auth-ru-logger.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: includes\class-wp-auth-ru-logger.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.WrongStyle
+		message: You must use "/**" style comments for a function comment
+		count: 5
+		path: includes\class-wp-auth-ru-logger.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 2
+		path: includes\class-wp-auth-ru-logger.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$stats[ $level ].'
+		count: 1
+		path: includes\class-wp-auth-ru-logger.php
+
+	-
+		sniff: Universal.Operators.DisallowStandalonePostIncrementDecrement.PostIncrementFound
+		message: 'Stand-alone post-increment statement found. Use pre-increment instead: ++$stats[''providers''][ $p ][''total''].'
+		count: 1
+		path: includes\class-wp-auth-ru-logger.php
+
+	-
+		sniff: WordPress.PHP.YodaConditions.NotYoda
+		message: 'Use Yoda Condition checks, you must.'
+		count: 2
+		path: includes\class-wp-auth-ru-logger.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 15 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 1 space
+		count: 2
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 3
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_Login_Log
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function __construct()'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function instance()'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
+		message: Expected 1 spaces after parameter type; 2 found
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
+		message: Expected 2 spaces after parameter type; 3 found
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Squiz.Commenting.VariableComment.Missing
+		message: Missing member variable doc comment
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Squiz.Strings.DoubleQuoteUsage.NotRequired
+		message: String "DELETE FROM " does not require double quotes; use single quotes instead
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 8
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.NoCaching
+		message: 'Direct database call without caching detected. Consider using wp_cache_get() / wp_cache_set() or wp_cache_delete().'
+		count: 7
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY login_time DESC, id DESC LIMIT %d OFFSET %d"'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT COUNT(*) FROM {$table} WHERE login_time >= %s"'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}"'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT COUNT(*) FROM {$table}"'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT provider, COUNT(*) AS c FROM {$table} GROUP BY provider ORDER BY c DESC"'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$where_sql} at "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY login_time DESC, id DESC LIMIT %d OFFSET %d"'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$where_sql} at "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}"'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.NotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found $table'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.NotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found self'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.NotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found table_name'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.DateTime.CurrentTimeTimestamp.Requested
+		message: 'Calling current_time() with a $type of "timestamp" or "U" is strongly discouraged as it will not return a Unix (UTC) timestamp. Please consider using a non-timestamp format or otherwise refactoring this code.'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''HTTP_USER_AGENT'']'
+		count: 1
+		path: includes\class-wp-auth-ru-login-log.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 10
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.Formatting.DisallowMultipleStatements.SameLine
+		message: Each PHP statement must be on a line by itself
+		count: 2
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 10 spaces but found 7 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 11 spaces but found 8 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 14 spaces but found 11 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 7 spaces but found 4 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 4 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 5 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 153
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_Max
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function extract_user_from_initdata()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function get_bot_url()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function get_rest_routes()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function icon()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function inject_miniapp_js()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function log_subject()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function new_user_role()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function output_styles()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function register_additional_hooks()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function render_button_woo()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function render_button_wp()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function render_checkout_banner()'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.WrongStyle
+		message: You must use "/**" style comments for a function comment
+		count: 3
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace
+		message: Newline required after opening brace
+		count: 4
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Functions.MultiLineFunctionDeclaration.ContentAfterBrace
+		message: Opening brace must be the last content on the line
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterFunction
+		message: Expected 1 space after FUNCTION keyword; 0 found
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.ContentAfterEnd
+		message: Closing PHP tag must be on a line by itself
+		count: 3
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.ContentBeforeOpen
+		message: Opening PHP tag must be on a line by itself
+		count: 4
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Universal.Operators.DisallowShortTernary.Found
+		message: Using short ternaries is not allowed as they are rarely used correctly
+		count: 3
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 8
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		message: 'Hook names invoked by a theme/plugin should start with the theme/plugin prefix. Found: "wp_login".'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$this''.'
+		count: 5
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''REMOTE_ADDR'']'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		message: '$_SERVER[''REMOTE_ADDR''] not unslashed before sanitization. Use wp_unslash() or similar'
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "??"; 2 found
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "??"; 3 found
+		count: 1
+		path: includes\class-wp-auth-ru-max.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 2
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 21 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 207
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_OAuth_Provider
+		count: 1
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		message: 'Hook names invoked by a theme/plugin should start with the theme/plugin prefix. Found: "wp_login".'
+		count: 1
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode
+		message: 'urlencode() should only be used when dealing with legacy applications rawurlencode() should now be used instead. See https://www.php.net/function.rawurlencode and http://www.faqs.org/rfcs/rfc3986.html'
+		count: 3
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
+		message: 'wp_redirect() found. Using wp_safe_redirect(), along with the "allowed_redirect_hosts" filter if needed, can help avoid any chances of malicious redirects within code. It is also important to remember to call exit() after a redirect so that no other unwanted code is executed.'
+		count: 1
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''REMOTE_ADDR'']'
+		count: 1
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		message: '$_SERVER[''REMOTE_ADDR''] not unslashed before sanitization. Use wp_unslash() or similar'
+		count: 1
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "??"; 2 found
+		count: 1
+		path: includes\class-wp-auth-ru-oauth-provider.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 5
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Formatting.DisallowMultipleStatements.SameLine
+		message: Each PHP statement must be on a line by itself
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 19 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 23 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 29 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 30 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 6 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 12 found
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 2 found
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 5 found
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 9 found
+		count: 2
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 306
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 2
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_Provider
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Squiz.Operators.IncrementDecrementUsage.NoBrackets
+		message: Increment and decrement operators must be bracketed when used in string concatenation
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 4
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 10 space(s) between "''IDPG_AUTH_MAX_ENABLED''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 11 space(s) between "''IDPG_AUTH_VK_ENABLED''" and double arrow, but found 9.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''IDPG_AUTH_MAX_BOT_USERNAME''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''IDPG_AUTH_VK_CLIENT_SECRET''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''IDPG_AUTH_YANDEX_CLIENT_ID''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''IDPG_AUTH_COMPLIANCE_MODE''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 7 space(s) between "''IDPG_AUTH_YANDEX_ENABLED''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''IDPG_AUTH_MAX_BOT_TOKEN''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''IDPG_AUTH_VK_CLIENT_ID''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		message: 'Detected usage of meta_key, possible slow query.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		message: 'Detected usage of meta_value, possible slow query.'
+		count: 1
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: WordPress.Security.NonceVerification.Recommended
+		message: Processing form data without nonce verification.
+		count: 2
+		path: includes\class-wp-auth-ru-provider.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $network is never used
+		count: 3
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $password is never used
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $username is never used
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 2 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 3 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 12 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 15 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 2 spaces but found 4 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 3 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 6 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 9 spaces but found 1 space
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 3 found
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 6 found
+		count: 3
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 7 found
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_Security
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function __construct()'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function instance()'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.MissingParamTag
+		message: Doc comment for parameter "$ip" missing
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
+		message: Expected 1 spaces after parameter type; 3 found
+		count: 2
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
+		message: Expected 2 spaces after parameter type; 4 found
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Squiz.Strings.DoubleQuoteUsage.NotRequired
+		message: String "DELETE FROM " does not require double quotes; use single quotes instead
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Squiz.Strings.DoubleQuoteUsage.NotRequired
+		message: 'String "Время:      " does not require double quotes; use single quotes instead'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Squiz.Strings.DoubleQuoteUsage.NotRequired
+		message: 'String "Сайт:       " does not require double quotes; use single quotes instead'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound
+		message: 'It is recommended not to use reserved keyword "default" as function parameter name. Found: $default'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 4
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''critical''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 1 space(s) between "''last_24h''" and double arrow, but found 2.'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''by_type''" and double arrow, but found 3.'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 3 space(s) between "''medium''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 4 space(s) between "''total''" and double arrow, but found 5.'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''high''" and double arrow, but found 6.'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 6 space(s) between "''low''" and double arrow, but found 7.'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 12
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.NoCaching
+		message: 'Direct database call without caching detected. Consider using wp_cache_get() / wp_cache_set() or wp_cache_delete().'
+		count: 11
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$ids_str} at "DELETE FROM {$table} WHERE id IN ({$ids_str})"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$need_to_remove} at "SELECT id FROM {$table} ORDER BY id ASC LIMIT {$need_to_remove}"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "DELETE FROM {$table} WHERE id IN ({$ids_str})"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT COUNT(*) FROM {$table} WHERE created_at >= %s"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT COUNT(*) FROM {$table} WHERE severity = %s"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT COUNT(*) FROM {$table}"'
+		count: 2
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT id FROM {$table} ORDER BY id ASC LIMIT {$need_to_remove}"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT id FROM {$table} WHERE ip = %s AND type = %s AND created_at >= %s LIMIT 1"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "SELECT type, COUNT(*) AS c FROM {$table} GROUP BY type ORDER BY c DESC"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$where_sql} at "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$where_sql} at "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}"'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.NotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found self'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.NotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found table_name'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Security.NonceVerification.Recommended
+		message: Processing form data without nonce verification.
+		count: 4
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''HTTP_USER_AGENT'']'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''REQUEST_METHOD'']'
+		count: 2
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''REQUEST_URI'']'
+		count: 2
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		message: 'Detected usage of a non-sanitized input variable: $_SERVER[''SCRIPT_NAME'']'
+		count: 1
+		path: includes\class-wp-auth-ru-security.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 5 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 8 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 17 found
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma
+		message: Expected 1 space after comma in argument list; 27 found
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 145
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_Updater
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function __construct()'
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.WrongStyle
+		message: You must use "/**" style comments for a function comment
+		count: 5
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Squiz.Commenting.InlineComment.InvalidEndChar
+		message: 'Inline comments must end in full-stops, exclamation marks, or question marks'
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Squiz.Commenting.VariableComment.Missing
+		message: Missing member variable doc comment
+		count: 7
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Squiz.PHP.DisallowSizeFunctionsInLoops.Found
+		message: 'The use of count() inside a loop condition is not allowed; assign the return value to a variable and use the variable in the loop condition instead'
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Universal.ControlStructures.DisallowLonelyIf.Found
+		message: If control structure block found as the only statement within an "else" block. Use elseif instead.
+		count: 1
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: WordPress.PHP.YodaConditions.NotYoda
+		message: 'Use Yoda Condition checks, you must.'
+		count: 3
+		path: includes\class-wp-auth-ru-updater.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 3
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.IncorrectWarning
+		message: Equals sign not aligned correctly; expected 1 space but found 11 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 1 space but found 5 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 10 spaces but found 14 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 10 spaces but found 7 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 11 spaces but found 8 spaces
+		count: 3
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 13 spaces but found 10 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 14 spaces but found 11 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 2 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 7 spaces but found 4 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 5 spaces
+		count: 3
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 9 spaces but found 6 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 280
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 6
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 6
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 7
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_VK
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function auth_params()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function email_required()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function exchange_code_for_token()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function get_rest_routes()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function get_user_profile()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function icon()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function log_subject()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function no_callback_message()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function no_email_message()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function normalize_profile()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function output_styles()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function render_button_woo()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function render_button_wp()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function render_checkout_banner()'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.ContentAfterEnd
+		message: Closing PHP tag must be on a line by itself
+		count: 3
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Squiz.PHP.EmbeddedPhp.ContentBeforeOpen
+		message: Opening PHP tag must be on a line by itself
+		count: 4
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Universal.Operators.DisallowShortTernary.Found
+		message: Using short ternaries is not allowed as they are rarely used correctly
+		count: 2
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''methods''". Found: 4 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 3
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 2 space(s) between "''redirect_uri''" and double arrow, but found 1.'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''client_id''" and double arrow, but found 4.'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''scope''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''state''" and double arrow, but found 8.'
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		message: 'base64_encode() can be used to obfuscate code which is strongly discouraged. Please verify that the function is used for benign reasons.'
+		count: 2
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$this''.'
+		count: 3
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.Security.NonceVerification.Recommended
+		message: Processing form data without nonce verification.
+		count: 8
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "??"; 2 found
+		count: 2
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "??"; 5 found
+		count: 2
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "??"; 6 found
+		count: 1
+		path: includes\class-wp-auth-ru-vk.php
+
+	-
+		sniff: Generic.ControlStructures.InlineControlStructure.NotAllowed
+		message: Inline control structures are not allowed
+		count: 3
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 10 spaces but found 7 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 11 spaces but found 8 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 13 spaces but found 10 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 14 spaces but found 11 spaces
+		count: 2
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 5 spaces but found 2 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 7 spaces but found 4 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 5 spaces
+		count: 3
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
+		message: Equals sign not aligned with surrounding assignments; expected 9 spaces but found 6 spaces
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 158
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.CloseBracketLine
+		message: Closing parenthesis of a multi-line function call must be on a line by itself
+		count: 2
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket
+		message: Opening parenthesis of a multi-line function call must be the last content on the line
+		count: 2
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: PEAR.Functions.FunctionCallSignature.MultipleArguments
+		message: Only one argument is allowed per line in a multi-line function call
+		count: 2
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.ClassComment.Missing
+		message: Missing doc comment for class WP_Auth_Ru_Yandex
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function auth_params()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function email_required()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function exchange_code_for_token()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function get_rest_routes()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function get_user_profile()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function log_subject()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function no_callback_message()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function no_email_message()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function normalize_profile()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function output_styles()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function render_button_woo()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function render_button_wp()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function render_checkout_banner()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function sync_email_on_login()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Squiz.Commenting.FunctionComment.Missing
+		message: 'Missing doc comment for function yandex_icon()'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Universal.Operators.DisallowShortTernary.Found
+		message: Using short ternaries is not allowed as they are rarely used correctly
+		count: 4
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
+		message: 'Expected 1 space between the comma and "''methods''". Found: 4 spaces'
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 3
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: WordPress.Security.EscapeOutput.OutputNotEscaped
+		message: 'All output should be run through an escaping function (see the Security sections in the WordPress Developer Handbooks), found ''$this''.'
+		count: 3
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: WordPress.Security.NonceVerification.Recommended
+		message: Processing form data without nonce verification.
+		count: 4
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "??"; 2 found
+		count: 2
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "??"; 5 found
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: WordPress.WhiteSpace.OperatorSpacing.SpacingBefore
+		message: Expected 1 space before "??"; 6 found
+		count: 1
+		path: includes\class-wp-auth-ru-yandex.php
+
+	-
+		sniff: Modernize.FunctionCalls.Dirname.FileConstant
+		message: 'Use the __DIR__ constant instead of calling dirname(__FILE__) (PHP >= 5.3)'
+		count: 1
+		path: tests\bootstrap.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: tests\bootstrap.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
+		message: 'Global constants defined by a theme/plugin should start with the theme/plugin prefix. Found: "WP_TESTS_PHPUNIT_POLYFILLS_PATH".'
+		count: 1
+		path: tests\bootstrap.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		message: 'Functions declared in the global namespace by a theme/plugin should start with the theme/plugin prefix. Found: "_manually_load_plugin".'
+		count: 1
+		path: tests\bootstrap.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$_phpunit_polyfills_path".'
+		count: 1
+		path: tests\bootstrap.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$_tests_dir".'
+		count: 2
+		path: tests\bootstrap.php
+
+	-
+		sniff: PSR2.Files.EndFileNewline.NoneFound
+		message: Expected 1 newline at end of file; 0 found
+		count: 1
+		path: tests\test-social-roles.php
+
+	-
+		sniff: Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
+		message: Tabs must be used to indent lines; spaces are not allowed
+		count: 23
+		path: uninstall.php
+
+	-
+		sniff: Squiz.Commenting.FileComment.MissingPackageTag
+		message: Missing @package tag in file comment
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.DirectQuery
+		message: Use of a direct database call is discouraged.
+		count: 2
+		path: uninstall.php
+
+	-
+		sniff: WordPress.DB.DirectDatabaseQuery.NoCaching
+		message: 'Direct database call without caching detected. Consider using wp_cache_get() / wp_cache_set() or wp_cache_delete().'
+		count: 2
+		path: uninstall.php
+
+	-
+		sniff: WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		message: 'Use placeholders and $wpdb->prepare(); found interpolated variable {$table} at "DROP TABLE IF EXISTS {$table}"'
+		count: 2
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$meta_key".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$meta_keys".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$site_id".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$sites".'
+		count: 1
+		path: uninstall.php
+
+	-
+		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$table".'
+		count: 2
+		path: uninstall.php
+
+

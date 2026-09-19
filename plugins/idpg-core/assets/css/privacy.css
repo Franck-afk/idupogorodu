@@ -1,0 +1,162 @@
+/**
+ * Cookie-баннер и блок прав субъекта (модуль IDPG_Privacy).
+ */
+
+/* ------------------------------------------------------------------ */
+/* Cookie-баннер                                                       */
+/* ------------------------------------------------------------------ */
+
+.idpg-cookie {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 9999;
+	padding: 16px;
+	background: var(--idpg-canvas, #fff);
+	border-top: 1px solid var(--idpg-hairline, #dee1e6);
+	box-shadow: 0 -8px 28px rgba(10, 11, 13, 0.12);
+}
+
+.idpg-cookie__form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 20px;
+	align-items: center;
+	justify-content: space-between;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.idpg-cookie__text {
+	flex: 1 1 380px;
+	margin: 0;
+	font-size: 0.875rem;
+	line-height: 1.55;
+	color: var(--idpg-body, #5b616e);
+}
+
+.idpg-cookie__policy {
+	color: var(--idpg-primary, #0052ff);
+	text-decoration: underline;
+}
+
+.idpg-cookie__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.idpg-cookie__btn {
+	padding: 10px 18px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	line-height: 1.2;
+	color: var(--idpg-ink, #0a0b0d);
+	background: var(--idpg-canvas, #fff);
+	border: 1px solid var(--idpg-hairline, #dee1e6);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.idpg-cookie__btn:hover {
+	border-color: var(--idpg-primary, #0052ff);
+}
+
+.idpg-cookie__btn--primary {
+	color: var(--idpg-on-primary, #fff);
+	background: var(--idpg-primary, #0052ff);
+	border-color: var(--idpg-primary, #0052ff);
+}
+
+.idpg-cookie__btn--primary:hover {
+	background: var(--idpg-primary-active, #003ecc);
+	border-color: var(--idpg-primary-active, #003ecc);
+}
+
+@media (max-width: 600px) {
+	.idpg-cookie__actions {
+		width: 100%;
+	}
+
+	.idpg-cookie__btn {
+		flex: 1 1 auto;
+	}
+}
+
+/* ------------------------------------------------------------------ */
+/* Блок «Ваши права» на странице политики конфиденциальности           */
+/* ------------------------------------------------------------------ */
+
+.idpg-privacy-tools {
+	margin: 32px 0;
+	padding: 24px;
+	background: var(--idpg-surface-soft, #f7f7f7);
+	border: 1px solid var(--idpg-hairline, #dee1e6);
+	border-radius: 12px;
+}
+
+.idpg-privacy-tools__title {
+	margin: 0 0 12px;
+	font-size: 1.25rem;
+	color: var(--idpg-ink, #0a0b0d);
+}
+
+.idpg-privacy-tools__text {
+	margin: 0 0 12px;
+	color: var(--idpg-body, #5b616e);
+}
+
+.idpg-privacy-tools__link {
+	color: var(--idpg-primary, #0052ff);
+	text-decoration: underline;
+}
+
+.idpg-privacy-tools__note {
+	margin: 12px 0 0;
+	padding: 12px 14px;
+	border-left: 3px solid var(--idpg-muted, #7c828a);
+	background: var(--idpg-canvas, #fff);
+	color: var(--idpg-body, #5b616e);
+}
+
+.idpg-privacy-tools__note--ok {
+	border-left-color: var(--idpg-up, #05b169);
+}
+
+.idpg-privacy-tools__note--error {
+	border-left-color: var(--idpg-error-text, #d63638);
+	color: var(--idpg-error-text, #d63638);
+}
+
+.idpg-privacy-tools__form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	align-items: flex-start;
+	margin-top: 16px;
+}
+
+.idpg-privacy-tools__checkbox {
+	display: flex;
+	gap: 8px;
+	align-items: flex-start;
+	font-size: 0.9375rem;
+	color: var(--idpg-body, #5b616e);
+}
+
+.idpg-privacy-tools__submit {
+	padding: 10px 18px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--idpg-ink, #0a0b0d);
+	background: var(--idpg-canvas, #fff);
+	border: 1px solid var(--idpg-hairline, #dee1e6);
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.idpg-privacy-tools__submit:hover {
+	border-color: var(--idpg-down, #cf202f);
+}

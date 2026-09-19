@@ -1,0 +1,289 @@
+/* =========================================================
+   Виджет «Календарь событий» (IDPG)
+   цветовые схемы: is-light (по умолчанию) / is-dark / is-brand
+   ========================================================= */
+.idpg-cal {
+  --cal-bg: #fff;
+  --cal-border: #dee1e6;
+  --cal-text: #0a0b0d;
+  --cal-muted: #7c828a;
+  --cal-accent: #0052ff;
+  --cal-accent-soft: #e8eefe;
+  --cal-cell-hover: #f7f7f7;
+  --cal-today: #d9e3ff;
+  --cal-today-border: #0052ff;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Тёмная схема */
+.idpg-cal.is-dark {
+  --cal-bg: #16181c;
+  --cal-border: rgba(255, 255, 255, 0.12);
+  --cal-text: #ffffff;
+  --cal-muted: #a8acb3;
+  --cal-accent: #85adff;
+  --cal-accent-soft: rgba(133, 173, 255, 0.14);
+  --cal-cell-hover: #22252b;
+  --cal-today: rgba(133, 173, 255, 0.22);
+  --cal-today-border: #85adff;
+}
+
+/* Фирменная схема */
+.idpg-cal.is-brand {
+  --cal-accent: #0052ff;
+  --cal-accent-soft: #e8eefe;
+  --cal-today: #d9e3ff;
+  --cal-today-border: #0052ff;
+}
+
+/* --- Навигация --- */
+.idpg-cal__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cal-text);
+}
+
+.idpg-cal__nav-btn {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--cal-muted);
+  background: transparent;
+  border: 1px solid var(--cal-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.idpg-cal__nav-btn:hover {
+  color: var(--cal-accent);
+  background: var(--cal-cell-hover);
+}
+
+.idpg-cal__nav-btn:focus-visible {
+  outline: 2px solid var(--cal-accent);
+  outline-offset: 1px;
+}
+
+.idpg-cal__title {
+  flex: 1 1 auto;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.idpg-cal__export {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  color: var(--cal-muted);
+  text-decoration: none;
+  padding: 5px 9px;
+  border: 1px solid var(--cal-border);
+  border-radius: 6px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.idpg-cal__export:hover {
+  color: var(--cal-accent);
+  border-color: var(--cal-accent);
+}
+
+/* --- Сетка --- */
+.idpg-cal__grid,
+.idpg-cal__weekgrid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.idpg-cal__dow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.idpg-cal__dow-cell {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--cal-muted);
+  padding-bottom: 4px;
+}
+
+.idpg-cal__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.idpg-cal__weekgrid .idpg-cal__cell {
+  min-height: 56px;
+}
+
+.idpg-cal__cell {
+  position: relative;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px 2px;
+  color: var(--cal-text);
+  background: var(--cal-bg);
+  border: 1px solid var(--cal-border);
+  border-radius: 8px;
+  cursor: default;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.idpg-cal__cell.is-empty {
+  background: transparent;
+  border-color: transparent;
+}
+
+.idpg-cal__cell.is-today {
+  background: var(--cal-today);
+  border-color: var(--cal-today-border);
+}
+
+.idpg-cal__cell.has-events {
+  cursor: pointer;
+}
+
+.idpg-cal__cell.has-events:hover {
+  background: var(--cal-accent-soft);
+  border-color: var(--cal-accent);
+}
+
+.idpg-cal__day-link {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cal-text);
+  text-decoration: none;
+}
+
+.idpg-cal__cell.has-events .idpg-cal__day-link {
+  color: var(--cal-accent);
+}
+
+.idpg-cal__cell.has-events .idpg-cal__day-link:hover {
+  text-decoration: underline;
+}
+
+.idpg-cal__day-num {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--cal-muted);
+}
+
+/* --- Блок событий дня (под календарём) --- */
+.idpg-cal__detail {
+  margin-top: 4px;
+  border-top: 1px dashed var(--cal-border);
+  padding-top: 10px;
+}
+
+.idpg-cal__detail:empty {
+  display: none;
+}
+
+.idpg-cal__detail-title {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--cal-muted);
+}
+
+.idpg-cal__detail-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.idpg-cal__detail-item a {
+  font-size: 0.85rem;
+  color: var(--cal-text);
+  text-decoration: none;
+}
+
+.idpg-cal__detail-item a:hover {
+  color: var(--cal-accent);
+  text-decoration: underline;
+}
+
+/* --- Список (режим) --- */
+.idpg-cal__list {
+  margin: 0;
+  padding: 0 0 0 18px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.idpg-cal__list-item {
+  font-size: 0.9rem;
+}
+
+.idpg-cal__list-date {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--cal-muted);
+  font-weight: 600;
+}
+
+.idpg-cal__list-link {
+  color: var(--cal-text);
+  text-decoration: none;
+}
+
+.idpg-cal__list-link:hover {
+  color: var(--cal-accent);
+  text-decoration: underline;
+}
+
+.idpg-cal__none {
+  margin: 0;
+  color: var(--cal-muted);
+  font-size: 0.9rem;
+}
+
+/* --- Адаптивность --- */
+@media (max-width: 480px) {
+  .idpg-cal__title {
+    font-size: 0.85rem;
+  }
+
+  .idpg-cal__export {
+    font-size: 0.7rem;
+    padding: 4px 6px;
+  }
+
+  .idpg-cal__cell {
+    min-height: 40px;
+    padding: 4px 1px;
+  }
+
+  .idpg-cal__weekgrid .idpg-cal__cell {
+    min-height: 48px;
+  }
+
+  .idpg-cal__day-link,
+  .idpg-cal__day-num {
+    font-size: 0.8rem;
+  }
+}

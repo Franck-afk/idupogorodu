@@ -1,0 +1,404 @@
+@use '../base/variables' as *;
+
+// ============================================================================
+// Страница авторизации (вход / регистрация / восстановление пароля)
+// BEM-блок: .auth
+// ============================================================================
+
+// -- Тело страницы (без хедера и футера) ------------------------------------
+.auth-body {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	padding: 24px 16px;
+	background-color: $color-bg-light;
+
+	// iOS Safari: адресная строка перекрывает 100vh
+	@supports (min-height: 100dvh) {
+		min-height: 100dvh;
+	}
+}
+
+.auth {
+	// -- Центрирование карточки -----------------------------------------------
+	display: flex;
+	justify-content: center;
+	padding: 24px 16px;
+
+	@media ( min-width: $breakpoint-tablet ) {
+		padding-top: 64px;
+	}
+
+	// -- Карточка -------------------------------------------------------------
+	&__card {
+		width: 100%;
+		max-width: 440px;
+		background: $color-bg;
+		border-radius: $border-radius;
+		box-shadow: $shadow-lg;
+		padding: 24px;
+
+		@media ( min-width: $breakpoint-tablet ) {
+			padding: 32px;
+		}
+	}
+
+	// -- Шапка (лого + заголовок) ---------------------------------------------
+	&__header {
+		text-align: center;
+		margin-bottom: 24px;
+	}
+
+	&__logo-link {
+		display: inline-block;
+		margin-bottom: 16px;
+	}
+
+	&__logo-text {
+		font-family: $font-family-display;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: $color-primary;
+	}
+
+	&__title {
+		font-size: $font-size-lg;
+		font-weight: 600;
+		color: $color-text;
+		margin: 0;
+	}
+
+	// -- Сообщение ------------------------------------------------------------
+	&__message {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		padding: 12px 16px;
+		border-radius: 8px;
+		margin-bottom: 16px;
+		font-size: $font-size-sm;
+		line-height: 1.4;
+		animation: auth-fade-in 0.3s ease;
+
+		&[hidden] {
+			display: none;
+		}
+
+		// Типы сообщений.
+		&--success {
+			background: #ecfdf5;
+			color: #065f46;
+			border: 1px solid #a7f3d0;
+		}
+
+		&--error {
+			background: #fef2f2;
+			color: #991b1b;
+			border: 1px solid #fecaca;
+		}
+	}
+
+	&__message-text {
+		flex: 1;
+		margin: 0;
+	}
+
+	&__message-close {
+		flex-shrink: 0;
+		background: none;
+		border: none;
+		font-size: 1.25rem;
+		line-height: 1;
+		cursor: pointer;
+		padding: 0 4px;
+		opacity: 0.7;
+		color: inherit;
+		transition: opacity $transition-fast;
+
+		&:hover {
+			opacity: 1;
+		}
+	}
+
+	// -- Табы -----------------------------------------------------------------
+	&__tabs {
+		display: flex;
+		border-bottom: 1px solid $color-border;
+		margin-bottom: 24px;
+		gap: 4px;
+
+		@media (max-width: 480px) {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			flex-wrap: nowrap;
+			scrollbar-width: none;
+
+			&::-webkit-scrollbar {
+				display: none;
+			}
+		}
+	}
+
+	&__tab {
+		flex: 1;
+		padding: 10px 4px;
+		font-size: $font-size-sm;
+		font-weight: 500;
+		color: $color-text-muted;
+		cursor: pointer;
+		background: none;
+		border: none;
+		border-bottom: 2px solid transparent;
+		margin-bottom: -1px;
+		white-space: nowrap;
+		transition:
+			color $transition-fast,
+			border-color $transition-fast;
+
+		@media (max-width: 480px) {
+			flex: 0 0 auto;
+			padding: 10px 12px;
+		}
+
+		&:hover {
+			color: $color-text-secondary;
+		}
+
+		&--active {
+			color: $color-primary;
+			border-bottom-color: $color-primary;
+		}
+	}
+
+	// -- Панели форм (fade-переключение) --------------------------------------
+	&__panel {
+		opacity: 0;
+		visibility: hidden;
+		max-height: 0;
+		overflow: hidden;
+		transition:
+			opacity $transition-normal,
+			visibility $transition-normal,
+			max-height $transition-normal;
+
+		&--active {
+			opacity: 1;
+			visibility: visible;
+			max-height: 2000px;
+		}
+	}
+
+	// -- Форма -----------------------------------------------------------------
+	&__form {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	// -- Поле -----------------------------------------------------------------
+	&__field {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+
+		&--horizontal {
+			flex-direction: row;
+			align-items: center;
+		}
+	}
+
+	// -- Метка ----------------------------------------------------------------
+	&__label {
+		font-size: $font-size-sm;
+		font-weight: 500;
+		color: $color-text-secondary;
+	}
+
+	// -- Инпут ----------------------------------------------------------------
+	&__input {
+		width: 100%;
+		padding: 10px 16px;
+		font-size: $font-size-base;
+		color: $color-text;
+		background: $color-bg;
+		border: 1px solid $color-border;
+		border-radius: 8px;
+		transition:
+			border-color $transition-fast,
+			box-shadow $transition-fast;
+		outline: none;
+
+		&::placeholder {
+			color: $color-text-muted;
+		}
+
+		&:focus {
+			border-color: $color-primary;
+			box-shadow: 0 0 0 3px rgba($color-primary, 0.15);
+		}
+
+		// Ошибка (выставляется JS).
+		&.border-red-500 {
+			border-color: #ef4444;
+
+			&:focus {
+				border-color: #ef4444;
+				box-shadow: 0 0 0 3px rgba(#ef4444, 0.15);
+			}
+		}
+	}
+
+	// -- Текст ошибки под полем -----------------------------------------------
+	&__field-error {
+		font-size: 0.75rem;
+		color: #dc2626;
+		margin-top: 2px;
+	}
+
+	// -- Чекбокс --------------------------------------------------------------
+	&__checkbox-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		cursor: pointer;
+		font-size: $font-size-sm;
+		color: $color-text-secondary;
+	}
+
+	&__checkbox {
+		width: 16px;
+		height: 16px;
+		border-radius: 4px;
+		border: 1px solid $color-border;
+		accent-color: $color-primary;
+		cursor: pointer;
+		flex-shrink: 0;
+	}
+
+	&__checkbox-text {
+		line-height: 1.4;
+	}
+
+	// -- Кнопка отправки -------------------------------------------------------
+	&__submit {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		padding: 12px 24px;
+		font-size: $font-size-base;
+		font-weight: 600;
+		color: #fff;
+		background: $color-primary;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		transition:
+			background $transition-fast,
+			opacity $transition-fast;
+
+		&:hover {
+			background: $color-primary-hover;
+		}
+
+		&:active {
+			transform: scale(0.98);
+		}
+
+		// Состояние загрузки (выставляется JS).
+		&--loading {
+			opacity: 0.7;
+			cursor: not-allowed;
+			pointer-events: none;
+
+			.auth__submit-text {
+				visibility: hidden;
+			}
+
+			.auth__spinner {
+				display: block;
+			}
+		}
+	}
+
+	&__submit-text {
+		display: inline;
+	}
+
+	// -- Спиннер --------------------------------------------------------------
+	&__spinner {
+		display: none;
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		border: 2px solid rgba(#fff, 0.3);
+		border-top-color: #fff;
+		border-radius: 50%;
+		animation: auth-spin 0.6s linear infinite;
+	}
+
+	// -- Ссылки ---------------------------------------------------------------
+	&__link {
+		color: $color-primary;
+		text-decoration: none;
+		font-size: $font-size-sm;
+		transition: color $transition-fast;
+
+		&:hover {
+			color: $color-primary-hover;
+			text-decoration: underline;
+		}
+	}
+
+	// -- Ссылка в футере формы ------------------------------------------------
+	&__footer-link {
+		text-align: center;
+		margin: 0;
+
+		.auth__link {
+			font-size: $font-size-sm;
+		}
+	}
+
+	// -- Описание (для forgot) ------------------------------------------------
+	&__description {
+		font-size: $font-size-sm;
+		color: $color-text-muted;
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	// -- Подсказка (организатор) ----------------------------------------------
+	&__hint {
+		font-size: 0.75rem;
+		color: $color-text-muted;
+		margin: 0;
+		line-height: 1.4;
+		padding: 8px 12px;
+		background: $color-primary-light;
+		border-radius: 6px;
+	}
+}
+
+// ============================================================================
+// Анимации
+// ============================================================================
+
+@keyframes auth-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes auth-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}

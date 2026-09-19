@@ -1,0 +1,164 @@
+/**
+ * Стили редактора Gutenberg для CPT event / venue.
+ *
+ * Приводит метабоксы Carbon Fields (заголовки, вкладки, поля)
+ * к аккуратному виду в блочном редакторе.
+ */
+
+/* =============================================================================
+ * Метабоксы Carbon Fields
+ * ========================================================================== */
+.post-type-event .block-editor .postbox,
+.post-type-venue .block-editor .postbox {
+	border: 1px solid #dcdcde;
+	background: #fff;
+	box-shadow: none;
+}
+
+.post-type-event .block-editor .postbox-header,
+.post-type-venue .block-editor .postbox-header {
+	border-bottom: 1px solid #dcdcde;
+	padding: 10px 12px;
+}
+
+.post-type-event .block-editor .postbox-header h2,
+.post-type-venue .block-editor .postbox-header h2 {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: #1d2327;
+}
+
+.post-type-event .block-editor .inside,
+.post-type-venue .block-editor .inside {
+	padding: 14px;
+}
+
+/* Общий контейнер полей: аккуратные отступы */
+.post-type-event .block-editor .cf-container,
+.post-type-venue .block-editor .cf-container {
+	margin: 0;
+}
+
+.post-type-event .block-editor .cf-container__fields .cf-field,
+.post-type-venue .block-editor .cf-container__fields .cf-field {
+	margin-bottom: 16px;
+}
+
+/* =============================================================================
+ * Вкладки контейнера (add_tab)
+ * ========================================================================== */
+.block-editor .cf-container--tabbed .cf-container__tabs {
+	margin-bottom: 16px;
+}
+
+.block-editor .cf-container__tabs-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0;
+	list-style: none;
+}
+
+.block-editor .cf-container__tabs-item {
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+}
+
+.block-editor .cf-container__tabs-item > button {
+	display: block;
+	width: 100%;
+	padding: 8px 14px;
+	border: 1px solid #ccd0d4;
+	border-radius: 3px;
+	background: #f6f7f7;
+	color: #1d2327;
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	box-shadow: none;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.block-editor .cf-container__tabs-item > button:hover {
+	background: #fff;
+	border-color: #2271b1;
+	color: #1d2327;
+}
+
+.block-editor .cf-container__tabs-item--current > button {
+	border-color: #2271b1;
+	background: #2271b1;
+	color: #fff;
+}
+
+.block-editor .cf-container__tabs-item--current > button:hover {
+	color: #fff;
+}
+
+/* В узкой боковой панели вкладки раскладываются одна на другую на всю ширину */
+.post-type-event .edit-post-sidebar .cf-container__tabs-item,
+.post-type-venue .edit-post-sidebar .cf-container__tabs-item {
+	flex: 1 1 100%;
+	max-width: 100%;
+}
+
+/* Убираем нижний скроллбар боковой панели редактора */
+.edit-post-sidebar,
+.block-editor-sidebar__panel,
+.cf-container__fields {
+	overflow-y: hidden !important;
+}
+
+/* =============================================================================
+ * Все вкладки контейнера Carbon Fields открыты при загрузке страницы
+ * ========================================================================== */
+/* Показываем содержимое всех вкладок сразу: поля вкладок «Место проведения»
+ * и «Дополнительно» видны организатору без переключения. Скрываем панель
+ * навигации вкладок, чтобы переключение не путало пользователя. */
+.post-type-event .cf-container--tabbed .cf-container__tabs,
+.post-type-venue .cf-container--tabbed .cf-container__tabs {
+	display: none;
+}
+
+.post-type-event .cf-container--tabbed .cf-container__fields,
+.post-type-venue .cf-container--tabbed .cf-container__fields {
+	display: block !important;
+}
+
+/* =============================================================================
+ * Памятка по заполнению события (метабокс в редакторе события)
+ * ========================================================================== */
+#idpg_editor_help .inside {
+	padding: 0;
+	margin: 0;
+}
+
+#idpg_editor_help .idpg-editor-help {
+	background: #fff8e5;
+	border-top: 4px solid #f0a500;
+}
+
+.idpg-editor-help__list {
+	margin: 0;
+	padding: 12px 16px 14px 36px;
+}
+
+.idpg-editor-help__list li {
+	margin: 6px 0;
+	line-height: 1.55;
+	color: #2c3338;
+	font-size: 13px;
+}
+
+.idpg-editor-help__list li:first-child {
+	margin-top: 0;
+}
+
+.idpg-editor-help__list li:last-child {
+	margin-bottom: 0;
+}
