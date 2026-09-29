@@ -1,0 +1,111 @@
+// ============================================================================
+// search
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+.idpg-search {
+  display: none;
+}
+.idpg-search-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--idpg-hairline);
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+  color: var(--idpg-ink);
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.idpg-search-toggle:hover, .idpg-search-toggle:focus {
+  border-color: var(--idpg-hairline);
+  background-color: var(--idpg-surface-soft);
+}
+.idpg-search-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: var(--idpg-canvas);
+  padding: env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px);
+  flex-direction: column;
+}
+.idpg-search-overlay--open {
+  display: flex;
+}
+.idpg-search-overlay__inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.idpg-search-overlay__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--idpg-hairline);
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+  color: var(--idpg-ink);
+  flex-shrink: 0;
+  transition: border-color 0.2s ease;
+}
+.idpg-search-overlay__close:hover, .idpg-search-overlay__close:focus {
+  border-color: var(--idpg-hairline);
+}
+.idpg-search-overlay__form {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  height: 44px;
+}
+.idpg-search-overlay__icon {
+  position: absolute;
+  left: 14px;
+  color: var(--idpg-muted);
+  pointer-events: none;
+}
+.idpg-search-overlay__input {
+  width: 100%;
+  height: 100%;
+  padding: 0 16px 0 44px;
+  background: var(--idpg-surface-soft);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: 12px;
+  font-family: "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem;
+  color: var(--idpg-ink);
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.idpg-search-overlay__input::placeholder {
+  color: var(--idpg-muted);
+}
+.idpg-search-overlay__input:focus {
+  background-color: var(--idpg-canvas);
+  border-color: var(--idpg-primary);
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.1);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

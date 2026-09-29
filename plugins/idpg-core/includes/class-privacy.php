@@ -76,6 +76,26 @@ class IDPG_Privacy {
 	const META_DELETE_REQUEST = 'idpg_delete_requested_at';
 
 	/**
+	 * Ключ user meta с записью об отзыве согласия.
+	 *
+	 * Отзыв пишется ОТДЕЛЬНОЙ записью, а не затирает `META_CONSENT`:
+	 * факт того, что согласие когда-то было дано и позже отозвано, сам по
+	 * себе является персональными данными, которые нужно хранить (ст. 5
+	 * 152-ФЗ), и без него нельзя доказать, как именно субъект распоряжался
+	 * своим согласием.
+	 *
+	 * @var string
+	 */
+	const META_WITHDRAWAL = '_idpg_pdn_consent_withdrawn';
+
+	/**
+	 * Nonce-действие формы отзыва согласия (фронтенд).
+	 *
+	 * @var string
+	 */
+	const WITHDRAW_NONCE = 'idpg_privacy_withdraw';
+
+	/**
 	 * Имя cookie с выбором в баннере.
 	 *
 	 * @var string
@@ -166,6 +186,9 @@ class IDPG_Privacy {
 		// Запрос субъекта на удаление данных (фронтенд).
 		add_action( 'template_redirect', array( $this, 'handle_subject_request' ) );
 
+		// Отзыв согласия на обработку ПДн (фронтенд).
+		add_action( 'template_redirect', array( $this, 'handle_subject_withdraw' ) );
+
 		// Самостоятельная выгрузка своих данных авторизованным пользователем.
 		add_action( 'admin_post_idpg_privacy_self_export', array( $this, 'handle_self_export' ) );
 
@@ -216,15 +239,91 @@ class IDPG_Privacy {
 		$record = apply_filters( 'idpg_privacy_consent_record', $record, $user_id );
 
 		update_user_meta( $user_id, self::META_CONSENT, $record );
+
+		// Новое согласие снимает прежний отзыв: иначе has_consent() продолжал бы
+		// возвращать false, хотя согласие снова получено. Запись — массив,
+		// поэтому приводить к строке нельзя.
+		$withdrawal = get_user_meta( $user_id, self::META_WITHDRAWAL, true );
+
+		if ( is_array( $withdrawal ) && ! empty( $withdrawal ) ) {
+			delete_user_meta( $user_id, self::META_WITHDRAWAL );
+		}
+	}
+
+	/**
+	 * Фиксирует отзыв согласия на обработку персональных данных.
+	 *
+	 * Запись о самом согласии не затирается (см. META_WITHDRAWAL): нужен след,
+	 * что согласие было дано и затем отозвано. Повторный отзыв перезаписывает
+	 * метку последним обращением, но не плодит дубликаты.
+	 *
+	 * @param int $user_id ID пользователя.
+	 * @return bool Записан ли отзыв.
+	 */
+	public static function withdraw_consent( $user_id ) {
+		$user_id = (int) $user_id;
+
+		if ( $user_id <= 0 ) {
+			return false;
+		}
+
+		$record = array(
+			'at'      => current_time( 'mysql' ),
+			'version' => self::instance()->get_consent_version(),
+			'ip_hash' => self::instance()->hash_client_ip(),
+		);
+
+		update_user_meta( $user_id, self::META_WITHDRAWAL, $record );
+
+		/**
+		 * Действие после отзыва согласия на обработку ПДн.
+		 *
+		 * @param int   $user_id ID пользователя, отозвавшего согласие.
+		 * @param array $record  Запись об отзыве.
+		 */
+		do_action( 'idpg_privacy_consent_withdrawn', $user_id, $record );
+
+		return true;
+	}
+
+	/**
+	 * Было ли согласие отозвано.
+	 *
+	 * @param int $user_id ID пользователя.
+	 * @return bool
+	 */
+	public static function is_withdrawn( $user_id ) {
+		$record = get_user_meta( (int) $user_id, self::META_WITHDRAWAL, true );
+
+		return is_array( $record ) && ! empty( $record['at'] );
+	}
+
+	/**
+	 * Запись об отзыве согласия.
+	 *
+	 * @param int $user_id ID пользователя.
+	 * @return array Пустой массив, если отзыва не было.
+	 */
+	public static function get_withdrawal( $user_id ) {
+		$record = get_user_meta( (int) $user_id, self::META_WITHDRAWAL, true );
+
+		return is_array( $record ) ? $record : array();
 	}
 
 	/**
 	 * Проверяет, дано ли пользователем согласие на обработку ПДн.
 	 *
+	 * Отозванное согласие не считается действующим: чтение этой функции
+	 * должно означать «можно обрабатывать данные прямо сейчас».
+	 *
 	 * @param int $user_id ID пользователя.
 	 * @return bool
 	 */
 	public static function has_consent( $user_id ) {
+		if ( self::is_withdrawn( $user_id ) ) {
+			return false;
+		}
+
 		$record = get_user_meta( (int) $user_id, self::META_CONSENT, true );
 
 		return ( is_array( $record ) && ! empty( $record['given'] ) );
@@ -537,6 +636,56 @@ class IDPG_Privacy {
 	}
 
 	/**
+	 * Обработка отзыва согласия на обработку персональных данных.
+	 *
+	 * Субъект отзывает согласие через форму на /privacy/. Требуется
+	 * авторизация, nonce и явное подтверждение — отзыв необратим из
+	 * интерфейса (согласие заново не даётся), поэтому ошибочный клик
+	 * должен быть невозможен.
+	 *
+	 * @return void
+	 */
+	public function handle_subject_withdraw() {
+		if ( is_admin() || 'POST' !== ( isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '' ) ) {
+			return;
+		}
+
+		if ( ! isset( $_POST['idpg_privacy_withdraw_submit'] ) ) {
+			return;
+		}
+
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		if ( ! isset( $_POST['idpg_privacy_withdraw_nonce'] )
+			|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['idpg_privacy_withdraw_nonce'] ) ), self::WITHDRAW_NONCE ) ) {
+			return;
+		}
+
+		// Как и в handle_subject_request(): required в разметке без JS не
+		// проверяется, а POST можно подделать — поэтому подтверждение
+		// проверяем на сервере.
+		$confirm = ( isset( $_POST['idpg_privacy_withdraw_confirm'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['idpg_privacy_withdraw_confirm'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- nonce проверен выше.
+
+		if ( ! $confirm ) {
+			wp_safe_redirect(
+				add_query_arg( 'idpg_withdraw', 'confirm', home_url( $this->current_request_path() ) )
+			);
+			exit;
+		}
+
+		$user_id = get_current_user_id();
+
+		self::withdraw_consent( $user_id );
+
+		wp_safe_redirect(
+			add_query_arg( 'idpg_withdraw', 'ok', home_url( $this->current_request_path() ) )
+		);
+		exit;
+	}
+
+	/**
 	 * Письмо администратору о запросе на удаление данных.
 	 *
 	 * @param int $user_id ID пользователя.
@@ -618,6 +767,8 @@ class IDPG_Privacy {
 
 		echo '<p><a class="idpg-privacy-tools__link" href="' . esc_url( $export_url ) . '">' . esc_html__( 'Скачать мои данные (JSON)', 'idpg-core' ) . '</a></p>';
 
+		$this->render_withdraw_block();
+
 		if ( $requested ) {
 			echo '<p class="idpg-privacy-tools__note">' . esc_html__( 'Запрос на удаление данных уже отправлен и ожидает обработки администратором.', 'idpg-core' ) . '</p>';
 			echo '</section>';
@@ -650,10 +801,72 @@ class IDPG_Privacy {
 		echo '</section>';
 	}
 
+	/**
+	 * Блок отзыва согласия на обработку персональных данных.
+	 *
+	 * Показывается только авторизованным. Согласие, отозванное однажды,
+	 * заново из интерфейса не даётся, поэтому форма исчезает, а вместо неё
+	 * показывается дата отзыва: субъект должен видеть, что его действие
+	 * зафиксировано, а не потерялось.
+	 *
+	 * @return void
+	 */
+	private function render_withdraw_block() {
+		$user_id = get_current_user_id();
+
+		echo '<div class="idpg-privacy-tools__block">';
+		echo '<h3 class="idpg-privacy-tools__subtitle">' . esc_html__( 'Отзыв согласия на обработку данных', 'idpg-core' ) . '</h3>';
+
+		if ( self::is_withdrawn( $user_id ) ) {
+			$withdrawal = self::get_withdrawal( $user_id );
+
+			echo '<p class="idpg-privacy-tools__note idpg-privacy-tools__note--ok">'
+				. sprintf(
+					/* translators: %s: дата и время отзыва согласия. */
+					esc_html__( 'Согласие на обработку персональных данных отозвано %s. Оно действует до повторного согласия, которое сейчас недоступно.', 'idpg-core' ),
+					esc_html( $withdrawal['at'] )
+				)
+				. '</p>';
+			echo '<p class="idpg-privacy-tools__note">' . esc_html__( 'Данные о самом согласии и его отзыве сохранены — этого требует закон. Если нужно, чтобы данные были удалены полностью, отправьте запрос на удаление.', 'idpg-core' ) . '</p>';
+			echo '</div>';
+
+			return;
+		}
+
+		if ( ! self::has_consent( $user_id ) ) {
+			echo '<p class="idpg-privacy-tools__note">' . esc_html__( 'Согласие на обработку персональных данных не зафиксировано, отзывать нечего.', 'idpg-core' ) . '</p>';
+			echo '</div>';
+
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification -- не действие, а флаг для показа уведомления после редиректа.
+		$withdraw_state = isset( $_GET['idpg_withdraw'] ) ? sanitize_key( wp_unslash( $_GET['idpg_withdraw'] ) ) : '';
+
+		if ( 'ok' === $withdraw_state ) {
+			echo '<p class="idpg-privacy-tools__note idpg-privacy-tools__note--ok">' . esc_html__( 'Отзыв согласия зафиксирован.', 'idpg-core' ) . '</p>';
+		} elseif ( 'confirm' === $withdraw_state ) {
+			echo '<p class="idpg-privacy-tools__note idpg-privacy-tools__note--error">' . esc_html__( 'Отметьте подтверждение, чтобы отозвать согласие.', 'idpg-core' ) . '</p>';
+		}
+		?>
+		<p class="idpg-privacy-tools__text"><?php esc_html_e( 'Отзыв согласия прекращает обработку ваших персональных данных на будущее. Он необратим: заново дать согласие из этого интерфейса нельзя, учётная запись при этом сохраняется.', 'idpg-core' ); ?></p>
+		<form class="idpg-privacy-tools__form" method="post">
+			<?php wp_nonce_field( self::WITHDRAW_NONCE, 'idpg_privacy_withdraw_nonce' ); ?>
+			<input type="hidden" name="idpg_privacy_withdraw_submit" value="1">
+			<label class="idpg-privacy-tools__checkbox">
+				<input type="checkbox" name="idpg_privacy_withdraw_confirm" value="1" required>
+				<span><?php esc_html_e( 'Отзываю согласие на обработку моих персональных данных', 'idpg-core' ); ?></span>
+			</label>
+			<button class="idpg-privacy-tools__submit" type="submit"><?php esc_html_e( 'Отозвать согласие', 'idpg-core' ); ?></button>
+		</form>
+		<?php
+
+		echo '</div>';
+	}
+
 	// =========================================================================
 	// Админ-страница «Конфиденциальность»
 	// =========================================================================
-
 	/**
 	 * Регистрация подстраницы в меню плагина.
 	 *

@@ -61,6 +61,19 @@ class IDPG_Auth_Rate_Limiter {
 	const RESET_LIMIT = 3;
 
 	/**
+	 * Не более RESET_IP_LIMIT запросов сброса пароля в час с одного
+	 * IP-адреса. Лимит по email не спасает от перебора: злоумышленник
+	 * подставляет разные адреса и на каждом свой счётчик, поэтому
+	 * нужен второй, независимый счётчик по адресу клиента.
+	 */
+	const RESET_IP_LIMIT = 10;
+
+	/**
+	 * Окно лимита по IP в секундах, совпадает с RESET_WINDOW.
+	 */
+	const RESET_IP_WINDOW = 3600;
+
+	/**
 	 * Интервал блокировки сброса пароля (секунд).
 	 *
 	 * @var int
@@ -239,6 +252,61 @@ class IDPG_Auth_Rate_Limiter {
 		$data['count']++;
 
 		set_transient( $key, $data, self::RESET_WINDOW );
+
+		return true;
+	}
+
+	/**
+	 * Проверка лимита запросов на сброс пароля по IP-адресу.
+	 *
+	 * Счётчик независим от счётчика по email: перебор множества
+	 * разных адресов с одной машины исчерпывает именно его.
+	 *
+	 * Неопределимый адрес (пустая строка, «не-ip», 0.0.0.0 за
+	 * общим прокси) не лимитируется — иначе все клиенты прокси
+	 * делили бы один счётчик.
+	 *
+	 * @param string $ip IP-адрес клиента.
+	 * @return true|WP_Error True, если лимит не превышен, иначе WP_Error.
+	 */
+	public function check_password_reset_ip_attempt( $ip ) {
+		$ip = is_string( $ip ) ? trim( $ip ) : '';
+
+		// Мусор и заведомо неопределимые адреса пропускаем без счётчика.
+		if ( '' === $ip || '0.0.0.0' === $ip || ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+			return true;
+		}
+
+		$key  = 'idpg_reset_ip_attempts_' . md5( $ip );
+		$data = get_transient( $key );
+
+		if ( false === $data ) {
+			$data = array(
+				'count'         => 0,
+				'first_attempt' => time(),
+			);
+		}
+
+		if ( $data['count'] >= self::RESET_IP_LIMIT ) {
+			$elapsed = time() - $data['first_attempt'];
+
+			if ( $elapsed < self::RESET_IP_WINDOW ) {
+				return new WP_Error(
+					'too_many_resets_from_ip',
+					__( 'Слишком много запросов сброса пароля с вашего устройства. Попробуйте позже.', 'idpg-core' ),
+					array( 'status' => 429 )
+				);
+			}
+
+			$data = array(
+				'count'         => 0,
+				'first_attempt' => time(),
+			);
+		}
+
+		$data['count']++;
+
+		set_transient( $key, $data, self::RESET_IP_WINDOW );
 
 		return true;
 	}

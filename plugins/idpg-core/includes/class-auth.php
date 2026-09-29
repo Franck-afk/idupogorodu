@@ -41,6 +41,17 @@ class IDPG_Auth {
 	const RESET_PASSWORD_URL = '/reset-password/';
 
 	/**
+	 * URL кабинета организатора.
+	 *
+	 * Запасной адрес на случай, когда `IDPG_Organizer_URL` не подключён и
+	 * спросить его не у кого. Кабинет живёт по адресу `/organizer/`
+	 * (`IDPG_Organizer_URL::section_url()` для корня).
+	 *
+	 * @var string
+	 */
+	const ORGANIZER_CABINET_URL = '/organizer/';
+
+	/**
 	 * Получение экземпляра синглтона.
 	 *
 	 * @return IDPG_Auth
@@ -98,11 +109,40 @@ class IDPG_Auth {
 	}
 
 	/**
+	 * Адрес кабинета организатора.
+	 *
+	 * Основной источник — `IDPG_Organizer_URL::after_login_url()`: он же
+	 * отдаёт адрес кабинета при подтверждении email и учитывает фильтр
+	 * `idpg_organizer_after_login_url`. Здесь вызывается подстраховкой, потому
+	 * что класс живёт в `class-organizer-url.php` и может быть не подключён
+	 * (тогда кабинет вообще не обслуживается и организатор на сайт не пустит).
+	 * Пустая строка от метода — тоже повод для запасного адреса.
+	 *
+	 * @param WP_User $user Пользователь-организатор.
+	 * @return string
+	 */
+	private function organizer_cabinet_url( $user ) {
+		$url = class_exists( 'IDPG_Organizer_URL' )
+			? IDPG_Organizer_URL::after_login_url( $user )
+			: '';
+
+		if ( ! $url ) {
+			$url = home_url( self::ORGANIZER_CABINET_URL );
+		}
+
+		return $url;
+	}
+
+	/**
 	 * Ограничение доступа к админ-панели.
 	 *
-	 * Пропускает AJAX и Cron-запросы.
+	 * Пропускает AJAX и Cron-запросы: `admin-ajax.php` обслуживает сам
+	 * кабинет, и редирект обрушил бы загрузку медиа и прочие фоновые запросы.
 	 * Перенаправляет неавторизованных на страницу входа.
 	 * Перенаправляет подписчиков на главную страницу.
+	 * Перенаправляет организаторов в кабинет (DEV-106).
+	 *
+	 * Решение о переходе принимает `admin_access_redirect()`.
 	 *
 	 * @return void
 	 */
@@ -120,12 +160,55 @@ class IDPG_Auth {
 			exit;
 		}
 
-		$user = wp_get_current_user();
+		$target = $this->admin_access_redirect( wp_get_current_user() );
 
-		if ( in_array( 'subscriber', (array) $user->roles, true ) ) {
-			wp_safe_redirect( home_url( '/' ) );
+		if ( $target ) {
+			wp_safe_redirect( $target );
 			exit;
 		}
+	}
+
+	/**
+	 * Куда отправлять пользователя при попытке зайти в админку.
+	 *
+	 * Вынесено отдельно от `restrict_admin_access()`, потому что там решение
+	 * заканчивается `exit`, а `exit` не перехватывается в PHPUnit — тест
+	 * дошёл бы только до первой строки. Здесь возвращается лишь адрес,
+	 * поэтому каждое решение проверяется напрямую.
+	 *
+	 * Порядок ролей значим: `administrator` и `editor` разбираются первыми и
+	 * пропускаются, поэтому организатор, у которого вдобавок есть одна из этих
+	 * ролей, сохранит доступ к админке. Право редактировать чужие события
+	 * выдаётся только им, и им же нужна админка для модерации.
+	 *
+	 * Права организатора при этом не трогаются: `edit_events`,
+	 * `publish_venues`, `edit_venues` нужны самому кабинету
+	 * (`IDPG_REST_Organizer`, `IDPG_REST_API`, `IDPG_Dashboard_Stats`).
+	 * Закрывается доступ к интерфейсу, а не набор прав.
+	 *
+	 * @param WP_User $user Текущий пользователь.
+	 * @return string Адрес редиректа либо пустая строка — пропустить.
+	 */
+	private function admin_access_redirect( $user ) {
+		$roles = (array) $user->roles;
+
+		// Админка нужна администратору и редактору для модерации.
+		if ( in_array( 'administrator', $roles, true ) || in_array( 'editor', $roles, true ) ) {
+			return '';
+		}
+
+		// Организатор работает в кабинете, а не в админке.
+		if ( in_array( IDPG_Roles::ROLE_SLUG, $roles, true ) ) {
+			return $this->organizer_cabinet_url( $user );
+		}
+
+		// Подписчику на сайте делать нечего.
+		if ( in_array( 'subscriber', $roles, true ) ) {
+			return home_url( '/' );
+		}
+
+		// Прочие роли (в том числе добавленные сторонним плагином) — как было.
+		return '';
 	}
 
 	/**
@@ -164,7 +247,7 @@ class IDPG_Auth {
 		// POST-запросы не редиректим: ядро WP само обработает вход
 		// и после login_redirect отправит на кастомную страницу.
 		$request_method = isset( $_SERVER['REQUEST_METHOD'] )
-			? strtoupper( sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) )
+			? strtoupper( (string) $_SERVER['REQUEST_METHOD'] )
 			: 'GET';
 
 		if ( 'POST' === $request_method ) {
@@ -227,7 +310,7 @@ class IDPG_Auth {
 		}
 
 		$request_path = isset( $_SERVER['REQUEST_URI'] )
-			? wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH )
+			? wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH )
 			: '';
 
 		if ( self::LOGIN_URL !== $request_path && rtrim( self::LOGIN_URL, '/' ) !== $request_path ) {

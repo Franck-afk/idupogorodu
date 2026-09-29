@@ -1,0 +1,15 @@
+# Служебные файлы темы (README, бэклог phpcs, переводы) не нужны на
+# выполнении: PHP/JS/CSS лежат рядом и должны отдаваться как обычно.
+# Закрываем только артефакты разработки.
+<IfModule mod_authz_core.c>
+	<FilesMatch "\.(md|neon|log|bak|sql|po|pot|dist|orig|rej)$">
+		Require all denied
+	</FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+	<FilesMatch "\.(md|neon|log|bak|sql|po|pot|dist|orig|rej)$">
+		Order deny,allow
+		Deny from all
+	</FilesMatch>
+</IfModule>

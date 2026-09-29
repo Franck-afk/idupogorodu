@@ -4,15 +4,6 @@
 Формат — [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/),
 версионирование — [SemVer](https://semver.org/lang/ru/).
 
-## [Unreleased]
-
-### Добавлено
-- PHPUnit-окружение и CI (DEV-52): настроены модульные тесты плагина — `composer install` подтягивает `phpunit/phpunit` + `yoast/phpunit-polyfills`; `phpunit.xml.dist` и `tests/bootstrap.php` работают против wordpress-tests-lib; `.circleci/config.yml` запускает все тесты на каждый пуш.
-
-### Исправлено (тесты, код не менялся)
-- `tests/test-roles.php`: `publish_events` у организатора отсутствует (модерация администратором) — ожидание исправлено с `true` на `false`.
-- `tests/test-organizer-page.php`: организатор с незаполненной анкетой теперь `pending` (страховка DEV-50) — тест allowed-сценария заполняет анкету; кабинетный `redirect_organizer_to_cabinet()` появится с обвязкой DEV-34 — тест проверяет фактический `redirect_after_login()`.
-
 ## [1.1.0] — 2026-09-05
 
 ### Удалено

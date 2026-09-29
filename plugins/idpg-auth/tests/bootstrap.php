@@ -8,7 +8,21 @@
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $_tests_dir ) {
-	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
+	/*
+	 * Постоянный каталог стенда проверяем до sys_get_temp_dir(): очистка
+	 * %TEMP% удаляла библиотеку WordPress, и тесты переставали запускаться
+	 * с сообщением «Could not find .../wordpress-tests-lib». Каталог взят из
+	 * bin\install-wp-tests.cmd плагина idpg-core. sys_get_temp_dir() сохранён
+	 * как последний вариант, чтобы ничего не сломать.
+	 */
+	$_local_app_data = getenv( 'LOCALAPPDATA' );
+	$_durable_dir   = $_local_app_data
+		? rtrim( $_local_app_data, '/\\' ) . '/idpg-tests/wordpress-develop/tests/phpunit'
+		: '';
+
+	$_tests_dir = ( '' !== $_durable_dir && file_exists( "{$_durable_dir}/includes/functions.php" ) )
+		? $_durable_dir
+		: rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 }
 
 // Forward custom PHPUnit Polyfills configuration to PHPUnit bootstrap file.

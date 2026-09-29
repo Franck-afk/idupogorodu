@@ -17,6 +17,10 @@
 	var config     = window.idpgAuth || {};
 	var messageTimeout = null;
 
+	// Имя поля согласия на обработку ПДн. Задаётся темой из
+	// IDPG_Privacy::CONSENT_FIELD, чтобы PHP и JS не разъезжались.
+	var PDN_CONSENT_FIELD = ( config.pdnConsentField || 'idpg_pdn_consent' );
+
 	// ── Tab switching ──
 
 	/**
@@ -426,18 +430,30 @@
 			return;
 		}
 
+		// Согласие на обработку персональных данных (152-ФЗ) — отдельный
+		// чекбокс: согласие с офертой его не заменяет. Отсутствующий
+		// элемент даёт явный false (решение сервера), а не «не передано».
+		var pdnCheckbox = form.querySelector( '[name="' + PDN_CONSENT_FIELD + '"]' );
+		var pdnConsent  = !! ( pdnCheckbox && pdnCheckbox.checked );
+
+		if ( pdnCheckbox && ! pdnConsent ) {
+			showMessage( 'Необходимо согласие на обработку персональных данных.', 'error' );
+			return;
+		}
+
 		hideMessage();
 
 		submitAuthForm( form, '/auth/register', function ( fd ) {
 			return {
-				type:         'organizer',
-				name:         fd.get( 'contact_name' ),
-				email:        fd.get( 'email' ),
-				password:     fd.get( 'password' ),
-				org_name:     fd.get( 'org_name' ),
-				contact_name: fd.get( 'contact_name' ),
-				phone:        fd.get( 'phone' ),
-				terms:        fd.get( 'terms' ) === '1',
+				type:              'organizer',
+				name:              fd.get( 'contact_name' ),
+				email:             fd.get( 'email' ),
+				password:          fd.get( 'password' ),
+				org_name:          fd.get( 'org_name' ),
+				contact_name:      fd.get( 'contact_name' ),
+				phone:             fd.get( 'phone' ),
+				terms:             fd.get( 'terms' ) === '1',
+				[ PDN_CONSENT_FIELD ]: pdnConsent,
 			};
 		} );
 	}

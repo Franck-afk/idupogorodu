@@ -5,17 +5,23 @@
  * Регистрирует rewrite-правила и query-переменную раздела, подключает шаблон
  * темы `page-organizer.php` и предоставляет чистую (тестируемую) логику доступа.
  *
+ * Дополнительно обслуживает форму события (G5):
+ * `/organizer/event/new/` и `/organizer/event/{id}/` — они живут внутри
+ * /organizer/*, но не являются разделами кабинета (нет боковой навигации),
+ * поэтому вынесены в отдельную query-переменную и отдельный шаблон
+ * `page-organizer-event.php`. Проверка прав у формы та же — её делает шаблон
+ * через `get_access_decision()`.
+ *
  * Решения по доступу (применяет шаблон `page-organizer.php`):
  *  - гость → редирект на `/login/`;
- *  - пользователь с флагом «анкета не доукомплектована» → `/organizer/complete/`;
  *  - пользователь без роли `event_organizer` (и не `administrator`/`editor`) → 403;
  *  - организатор и выше → кабинет.
  *
  * Маршрут намеренно не опирается на запись WP: как и у `/lk/favorites/`
- * (`IDPG_Favorites`) и `/organizer/complete/` (`IDPG_Organizer_Page`), запрос
- * обслуживается query-переменной и шаблоном темы. Реальную страницу `/organizer/`
- * всё равно создаёт тема (`idpg_core_create_organizer_page()`) — она нужна для
- * крошек, пунктов меню и исключения из sitemap Yoast.
+ * (`IDPG_Favorites`), запрос обслуживается query-переменной и шаблоном темы.
+ * Реальную страницу `/organizer/` всё равно создаёт тема
+ * (`idpg_core_create_organizer_page()`) — она нужна для крошек, пунктов
+ * меню и исключения из sitemap Yoast.
  *
  * Сброс постоянных ссылок: правила регистрируются на `init`, поэтому
  * `flush_rewrite_rules()` вызывается при активации плагина
@@ -49,6 +55,39 @@ class IDPG_Organizer_URL {
 	const PAGE_QVAR = 'idpg_organizer_page';
 
 	/**
+	 * Query-переменная формы события: `new` либо ID события (G5).
+	 *
+	 * Значение `new` означает создание, положительное целое — правку
+	 * существующего события. Отдельная переменная, а не раздел кабинета:
+	 * форма события — полноэкранная страница вне боковой навигации, и
+	 * показывать её в списке разделов было бы неверно.
+	 */
+	const EVENT_QVAR = 'idpg_organizer_event';
+
+	/**
+	 * Значение `EVENT_QVAR` для режима создания.
+	 */
+	const EVENT_NEW = 'new';
+
+	/**
+	 * Query-переменная формы площадки: `new` либо ID площадки (DEV-50).
+	 *
+	 * Отдельная переменная, а не переиспользование `EVENT_QVAR`: площадка
+	 * и событие — разные сущности, и их нельзя было бы различить в
+	 * шаблоне.
+	 *
+	 * @var string
+	 */
+	const VENUE_QVAR = 'idpg_organizer_venue';
+
+	/**
+	 * Значение `VENUE_QVAR` для режима создания.
+	 *
+	 * @var string
+	 */
+	const VENUE_NEW = 'new';
+
+	/**
 	 * Слаг страницы кабинета (совпадает с именем шаблона темы).
 	 */
 	const PAGE_SLUG = 'organizer';
@@ -61,7 +100,14 @@ class IDPG_Organizer_URL {
 	/**
 	 * Разделы кабинета по умолчанию.
 	 */
-	const SECTIONS = array( 'dashboard', 'events', 'profile' );
+	/**
+	 * Разделы кабинета по умолчанию.
+	 *
+	 * `venues` добавлен DEV-50: площадки — самостоятельная сущность
+	 * организатора (CPT venue), и их некуда было деть: создать площадку
+	 * можно было только через модалку в форме события.
+	 */
+	const SECTIONS = array( 'dashboard', 'events', 'venues', 'profile' );
 
 	/**
 	 * Раздел по умолчанию.
@@ -88,11 +134,6 @@ class IDPG_Organizer_URL {
 	const ACCESS_GUEST = 'guest';
 
 	/**
-	 * Организатор с незаполненной анкетой.
-	 */
-	const ACCESS_PENDING = 'pending';
-
-	/**
 	 * Авторизован, но прав на кабинет нет.
 	 */
 	const ACCESS_DENIED = 'denied';
@@ -103,32 +144,64 @@ class IDPG_Organizer_URL {
 	const ACCESS_ALLOWED = 'allowed';
 
 	/**
-	 * Ключ user meta с флагом «анкета не доукомплектована».
-	 */
-	const META_PENDING = '_idpg_org_pending';
-
-	/**
-	 * Мета-ключ отметки времени завершения анкеты организатора.
+	 * Мета-ключ названия организации.
 	 *
-	 * Отсутствие отметки вместе с пустым названием организации — признак
-	 * «анкета не заполнялась», используется как страховка на лету
-	 * (DEV-50) в is_pending_organizer() / get_access_decision().
-	 *
-	 * @var string
-	 */
-	const META_COMPLETED_AT = '_idpg_org_completed_at';
-
-	/**
-	 * Мета-ключ названия организации (заполняется в анкете).
+	 * Заполняется при регистрации организатора, а не в отдельной анкете.
 	 *
 	 * @var string
 	 */
 	const META_ORG_NAME = 'idpg_org_name';
 
 	/**
+	 * Мета-ключ контактного лица организатора.
+	 *
+	 * Редактируется в профиле кабинета (`/organizer/profile/`).
+	 *
+	 * @var string
+	 */
+	const META_CONTACT_NAME = 'idpg_contact_name';
+
+	/**
+	 * Мета-ключ телефона организатора.
+	 *
+	 * Редактируется в профиле кабинета (`/organizer/profile/`).
+	 *
+	 * @var string
+	 */
+	const META_PHONE = 'idpg_phone';
+
+	/**
+	 * Мета-ключ аватара организатора (ID вложения).
+	 *
+	 * Дублирует константу `IDPG_Media::AVATAR_META_KEY`, чтобы профиль
+	 * не зависел от загрузки медиамодуля.
+	 *
+	 * @var string
+	 */
+	const META_AVATAR_ID = 'idpg_avatar_attachment_id';
+
+	/**
+	 * Максимальная длина текстовых полей профиля.
+	 *
+	 * @var int
+	 */
+	const PROFILE_FIELD_MAXLEN = 190;
+
+	/**
+	 * Провайдеры idpg-auth, для которых подключается редирект в кабинет.
+	 *
+	 * Значения должны совпадать с константой `PROVIDER` соответствующего
+	 * класса `WP_Auth_Ru_*`: плагин применяет фильтр
+	 * `wp_auth_ru_{PROVIDER}_after_login_redirect`.
+	 *
+	 * @var string[]
+	 */
+	const SOCIAL_PROVIDERS = array( 'yandex', 'vk', 'max' );
+
+	/**
 	 * Версия rewrite-правил. Инкремент → принудительный flush один раз.
 	 */
-	const REWRITE_VERSION = 1;
+	const REWRITE_VERSION = 3;
 
 	/**
 	 * Опция-маркер выполненного сброса правил.
@@ -144,6 +217,131 @@ class IDPG_Organizer_URL {
 		add_action( 'init', array( __CLASS__, 'rewrites' ), 20 );
 		add_filter( 'query_vars', array( __CLASS__, 'query_vars' ) );
 		add_filter( 'template_include', array( __CLASS__, 'template' ), 30 );
+		add_filter( 'wp_redirect', array( __CLASS__, 'guard_cabinet_redirect' ), 10, 2 );
+
+		self::init_social_login_redirects();
+	}
+
+	// =========================================================================
+	// Соцвход
+	// =========================================================================
+
+	/**
+	 * Подключает редирект в кабинет после входа через соцсеть.
+	 *
+	 * Фильтры `wp_auth_ru_*_after_login_redirect` применяет плагин
+	 * idpg-auth, когда соцсеть вернула пользователя. К этому моменту
+	 * `wp_set_current_user()` уже отработал, поэтому роль известна.
+	 *
+	 * Фильтр срабатывает не всегда: если провайдер сохранил в transient
+	 * локальный адрес из `redirect_to`, он используется как есть и фильтр
+	 * не вызывается. Наш фильтр отвечает только за случай «адрес не задан»
+	 * — то есть за прямой вход через соцсеть с `/login/`.
+	 *
+	 * @return void
+	 */
+	public static function init_social_login_redirects() {
+		foreach ( self::SOCIAL_PROVIDERS as $provider ) {
+			add_filter(
+				'wp_auth_ru_' . $provider . '_after_login_redirect',
+				array( __CLASS__, 'social_login_redirect' )
+			);
+		}
+	}
+
+	/**
+	 * Куда отправить пользователя после входа через соцсеть.
+	 *
+	 * Организатору — в личный кабинет, остальным оставляем адрес,
+	 * предложенный плагином (по умолчанию главная страница).
+	 *
+	 * Роль при соцвходе не меняется: существующий пользователь находится
+	 * по email, новому назначается роль по умолчанию. Поэтому проверка
+	 * идёт по уже установленной роли, а не по факту входа.
+	 *
+	 * @param string $redirect_to Адрес, предложенный плагином idpg-auth.
+	 * @return string
+	 */
+	public static function social_login_redirect( $redirect_to ) {
+		$url = self::after_login_url( get_current_user_id() );
+
+		if ( '' !== $url ) {
+			return $url;
+		}
+
+		return $redirect_to;
+	}
+
+	// =========================================================================
+	// Защита редиректов в кабинет
+	// =========================================================================
+
+	/**
+	 * Не пускает в кабинет пользователя, которому там нельзя.
+	 *
+	 * Фильтр `wp_auth_ru_*_after_login_redirect` не является единственной
+	 * точкой входа в кабинет: плагин idpg-auth применяет его только когда
+	 * в transient не оказалось локального `redirect_to`
+	 * (`class-wp-auth-ru-oauth-provider.php`, ветка `empty( $redirect_to )`).
+	 * С явным `redirect_to=/organizer/` фильтр не вызывается вовсе, и
+	 * подписчик после соцвхода оказывается в кабинете, откуда его
+	 * выбрасывает обратно на страницу входа — замыкается цикл
+	 * «вход → кабинет → вход».
+	 *
+	 * Поэтому решение о допуске в кабинет принимается на любом редиректе
+	 * сайта: право проверяется по `user_is_organizer()`, то есть по тому же
+	 * правилу, что и `get_access_decision()`. Администраторы и редакторы
+	 * доступ в кабинет сохраняют, им редирект не трогаем.
+	 *
+	 * Редиректы за пределы кабинета не изменяются вовсе.
+	 *
+	 * @param string $location Адрес редиректа.
+	 * @param int    $status   HTTP-код редиректа.
+	 * @return string
+	 */
+	public static function guard_cabinet_redirect( $location, $status = 302 ) {
+		if ( ! is_string( $location ) || ! self::is_cabinet_url( $location ) ) {
+			return $location;
+		}
+
+		if ( self::user_is_organizer() ) {
+			return $location;
+		}
+
+		/**
+		 * Фильтр адреса, которым подменяем редирект в кабинет.
+		 *
+		 * Позволяет, например, отправить несовместимого пользователя
+		 * на страницу входа, а не на главную.
+		 *
+		 * @param string $fallback Адрес для замены.
+		 * @param string $location Адрес, который заменяем.
+		 */
+		return (string) apply_filters( 'idpg_organizer_denied_redirect_url', home_url(), $location );
+	}
+
+	/**
+	 * Указывает ли адрес на кабинет организатора.
+	 *
+	 * Сравнение идёт по корню `/organizer/` без учёта слэша и query-строки,
+	 * поэтому `/organizer`, `/organizer/` и `/organizer/events/` считаются
+	 * кабинетом, а `/organizers-2026` — нет.
+	 *
+	 * @param string $url Проверяемый адрес.
+	 * @return bool
+	 */
+	public static function is_cabinet_url( $url ) {
+		$base = untrailingslashit( home_url( '/' . self::PAGE_SLUG ) );
+		$url  = untrailingslashit( (string) $url );
+
+		// Ограничиваемся тем же доменом: чужой адрес кабинетом не считается.
+		if ( 0 !== stripos( $url, $base ) ) {
+			return false;
+		}
+
+		$rest = substr( $url, strlen( $base ) );
+
+		return '' === $rest || '/' === $rest[0] || '?' === $rest[0];
 	}
 
 	// =========================================================================
@@ -231,6 +429,18 @@ class IDPG_Organizer_URL {
 			return true;
 		}
 
+		// Форма площадки (DEV-50) живёт внутри /organizer/* и тоже нуждается
+		// в ассетах кабинета, хотя разделом не является.
+		if ( '' !== (string) get_query_var( self::VENUE_QVAR ) ) {
+			return true;
+		}
+
+		// Форма события (G5) живёт внутри /organizer/* и тоже нуждается в
+		// ассетах кабинета, хотя разделом не является.
+		if ( '' !== (string) get_query_var( self::EVENT_QVAR ) ) {
+			return true;
+		}
+
 		// Запасные варианты: правила не сброшены либо страница открыта
 		// напрямую по записи WP.
 		if ( ! function_exists( 'is_page' ) ) {
@@ -242,6 +452,100 @@ class IDPG_Organizer_URL {
 		}
 
 		return (bool) is_page_template( self::TEMPLATE );
+	}
+
+	// =========================================================================
+	// Форма события (G5)
+	// =========================================================================
+
+	/**
+	 * Обслуживает ли текущий запрос форму события.
+	 *
+	 * @return bool
+	 */
+	public static function is_event_form_request() {
+		return '' !== (string) get_query_var( self::EVENT_QVAR );
+	}
+
+	/**
+	 * ID события, который правит текущий запрос формы.
+	 *
+	 * Возвращает 0 в режиме создания (`new`) и для любого нечислового
+	 * значения — вызывающий код трактует 0 как «создать новое».
+	 *
+	 * @return int
+	 */
+	public static function get_current_event_id() {
+		$raw = get_query_var( self::EVENT_QVAR );
+
+		if ( self::EVENT_NEW === (string) $raw ) {
+			return 0;
+		}
+
+		return absint( $raw );
+	}
+
+	/**
+	 * URL формы события.
+	 *
+	 * @param int $event_id ID события; 0 — форма создания.
+	 * @return string
+	 */
+	public static function event_form_url( $event_id = 0 ) {
+		$event_id = absint( $event_id );
+
+		if ( ! $event_id ) {
+			return home_url( '/' . self::PAGE_SLUG . '/event/' . self::EVENT_NEW . '/' );
+		}
+
+		return home_url( '/' . self::PAGE_SLUG . '/event/' . $event_id . '/' );
+	}
+
+	// =========================================================================
+	// Форма площадки (DEV-50)
+	// =========================================================================
+
+	/**
+	 * Обслуживает ли текущий запрос форму площадки.
+	 *
+	 * @return bool
+	 */
+	public static function is_venue_form_request() {
+		return '' !== (string) get_query_var( self::VENUE_QVAR );
+	}
+
+	/**
+	 * ID площадки, которую правит текущий запрос формы.
+	 *
+	 * Возвращает 0 в режиме создания (`new`) и для любого нечислового
+	 * значения — вызывающий код трактует 0 как «создать новую».
+	 *
+	 * @return int
+	 */
+	public static function get_current_venue_id() {
+		$raw = get_query_var( self::VENUE_QVAR );
+
+		if ( self::VENUE_NEW === (string) $raw ) {
+			return 0;
+		}
+
+		return absint( $raw );
+	}
+
+	/**
+	 * URL формы площадки.
+	 *
+	 * @param int $venue_id ID площадки; 0 — форма создания.
+	 * @return string
+	 */
+	public static function venue_form_url( $venue_id = 0 ) {
+		$venue_id = absint( $venue_id );
+
+		if ( ! $venue_id ) {
+			return home_url( '/' . self::PAGE_SLUG . '/venue/' . self::VENUE_NEW . '/' );
+		}
+
+		return home_url( '/' . self::PAGE_SLUG . '/venue/' . $venue_id . '/' );
 	}
 
 	// =========================================================================
@@ -273,59 +577,6 @@ class IDPG_Organizer_URL {
 
 		// Пустой пользователь: WP_User( 0 )->exists() === false.
 		return new WP_User( 0 );
-	}
-
-	/**
-	 * Ожидает ли пользователь доуполнения анкеты организатора.
-	 *
-	 * Флаг пишет `IDPG_Organizer_Verify::prepare()` под ключом
-	 * `idpg_org_pending` (без подчёркивания), а исторические чтения
-	 * (`IDPG_Organizer_Page::is_pending()`, `page-organizer-complete.php`)
-	 * используют `_idpg_org_pending`. Проверяем оба ключа, чтобы редирект
-	 * на анкету работал независимо от того, каким ключом записан флаг.
-	 *
-	 * Роль намеренно не проверяется: сразу после регистрации организатор
-	 * ещё без роли (`event_organizer` выдаётся только после подтверждения
-	 * email), но на анкету его отправить нужно.
-	 *
-	 * @param WP_User|int|string|null $user Пользователь, ID или null (текущий).
-	 * @return bool
-	 */
-	public static function is_pending_organizer( $user = null ) {
-		$user = self::resolve_user( $user );
-
-		if ( ! $user->exists() ) {
-			return false;
-		}
-
-		$keys = array( self::META_PENDING, ltrim( self::META_PENDING, '_' ) );
-
-		if ( class_exists( 'IDPG_Organizer_Verify' ) ) {
-			$keys[] = IDPG_Organizer_Verify::META_PENDING;
-		}
-
-		// Явный флаг под любым из известных ключей.
-		foreach ( array_unique( $keys ) as $key ) {
-			if ( get_user_meta( $user->ID, $key, true ) ) {
-				return true;
-			}
-		}
-
-		// Страховка на лету (DEV-50): организатор, который никогда не
-		// заполнял анкету — нет отметки о завершении и названия
-		// организации, — считается pending независимо от флага.
-		// Ограничено ролью event_organizer, чтобы подписчиков и гостей
-		// не переводить в pending (G7: флаг мог не проставиться при
-		// соц-регистрации).
-		if (
-			in_array( self::ROLE_ORGANIZER, (array) $user->roles, true )
-			&& ! get_user_meta( $user->ID, self::META_COMPLETED_AT, true )
-			&& '' === (string) get_user_meta( $user->ID, self::META_ORG_NAME, true )
-		) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -399,6 +650,10 @@ class IDPG_Organizer_URL {
 	 * Чистая функция без редиректов и вывода — применяется шаблоном
 	 * `page-organizer.php` и покрывается юнит-тестами.
 	 *
+	 * Анкеты организатора больше нет (DEV-72): после подтверждения email
+	 * или при соцвходе организатор сразу попадает в кабинет, поэтому
+	 * промежуточного состояния «pending» не существует.
+	 *
 	 * @param WP_User|int|string|null $user Пользователь, ID или null (текущий).
 	 * @return string Одна из констант ACCESS_*.
 	 */
@@ -407,12 +662,6 @@ class IDPG_Organizer_URL {
 
 		if ( ! $user->exists() ) {
 			return self::ACCESS_GUEST;
-		}
-
-		// Флаг анкеты проверяется раньше роли: pending-организатор ещё
-		// без роли, но должен попасть на /organizer/complete/.
-		if ( self::is_pending_organizer( $user ) ) {
-			return self::ACCESS_PENDING;
 		}
 
 		if ( ! self::user_is_organizer( $user ) ) {
@@ -435,6 +684,41 @@ class IDPG_Organizer_URL {
 		$sections = implode( '|', array_map( 'preg_quote', self::get_sections() ) );
 		$query    = 'index.php?' . self::PAGE_QVAR . '=1&' . self::SECTION_QVAR . '=';
 
+		// Форма события (G5): /organizer/event/new/ и /organizer/event/{id}/.
+		//
+		// Порядок важен: WP_Rewrite::add_rule() делает обычное присваивание
+		// (`extra_rules_top[$regex] = $query`), поэтому порядок элементов
+		// массива совпадает с порядком регистрации, и при разборе адреса
+		// правила проверяются именно в этом порядке. Правила формы идут
+		// первыми, поэтому выигрывают у раздела с тем же слагом (`event`),
+		// если его когда-нибудь добавят через фильтр get_sections().
+		add_rewrite_rule(
+			'^' . self::PAGE_SLUG . '/event/' . self::EVENT_NEW . '/?$',
+			'index.php?' . self::PAGE_QVAR . '=1&' . self::EVENT_QVAR . '=' . self::EVENT_NEW,
+			'top'
+		);
+
+		add_rewrite_rule(
+			'^' . self::PAGE_SLUG . '/event/([0-9]+)/?$',
+			'index.php?' . self::PAGE_QVAR . '=1&' . self::EVENT_QVAR . '=$matches[1]',
+			'top'
+		);
+
+		// Форма площадки (DEV-50): /organizer/venue/new/ и
+		// /organizer/venue/{id}/. Объявлены до разделов, потому что
+		// `venue` — и форма, и возможный будущий слаг раздела.
+		add_rewrite_rule(
+			'^' . self::PAGE_SLUG . '/venue/' . self::VENUE_NEW . '/?$',
+			'index.php?' . self::PAGE_QVAR . '=1&' . self::VENUE_QVAR . '=' . self::VENUE_NEW,
+			'top'
+		);
+
+		add_rewrite_rule(
+			'^' . self::PAGE_SLUG . '/venue/([0-9]+)/?$',
+			'index.php?' . self::PAGE_QVAR . '=1&' . self::VENUE_QVAR . '=$matches[1]',
+			'top'
+		);
+
 		// Разделы: /organizer/{section}/.
 		add_rewrite_rule(
 			'^' . self::PAGE_SLUG . '/(' . $sections . ')/?$',
@@ -455,10 +739,33 @@ class IDPG_Organizer_URL {
 	/**
 	 * Однократный сброс постоянных ссылок при смене версии правил.
 	 *
+	 * Важно: `flush_rewrite_rules()` до срабатывания `wp_loaded` только
+	 * *откладывает* генерацию правил — реальная перезапись опции
+	 * `rewrite_rules` происходит на хуке `wp_loaded`. Если выставить маркер
+	 * сразу, следующий запрос увидит маркер и не повторит сброс, а правила
+	 * так и останутся в старом виде. Поэтому маркер ставим после фактического
+	 * сброса: на `init` планируем повторный вызов на `wp_loaded` с
+	 * приоритетом выше 10 (сам сброс ядро ставит на приоритете 10).
+	 *
 	 * @return void
 	 */
 	private static function maybe_flush() {
 		if ( (string) get_option( self::FLUSH_OPT ) === (string) self::REWRITE_VERSION ) {
+			return;
+		}
+
+		if ( ! did_action( 'wp_loaded' ) ) {
+			// Closure, а не array( __CLASS__, 'maybe_flush' ): хуки вызываются
+			// ядром из глобальной области, приватный метод напрямую недоступен,
+			// а замыкание сохраняет область класса.
+			add_action(
+				'wp_loaded',
+				function () {
+					self::maybe_flush();
+				},
+				20
+			);
+			flush_rewrite_rules();
 			return;
 		}
 
@@ -475,9 +782,21 @@ class IDPG_Organizer_URL {
 	public static function query_vars( $vars ) {
 		$vars[] = self::SECTION_QVAR;
 		$vars[] = self::PAGE_QVAR;
+		$vars[] = self::EVENT_QVAR;
+		$vars[] = self::VENUE_QVAR;
 
 		return $vars;
 	}
+
+	/**
+	 * Шаблон темы, обслуживающий форму события (G5).
+	 */
+	const EVENT_TEMPLATE = 'page-organizer-event.php';
+
+	/**
+	 * Шаблон темы, обслуживающий форму площадки (DEV-50).
+	 */
+	const VENUE_TEMPLATE = 'page-organizer-venue.php';
 
 	/**
 	 * Подключение шаблона кабинета.
@@ -490,7 +809,11 @@ class IDPG_Organizer_URL {
 	 * @return string
 	 */
 	public static function template( $template ) {
-		if ( '' === (string) get_query_var( self::SECTION_QVAR ) ) {
+		$is_cabinet = '' !== (string) get_query_var( self::SECTION_QVAR );
+		$is_event   = '' !== (string) get_query_var( self::EVENT_QVAR );
+		$is_venue   = '' !== (string) get_query_var( self::VENUE_QVAR );
+
+		if ( ! $is_cabinet && ! $is_event && ! $is_venue ) {
 			return $template;
 		}
 
@@ -505,8 +828,209 @@ class IDPG_Organizer_URL {
 
 		status_header( 200 );
 
-		$cabinet = locate_template( self::TEMPLATE );
+		if ( $is_venue ) {
+			$wanted = self::VENUE_TEMPLATE;
+		} elseif ( $is_event ) {
+			$wanted = self::EVENT_TEMPLATE;
+		} else {
+			$wanted = self::TEMPLATE;
+		}
 
-		return $cabinet ? $cabinet : $template;
+		$found = locate_template( $wanted );
+
+		return $found ? $found : $template;
+	}
+
+	// =========================================================================
+	// Профиль организатора (DEV-73)
+	//
+	// Логика профиля живёт здесь, а не в REST-классе и не в шаблоне: и
+	// `PUT /idpg/v1/organizer/profile`, и no-JS форма в `page-organizer.php`
+	// вызывают одни и те же методы, поэтому санитайз не может разъехаться
+	// между путями сохранения.
+	// =========================================================================
+
+	/**
+	 * Данные профиля пользователя для вывода и заполнения формы.
+	 *
+	 * Email намеренно только для чтения: смена адреса требует
+	 * подтверждения (DEV-68), и в рамках DEV-73 её не реализуем.
+	 *
+	 * @param WP_User|int|string|null $user Пользователь, ID или null (текущий).
+	 * @return array {
+	 *     @type int    $user_id      ID пользователя.
+	 *     @type string $display_name Имя в системе.
+	 *     @type string $email        Email (только чтение).
+	 *     @type string $org_name     Название организации.
+	 *     @type string $contact_name Контактное лицо.
+	 *     @type string $phone        Телефон.
+	 *     @type int    $avatar_id    ID вложения-аватара (0 — нет).
+	 *     @type string $avatar_url   URL аватара ('' — нет).
+	 * }
+	 */
+	public static function get_profile_data( $user = null ) {
+		$user = self::resolve_user( $user );
+
+		if ( ! $user->exists() ) {
+			return array(
+				'user_id'      => 0,
+				'display_name' => '',
+				'email'        => '',
+				'org_name'     => '',
+				'contact_name' => '',
+				'phone'        => '',
+				'avatar_id'    => 0,
+				'avatar_url'   => '',
+			);
+		}
+
+		$avatar_id = (int) get_user_meta( $user->ID, self::META_AVATAR_ID, true );
+
+		return array(
+			'user_id'      => (int) $user->ID,
+			'display_name' => (string) $user->display_name,
+			'email'        => (string) $user->user_email,
+			'org_name'     => (string) get_user_meta( $user->ID, self::META_ORG_NAME, true ),
+			'contact_name' => (string) get_user_meta( $user->ID, self::META_CONTACT_NAME, true ),
+			'phone'        => (string) get_user_meta( $user->ID, self::META_PHONE, true ),
+			'avatar_id'    => $avatar_id,
+			'avatar_url'   => $avatar_id ? (string) wp_get_attachment_image_url( $avatar_id, 'medium' ) : '',
+		);
+	}
+
+	/**
+	 * Санитайз и проверка полей профиля.
+	 *
+	 * Поля, которых нет во входном массиве, не попадают в результат —
+	 * так частичное обновление (например, только телефон из JS-формы)
+	 * не затирает остальные мета.
+	 *
+	 * @param array $input Необработанные значения.
+	 * @return array|WP_Error Очищенные значения либо ошибка.
+	 */
+	public static function sanitize_profile_input( $input ) {
+		if ( ! is_array( $input ) ) {
+			return new WP_Error(
+				'idpg_profile_invalid_input',
+				__( 'Некорректные данные профиля.', 'idpg_core' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$clean = array();
+
+		foreach ( array( 'display_name', 'org_name', 'contact_name', 'phone' ) as $field ) {
+			if ( ! array_key_exists( $field, $input ) ) {
+				continue;
+			}
+
+			$value = sanitize_text_field( (string) $input[ $field ] );
+
+			$clean[ $field ] = mb_substr( $value, 0, self::PROFILE_FIELD_MAXLEN );
+		}
+
+		if ( array_key_exists( 'avatar_id', $input ) ) {
+			$avatar_id = absint( $input['avatar_id'] );
+
+			if ( $avatar_id ) {
+				$attachment = get_post( $avatar_id );
+
+				// Принимаем только вложение-изображение: произвольный ID
+				// поста не должен становиться аватаром.
+				if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
+					return new WP_Error(
+						'idpg_profile_invalid_avatar',
+						__( 'Аватар должен быть файлом из медиатеки.', 'idpg_core' ),
+						array( 'status' => 400 )
+					);
+				}
+			}
+
+			$clean['avatar_id'] = $avatar_id;
+		}
+
+		/**
+		 * Фильтр позволяет добавить собственные поля профиля.
+		 *
+		 * @param array $clean Очищенные значения.
+		 * @param array $input Необработанные значения.
+		 */
+		return apply_filters( 'idpg_organizer_profile_sanitized', $clean, $input );
+	}
+
+	/**
+	 * Сохранение профиля пользователя.
+	 *
+	 * Пишет только те поля, которые реально присутствуют в $clean —
+	 * частичное обновление не затирает остальные мета.
+	 *
+	 * @param WP_User|int|string|null $user  Пользователь, ID или null (текущий).
+	 * @param array                    $clean Результат sanitize_profile_input().
+	 * @return array|WP_Error Обновлённые данные профиля либо ошибка.
+	 */
+	public static function update_profile( $user, $clean ) {
+		$user = self::resolve_user( $user );
+
+		if ( ! $user->exists() ) {
+			return new WP_Error(
+				'idpg_profile_user_not_found',
+				__( 'Пользователь не найден.', 'idpg_core' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( ! is_array( $clean ) || ! $clean ) {
+			return new WP_Error(
+				'idpg_profile_nothing_to_update',
+				__( 'Нет данных для сохранения.', 'idpg_core' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// display_name — стандартное поле пользователя, не мета.
+		if ( array_key_exists( 'display_name', $clean ) ) {
+			$result = wp_update_user(
+				array(
+					'ID'           => $user->ID,
+					'display_name' => $clean['display_name'],
+				)
+			);
+
+			if ( is_wp_error( $result ) ) {
+				return new WP_Error(
+					'idpg_profile_update_failed',
+					$result->get_error_message(),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		$meta_map = array(
+			'org_name'     => self::META_ORG_NAME,
+			'contact_name' => self::META_CONTACT_NAME,
+			'phone'        => self::META_PHONE,
+		);
+
+		foreach ( $meta_map as $field => $meta_key ) {
+			if ( ! array_key_exists( $field, $clean ) ) {
+				continue;
+			}
+
+			update_user_meta( $user->ID, $meta_key, $clean[ $field ] );
+		}
+
+		if ( array_key_exists( 'avatar_id', $clean ) ) {
+			update_user_meta( $user->ID, self::META_AVATAR_ID, $clean['avatar_id'] );
+		}
+
+		/**
+		 * Действие после успешного сохранения профиля.
+		 *
+		 * @param int   $user_id ID пользователя.
+		 * @param array $clean   Сохранённые значения.
+		 */
+		do_action( 'idpg_organizer_profile_updated', $user->ID, $clean );
+
+		return self::get_profile_data( $user->ID );
 	}
 }

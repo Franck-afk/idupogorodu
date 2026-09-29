@@ -3,15 +3,18 @@
  * Юнит-тесты: доступ к кабинету организатора (/organizer/).
  *
  * Проверяется:
- *  - решение по доступу для гостя, организатора, pending-организатора
- *    и обычного подписчика (роль subscriber);
+ *  - решение по доступу для гостя, организатора и обычного подписчика
+ *    (роль subscriber);
  *  - администратор и редактор тоже допускаются («организатор и выше»);
- *  - флаг анкеты распознаётся под обоими ключами
- *    (`_idpg_org_pending` и `idpg_org_pending`);
  *  - нормализация слага раздела и адреса разделов;
  *  - регистрация query-переменной и rewrite-правил;
  *  - адрес после входа: организатор — в кабинет, администратор и редактор — в wp-admin
  *    (`IDPG_Organizer_URL::after_login_url()` и `IDPG_Auth::redirect_organizer_to_cabinet()`).
+ *
+ * Анкеты организатора больше нет (DEV-72), поэтому отдельного состояния
+ * «pending» и флагов анкеты в тестах не осталось: доступ определяется
+ * только наличием роли. Флаг подтверждения email (`idpg_org_pending`)
+ * живёт в `IDPG_Organizer_Verify` и на решение по доступу не влияет.
  *
  * Логика доступа — чистая функция `IDPG_Organizer_URL::get_access_decision()`
  * без редиректов и вывода, поэтому проверяется без HTTP-запросов.
@@ -90,6 +93,27 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Выставить query-переменную глобального запроса.
+	 *
+	 * В наборе тестов WP нет хелпера на этот случай, а `set_query_var()` из
+	 * ядра только читает текущее значение. Поэтому правим $wp_query
+	 * напрямую — ровно то, что делает WP_Rewrite при разборе адреса.
+	 *
+	 * @param string $key   Имя переменной.
+	 * @param string $value Значение.
+	 * @return void
+	 */
+	protected function set_cabinet_query_var( $key, $value ) {
+		global $wp_query;
+
+		if ( ! $wp_query instanceof WP_Query ) {
+			$wp_query = new WP_Query();
+		}
+
+		$wp_query->set( $key, $value );
+	}
+
+	/**
 	 * Гость (неавторизованный) — решение «guest».
 	 */
 	public function test_guest_is_redirected_to_login() {
@@ -99,65 +123,41 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Организатор с заполненной анкетой получает доступ к кабинету.
+	 * Организатор получает доступ к кабинету.
 	 *
-	 * Организатор без анкеты (нет _idpg_org_completed_at и idpg_org_name)
-	 * теперь считается pending (страховка DEV-50), поэтому для allowed
-	 * анкета должна быть отмечена как заполненная.
+	 * С DEV-72 отдельной анкеты нет, поэтому никаких дополнительных
+	 * признаков заполнения не требуется — достаточно роли event_organizer.
 	 */
 	public function test_organizer_is_allowed() {
 		$organizer = $this->make_organizer( 'org_cabinet' );
 
-		// Признаки заполненной анкеты (см. is_questionnaire_complete()).
-		update_user_meta( $organizer->ID, 'idpg_org_name', 'ООО «Рога и копыта»' );
-		update_user_meta( $organizer->ID, '_idpg_org_completed_at', time() );
-
 		wp_set_current_user( $organizer->ID );
 
 		$this->assertTrue( IDPG_Organizer_URL::user_is_organizer( $organizer->ID ) );
-		$this->assertFalse( IDPG_Organizer_Page::is_pending() );
 		$this->assertSame( IDPG_Organizer_URL::ACCESS_ALLOWED, IDPG_Organizer_URL::get_access_decision() );
 	}
 
 	/**
-	 * Организатор с незаполненной анкетой уходит на /organizer/complete/.
+	 * Организатор без заполненного `idpg_org_name` всё равно допускается:
+	 * данные профиля собираются в кабинете (DEV-73), а не в отдельной анкете.
 	 */
-	public function test_pending_organizer_is_sent_to_anketa() {
-		$organizer = $this->make_organizer( 'org_pending' );
+	public function test_organizer_without_org_name_is_allowed() {
+		$organizer = $this->make_organizer( 'org_no_name' );
 
-		update_user_meta( $organizer->ID, '_idpg_org_pending', 1 );
-
-		wp_set_current_user( $organizer->ID );
-
-		$this->assertTrue( IDPG_Organizer_URL::is_pending_organizer( $organizer->ID ) );
-		$this->assertSame( IDPG_Organizer_URL::ACCESS_PENDING, IDPG_Organizer_URL::get_access_decision() );
+		$this->assertSame( '', (string) get_user_meta( $organizer->ID, 'idpg_org_name', true ) );
+		$this->assertSame( IDPG_Organizer_URL::ACCESS_ALLOWED, IDPG_Organizer_URL::get_access_decision( $organizer->ID ) );
 	}
 
 	/**
-	 * Флаг анкеты под «историческим» ключом без подчёркивания
-	 * (idpg_org_pending) тоже распознаётся — именно его пишет
-	 * IDPG_Organizer_Verify::prepare().
+	 * Флаг подтверждения email (`idpg_org_pending`) не влияет на доступ:
+	 * пользователь без роли получает 403, а не «pending».
 	 */
-	public function test_pending_flag_without_underscore_is_recognized() {
-		$organizer = $this->make_organizer( 'org_pending_alt' );
+	public function test_email_pending_flag_does_not_grant_access() {
+		$user_id = $this->make_roleless_user( 'org_email_pending' );
 
-		update_user_meta( $organizer->ID, IDPG_Organizer_Verify::META_PENDING, 1 );
+		update_user_meta( $user_id, 'idpg_org_pending', 1 );
 
-		$this->assertTrue( IDPG_Organizer_URL::is_pending_organizer( $organizer->ID ) );
-		$this->assertSame( IDPG_Organizer_URL::ACCESS_PENDING, IDPG_Organizer_URL::get_access_decision( $organizer->ID ) );
-	}
-
-	/**
-	 * Сразу после регистрации роли у пользователя ещё нет, но флаг анкеты
-	 * уже стоит: он должен попасть на /organizer/complete/, а не получить 403.
-	 */
-	public function test_roleless_pending_user_goes_to_anketa() {
-		$user_id = $this->make_roleless_user( 'org_fresh' );
-
-		update_user_meta( $user_id, '_idpg_org_pending', 1 );
-
-		$this->assertSame( array(), (array) get_user_by( 'id', $user_id )->roles );
-		$this->assertSame( IDPG_Organizer_URL::ACCESS_PENDING, IDPG_Organizer_URL::get_access_decision( $user_id ) );
+		$this->assertSame( IDPG_Organizer_URL::ACCESS_DENIED, IDPG_Organizer_URL::get_access_decision( $user_id ) );
 	}
 
 	/**
@@ -188,7 +188,6 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 	 */
 	public function test_guest_is_not_organizer() {
 		$this->assertFalse( IDPG_Organizer_URL::user_is_organizer( 0 ) );
-		$this->assertFalse( IDPG_Organizer_URL::is_pending_organizer( 0 ) );
 	}
 
 	/**
@@ -217,10 +216,17 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Базовый набор разделов — три штуки.
+	 * Базовый набор разделов.
+	 *
+	 * `venues` добавлен DEV-50 вместе с самостоятельной формой площадки:
+	 * до этого площадку можно было завести только модалкой из формы
+	 * события, отдельного адреса у неё не было.
 	 */
 	public function test_default_sections() {
-		$this->assertSame( array( 'dashboard', 'events', 'profile' ), IDPG_Organizer_URL::get_sections() );
+		$this->assertSame(
+			array( 'dashboard', 'events', 'venues', 'profile' ),
+			IDPG_Organizer_URL::get_sections()
+		);
 	}
 
 	/**
@@ -237,8 +243,9 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 	/**
 	 * Rewrite-правила кабинета регистрируются.
 	 *
-	 * Правило опознаётся по query-переменной раздела: у /organizer/complete/
-	 * (IDPG_Organizer_Page) она не используется.
+	 * Правила опознаются по query-переменной раздела. С DEV-72 страницы
+	 * анкеты `/organizer/complete/` больше нет, поэтому правил ровно два:
+	 * `/organizer/{section}/` и база `/organizer/`.
 	 */
 	public function test_rewrite_rules_registered() {
 		global $wp_rewrite;
@@ -261,7 +268,7 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 
 		$regexes = array_keys( $section_rules );
 
-		$this->assertContains( '^organizer/(dashboard|events|profile)/?$', $regexes );
+		$this->assertContains( '^organizer/(dashboard|events|venues|profile)/?$', $regexes );
 		$this->assertContains( '^organizer/?$', $regexes );
 
 		// Раздел по умолчанию подставляется в базовом правиле.
@@ -366,6 +373,160 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 		$this->assertSame(
 			home_url( '/' ),
 			$auth->redirect_after_login( $admin_url, '', $this->make_user( 'auth-redirect-sub', 'subscriber' ) )
+		);
+	}
+
+	// =========================================================================
+	// Форма события (G5): /organizer/event/new/ и /organizer/event/{id}/
+	// =========================================================================
+
+	/**
+	 * Query-переменная формы события зарегистрирована.
+	 *
+	 * Без неё rewrite-правила подставят параметр в адрес, но WP его
+	 * отбросит и get_query_var() вернёт пустую строку — то есть страница
+	 * формы отрендерилась бы обычным шаблоном записи.
+	 */
+	public function test_event_qvar_registered() {
+		$vars = IDPG_Organizer_URL::query_vars( array( 'p' ) );
+
+		$this->assertContains( IDPG_Organizer_URL::EVENT_QVAR, $vars );
+		$this->assertContains( 'p', $vars );
+	}
+
+	/**
+	 * Rewrite-правила формы события: создание и правка.
+	 */
+	public function test_event_rewrite_rules_registered() {
+		global $wp_rewrite;
+
+		update_option( IDPG_Organizer_URL::FLUSH_OPT, IDPG_Organizer_URL::REWRITE_VERSION );
+
+		IDPG_Organizer_URL::rewrites();
+
+		$event_rules = array();
+
+		foreach ( (array) $wp_rewrite->extra_rules_top as $regex => $query ) {
+			if ( false !== strpos( (string) $query, IDPG_Organizer_URL::EVENT_QVAR ) ) {
+				$event_rules[ $regex ] = $query;
+			}
+		}
+
+		$this->assertCount( 2, $event_rules, 'Ожидались два правила формы события.' );
+
+		$regexes = array_keys( $event_rules );
+
+		$this->assertContains( '^organizer/event/new/?$', $regexes );
+		$this->assertContains( '^organizer/event/([0-9]+)/?$', $regexes );
+
+		// Порядок проверяем по полному списку правил, а не по отфильтрованному.
+		// WP_Rewrite::add_rule() делает обычное присваивание в extra_rules_top,
+		// поэтому порядок массива = порядок регистрации, и правила проверяются
+		// именно в нём. Правила формы объявлены первыми, значит в массиве они
+		// должны стоять раньше правил разделов — иначе раздел с слагом `event`
+		// перехватил бы /organizer/event/.
+		$all_regexes = array_keys( (array) $wp_rewrite->extra_rules_top );
+
+		$event_new_pos = array_search( '^organizer/event/new/?$', $all_regexes, true );
+		$section_pos   = array_search( '^organizer/(dashboard|events|venues|profile)/?$', $all_regexes, true );
+
+		$this->assertNotFalse( $event_new_pos, 'Правило создания события должно регистрироваться.' );
+		$this->assertNotFalse( $section_pos, 'Правило разделов должно регистрироваться.' );
+		$this->assertLessThan(
+			$section_pos,
+			$event_new_pos,
+			'Правила формы должны проверяться раньше правил разделов.'
+		);
+
+		// Числовой ID подставляется в query-переменную, `new` — константой.
+		$this->assertStringContainsString(
+			IDPG_Organizer_URL::EVENT_QVAR . '=$matches[1]',
+			$event_rules['^organizer/event/([0-9]+)/?$']
+		);
+
+		$this->assertStringContainsString(
+			IDPG_Organizer_URL::EVENT_QVAR . '=' . IDPG_Organizer_URL::EVENT_NEW,
+			$event_rules['^organizer/event/new/?$']
+		);
+	}
+
+	/**
+	 * Адреса формы события: создание и правка.
+	 */
+	public function test_event_form_urls() {
+		$this->assertSame(
+			home_url( '/organizer/event/new/' ),
+			IDPG_Organizer_URL::event_form_url( 0 )
+		);
+
+		$this->assertSame(
+			home_url( '/organizer/event/42/' ),
+			IDPG_Organizer_URL::event_form_url( 42 )
+		);
+
+		// Мусор на входе не должен попасть в адрес.
+		$this->assertSame(
+			home_url( '/organizer/event/new/' ),
+			IDPG_Organizer_URL::event_form_url( 'abc' )
+		);
+	}
+
+	/**
+	 * ID события из query-переменной формы.
+	 */
+	public function test_current_event_id_from_query_var() {
+		$this->set_cabinet_query_var( IDPG_Organizer_URL::EVENT_QVAR, '42' );
+		$this->assertSame( 42, IDPG_Organizer_URL::get_current_event_id() );
+		$this->assertTrue( IDPG_Organizer_URL::is_event_form_request() );
+
+		// `new` и отсутствие значения — оба означают «создать».
+		$this->set_cabinet_query_var( IDPG_Organizer_URL::EVENT_QVAR, IDPG_Organizer_URL::EVENT_NEW );
+		$this->assertSame( 0, IDPG_Organizer_URL::get_current_event_id() );
+
+		$this->set_cabinet_query_var( IDPG_Organizer_URL::EVENT_QVAR, '' );
+		$this->assertSame( 0, IDPG_Organizer_URL::get_current_event_id() );
+		$this->assertFalse( IDPG_Organizer_URL::is_event_form_request() );
+	}
+
+	/**
+	 * Форма события — часть кабинета: ей нужны те же ассеты.
+	 */
+	public function test_event_form_is_part_of_cabinet() {
+		$this->set_cabinet_query_var( IDPG_Organizer_URL::EVENT_QVAR, IDPG_Organizer_URL::EVENT_NEW );
+
+		$this->assertTrue( IDPG_Organizer_URL::is_cabinet_request() );
+	}
+
+	/**
+	 * Запрос формы обслуживается отдельным шаблоном.
+	 */
+	public function test_event_form_template_selected() {
+		$page_template = locate_template( 'page-organizer.php' );
+
+		// Вне кабинета шаблон не подменяется.
+		$this->assertSame(
+			$page_template,
+			IDPG_Organizer_URL::template( $page_template )
+		);
+
+		$this->set_cabinet_query_var( IDPG_Organizer_URL::PAGE_QVAR, '1' );
+		$this->set_cabinet_query_var( IDPG_Organizer_URL::EVENT_QVAR, IDPG_Organizer_URL::EVENT_NEW );
+
+		$this->assertSame(
+			locate_template( IDPG_Organizer_URL::EVENT_TEMPLATE ),
+			IDPG_Organizer_URL::template( $page_template )
+		);
+	}
+
+	/**
+	 * Правила сброса постоянных ссылок подняты: правила формы добавлены
+	 * после последнего сброса, поэтому старая версия должна форсировать новый.
+	 */
+	public function test_rewrite_version_covers_event_rules() {
+		$this->assertGreaterThanOrEqual(
+			2,
+			IDPG_Organizer_URL::REWRITE_VERSION,
+			'Правила формы события требуют пересборки rewrite_rules.'
 		);
 	}
 }

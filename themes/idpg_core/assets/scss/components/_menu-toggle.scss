@@ -1,0 +1,54 @@
+// ============================================================================
+// menu toggle
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+.idpg-menu-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--idpg-hairline);
+  border-radius: 12px;
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+}
+.idpg-menu-toggle:hover, .idpg-menu-toggle:focus {
+  border-color: var(--idpg-hairline);
+  background-color: var(--idpg-surface-soft);
+  outline: none;
+}
+.idpg-menu-toggle:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: 2px;
+}
+.idpg-menu-toggle__line {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background-color: var(--idpg-ink);
+  border-radius: 1px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.idpg-menu-toggle[aria-expanded=true] .idpg-menu-toggle__line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.idpg-menu-toggle[aria-expanded=true] .idpg-menu-toggle__line:nth-child(2) {
+  opacity: 0;
+}
+.idpg-menu-toggle[aria-expanded=true] .idpg-menu-toggle__line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}

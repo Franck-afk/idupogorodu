@@ -205,6 +205,19 @@ function idpg_core_scripts() {
 		wp_enqueue_script( 'idpg_core-auth', get_template_directory_uri() . '/assets/js/auth.js', array(), IDPG_VERSION, true );
 	}
 
+	// Кабинет организатора (/organizer/*): общая логика разделов, форма
+	// события и форма площадки. Данные для скриптов передаются
+	// data-атрибутами разметки, поэтому wp_localize_script не нужен.
+	if ( function_exists( 'idpg_core_is_organizer_cabinet' ) && idpg_core_is_organizer_cabinet() ) {
+		$org_css_ver = file_exists( get_template_directory() . '/assets/css/organizer.css' )
+			? (string) filemtime( get_template_directory() . '/assets/css/organizer.css' )
+			: IDPG_VERSION;
+		wp_enqueue_style( 'idpg_core-organizer', get_template_directory_uri() . '/assets/css/organizer.css', array( 'idpg_core-style' ), $org_css_ver );
+		wp_enqueue_script( 'idpg_core-organizer', get_template_directory_uri() . '/assets/js/organizer.js', array(), IDPG_VERSION, true );
+		wp_enqueue_script( 'idpg_core-organizer-event-form', get_template_directory_uri() . '/assets/js/organizer-event-form.js', array(), IDPG_VERSION, true );
+		wp_enqueue_script( 'idpg_core-organizer-venue-form', get_template_directory_uri() . '/assets/js/organizer-venue-form.js', array(), IDPG_VERSION, true );
+	}
+
 	// Передача данных в JS
 	$current_city_slug = class_exists( 'IDPG_City_Filter' ) ? IDPG_City_Filter::get_current_city_slug() : '';
 	wp_localize_script(
@@ -379,6 +392,114 @@ require_once get_template_directory() . '/inc/class-idpg-nav-walker.php';
  * Управление областями виджетов.
  */
 require_once get_template_directory() . '/inc/widget-areas.php';
+
+/**
+ * Меню и вспомогательные функции кабинета организатора.
+ *
+ * Файл делегирует проверку страниц и построение URL классу
+ * IDPG_Organizer_URL плагина idpg-core и содержит безопасные
+ * заглушки, если плагин неактивен, — поэтому подключается
+ * безусловно.
+ */
+require_once get_template_directory() . '/inc/organizer-menu.php';
+
+/**
+ * Создаёт страницу кабинета организатора `/organizer/`.
+ *
+ * Идемпотентна: уже существующая страница со слагом `organizer`
+ * переиспользуется, её ID записывается в опцию. Нужен темплейт
+ * `page-organizer.php`, поэтому страница всегда получает его и при
+ * повторном вызове — если темплейт был снят вручную.
+ *
+ * @return int ID страницы; 0, если создать не удалось.
+ */
+function idpg_core_create_organizer_page() {
+	$existing = get_page_by_path( 'organizer' );
+
+	if ( $existing instanceof WP_Post ) {
+		update_option( '_idpg_organizer_page_id', (int) $existing->ID );
+		update_post_meta( (int) $existing->ID, '_wp_page_template', 'page-organizer.php' );
+
+		return (int) $existing->ID;
+	}
+
+	$page_id = wp_insert_post(
+		array(
+			'post_type'      => 'page',
+			'post_status'    => 'publish',
+			'post_title'     => 'Кабинет организатора',
+			'post_name'      => 'organizer',
+			'post_content'   => '',
+			'comment_status' => 'closed',
+			'ping_status'    => 'closed',
+		),
+		true
+	);
+
+	if ( is_wp_error( $page_id ) ) {
+		return 0;
+	}
+
+	update_post_meta( (int) $page_id, '_wp_page_template', 'page-organizer.php' );
+	update_option( '_idpg_organizer_page_id', (int) $page_id );
+
+	return (int) $page_id;
+}
+add_action( 'after_switch_theme', 'idpg_core_create_organizer_page' );
+
+/**
+ * ID страницы кабинета организатора.
+ *
+ * Опция — основной источник, но при её потере (импорт базы, ручная
+ * правка) ID восстанавливается по слагу. Значение, указывающее не на
+ * страницу, игнорируется.
+ *
+ * @return int ID страницы; 0, если страницы нет.
+ */
+function idpg_core_get_organizer_page_id() {
+	$stored = (int) get_option( '_idpg_organizer_page_id', 0 );
+
+	if ( $stored > 0 ) {
+		$page = get_post( $stored );
+
+		if ( $page instanceof WP_Post && 'page' === $page->post_type ) {
+			return $stored;
+		}
+	}
+
+	$page = get_page_by_path( 'organizer' );
+
+	if ( ! $page instanceof WP_Post ) {
+		return 0;
+	}
+
+	update_option( '_idpg_organizer_page_id', (int) $page->ID );
+
+	return (int) $page->ID;
+}
+
+/**
+ * Исключает страницу кабинета организатора из sitemap.
+ *
+ * Кабинет закрыт от индексации, поэтому в карту сайта не попадает.
+ *
+ * @param array $excluded Список исключений Yoast.
+ * @return array
+ */
+function idpg_core_exclude_organizer_page_from_sitemap( $excluded ) {
+	if ( ! is_array( $excluded ) ) {
+		return array();
+	}
+
+	$page_id = idpg_core_get_organizer_page_id();
+
+	if ( $page_id ) {
+		$excluded[] = $page_id;
+	}
+
+	return array_values( array_unique( $excluded ) );
+}
+add_filter( 'wpseo_exclude_from_sitemap_by_posts_ids', 'idpg_core_exclude_organizer_page_from_sitemap' );
 
 /**
  * Автосоздание меню навигации по умолчанию.

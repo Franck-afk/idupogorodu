@@ -22,8 +22,6 @@ add_action( 'add_meta_boxes', 'idpg_core_add_title_meta_box' );
 
 /**
  * HTML метaboxа.
- *
- * @param WP_Post $post Текущая запись (страница) в редакторе.
  */
 function idpg_page_title_meta_box_html( $post ) {
 	wp_nonce_field( 'idpg_page_title_meta', 'idpg_page_title_nonce' );
@@ -38,15 +36,13 @@ function idpg_page_title_meta_box_html( $post ) {
 
 /**
  * Сохранение метaboxа.
- *
- * @param int $post_id ID сохраняемой страницы.
  */
 function idpg_core_save_title_meta( $post_id ) {
 	if ( ! isset( $_POST['idpg_page_title_nonce'] ) ) {
 		return;
 	}
 
-	if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['idpg_page_title_nonce'] ) ), 'idpg_page_title_meta' ) ) {
+	if ( ! wp_verify_nonce( $_POST['idpg_page_title_nonce'], 'idpg_page_title_meta' ) ) {
 		return;
 	}
 

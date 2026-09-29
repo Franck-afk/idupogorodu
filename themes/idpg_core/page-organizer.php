@@ -8,7 +8,6 @@
  *
  * Проверка доступа (см. `IDPG_Organizer_URL::get_access_decision()`):
  *  - гость → редирект на /login/;
- *  - организатор с незаполненной анкетой → /organizer/complete/;
  *  - авторизованный без роли организатора → 403;
  *  - организатор и выше → кабинет.
  *
@@ -49,16 +48,75 @@ if ( 'guest' === $idpg_org_decision ) {
 	exit;
 }
 
-if ( 'pending' === $idpg_org_decision ) {
-	wp_safe_redirect( home_url( '/organizer/complete/' ) );
-	exit;
-}
-
 // Авторизован, но прав на кабинет нет: отдаём именно 403 (а не 200
 // с текстом «нет доступа»), чтобы код ответа был честным.
 if ( 'denied' === $idpg_org_decision ) {
 	status_header( 403 );
 	nocache_headers();
+}
+
+// --- Сохранение профиля без JavaScript (DEV-73) -----------------------------
+//
+// Форма в разделе «Профиль» работает и без JS: обычный POST на эту же
+// страницу. Валидацию и запись делает IDPG_Organizer_URL — тот же код,
+// что и у REST-метода PUT /idpg/v1/organizer/profile.
+
+$idpg_org_profile_notice = '';
+
+if ( isset( $_POST['idpg_org_profile_submit'] ) ) {
+	if ( ! class_exists( 'IDPG_Organizer_URL' ) ) {
+		// Плагин ядра отключён — сохранять нечем.
+		$idpg_org_profile_notice = 'error';
+	} elseif ( 'allowed' !== IDPG_Organizer_URL::get_access_decision() ) {
+		// Права проверяем так же, как в REST: путь через POST не должен
+		// быть слабее пути через /idpg/v1/organizer/profile.
+		$idpg_org_profile_notice = 'error';
+	} else {
+		$idpg_org_user_id = get_current_user_id();
+
+		// Nonce: без него форму можно отправить со стороннего сайта.
+		$idpg_org_nonce = isset( $_POST['idpg_org_profile_nonce'] )
+			? sanitize_text_field( wp_unslash( $_POST['idpg_org_profile_nonce'] ) )
+			: '';
+
+		if ( ! $idpg_org_user_id || ! wp_verify_nonce( $idpg_org_nonce, 'idpg_organizer_profile' ) ) {
+			$idpg_org_profile_notice = 'invalid_nonce';
+		} else {
+			$idpg_org_input = array();
+
+			foreach ( array( 'display_name', 'org_name', 'contact_name', 'phone', 'avatar_id' ) as $idpg_org_field ) {
+				if ( ! isset( $_POST[ $idpg_org_field ] ) ) {
+					continue;
+				}
+
+				$idpg_org_input[ $idpg_org_field ] = wp_unslash( $_POST[ $idpg_org_field ] );
+			}
+
+			$idpg_org_clean = IDPG_Organizer_URL::sanitize_profile_input( $idpg_org_input );
+			$idpg_org_saved = is_wp_error( $idpg_org_clean )
+				? $idpg_org_clean
+				: IDPG_Organizer_URL::update_profile( $idpg_org_user_id, $idpg_org_clean );
+
+			$idpg_org_profile_notice = is_wp_error( $idpg_org_saved ) ? 'error' : 'saved';
+
+			// Post/Redirect/Get: после редиректа F5 не переотправляет форму.
+			wp_safe_redirect(
+				add_query_arg(
+					'profile',
+					$idpg_org_profile_notice,
+					function_exists( 'idpg_organizer_section_url' )
+						? idpg_organizer_section_url( 'profile' )
+						: home_url( '/organizer/profile/' )
+				)
+			);
+			exit;
+		}
+	}
+}
+
+// Уведомление после редиректа (см. Post/Redirect/Get выше).
+if ( ! $idpg_org_profile_notice && isset( $_GET['profile'] ) ) {
+	$idpg_org_profile_notice = sanitize_key( wp_unslash( $_GET['profile'] ) );
 }
 
 // --- Данные для разметки -------------------------------------------------

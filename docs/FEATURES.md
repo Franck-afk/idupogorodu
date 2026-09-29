@@ -59,7 +59,11 @@
 ### 1.4 Авторизация и аккаунты
 
 - REST (namespace `idpg/v1`): `POST /auth/login`, `POST /auth/register`, `POST /auth/logout`,
-  `POST /auth/forgot-password`, `POST /auth/reset-password`, `GET /auth/me`.
+  `POST /auth/forgot-password`, `POST /auth/reset-password`, `GET /auth/me`,
+  `GET|PUT /organizer/profile` (профиль организатора, DEV-73),
+  маршруты событий организатора (DEV-42): `GET|POST /organizer/events`,
+  `GET|PUT|DELETE /organizer/events/{id}`, `POST /organizer/events/{id}/submit`,
+  `GET /organizer/stats`.
 - PHP-fallback обработка форм без JavaScript на `/login/` и `/reset-password/` (+ nonce-поля).
 - Кастомные HTML-письма: приветствие после регистрации, восстановление пароля, настройка
   отправителя, логотип письма (фильтр `idpg_email_logo_url`).
@@ -68,17 +72,26 @@
   без JS); при заполнении пользователь не создаётся, ответ нейтральный. Опциональная капча —
   фильтры `idpg_auth_captcha_enabled` / `idpg_auth_captcha_verify`.
 - Подтверждение организатора по email: ключ-хэш + срок в user meta, роль `event_organizer`
-  выдаётся только после перехода по ссылке.
-- Страница доуполнения анкеты `/organizer/complete/` (rewrite + шаблон + JS + защита доступа).
+  выдаётся только после перехода по ссылке. Флаг ожидания подтверждения —
+  `idpg_org_pending` в user meta.
 - **Личный кабинет организатора** `/organizer/` (+ `/organizer/{section}/`, разделы
   `dashboard` | `events` | `profile`): rewrite + шаблон + меню + JS/CSS. Доступ — только
-  роли `event_organizer` и выше (`administrator`, `editor`): гость → `/login/`, флаг анкеты →
-  `/organizer/complete/`, нет прав → `403`. Каркас: разделы рендерятся серверно,
+  роли `event_organizer` и выше (`administrator`, `editor`): гость → `/login/`, нет прав →
+  `403`, иначе кабинет. Каркас: разделы рендерятся серверно,
   `organizer.js` переключает видимость и адрес без перезагрузки. Страница исключена из sitemap Yoast.
   После входа организатор попадает в кабинет (не в `wp-admin`): вход с формы `/login/`,
   ветка «уже авторизован», фильтр `login_redirect` (приоритет 20) и соцвход;
   администратор и редактор по-прежнему ведут в `wp-admin`. Ссылка «Панель» в шапке
   организатору тоже указывает на кабинет.
+- Отдельной анкеты организатора нет (DEV-72): после подтверждения email организатор
+  сразу попадает в кабинет, данные организации заполняются в профиле `/organizer/profile/`.
+- **Редактирование профиля** в разделе `/organizer/profile/` (DEV-73): форма полей
+  `display_name`, `idpg_org_name`, `idpg_contact_name`, `idpg_phone` (+ скрытый `avatar_id`);
+  email только для чтения. Работает с JS (`PUT /organizer/profile` без перезагрузки) и без
+  него (обычный `POST` на страницу кабинета, nonce + Post/Redirect/Get). Маршрут не принимает
+  `user_id` — редактируется только собственный профиль; доступ у ролей `event_organizer`
+  и выше. Логика санитайза и записи — `IDPG_Organizer_URL::sanitize_profile_input()` /
+  `update_profile()`, общая для REST и no-JS пути.
   Рекламный баннер над подвалом (виджет в области «Подвал», позиция `before-footer`) в
   кабинете не выводится: фильтр `sidebars_widgets` обнуляет такие области только внутри ЛК,
   на остальных страницах реклама остаётся.
@@ -95,6 +108,12 @@
 ### 1.4а Персональные данные (152-ФЗ)
 
 - **Модуль `class-privacy.php`** (`IDPG_Privacy`): согласия, cookie-баннер, права субъекта.
+  Подключён (G8, 28.09.2026); до этого файл лежал в дереве неподключённым.
+- **Согласие на обработку ПДн обязательно** при регистрации организатора: отдельный
+  чекбокс в форме (не путать с согласием с офертой), серверная проверка, без него
+  `POST /idpg/v1/auth/register` → `400 pdn_consent_required`. Факт согласия пишется в
+  user meta `idpg_pdn_consent` (дата, редакция документов, источник, хэш IP).
+  Отказ по согласию не расходует лимит попыток регистрации.
 - Cookie-баннер: cookie `idpg_cookie_consent` на год, значения `all` | `necessary`,
   работает без JavaScript (POST с nonce) и с ним; выбор можно изменить повторно.
 - Права субъекта на странице `/privacy/`: самостоятельная выгрузка данных (JSON) через
@@ -225,7 +244,7 @@
 - **Страницы:** `page-login.php` (вход / регистрация пользователя / регистрация организатора
   с полями org_name, contact_name, phone, terms), `page-reset-password.php`, `page-terms.php`,
   `page-privacy.php`, `page-offer` (через `page-legal.php`), `page-about.php`, `page-contacts.php`,
-  `page-favorites.php`, `page-organizer-complete.php`, `page-organizer.php`.
+  `page-favorites.php`, `page-organizer.php`.
 - **Части:** `content-event.php`, `content-event-today.php`, `content-venue.php`, `content-page.php`,
   `content-none.php`, `content.php`, `home-section.php`.
 
@@ -269,11 +288,53 @@
 ### 3.4 Ассеты
 
 - **JS:** `auth.js`, `live-search.js`, `navigation.js`, `canvas-fix.js`, `subscribe.js`,
-  `organizer-complete.js`, `organizer.js`, `widget-ad.js` + `widget-ad-front.js`, `customize-preview.js`,
+  `organizer.js`, `widget-ad.js` + `widget-ad-front.js`, `customize-preview.js`,
   `customize-sidebar-sticky.js`, `social-icons.js`, `pikaday.js` + `pikaday.range.js` +
   `pikaday-locale-ru.js`; vendor: Toastify, xlsx.full.min.js.
 - **CSS/SCSS:** `style.css` (сборка), `templates.css`, `editor-style.css`, `subscribe.css`,
-  `organizer.css`, `widget-areas-admin.css`, SCSS-исходники (`base/`, `components/`, `pages/`, `_responsive.scss`).
+  `organizer.css`, `widget-areas-admin.css`, SCSS-исходники (`base/`, `components/`, `pages/`, `responsive.scss`).
+
+### 3.4.1 Сборка CSS (DEV-87)
+
+`style.css` — **собираемый артефакт**, а не ручной файл. Сборка:
+
+```
+cd wp-content/themes/idpg_core
+npm install          # ставит sass из devDependencies
+npm run compile:css  # sass assets/scss/style.scss:style.css --no-source-map --style=expanded
+```
+
+Структура `assets/scss/` (порядок `@use` в `style.scss` = порядок каскада):
+
+| Каталог | Содержимое |
+|---|---|
+| `base/` | `_tokens.scss` — 103 CSS-переменные в `:root`, `_reset.scss`, `_typography.scss` |
+| `components/` | `_header`, `_nav`, `_auth-dropdown`, `_menu-toggle`, `_city-selector`, `_city-modal`, `_bottom-bar`, `_search`, `_footer`, `_container`, `_buttons`, `_home-sidebar`, `_widget-areas`, `_recent-events`, `_mobile` |
+| `pages/` | `_auth`, `_create-event`, `_cabinet`, `_dashboard`, `_organizer` |
+| корень | `responsive.scss`, `style.scss` (точка входа) |
+
+**Дизайн-система — CSS Custom Properties.** Палитра, поверхности, типографика и
+тень заданы переменными `--idpg-*` в `:root` (103 шт., 373 ссылки). SCSS-переменные
+`base/_variables.scss` — наследие до DEV-87, сейчас не используются: партиалы
+перенесены дословно, без `$var`.
+
+**Правила при переносе (нарушение ломает каскад):**
+- не переставлять `@use` в `style.scss` — очерёдность определяет приоритет;
+- не переименовывать партиалы без перепроверки сборки;
+- Sass сворачивает `calc(32px + 344px)` в `376px` — если важна читаемость
+  связи, писать через интерполяцию: `calc(#{32}px + #{344}px)`;
+- литерал интерполяции нельзя писать в комментарии: Sass разбирает его даже
+  внутри `/* */` и падает на пустой последовательности.
+
+**Сторож сборки.** `tests/test-css-build.php` (в наборе `idpg-core`) собирает
+SCSS во временный файл и сравнивает набор правил с `style.css` на уровне
+селектор + декларации + контекст `@media`. Требует нулевую разницу, поэтому
+расхождение источника и сборки больше не может накопиться незаметно. Без node
+тест пропускается.
+
+**Активна дочерняя тема** `idpg_core-child` (см. 3.5): `style.css` родителя
+подключается отдельно как `chld_thm_cfg_parent-css`, дочерний — как
+`idpg_core-style-css`. Оба с `?ver=IDPG_VERSION`.
 
 ### 3.5 Дочерняя тема `idpg_core-child` (v1.0.0)
 
@@ -301,7 +362,7 @@
 
 | # | Факт | Детали |
 |---|---|---|
-| 1 | REST `/idpg/v1/auth/organizer-complete` **не зарегистрирован** | На него шлёт форма `page-organizer-complete.php` и `organizer-complete.js`; в `class-rest-auth.php` только 6 маршрутов. Форма доуполнения анкеты организатора фактически не работает |
+| 1 | ~~REST `/idpg/v1/auth/organizer-complete` не зарегистрирован~~ | **Закрыто DEV-72**: расхождение снято удалением слоя анкеты — маршрута, шаблона `page-organizer-complete.php` и скрипта `organizer-complete.js` больше нет |
 | 2 | `class-banners.php` отсутствует | README плагина и ТЗ описывают систему баннеров middle/bottom (UTM, период показа, TTL кэша) — файла нет. Баннеры = баннер текущего события + области виджетов + рекламный виджет |
 | 3 | Модуль `includes/social-auth/*` отсутствует | README плагина описывает встроенный VK/Яндекс OAuth — соц-вход вынесен в отдельный плагин `idpg-auth` (VK/Яндекс/MAX) |
 | 4 | ЛК `/lk/` удалён (1.1.0) | Нет `page-lk.php` и REST `/user/*`; осталось только `/lk/favorites/`. README темы всё ещё ссылается на ЛК |
@@ -313,65 +374,185 @@
 
 ---
 
-## 6. ЛК организатора: фактическое состояние (аудит DEV-00A, 19.09.2026)
+## 6. ЛК организатора: фактическое состояние (сверено 28.09.2026)
 
-> **Источник:** `docs/README_DEV-00A.md` (полный отчёт, проверка 16.09.2026) + повторная
-> сверка 19.09.2026 на текущем дереве `idpg-core` 1.1.2 / тема 1.0.75. **Выводы сходятся.**
->
-> Существенная часть файлов ЛК есть в репозитории, но **не подключена** в рантайме.
-> Ниже — фактическое состояние «что реально работает», затем gap-лист (см. §3).
+> **Источник:** сверка по текущему дереву `idpg-core` 1.1.2 / тема 1.0.75
+> (проверка `require`, `enqueue`, наличия REST-маршрутов и методов), а не
+> прежний отчёт DEV-00A от 19.09.2026. **Прежний вывод устарел:** на тот момент
+> обвязка ЛК (DEV-37/38/39) ещё не была применена, и документ утверждал, что
+> роутер, меню и ассеты «не подключены». Сейчас это не так — см. §6.1.
+> Историческая версия сохранена в `docs/README_DEV-00A.md`.
 
 ### 6.1 Что фактически работает
 
 | Компонент | Состояние |
 |---|---|
-| `/organizer/complete/` (анкета доуполнения) | Маршрутизация работает (`IDPG_Organizer_Page`, подключён `idpg-core.php:148`); **форма не работает** — REST `POST /auth/organizer-complete` не зарегистрирован → 404 (DEV-01, §5 п.1) |
-| `page-organizer.php` + `template-parts/organizer/section-{dashboard,events,profile}.php` | Файлы есть и валидны, но к ним нет маршрутизации: `class-organizer-url.php` не загружен |
-| Модерация по платности (`class-event-moderation.php`) | Загружен (`idpg-core.php:151`): орг. не публикует (→ `pending`), бесплатные авто-публикуются, платные с неполными билетными данными → `draft` + уведомления |
+| Роутер `/organizer/` и `/organizer/{section}/` (`IDPG_Organizer_URL`) | **Подключён и работает**: `require_once` в `idpg-core.php:109`, `IDPG_Organizer_URL::init()` в `:151`. Rewrite-правила, query vars, `template_include`, принудительный flush по `REWRITE_VERSION`. **DEV-37** |
+| Меню кабинета (`inc/organizer-menu.php`, 7 функций `idpg_organizer_*`) | **Подключено**: `require_once` в `functions.php:416`. Даёт `idpg_organizer_menu()`, `idpg_organizer_section_url()`, `idpg_core_is_organizer_cabinet()`, скрытие баннера над подвалом. **DEV-38** |
+| Ассеты кабинета | **Подключены**: `assets/css/organizer.css` (`functions.php:212-215`) и `assets/js/organizer.js` (`:221`) — только на `/organizer/*`. **DEV-38** |
+| Страница WP `/organizer/` | **Создаётся автоматически**: `idpg_core_create_organizer_page()` на `after_setup_theme` (`functions.php:782`), ID в `_idpg_organizer_page_id`. Нужна для крошек, меню и исключения из sitemap Yoast. **DEV-39** |
+| `page-organizer.php` + `template-parts/organizer/section-{dashboard,events,profile}.php` | Работают: обслуживаются роутером, разделы рендерятся серверно, `organizer.js` переключает видимость и адрес без перезагрузки. **DEV-37/38** |
+| Проверка доступа `get_access_decision()` | Гость → `/login/`, нет роли → `403`, организатор и выше → кабинет. Отдельного состояния «pending» нет. **DEV-72** |
+| `guard_cabinet_redirect()` | Работает (`class-organizer-url.php:255`): не даёт зациклиться при попытке зайти в кабинет без прав. **DEV-63** |
+| Редирект в кабинет после входа и после подтверждения email | Работает: `after_login_url()` + `idpg_organizer_after_login_url()`, `IDPG_Auth::redirect_organizer_to_cabinet()`, подтверждение по ссылке из письма. **DEV-37, DEV-67** |
+| Подтверждение по email (`IDPG_Organizer_Verify`) | Работает — роль `event_organizer` выдаётся только после перехода по ссылке; флаг ожидания `idpg_org_pending`. **DEV-68** |
+| Редактирование профиля в `/organizer/profile/` | **Работает**: форма + `GET|PUT /idpg/v1/organizer/profile`, с JavaScript и без него. **DEV-73** |
+| Платный показ в баннере на главной | **Работает**: заявка организатора `_idpg_banner_request` → подтверждение админом `_idpg_banner_approved` → событие попадает в выборку баннера (`class-current-event-banner.php:707-713`), колонка статуса в списке событий (`class-meta.php:1098-1113`) |
+| Модерация по платности (`class-event-moderation.php`) | Подключён (`idpg-core.php:151`): орг. не публикует (→ `pending`), бесплатные авто-публикуются, платные с неполными билетными данными → `draft` + уведомления |
+| Валюта события у организатора | **Только рубли (решение владельца, DEV-95).** Поле `_idpg_currency` остаётся в модели Carbon для администратора (select `RUB|USD|EUR`, контейнер «Билеты и цены»), но организатор его не выбирает: в форме `/organizer/event/new/` поля нет, параметр `currency` не объявлен в схеме REST `/idpg/v1/organizer/events` и потому игнорируется, а при сохранении `_idpg_currency` принудительно ставится в `RUB` (только если поле ещё пустое — валюту, выставленную админом, правка организатора не затирает). Карточка выводит `₽` |
+| Перечисления в маршруте события | **Проверяются сервером (DEV-99).** Все девять перечислений `GET|POST /idpg/v1/organizer/events` — `all_day`, `is_free`, `ticket_type`, `ticket_status`, `banner_request`, `is_online`, `venue_type`, `orderby`, `order` — имеют `validate_callback`, без чего `enum` был декорацией: `is_free=hack` проходил с 201 и ложился в базу. Набор значений повторяет то, что способна отправить форма: у `<select>` (`ticket_type`, `ticket_status`, `venue_type`) в перечисление входит пустая строка — это опция «— Не нужны —» / «— Не выбран —», без неё сохранение новой формы отвергалось с 400; у радио (`all_day`, `is_free`) её нет, скрипт подставляет `no` |
+| Форма создания/правки события (G5) | **Работает**: `page-organizer-event.php` + `organizer-event-form.js` (3 шага, прогресс, сеансы, отправка на модерацию, удаление), маршруты `/organizer/event/new/` и `/organizer/event/{id}/`. **DEV-94** |
+| Синхронизация сеансов (Carbon ↔ зеркало) | **Двусторонняя (DEV-48)**. Сеансы — complex-поле CF `idpg_sessions` (подполя `time`/`price`/`url`), CF раскладывает его по служебным мета-ключам. Организатор пишет через `carbon_set_post_meta()`, зеркало `_idpg_sessions_json` (его читают шаблоны) собирает `IDPG_Meta::mirror_sessions()`. Поэтому сеансы видны обеим сторонам: заведённые в кабинете — в wp-admin, заведённые админом — в кабинете. Пустое значение удаляет зеркало, а не оставляет заглушку `...\|\|\|_empty` |
+| Разделы «Дашборд» и «Мои события» (G6) | **Работают**: наполняются из `GET /organizer/stats` и `GET /organizer/events`, фильтр по статусам со счётчиками, таблица с постерами, пагинация; состояние в адресе (`?status=&p=`). **DEV-94** |
+| Площадки организатора (раздел + форма) | **Работает (DEV-98)**: раздел `/organizer/venues/` (`section-venues.php`) наполняется из `GET /idpg/v1/organizer/venues`; отдельная форма `/organizer/venue/new/` и `/organizer/venue/{id}/` (`page-organizer-venue.php` + `organizer-venue-form.js`) с полями контейнера «Данные площадки», выбором постера через `wp.media` и работой без JavaScript (обычный POST + nonce + Post/Redirect/Get). Обязательны `title`, `city`, `venue_address` — проверяются и при создании, и при правке. Чужие опубликованные площадки видны в списке, но без ссылки на правку. `DELETE` площадки, на которую ссылается событие, отвечает `409 idpg_org_venue_in_use`. Оформление: контролы и кнопки общие с формой события (`create-event__*`), собственные стили в `pages/_venue-form.scss` — пометка «общая», подсказка о загрузке файлов, опасная кнопка удаления, состояния раздела |
 | Изоляция контента (`IDPG_Organizer_Scope`, `IDPG_City_Filter`) | Работает — организатор видит только свои медиа/события |
-| Подтверждение по email (`IDPG_Organizer_Verify`) | Работает — роль `event_organizer` выдается после перехода по ссылке |
-| Редирект после входа организатора | Родительская логика работает (`class-auth.php`): организатор попадает в `wp-admin`. Целевой редирект в `/organizer/` (DEV-37) не работает — метод в не подключённом `class-organizer-url.php` |
+| Анкета `/organizer/complete/` | **Удалена DEV-72** вместе с классом `IDPG_Organizer_Page`, шаблоном, скриптом и REST-маршрутом. Организатор после подтверждения email попадает сразу в `/organizer/` |
 
 ### 6.2 Что есть, но НЕ подключено (мёртвый код в рантайме)
 
-| Файл / класс | Назначение | Причина выключености |
+| Файл / класс | Назначение | Почему не работает |
 |---|---|---|
-| `plugins/idpg-core/includes/class-organizer-url.php` (`IDPG_Organizer_URL`) | Роутер `/organizer/` + `/organizer/{section}/`: rewrite, query vars, `template_include`, `get_access_decision()`, `after_login_url()` | Нет `require_once` в `idpg-core.php` (блок 75–119), `::init()` нигде не вызывается |
-| `themes/idpg_core/inc/organizer-menu.php` (7 функций `idpg_organizer_*`) | Меню кабинета, `idpg_organizer_section_url()`, `idpg_core_is_organizer_cabinet()`, скрытие баннера над подвалом | Нет `require_once` в `functions.php` (блок 351–381) |
-| `themes/idpg_core/assets/js/organizer.js`, `assets/css/organizer.css` | Переключение разделов ЛК, стили кабинета | Нет `wp_enqueue_script/style` |
-| `themes/idpg_core/assets/js/organizer-complete.js` | `fetch` на `/auth/organizer-complete` | Нет enqueue + целевой REST-маршрут не зарегистрирован |
-| `themes/idpg_core/page-organizer.php` (`page-organizer.php`) | Шаблон кабинета | Работает только если открыт как страница WP; страница `/organizer/` в БД не создана |
-| `plugins/idpg-core/includes/class-privacy.php` (`IDPG_Privacy`, 1318 стр.) | 152-ФЗ: согласие, cookie-баннер, выгрузка/удаление данных субъекта | Нет `require_once` в `idpg-core.php`, нет `IDPG_Privacy::instance()` в `idpg_core_init()` |
-| Страница WP `/organizer/` | Точка входа в кабинет | Не создаётся: `idpg_core_create_organizer_page()` существует только в docblock'ах (автосоздаются только `/login/`, `/reset-password/`, `/terms/`, `/privacy/`, `/offer/`) |
+| ~~`plugins/idpg-core/includes/class-privacy.php`~~ | ~~152-ФЗ: согласие, cookie-баннер, выгрузка и удаление данных~~ | **Подключён** — G8 (28.09.2026). `require_once` в `idpg-core.php`, согласие обязательно при регистрации, тулзы субъекта на `/privacy/` |
+| ~~`class-organizer-url.php`, `inc/organizer-menu.php`, `assets/js/organizer.js`, `assets/css/organizer.css`, `page-organizer.php`, страница `/organizer/`~~ | ~~Обвязка ЛК~~ | **Подключены** — DEV-37/38/39. Больше не мёртвый код |
+
+Других неподключённых модулей кабинета в дереве не осталось.
+
+### 6.2.1 Персональные данные (152-ФЗ)
+
+Подключено в G8, 28.09.2026. Модуль `IDPG_Privacy` (`includes/class-privacy.php`):
+
+- **Согласие на обработку ПДн** — отдельный обязательный чекбокс в форме регистрации
+  организатора (не путать с согласием с офертой). Проверяется на сервере: без него
+  `POST /idpg/v1/auth/register` отвечает `400 pdn_consent_required`. Факт согласия
+  пишется в user meta `idpg_pdn_consent` (кто, когда, редакция документов, хэш IP).
+  Порядок проверок: сначала `type` (403 для не-организатора), затем согласие —
+  иначе не-организатору выдавался бы факт существования регистрации организатора.
+  Отказ по согласию не расходует лимит попыток регистрации.
+- **Cookie-баннер** — выбор «все» / «только необходимые», хранится в cookie
+  `idpg_cookie_consent` на год. Работает без JavaScript (POST + nonce) и с ним.
+- **Права субъекта** — блок «Ваши права» на странице `/privacy/`: самостоятельная
+  выгрузка своих данных в JSON и запрос на удаление. Журнал действий администратора —
+  в опции `idpg_privacy_log`. Админ-страница: «Иду по городу → Конфиденциальность`.
+
+Не сделано: отзыв согласия пользователем в интерфейсе (бэкенд есть — `has_consent()`).
+
+### 6.2.2 События организатора (REST, DEV-42)
+
+`plugins/idpg-core/includes/class-rest-organizer.php` (`IDPG_REST_Organizer`).
+Маршруты доступны, интерфейса создания/редактирования пока нет (см. G5).
+
+| Маршрут | Назначение |
+|---|---|
+| `GET /organizer/events` | Список своих событий. Фильтры: `status` (draft\|pending\|publish\|rejected), `page`, `per_page` (макс. 50), `search`, `orderby` (date\|title\|views), `order`. Ответ: `{ items, total, pages }` |
+| `GET /organizer/events/{id}` | Одно событие, ответ `{ success, data, message }` |
+| `POST /organizer/events` | Создать черновик, ответ `201` |
+| `PUT /organizer/events/{id}` | Обновить. Только `draft` / `rejected` |
+| `POST /organizer/events/{id}/submit` | Отправить на модерацию: `draft` / `rejected` → `pending` |
+| `DELETE /organizer/events/{id}` | Удалить. Только `draft` / `rejected` |
+| `GET /organizer/stats` | Счётчики по статусам + сумма просмотров и кликов |
+
+Правила доступа:
+
+- **Скоуп — только свои события.** Запрос списка всегда ограничен `author`,
+  чужое событие по прямому ID → `403` (не 404, чтобы не выдавать факт
+  существования чужой записи). Администратор и редактор
+  (`edit_others_events`) видят все.
+- **Nonce `wp_rest` обязателен** — проверяется явно в `permission_callback`,
+  как в `IDPG_REST_Api::can_manage_events()`. REST сам проверяет nonce только
+  при cookie-аутентификации, а с Bearer-токеном запрос с чужим заголовком
+  прошёл бы.
+- **Жизненный цикл.** `pending` править и удалять нельзя → `409`
+  (конфликт состояний), иначе организатор обошёл бы модерацию, изменив
+  событие прямо во время проверки. `publish` → `403`. Остальное не трогаем.
+- Отправка на модерацию требует название, дату начала и город, иначе `400`
+  с перечнем недостающих полей. Хук `idpg_organizer_event_submitted`.
+
+Модерация не дублируется: правила бесплатного/платного применяет
+`IDPG_Event_Moderation`. Его штатный триггер — Carbon Fields, которого на
+REST-пути нет, поэтому `submit` вызывает
+`IDPG_Event_Moderation::schedule_price_moderation()` явно. Итог: бесплатное
+публикуется сразу, платное с полными данными идёт на модерацию, платное без
+билетных данных возвращается в черновик.
+
+**Статус `rejected` зарегистрирован** в этом классе (`protected`). До DEV-42
+такого статуса в проекте не было вовсе: модерация уводила событие в `pending`
+и на этом останавливалась. Переходы `rejected → draft / pending` работают,
+и статус выставляется — см. §6.2.3.
+
+### 6.2.3 Отклонение события модератором (DEV-46)
+
+`plugins/idpg-core/includes/class-event-rejection.php` (`IDPG_Event_Rejection`).
+До DEV-46 статус `rejected` был мёртвым: зарегистрирован как перечисление,
+но выставить его было нечем.
+
+- **Row action «Отклонить»** в списке событий (`edit.php?post_type=event`) —
+  только для событий в статусе `pending` и только при наличии
+  `edit_others_events` (администратор, редактор).
+- **Форма отклонения** — подстраница «Иду по городу → Отклонить событие»:
+  предпросмотр, необязательное поле «Причина отклонения», подтверждение.
+- **Действие** — статус → `rejected`, причина в
+  `_idpg_rejection_reason`, дата в `_idpg_rejected_at`, хук
+  `idpg_event_rejected( $post_id, $reason, $actor )`.
+- **Письмо автору** — обязательно, причина попадает в текст, если указана.
+  Повторное отклонение уже отклонённого события — ошибка, а не новое письмо
+  (защита от двойного клика).
+- Безопасность: права и nonce `idpg_reject_event` проверяются в обработчике
+  `admin_post.php` до отклонения; прямая отправка в обработчик без nonce
+  ничего не делает.
+
+Одобрение не менялось: его роль выполняет обычная публикация записи, письмо
+об одобрении шлёт `IDPG_Event_Moderation`.
+
+Модуль намеренно отдельный, а не дописан в `IDPG_Event_Moderation`: модерация
+по платности и отклонение редактором — разные решения с разными последствиями
+для события.
+
+Организатор после отклонения видит событие в разделе «Мои события» с фильтром
+`rejected`, может его править и отправить на модерацию повторно
+(проверено `tests/test-event-rejection.php`).
 
 ### 6.3 Чего нет вовсе
 
-- REST `POST /auth/organizer-complete` (DEV-01) и `handle_organizer_complete()`.
-- REST-маршруты ЛК: `/organizer/events` (CRUD), `/organizer/events/{id}/submit`, `/organizer/profile`, `/organizer/stats`.
-- Страницы `/organizer/event/new/`, `/organizer/event/{id}/`, их шаблоны и `organizer-event-form.js`.
+| Чего нет | Задача |
+|---|---|
+| **UI создания и редактирования события** — страницы `/organizer/event/new/`, `/organizer/event/{id}/`, шаблон формы, скрипт `organizer-event-form.js`. REST-слой под ними готов (DEV-42), форма к нему не подключена | DEV-43, DEV-44 |
+| **Живые разделы «Дашборд» и «Мои события»** — оба по-прежнему заглушки «Раздел в разработке». Не читают ни `/organizer/events`, ни `/organizer/stats`, хотя оба маршрута готовы | DEV-45 |
+| **Оплата за публикацию события** (не за показ в баннере) — продукт не определён, в коде нет. Платный показ в баннере работает | G10, нужно решение владельца |
+| **Выбор аватара** в профиле — UI медиатеки (wp.media) | G11 |
 
-### 6.4 Gap-лист (по приоритету)
+**Что закрыто и больше не является разрывом:**
 
-| # | Gap | Приоритет | Куда ведёт |
-|---|---|---|---|
-| G1 | `class-organizer-url.php` не подключён → весь `/organizer/` мёртв; страница `/organizer/` в БД не создана | P0 | DEV-34 |
-| G2 | `inc/organizer-menu.php` не подключён → `idpg_organizer_*()` не определены в рантайме | P0 | DEV-34/37/38 |
-| G3 | `organizer.js` / `organizer.css` не подключаются | P0 | DEV-34 |
-| G4 | REST `POST /auth/organizer-complete` не зарегистрирован → анкета падает 404 | P0 | DEV-01 |
-| G5 | `/organizer/event/new/`, `/organizer/event/{id}/` + REST `/organizer/events*` + `organizer-event-form.js` — не существуют | P1 | ЛК-события (DEV-35 план) |
-| G6 | Разделы `dashboard`/`events` — заглушки без реальных данных; REST `/organizer/stats`, `/organizer/profile` нет | P1 | ЛК-события (DEV-35 план) |
-| G7 | Флаг pending-анкеты: рассинхрон `idpg_org_pending` / `_idpg_org_pending` | P2 | DEV-01 попутно |
-| G8 | `class-privacy.php` (152-ФЗ) — код есть, не загружен | P0 (законодательство) | DEV-06 |
-| G9 | `is_pending()` требует роль `event_organizer`, которой нет у только что зарегистрированного пользователя | P2 | DEV-32 |
-| G10 | «Платная модерация события» (оплата → публикация) как продукт не задокументирована; реализована только модерация по платности (правила `class-event-moderation.php`) | P2 (решение владельца) | — |
+- ~~REST-маршруты ЛК `/organizer/events*`, `/organizer/stats`~~ — **DEV-42** (§6.2.2).
+- ~~Кнопка «Отклонить» и уведомление автору~~ — **DEV-46** (§6.2.3). Статус
+  `rejected` выставляется, причина сохраняется, письмо уходит автору.
+- ~~Анкета `/organizer/complete/`~~ — удалена **DEV-72**.
+- ~~REST `POST /auth/organizer-complete`~~ — удалён **DEV-72**.
+
+### 6.4 Gap-лист
+
+| # | Gap | Статус | Приоритет | Куда ведёт |
+|---|---|---|---|---|
+| ~~G1~~ | Роутер `class-organizer-url.php` не подключён → `/organizer/` мёртв | **Закрыто DEV-37** | — | — |
+| ~~G2~~ | `inc/organizer-menu.php` не подключён → `idpg_organizer_*()` не определены | **Закрыто DEV-38** | — | — |
+| ~~G3~~ | `organizer.js` / `organizer.css` не подключаются | **Закрыто DEV-38** | — | — |
+| ~~G4~~ | REST `POST /auth/organizer-complete` не зарегистрирован | **Закрыто DEV-72** (слой анкеты удалён целиком) | — | — |
+| ~~G5~~ | **UI создания/правки события.** REST готов (**DEV-42**, §6.2.2), форма — нет: страницы `/organizer/event/new/`, `/organizer/event/{id}/`, шаблон, `organizer-event-form.js` | **Закрыто 29.09.2026**: маршруты + шаблон `page-organizer-event.php` + `organizer-event-form.js` (3 шага, прогресс, сеансы, submit/delete). Тесты: `test-organizer-page.php`, `test-organizer-menu.php`, `tests/js-smoke/organizer-js-smoke.js` | — | — |
+| ~~G6~~ | **Разделы «Дашборд» и «Мои события»** — заглушки. `/organizer/stats` и `/organizer/events` готовы (**DEV-42**), но разделы их не потребляют | **Закрыто 29.09.2026**: `section-dashboard.php` (4 карточки из stats) и `section-events.php` (фильтр по статусам, таблица, пагинация, постеры) наполняются через `organizer.js`. Тесты: `tests/js-smoke/organizer-js-smoke.js` | — | — |
+| ~~G7~~ | Рассинхрон флагов `idpg_org_pending` / `_idpg_org_pending` | **Закрыто DEV-72**: `_idpg_org_pending` удалён, остался только флаг подтверждения email | — | — |
+| ~~G8~~ | ~~`class-privacy.php` (152-ФЗ) — код есть, не подключён~~ | **Закрыто (28.09.2026)**: модуль подключён, согласие на обработку ПДн обязательно при регистрации (REST + PHP-fallback), cookie-баннер работает, блок прав субъекта (выгрузка JSON + запрос на удаление) выводится на `/privacy/`. Тесты: `tests/test-privacy.php` | — | — |
+| ~~G9~~ | `is_pending()` требует роль `event_organizer` | **Закрыто DEV-72**: методов `is_pending()` / `is_pending_organizer()` больше нет | — | — |
+| G10 | Оплата за **публикацию** события (не за баннер) как продукт не определена. Реализована только модерация по платности; платный показ в баннере (`_idpg_banner_request` → `_idpg_banner_approved`) работает | **Отложено решением владельца 29.09.2026**: платёжного провайдера в проекте нет, без него задача невыполнима | P2 | — |
+| ~~G11~~ | ~~Выбор аватара в профиле: UI медиатеки (wp.media) не сделан, `avatar_id` заполняется только через API~~ | **Закрыто решением владельца 29.09.2026 — снято как неактуальное**: аватар существовал только внутри личного кабинета `/lk/`, который по DEV-14 не возвращается. REST `/user/avatar` и UI профиля удалены вместе с ЛК в 1.1.0 | — | — |
+| G12 | `default_role = subscriber` в `wp_options`: роль `subscriber` не должна быть ролью пользователя сайта | **Закрыто решением владельца 28.09.2026 — оставлено `subscriber`**. Через `update_option` задача невыполнима: ядро в `sanitize_option()` (`wp-includes/formatting.php:5158`) подставляет `subscriber`, пока такая роль существует. Обход возможен только прямой записью в `wp_options` в обход валидации ядра. Регистрация организатора от `default_role` не зависит (явный `set_role( 'subscriber' )`) — см. `tests/test-default-role.php` | — | — (решение принято) |
+| ~~G13~~ | ~~Кнопка модератора «Отклонить» и уведомление автору; статус `rejected` был нечем выставить~~ | **Закрыто DEV-46** (§6.2.3): row action + форма с причиной, хук `idpg_event_rejected`, письмо автору. Тесты: `tests/test-event-rejection.php` | — | — |
 
 ### 6.5 Навигация по DEV-33…36 (TZ_BACKLOG)
 
 Заявленные ранее «DEV-33…36» для ЛК-событий в актуальной нумерации `TZ_BACKLOG.md` частично заняты
-другими задачами. Соответствие по факту кода (детали — `README_DEV-00A.md`, §10):
+другими задачами. Соответствие по факту кода:
 
 | Заявленная тема | Реальная позиция в TZ_BACKLOG | Статус по факту |
 |---|---|---|
-| «DEV-33–34: каркас ЛК» | DEV-33 = rate limiter (занят); DEV-34 = каркас ЛК | Файлы каркаса есть, обвязка (G1–G3) не применена |
-| «DEV-35: список/создание событий в ЛК» | Свободного DEV-35 нет | Открытая работа: G5, G6 |
-| «DEV-36: доуполнение анкеты» | Совпадает с DEV-01 (P0) | Открыто: G4 |
+| «DEV-33-34: каркас ЛК» | DEV-33 = rate limiter (занят); DEV-34 = каркас ЛК | Каркас собран и подключён (DEV-37/38/39), профиль редактируется (DEV-73), REST событий готов (DEV-42), отклонение модератором работает (DEV-46). Открытые части кабинета — G5, G6 |
+| «DEV-35: список/создание событий в ЛК» | Свободного DEV-35 нет | Открытая работа: UI над готовым API — G5 (форма, DEV-43/44), G6 (живые разделы, DEV-45) |
+| ~~«DEV-36: доуполнение анкеты»~~ | Совпадало с DEV-01 (P0) | **Закрыто DEV-72**: анкета удалена целиком |

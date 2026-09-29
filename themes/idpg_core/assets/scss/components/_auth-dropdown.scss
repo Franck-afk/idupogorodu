@@ -1,0 +1,115 @@
+// ============================================================================
+// auth dropdown
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+.idpg-auth-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+.idpg-auth-dropdown__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.idpg-auth-dropdown__arrow {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+@media (min-width: 1024px) {
+  .idpg-auth-dropdown:hover .idpg-auth-dropdown__arrow, .idpg-auth-dropdown:focus-within .idpg-auth-dropdown__arrow {
+    transform: rotate(180deg);
+  }
+  .idpg-auth-dropdown:hover .idpg-auth-dropdown__menu, .idpg-auth-dropdown:focus-within .idpg-auth-dropdown__menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+}
+.idpg-auth-dropdown--open .idpg-auth-dropdown__arrow {
+  transform: rotate(180deg);
+}
+.idpg-auth-dropdown--open .idpg-auth-dropdown__menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.idpg-auth-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: var(--idpg-canvas);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px var(--idpg-hairline);
+  padding: 6px;
+  list-style: none;
+  margin: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.95);
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+  z-index: 200;
+}
+.idpg-auth-dropdown__menu::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: var(--idpg-canvas);
+  border-top: 1px solid var(--idpg-hairline);
+  border-left: 1px solid var(--idpg-hairline);
+  transform: rotate(45deg);
+  z-index: 1;
+}
+.idpg-auth-dropdown__user-info {
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--idpg-ink);
+  white-space: nowrap;
+}
+.idpg-auth-dropdown__divider {
+  height: 1px;
+  background-color: var(--idpg-hairline);
+  margin: 4px 0;
+}
+.idpg-auth-dropdown__link {
+  display: block;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  color: var(--idpg-body);
+  text-decoration: none;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.idpg-auth-dropdown__link:hover, .idpg-auth-dropdown__link:focus {
+  background-color: var(--idpg-surface-strong);
+  color: var(--idpg-ink);
+  outline: none;
+}
+.idpg-auth-dropdown__link:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: -2px;
+}
+.idpg-body-locked {
+  overflow: hidden;
+}
+.idpg-body-locked .idpg-header {
+  z-index: 110;
+}
+.idpg-body-locked .idpg-bottom-bar {
+  z-index: 99;
+}

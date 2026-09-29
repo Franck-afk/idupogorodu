@@ -315,6 +315,8 @@ class IDPG_Media {
 	 * @return bool true, если вложение удалено.
 	 */
 	public static function idpg_delete_attachment( $attachment_id, $force = true ) {
+		global $wpdb;
+
 		$attachment_id = absint( $attachment_id );
 
 		if ( ! $attachment_id || ! get_post( $attachment_id ) ) {

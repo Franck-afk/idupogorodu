@@ -27,9 +27,7 @@ define( 'IDPG_AUTH_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 define( 'IDPG_AUTH_OPTIONS_KEY',     'idpg_auth_settings' );
 
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-logger.php';
-require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-login-log.php';
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-compliance.php';
-require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-security.php';
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-admin.php';
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-provider.php';
 require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-oauth-provider.php';
@@ -39,8 +37,6 @@ require_once IDPG_AUTH_PLUGIN_DIR . 'includes/class-wp-auth-ru-max.php';
 
 function idpg_auth_init() {
     WP_Auth_Ru_Compliance::instance();
-    WP_Auth_Ru_Login_Log::instance();
-    WP_Auth_Ru_Security::instance();
     WP_Auth_Ru_Admin::instance();
     WP_Auth_Ru_Yandex::instance();
     WP_Auth_Ru_VK::instance();

@@ -68,6 +68,10 @@ if ( ! empty( $hero_events ) ) {
 /**
  * PHP-обработка форм (fallback при отключённом JS).
  */
+
+// Имя поля согласия на обработку ПДн (152-ФЗ). Объявлено до разбора
+// форм, чтобы разметка ниже не зависела от ветки POST-обработки.
+$pdn_field = class_exists( 'IDPG_Privacy' ) ? IDPG_Privacy::CONSENT_FIELD : 'idpg_pdn_consent';
 $login_error   = '';
 	$register_error = '';
 	$forgot_sent   = false;
@@ -179,8 +183,14 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		$confirm      = wp_unslash( $_POST['password_confirm'] );
 		$terms        = isset( $_POST['terms'] ) ? (bool) $_POST['terms'] : false;
 
+		// Согласие на обработку ПДн (152-ФЗ) — отдельный чекбокс:
+		// согласие с офертой его не заменяет.
+		$pdn_consent  = isset( $_POST[ $pdn_field ] ) ? (bool) $_POST[ $pdn_field ] : false;
+
 		if ( ! $terms ) {
 			$register_error = __( 'Необходимо согласие с офертой и политикой конфиденциальности.', 'idpg_core' );
+		} elseif ( ! $pdn_consent ) {
+			$register_error = __( 'Необходимо согласие на обработку персональных данных.', 'idpg_core' );
 		} elseif ( empty( $org_name ) ) {
 			$register_error = __( 'Введите название организации.', 'idpg_core' );
 		} elseif ( empty( $contact_name ) ) {
@@ -221,6 +231,11 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 				// default_role может быть event_organizer, поэтому явно ставим subscriber.
 				$org_user = new WP_User( $user_id );
 				$org_user->set_role( 'subscriber' );
+
+				// Фиксация согласия на обработку персональных данных.
+				if ( class_exists( 'IDPG_Privacy' ) ) {
+					IDPG_Privacy::record_consent( $user_id, 'organizer' );
+				}
 
 				// Подготовка ключа подтверждения и письма — только при активном плагине.
 				if ( class_exists( 'IDPG_Organizer_Verify' ) && class_exists( 'IDPG_Auth_Emails' ) ) {
@@ -511,18 +526,32 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 								value="1"
 								required
 							>
-							<span class="auth__checkbox-text">
-								Согласен с
-								<a href="<?php echo esc_url( home_url( '/terms/' ) ); ?>" target="_blank" class="auth__link">
-									офертой
-								</a>
-								и
-								<a href="<?php echo esc_url( home_url( '/privacy/' ) ); ?>" target="_blank" class="auth__link">
-									политикой конфиденциальности
-								</a>
-							</span>
-						</label>
-					</div>
+						<span class="auth__checkbox-text">
+							Согласен с
+							<a href="<?php echo esc_url( home_url( '/terms/' ) ); ?>" target="_blank" class="auth__link">
+								офертой
+							</a>
+						</span>
+					</label>
+				</div>
+
+				<div class="auth__field auth__field--horizontal">
+					<label class="auth__checkbox-label">
+						<input
+							class="auth__checkbox"
+							type="checkbox"
+							name="<?php echo esc_attr( $pdn_field ); ?>"
+							value="1"
+							required
+						>
+						<span class="auth__checkbox-text">
+							Согласен на обработку персональных данных в соответствии с
+							<a href="<?php echo esc_url( home_url( '/privacy/' ) ); ?>" target="_blank" class="auth__link">
+								политикой конфиденциальности
+							</a>
+						</span>
+					</label>
+				</div>
 
 				<button class="auth__submit" type="submit">
 						<span class="auth__submit-text">Зарегистрироваться</span>
@@ -563,6 +592,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		restUrl: '<?php echo esc_url_raw( rest_url( 'idpg/v1' ) ); ?>',
 		nonce: '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>',
 		loginUrl: '<?php echo esc_url( home_url( '/login/' ) ); ?>',
+		pdnConsentField: '<?php echo esc_js( $pdn_field ); ?>',
 	};
 </script>
 

@@ -1,0 +1,89 @@
+// ============================================================================
+// bottom bar
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+/* ============================================================================
+   Мобильный нижний бар (bottom navigation)
+   ============================================================================ */
+.idpg-bottom-bar {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .idpg-bottom-bar {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--idpg-canvas);
+    border-top: 1px solid var(--idpg-hairline);
+    padding: 4px 0 env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .idpg-bottom-bar__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 0 4px;
+    min-height: 52px;
+    color: var(--idpg-muted);
+    font-size: 0.625rem;
+    font-weight: 500;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .idpg-bottom-bar__item svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .idpg-bottom-bar__item:active {
+    color: var(--idpg-primary);
+    opacity: 0.7;
+  }
+
+  /* Активная страница */
+  .idpg-bottom-bar__item--active {
+    color: var(--idpg-primary);
+  }
+
+  /* Отступ снизу контента, чтобы бар не перекрывал */
+  .site-main {
+    padding-bottom: 64px;
+  }
+  .home .site-main {
+    padding-bottom: 64px;
+  }
+  .site-footer {
+    margin-bottom: 60px;
+  }
+
+  /* Скрыть кнопки хедера — они перенесены вниз */
+  .idpg-header__actions {
+    display: none !important;
+  }
+  .idpg-city-selector {
+    display: none !important;
+  }
+}

@@ -306,6 +306,9 @@ class IDPG_Meta {
 			// Дополнительно.
 			'_idpg_source'           => array( 'type' => 'string' ),
 			'_idpg_promoted'         => array( 'type' => 'string' ),
+			// Срок закрепления в топе (Y-m-d). Cron IDPG_Promotion снимает
+			// закрепление по истечении даты.
+			'_idpg_pin_expires'      => array( 'type' => 'string' ),
 			'_idpg_is_online'        => array( 'type' => 'string' ),
 			'_idpg_stream_url'       => array( 'type' => 'string' ),
 			'_idpg_views'            => array( 'type' => 'integer', 'default' => 0 ),
@@ -527,6 +530,13 @@ class IDPG_Meta {
 			// Закрепление в топе — платная услуга, управление системой.
 			$admin_fields[] = \Carbon_Fields\Field::make( 'checkbox', 'idpg_promoted', __( 'Закрепить в топе', 'idpg-core' ) )
 				->set_help_text( __( 'Событие поднимается наверх в списках и подборках.', 'idpg-core' ) )
+				->set_width( 50 );
+
+			// Срок закрепления: без него закрепление было бы бессрочным,
+			// и снимать его мог бы только cron вручную.
+			$admin_fields[] = \Carbon_Fields\Field::make( 'date', 'idpg_pin_expires', __( 'Закрепить до', 'idpg-core' ) )
+				->set_help_text( __( 'Дата автоматического снятия закрепления. Пусто — закрепление бессрочное.', 'idpg-core' ) )
+				->set_storage_format( 'Y-m-d' )
 				->set_width( 50 );
 
 			// Скрытие из баннеров — системные настройки, организаторы не видят.

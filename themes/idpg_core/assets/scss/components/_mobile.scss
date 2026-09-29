@@ -1,0 +1,157 @@
+// ============================================================================
+// mobile
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+/* === Theme toggle button === */
+/* === Мобильный адаптив: против iOS-зума и мелких тап-зон === */
+@media (max-width: 767px) {
+  .site-footer__subscribe-input {
+    font-size: 16px;
+  }
+}
+/* ============================================================================
+   iPhone / iOS Safe Area — notch, Dynamic Island, home indicator
+   ============================================================================ */
+@supports (padding: env(safe-area-inset-top)) {
+  /* Шапка: отступ сверху за notch / Dynamic Island */
+  .idpg-header {
+    padding-top: env(safe-area-inset-top);
+  }
+  /* Навигационная панель: safe area сверху и снизу */
+  .idpg-nav {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* Футер: отступ снизу за home indicator */
+  .site-footer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* Auth-страница: safe area на мобильных */
+  .auth-body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  /* Поиск (оверлей): safe area + гарантированный отступ 16px сверху/снизу
+     (env() без fallback на устройствах без notch даёт 0px — поиск прилипал к верху) */
+  .idpg-search-overlay {
+    padding-top: calc(16px + env(safe-area-inset-top));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+  /* Pikaday fullscreen overlay на мобильных */
+  @media (max-width: 767px) {
+    .idpg-datedrop.is-open {
+      padding-top: calc(16px + env(safe-area-inset-top));
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+  }
+}
+/* ============================================================================
+   Touch targets — minimum 44×44px по Apple HIG (мобильные)
+   ============================================================================ */
+/* Кнопки хедера — только на мобильных */
+@media (max-width: 1023px) {
+  .idpg-menu-toggle,
+  .idpg-city-selector__btn,
+  .idpg-auth-dropdown__toggle,
+  .idpg-header__btn-login,
+  .idpg-header__btn-add-event {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+/* Ссылки навигации на мобильных */
+@media (max-width: 1023px) {
+  .idpg-nav__link {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+  .idpg-nav__submenu .idpg-nav__link {
+    min-height: 44px;
+  }
+}
+/* Auth-табы */
+.auth__tab {
+  min-height: 44px;
+  padding: 10px 16px;
+}
+/* Auth-кнопки и ссылки */
+.auth__submit {
+  min-height: 48px;
+}
+.auth__link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+/* Footer-ссылки */
+.site-footer a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+/* Карточки событий — ссылка-обёртка */
+.idpg-event-card a {
+  min-height: 44px;
+}
+/* Today-card */
+.idpg-today-card {
+  min-height: 88px;
+}
+/* Кнопки пагинации */
+.idpg-pagination button,
+.idpg-pagination a {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 16px;
+}
+/* LK-кнопки */
+.lk-form .lk-card__actions button,
+.lk-form .lk-card__actions a {
+  min-height: 44px;
+  padding: 10px 20px;
+}
+/* Кнопка «Назад» */
+.idpg-back-link,
+.idpg-event-single__back {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+/* ============================================================================
+   iPhone SE / маленькие экраны (≤375px) — дополнительные корректировки
+   ============================================================================ */
+@media (max-width: 375px) {
+  /* Контейнер: уменьшить паддинги */
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  /* Хедер: компактнее */
+  .idpg-header__container {
+    padding: 10px 12px;
+  }
+  /* Auth-карточка: компактнее на маленьком экране */
+  .auth__card {
+    padding: 24px 16px;
+  }
+  /* Auth-заголовок: меньше */
+  .auth__title {
+    font-size: 1.5rem;
+  }
+  /* Сегодня-секция: заголовок */
+  .idpg-home-section__title {
+    font-size: 1.25rem;
+  }
+  /* Footer: компактнее */
+  .site-footer__container {
+    padding: 40px 16px;
+  }
+}

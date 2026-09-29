@@ -13,18 +13,6 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 // 1. Настройки и маркеры
 delete_option( 'idpg_auth_settings' );
 delete_option( 'idpg_auth_log' );
-delete_option( 'idpg_auth_logins_db_version' );
-delete_option( 'idpg_auth_security_db_version' );
-delete_option( 'idpg_auth_security_last_email' );
-delete_option( 'idpg_auth_lock_map' );
-
-// 1a. Таблицы (классы WP_Auth_Ru_Login_Log / WP_Auth_Ru_Security здесь
-// не загружены — используем имена таблиц напрямую с префиксом БД).
-global $wpdb;
-$table = $wpdb->prefix . 'idpg_auth_logins';
-$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-$table = $wpdb->prefix . 'idpg_auth_security';
-$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
 // 2. OAuth user_meta провайдеров (VK, Яндекс, MAX)
 // Фактические ключи пишутся провайдерами с префиксом wp_auth_ru_.
@@ -53,12 +41,6 @@ if ( is_multisite() ) {
         switch_to_blog( $site_id );
         delete_option( 'idpg_auth_settings' );
         delete_option( 'idpg_auth_log' );
-        delete_option( 'idpg_auth_logins_db_version' );
-        delete_option( 'idpg_auth_security_db_version' );
-        delete_option( 'idpg_auth_security_last_email' );
-        delete_option( 'idpg_auth_lock_map' );
-        $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'idpg_auth_logins' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-        $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'idpg_auth_security' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
         $wpdb->query(
             "DELETE FROM {$wpdb->options}
              WHERE option_name LIKE '_transient_idpg_auth_%'

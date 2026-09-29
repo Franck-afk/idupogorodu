@@ -1,0 +1,51 @@
+// ============================================================================
+// recent events
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+/* --- Widget «Последние события» --- */
+.idpg-recent-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.idpg-recent-events__item {
+  border-bottom: 1px solid var(--idpg-hairline);
+  padding-bottom: 8px;
+}
+.idpg-recent-events__item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.idpg-recent-events__item a {
+  display: inline-block;
+  color: var(--idpg-ink);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.idpg-recent-events__item a:hover {
+  color: var(--idpg-primary);
+  text-decoration: underline;
+}
+.idpg-recent-events__item a:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* Create-event buttons: min 44px touch */
+.create-event__btn {
+  min-height: 44px;
+}

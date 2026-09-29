@@ -165,8 +165,8 @@
 | G2 | `inc/organizer-menu.php` не подключён → `idpg_organizer_*()` хелперы не определены | P0 | DEV-34/37/38 |
 | G3 | `organizer.js` / `organizer.css` не подключаются | P0 | DEV-34 |
 | G4 | REST `POST /auth/organizer-complete` не зарегистрирован → анкета `/organizer/complete/` падает 404 | P0 | DEV-01 |
-| G5 | Маршруты `/organizer/event/new/`, `/organizer/event/{id}/` + REST `/organizer/events*` + `organizer-event-form.js` — не существуют | P1 | DEV-33…36 (ЛК-события) |
-| G6 | Разделы `dashboard`/`events` — заглушки без реальных данных; REST `/organizer/stats`, `/organizer/profile` нет | P1 | DEV-33…36 |
+| ~~G5~~ | Маршруты `/organizer/event/new/`, `/organizer/event/{id}/` + REST `/organizer/events*` + `organizer-event-form.js` — не существуют | **Закрыто DEV-94 (29.09.2026)**: маршруты + шаблон + скрипт формы | — |
+| ~~G6~~ | Разделы `dashboard`/`events` — заглушки без реальных данных; REST `/organizer/stats`, `/organizer/profile` нет | **Закрыто DEV-94 (29.09.2026)**: разделы наполняются из `/organizer/stats` и `/organizer/events` | — |
 | G7 | Флаг pending-анкеты: рассинхрон `idpg_org_pending` / `_idpg_org_pending` | P2 | DEV-01 попутно |
 | G8 | `class-privacy.php` (152-ФЗ: согласие, баннер, права субъекта, хеш IP) — код есть, не загружен | P0 (законодательство) | DEV-06 |
 | G9 | `class-organizer-verify::is_pending()` требует роль `event_organizer`, которой нет сразу после регистрации (пользователь без роли) → pending-проверка может пропустить | P2 | DEV-32 |
@@ -183,7 +183,7 @@
 | Заявленная тема | Реальное состояние | Действие |
 |---|---|---|
 | «DEV-33–34: каркас ЛК» | Файлы каркаса есть, обвязка (`require_once`, страница в БД, ассеты, хелперы) **не применена** | Закрыть G1–G3 (подключение обвязки) — по сути «уже сделано, но не подключено» |
-| «DEV-35: список/создание событий в ЛК» | Раздел `section-events.php` — заглушка; REST и форм нет | Перенести в заполнение: REST `/organizer/events` (CRUD), `/organizer/event/new/` + шаблон + `organizer-event-form.js` |
+| «DEV-35: список/создание событий в ЛК» | Раздел `section-events.php` — заглушка; REST и форм нет | **Закрыто DEV-94 (29.09.2026)**: REST `/organizer/events` (CRUD), `/organizer/event/new/` + шаблон + `organizer-event-form.js`, разделы `dashboard`/`events` наполняются из API |
 | «DEV-36: доуполнение анкеты» | REST-маршрут отсутствует (G4) — DEV-01 | Считать **открытым** (DEV-01), дублировать не нужно |
 
 Полная переклассификация DEV-33…36 — после подтверждения владельцем определения этих номеров

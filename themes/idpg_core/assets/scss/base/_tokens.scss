@@ -1,0 +1,144 @@
+// ============================================================================
+// tokens
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+/* === Gilroy (локальный шрифт) === */
+@font-face {
+  font-family: "Gilroy";
+  src: url("fonts/gilroy-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+/* === CSS Custom Properties: Coinbase Design System === */
+:root {
+  /* Brand */
+  --idpg-primary:         #0052ff;
+  --idpg-primary-active:  #003ecc;
+  --idpg-primary-disabled:#a8b8cc;
+  --idpg-primary-bg:      rgba(0, 82, 255, 0.08);
+
+  /* Surfaces */
+  --idpg-canvas:          #ffffff;
+  --idpg-surface-soft:    #f7f7f7;
+  --idpg-surface-strong:  #eef0f3;
+  --idpg-surface-dark:    #0a0b0d;
+  --idpg-surface-dark-elevated: #16181c;
+
+  /* Lines */
+  --idpg-hairline:        #dee1e6;
+  --idpg-hairline-soft:   #eef0f3;
+
+  /* Text */
+  --idpg-ink:             #0a0b0d;
+  --idpg-body:            #5b616e;
+  --idpg-body-strong:     #0a0b0d;
+  --idpg-muted:           #7c828a;
+  --idpg-muted-soft:      #a8acb3;
+
+  /* On-colors */
+  --idpg-on-primary:      #ffffff;
+  --idpg-on-dark:         #ffffff;
+  --idpg-on-dark-soft:    #a8acb3;
+
+  /* Semantic */
+  --idpg-up:              #05b169;
+  --idpg-down:            #cf202f;
+  --idpg-accent-yellow:   #f4b000;
+
+  /* Back-compat aliases */
+  --idpg-bg:              var(--idpg-canvas);
+  --idpg-bg-soft:         var(--idpg-canvas);
+  --idpg-bg-elevated:     var(--idpg-canvas);
+  --idpg-text:            var(--idpg-ink);
+  --idpg-text-secondary:  var(--idpg-body);
+  --idpg-text-muted:      var(--idpg-body);
+  --idpg-border:          var(--idpg-hairline);
+  --idpg-border-hover:    var(--idpg-hairline);
+  --idpg-primary-hover:   var(--idpg-primary-active);
+  --idpg-secondary:       var(--idpg-ink);
+  --idpg-secondary-hover: var(--idpg-surface-dark-elevated);
+  --idpg-shadow:          0 4px 12px var(--idpg-surface-soft);
+  --idpg-overlay:         rgba(0, 0, 0, 0.4);
+  --idpg-header-bg:       var(--idpg-canvas);
+  --idpg-nav-bg:          var(--idpg-canvas);
+  --idpg-input-bg:        var(--idpg-canvas);
+  --idpg-hover-bg:        var(--idpg-surface-soft);
+  --idpg-badge-bg:        var(--idpg-surface-strong);
+  --idpg-badge-text:      var(--idpg-ink);
+  --idpg-transition:      0.2s ease;
+  --idpg-footer-bg:       var(--idpg-canvas);
+  --idpg-footer-text:     var(--idpg-body);
+  --idpg-footer-link:     var(--idpg-body);
+  --idpg-footer-link-hover: var(--idpg-ink);
+  --idpg-auth-bg:         var(--idpg-canvas);
+  --idpg-auth-card:       var(--idpg-canvas);
+  --idpg-auth-border:     var(--idpg-hairline);
+  --idpg-success-bg:      #ecfdf5;
+  --idpg-success-text:    #065f46;
+  --idpg-error-bg:        #fef2f2;
+  --idpg-error-text:      #991b1b;
+  --idpg-warning-bg:      #fffbeb;
+  --idpg-warning-text:    #92400e;
+  --idpg-muted-text:      var(--idpg-muted);
+  --idpg-muted-bg:        var(--idpg-surface-soft);
+  --idpg-card-bg:         var(--idpg-canvas);
+  --idpg-card-border:     var(--idpg-hairline);
+  --idpg-table-border:    var(--idpg-hairline);
+  --idpg-table-hover:     var(--idpg-surface-soft);
+  --idpg-pagination-bg:   var(--idpg-canvas);
+  --idpg-pagination-border: var(--idpg-hairline);
+  --idpg-tabs-border:     var(--idpg-hairline);
+  --idpg-progress-bg:     var(--idpg-surface-strong);
+  --idpg-upload-border:   var(--idpg-hairline);
+  --idpg-upload-hover:    var(--idpg-surface-strong);
+  --idpg-select-menu-bg:  var(--idpg-canvas);
+  --idpg-select-menu-border: var(--idpg-hairline);
+  --idpg-select-option-hover: var(--idpg-surface-soft);
+  --idpg-select-option-selected: var(--idpg-surface-strong);
+  --idpg-summary-bg:      var(--idpg-surface-soft);
+  --idpg-widget-bg:       var(--idpg-canvas);
+  --idpg-widget-border:   var(--idpg-hairline-soft);
+  --idpg-stat-card-bg:    var(--idpg-canvas);
+  --idpg-stat-card-border: var(--idpg-hairline);
+  --idpg-filter-btn-bg:   var(--idpg-canvas);
+  --idpg-filter-btn-border: var(--idpg-hairline);
+  --idpg-cabinet-card-bg: var(--idpg-canvas);
+  --idpg-cabinet-card-border: var(--idpg-hairline);
+  --idpg-status-publish-bg: #dcfce7;
+  --idpg-status-publish-text: #166534;
+  --idpg-status-pending-bg: #fef9c3;
+  --idpg-status-pending-text: #854d0e;
+  --idpg-status-draft-bg: var(--idpg-surface-strong);
+  --idpg-status-draft-text: var(--idpg-body);
+
+  /* Spacing */
+  --idpg-space-xxs:       4px;
+  --idpg-space-xs:        8px;
+  --idpg-space-sm:        12px;
+  --idpg-space-base:      16px;
+  --idpg-space-md:        20px;
+  --idpg-space-lg:        24px;
+  --idpg-space-xl:        32px;
+  --idpg-space-xxl:       48px;
+  --idpg-space-section:   96px;
+
+  /* Radius */
+  --idpg-radius-none:     0px;
+  --idpg-radius-xs:       4px;
+  --idpg-radius-sm:       8px;
+  --idpg-radius-md:       12px;
+  --idpg-radius-lg:       16px;
+  --idpg-radius-xl:       24px;
+  --idpg-radius-pill:     100px;
+  --idpg-radius-full:     9999px;
+}
+/* === CSS Custom Properties: Dark (DeepSeek-inspired) === */

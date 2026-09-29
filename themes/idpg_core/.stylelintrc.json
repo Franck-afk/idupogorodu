@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "block-no-empty": true,
+    "declaration-block-no-duplicate-properties": true,
+    "declaration-block-no-shorthand-property-overrides": true,
+    "color-hex-case": "lower",
+    "function-url-quotes": "always",
+    "unit-no-unknown": [
+      true,
+      {
+        "ignoreUnits": [ "dvh", "svh", "lvh", "dvw", "svw", "lvw", "dvi", "svi", "lvi" ]
+      }
+    ]
+  },
+  "ignoreFiles": [
+    "node_modules/**",
+    "vendor/**"
+  ],
+  "overrides": [
+    {
+      "files": [ "**/_typography.scss", "**/_reset.scss" ],
+      "rules": {
+        "no-duplicate-selectors": true
+      }
+    }
+  ]
+}

@@ -177,9 +177,6 @@ abstract class WP_Auth_Ru_Provider {
      * @return int|WP_Error ID пользователя или ошибка.
      */
     protected function login_or_create_user( $profile ) {
-        // Текущий провайдер для журнала входов (сбрасывается в on_wp_login).
-        WP_Auth_Ru_Login_Log::$current_provider = static::PROVIDER;
-
         $profile = $this->normalize_profile( $profile );
 
         $provider_id = (string) $profile['id'];
@@ -288,18 +285,10 @@ abstract class WP_Auth_Ru_Provider {
     /**
      * Роль нового пользователя.
      *
-     * При соц-входе роль организатора event_organizer НЕ выдаётся:
-     * она назначается только через IDPG_Organizer_Verify после
-     * подтверждения email и заполнения анкеты. Новый пользователь
-     * получает роль из настроек сайта (default_role), которую можно
-     * переопределить через фильтр idpg_auth_new_user_role.
-     *
-     * @return string Роль нового пользователя.
+     * @return string
      */
     protected function new_user_role() {
-        $role = get_option( 'default_role', 'subscriber' );
-
-        return apply_filters( 'idpg_auth_new_user_role', $role, static::PROVIDER );
+        return 'event_organizer';
     }
 
     /**

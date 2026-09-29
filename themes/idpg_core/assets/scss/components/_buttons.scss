@@ -1,0 +1,43 @@
+// ============================================================================
+// buttons
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+.idpg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+.idpg-btn:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: 2px;
+}
+.idpg-btn--primary {
+  background-color: var(--idpg-primary);
+  color: #ffffff;
+}
+.idpg-btn--primary:hover, .idpg-btn--primary:focus {
+  background-color: var(--idpg-primary-active);
+  color: #ffffff;
+}
+.idpg-btn--secondary {
+  background-color: var(--idpg-ink);
+  color: var(--idpg-surface-soft);
+}
+.idpg-btn--secondary:hover, .idpg-btn--secondary:focus {
+  background-color: var(--idpg-surface-dark-elevated);
+  color: var(--idpg-surface-soft);
+}

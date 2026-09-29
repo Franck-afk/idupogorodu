@@ -471,8 +471,8 @@ class IDPG_Event_Calendar_Widget extends WP_Widget {
 		$meta_rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$wpdb->prepare(
 				"SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta}
-				 WHERE post_id IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')
-				   AND meta_key IN (%s, %s)',
+				 WHERE post_id IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ")
+				   AND meta_key IN (%s, %s)",
 				array_merge( $ids, array( self::META_START, self::META_END ) )
 			)
 		);

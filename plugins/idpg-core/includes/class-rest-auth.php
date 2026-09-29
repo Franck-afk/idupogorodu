@@ -96,10 +96,13 @@ class IDPG_REST_Auth {
 				'callback'            => array( $this, 'handle_register' ),
 				'permission_callback' => '__return_true',
 				'args'                => array(
+					// `type` намеренно необязателен и без enum: допустимое
+					// значение проверяется в колбэке строгим сравнением, иначе
+					// запрос без `type` или с пустой строкой отсекался бы
+					// схемой с 400 вместо продуктового 403.
 					'type'     => array(
-						'required'          => true,
+						'required'          => false,
 						'type'              => 'string',
-						'enum'              => array( 'user', 'organizer' ),
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'name'     => array(
@@ -112,7 +115,12 @@ class IDPG_REST_Auth {
 						'type'              => 'string',
 						'format'            => 'email',
 						'sanitize_callback' => 'sanitize_email',
-						'validate_callback' => 'is_email',
+						// DEV-78: замыкание вместо строки 'is_email',
+						// иначе REST передаёт $request в устаревший
+						// второй аргумент is_email() и летит notice.
+						'validate_callback' => function ( $value ) {
+							return is_email( $value );
+						},
 					),
 					'password' => array(
 						'required'          => true,
@@ -133,10 +141,19 @@ class IDPG_REST_Auth {
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 					),
-					'terms'    => array(
+					'terms'            => array(
 						'required'          => false,
 						'type'              => 'boolean',
 						'description'       => 'User consent to site terms.',
+					),
+					// Согласие на обработку персональных данных (152-ФЗ).
+					// rest_sanitize_boolean обязателен: без него строка
+					// 'false' прошла бы как истинное значение.
+					'idpg_pdn_consent' => array(
+						'required'          => false,
+						'type'              => 'boolean',
+						'description'       => 'Согласие на обработку персональных данных.',
+						'sanitize_callback' => 'rest_sanitize_boolean',
 					),
 				),
 			)
@@ -165,7 +182,13 @@ class IDPG_REST_Auth {
 						'type'              => 'string',
 						'format'            => 'email',
 						'sanitize_callback' => 'sanitize_email',
-						'validate_callback' => 'is_email',
+						// DEV-78: не строка 'is_email' — REST вызывает
+						// валидатор как ( $value, $request, $key ), и второй
+						// аргумент is_email() помечен устаревшим с 3.0.0,
+						// из-за чего каждый вызов давал notice.
+						'validate_callback' => function ( $value ) {
+							return is_email( $value );
+						},
 					),
 				),
 			)
@@ -204,48 +227,6 @@ class IDPG_REST_Auth {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'handle_me' ),
 				'permission_callback' => 'is_user_logged_in',
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/auth/organizer-complete',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'handle_organizer_complete' ),
-				'permission_callback' => array( $this, 'can_complete_organizer' ),
-				'args'                => array(
-					'org_name'     => array(
-						'required'          => true,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'contact_name' => array(
-						'required'          => true,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'phone'        => array(
-						'required'          => true,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'email'        => array(
-						'required'          => false,
-						'type'              => 'string',
-						'format'            => 'email',
-						'sanitize_callback' => 'sanitize_email',
-						'validate_callback' => 'is_email',
-					),
-					'password'     => array(
-						'required'          => false,
-						'type'              => 'string',
-					),
-					'password_rep' => array(
-						'required'          => false,
-						'type'              => 'string',
-					),
-				),
 			)
 		);
 	}
@@ -387,12 +368,25 @@ class IDPG_REST_Auth {
 
 		$type     = $request->get_param( 'type' );
 
-		// Регистрация обычных пользователей отключена — доступен только вход организатора.
-		if ( 'user' === $type ) {
+		// Регистрация обычных пользователей отключена — доступна только
+		// организаторская. Проверка идёт до валидации схемы, поэтому `type`
+		// объявлен необязательным: иначе WordPress отвечал бы на запрос без
+		// него 400 rest_missing_callback_param, не доходя сюда.
+		if ( 'organizer' !== $type ) {
 			return new WP_Error(
 				'registration_disabled',
-				__( 'Регистрация обычных пользователей отключена.', 'idpg-core' ),
+				__( 'Регистрация доступна только организаторам.', 'idpg-core' ),
 				array( 'status' => 403 )
+			);
+		}
+
+		// Согласие на обработку персональных данных проверяется до
+		// расхода лимита регистрации и до создания аккаунта.
+		if ( ! $request->get_param( 'idpg_pdn_consent' ) ) {
+			return new WP_Error(
+				'pdn_consent_required',
+				__( 'Требуется согласие на обработку персональных данных.', 'idpg-core' ),
+				array( 'status' => 400 )
 			);
 		}
 
@@ -531,6 +525,9 @@ class IDPG_REST_Auth {
 			 */
 			do_action( 'idpg_auth_after_register', $user_id, $type );
 
+			// Фиксация согласия на обработку персональных данных.
+			IDPG_Privacy::record_consent( $user_id, 'organizer' );
+
 			return new WP_REST_Response(
 				array(
 					'success'       => true,
@@ -598,6 +595,14 @@ class IDPG_REST_Auth {
 	 */
 	public function handle_forgot_password( $request ) {
 		$email = $request->get_param( 'email' );
+
+		// Лимит по IP: ловит перебор множества разных email с одной машины,
+		// чего лимит по адресу письма не видит.
+		$ip_check = IDPG_Auth_Rate_Limiter::instance()->check_password_reset_ip_attempt( IDPG_Auth_Rate_Limiter::instance()->get_client_ip() );
+
+		if ( is_wp_error( $ip_check ) ) {
+			return $ip_check;
+		}
 
 		$rate_check = IDPG_Auth_Rate_Limiter::instance()->check_password_reset_attempt( $email );
 
@@ -708,213 +713,6 @@ class IDPG_REST_Auth {
 			),
 			200
 		);
-	}
-
-	/**
-	 * Проверка прав на доуполнение анкеты организатора.
-	 *
-	 * Требует валидный nonce 'wp_rest', авторизацию и наличия у пользователя
-	 * флага ожидания доуполнения анкеты. Флаг пишется под двумя ключами:
-	 * `_idpg_org_pending` (исторические чтения) и `idpg_org_pending`
-	 * (`IDPG_Organizer_Verify`), поэтому проверяем оба.
-	 *
-	 * @param WP_REST_Request $request Запрос.
-	 * @return bool|WP_Error True или объект ошибки.
-	 */
-	public function can_complete_organizer( $request ) {
-		$nonce = $request->get_header( 'X-WP-Nonce' );
-
-		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-			return new WP_Error(
-				'idpg_rest_nonce_failed',
-				__( 'Неверный или отсутствующий nonce-токен.', 'idpg-core' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		$user = wp_get_current_user();
-
-		if ( ! $user || ! $user->exists() ) {
-			return new WP_Error(
-				'idpg_rest_not_logged_in',
-				__( 'Необходима авторизация.', 'idpg-core' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		if ( ! $this->is_pending_organizer( $user->ID ) ) {
-			return new WP_Error(
-				'organizer_not_pending',
-				__( 'Доуполнение анкеты недоступно для этого пользователя.', 'idpg-core' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Обработчик доуполнения анкеты организатора.
-	 *
-	 * Принимает название организации, контактное лицо и телефон, сохраняет
-	 * мету и снимает флаг ожидания. Опционально принимает email (замена
-	 * плейсхолдера соцсети) и пароль для входа через форму.
-	 *
-	 * @param WP_REST_Request $request Запрос.
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function handle_organizer_complete( $request ) {
-		$user = wp_get_current_user();
-
-		if ( ! $user || ! $user->exists() ) {
-			return new WP_Error(
-				'not_logged_in',
-				__( 'Пользователь не авторизован.', 'idpg-core' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		if ( ! $this->is_pending_organizer( $user->ID ) ) {
-			return new WP_Error(
-				'organizer_not_pending',
-				__( 'Доуполнение анкеты недоступно для этого пользователя.', 'idpg-core' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		$org_name     = $request->get_param( 'org_name' );
-		$contact_name = $request->get_param( 'contact_name' );
-		$phone        = $request->get_param( 'phone' );
-
-		if ( empty( $org_name ) || empty( $contact_name ) || empty( $phone ) ) {
-			return new WP_Error(
-				'empty_fields',
-				__( 'Заполните название организации, ФИО представителя и телефон.', 'idpg-core' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		update_user_meta( $user->ID, 'idpg_org_name', sanitize_text_field( $org_name ) );
-		update_user_meta( $user->ID, 'idpg_contact_name', sanitize_text_field( $contact_name ) );
-		update_user_meta( $user->ID, 'idpg_phone', sanitize_text_field( $phone ) );
-
-		// Email (плейсхолдер соцсети @*.social): обновляем, если передан
-		// и не занят другим пользователем. Пароль — только если оба поля
-		// заполнены и совпадают (минимум 8 символов).
-		$email = sanitize_email( $request->get_param( 'email' ) );
-
-		if ( $email && $email !== $user->user_email ) {
-			$owner = email_exists( $email );
-
-			if ( $owner && (int) $owner !== $user->ID ) {
-				return new WP_Error(
-					'email_exists',
-					__( 'Этот email уже используется другим пользователем.', 'idpg-core' ),
-					array( 'status' => 409 )
-				);
-			}
-
-			wp_update_user(
-				array(
-					'ID'         => $user->ID,
-					'user_email' => $email,
-				)
-			);
-		}
-
-		$password     = $request->get_param( 'password' );
-		$password_rep = $request->get_param( 'password_rep' );
-
-		if ( '' !== (string) $password || '' !== (string) $password_rep ) {
-			if ( strlen( (string) $password ) < 8 ) {
-				return new WP_Error(
-					'short_password',
-					__( 'Пароль должен содержать минимум 8 символов.', 'idpg-core' ),
-					array( 'status' => 400 )
-				);
-			}
-
-			if ( (string) $password !== (string) $password_rep ) {
-				return new WP_Error(
-					'password_mismatch',
-					__( 'Пароли не совпадают.', 'idpg-core' ),
-					array( 'status' => 400 )
-				);
-			}
-
-			wp_set_password( $password, $user->ID );
-			wp_set_current_user( $user->ID );
-		}
-
-		// Снимаем флаг ожидания: переписываем оба варианта ключа.
-		delete_user_meta( $user->ID, '_idpg_org_pending' );
-		delete_user_meta( $user->ID, 'idpg_org_pending' );
-
-		// Фиксируем завершение анкеты: страховка DEV-50 по этому ключу
-		// больше не считает организатора pending при повторных входах.
-		update_user_meta( $user->ID, '_idpg_org_completed_at', time() );
-
-		// Обновляем объект пользователя (роль могла измениться из-за
-		// wp_set_password — данные актуальные на момент ответа).
-		$user = get_user_by( 'id', $user->ID );
-
-		$role = $this->get_user_role( $user );
-
-		/**
-		 * Действие после доуполнения анкеты организатора.
-		 *
-		 * @param int     $user_id ID пользователя.
-		 * @param WP_User $user    Объект пользователя.
-		 */
-		do_action( 'idpg_organizer_completed', $user->ID, $user );
-
-		return new WP_REST_Response(
-			array(
-				'success'      => true,
-				'user_id'      => $user->ID,
-				'role'         => $role,
-				'redirect_url' => $this->get_redirect_url_by_role( $role ),
-			),
-			200
-		);
-	}
-
-	/**
-	 * Ожидает ли пользователь доуполнения анкеты организатора.
-	 *
-	 * Проверяет оба варианта мета-ключа: `_idpg_org_pending` (исторический,
-	 * используется шаблоном и `IDPG_Organizer_Page`) и `idpg_org_pending`
-	 * (`IDPG_Organizer_Verify::META_PENDING`).
-	 *
-	 * @param int $user_id ID пользователя.
-	 * @return bool
-	 */
-	private function is_pending_organizer( $user_id ) {
-		$user_id = (int) $user_id;
-
-		if ( get_user_meta( $user_id, '_idpg_org_pending', true ) ) {
-			return true;
-		}
-
-		if ( get_user_meta( $user_id, 'idpg_org_pending', true ) ) {
-			return true;
-		}
-
-		// Страховка на лету (DEV-50): организатор без анкеты — нет отметки
-		// о завершении и названия организации — считается pending даже при
-		// отсутствии флага (рассинхрон G7 при соц-регистрации).
-		$user = get_userdata( $user_id );
-
-		if (
-			$user instanceof WP_User
-			&& in_array( 'event_organizer', (array) $user->roles, true )
-			&& ! get_user_meta( $user_id, '_idpg_org_completed_at', true )
-			&& '' === (string) get_user_meta( $user_id, 'idpg_org_name', true )
-		) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**

@@ -80,6 +80,7 @@ require_once IDPG_CORE_DIR . 'includes/class-search.php';
 require_once IDPG_CORE_DIR . 'includes/class-media.php';
 require_once IDPG_CORE_DIR . 'includes/class-favorites.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-scope.php';
+require_once IDPG_CORE_DIR . 'includes/class-organizer-url.php';
 require_once IDPG_CORE_DIR . 'includes/class-template-helpers.php';
 require_once IDPG_CORE_DIR . 'includes/class-ticket-sync.php';
 require_once IDPG_CORE_DIR . 'includes/class-rest-api.php';
@@ -112,8 +113,13 @@ require_once IDPG_CORE_DIR . 'includes/class-event-calendar-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-expected-events-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-user-purge.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-page.php';
+require_once IDPG_CORE_DIR . 'includes/class-rest-organizer.php';
 require_once IDPG_CORE_DIR . 'includes/class-dashboard-stats.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-moderation.php';
+require_once IDPG_CORE_DIR . 'includes/class-event-rejection.php';
+require_once IDPG_CORE_DIR . 'includes/class-privacy.php';
+require_once IDPG_CORE_DIR . 'includes/class-promotion.php';
+require_once IDPG_CORE_DIR . 'includes/class-cli.php';
 
 // Интеграция с Yoast SEO (schema/OG/крошки; работает только при активном Yoast).
 require_once IDPG_CORE_DIR . 'includes/class-seo-integration.php';
@@ -149,6 +155,18 @@ function idpg_core_init() {
 
 	// Модерация публикации событий организаторов (pending + уведомления).
 	IDPG_Event_Moderation::instance();
+
+	// Кабинет организатора: маршруты /organizer/* и перехват запросов.
+	IDPG_Organizer_URL::init();
+
+	// REST-маршруты кабинета организатора (события, площадки, профиль).
+	IDPG_REST_Organizer::instance();
+
+	// Отклонение события модератором (строка действий + admin_post).
+	IDPG_Event_Rejection::instance();
+
+	// Снятие «закреплённости» по истечении срока акции (cron-хуки).
+	IDPG_Promotion::instance();
 
 	// Интеграция с Yoast SEO (хуки вешаются только если плагин активен).
 	IDPG_SEO_Integration::instance();

@@ -60,6 +60,30 @@ function idpg_organizer_section_url( $section ) {
 }
 
 /**
+ * URL формы события организатора (G5).
+ *
+ * Ссылка на создание ведёт из дашборда и списка событий, поэтому живёт рядом
+ * с `idpg_organizer_section_url()` и так же делегирует плагину: при выключенном
+ * `idpg-core` отдаём предсказуемый адрес, чтобы раздел не рассыпался.
+ *
+ * @param int $event_id ID события; 0 — создание нового.
+ * @return string
+ */
+function idpg_organizer_event_form_url( $event_id = 0 ) {
+	$event_id = absint( $event_id );
+
+	if ( class_exists( 'IDPG_Organizer_URL' ) ) {
+		return IDPG_Organizer_URL::event_form_url( $event_id );
+	}
+
+	if ( $event_id ) {
+		return home_url( '/organizer/event/' . $event_id . '/' );
+	}
+
+	return home_url( '/organizer/event/new/' );
+}
+
+/**
  * Активный раздел кабинета.
  *
  * @return string Слаг раздела.
@@ -119,6 +143,13 @@ function idpg_organizer_menu() {
 			'url'   => idpg_organizer_section_url( 'events' ),
 			'icon'  => '▤',
 			'order' => 20,
+		),
+		'venues'    => array(
+			'slug'  => 'venues',
+			'label' => __( 'Площадки', 'idpg_core' ),
+			'url'   => idpg_organizer_section_url( 'venues' ),
+			'icon'  => '◆',
+			'order' => 25,
 		),
 		'profile'   => array(
 			'slug'  => 'profile',

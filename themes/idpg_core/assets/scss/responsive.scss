@@ -1,0 +1,202 @@
+// ============================================================================
+// responsive
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+@media (hover: none) and (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+@media (min-width: 640px) {
+  .idpg-header__btn-login {
+    display: inline-flex;
+  }
+  .idpg-header__container {
+    gap: 12px;
+  }
+}
+@media (min-width: 768px) {
+  .idpg-header__container {
+    padding: 12px 24px;
+  }
+  .site-main {
+    padding-top: var(--idpg-header-h, 72px);
+    padding-bottom: 32px;
+  }
+}
+@media (min-width: 1024px) {
+  .idpg-menu-toggle {
+    display: none;
+  }
+  .idpg-search {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex: 0 1 280px;
+    height: 36px;
+    margin-left: auto;
+  }
+  .idpg-search__icon {
+    position: absolute;
+    left: 12px;
+    color: var(--idpg-muted);
+    pointer-events: none;
+  }
+  .idpg-search__input {
+    width: 100%;
+    height: 100%;
+    padding: 0 12px 0 36px;
+    background: var(--idpg-surface-soft);
+    border: 1px solid var(--idpg-hairline);
+    border-radius: 8px;
+    font-family: "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.875rem;
+    color: var(--idpg-ink);
+    outline: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .idpg-search__input::placeholder {
+    color: var(--idpg-muted);
+  }
+  .idpg-search__input:hover {
+    background-color: var(--idpg-canvas);
+    border-color: var(--idpg-hairline);
+  }
+  .idpg-search__input:focus {
+    background-color: var(--idpg-canvas);
+    border-color: var(--idpg-primary);
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.1);
+  }
+  .idpg-header__container {
+    padding: 12px 32px;
+    position: relative;
+  }
+  .idpg-nav__item--has-children {
+    position: relative;
+  }
+  .idpg-nav__item--has-children:hover .idpg-nav__submenu, .idpg-nav__item--has-children:focus-within .idpg-nav__submenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .idpg-nav__item--has-children:hover > .idpg-nav__link > .idpg-nav__arrow {
+    transform: rotate(180deg);
+  }
+  .idpg-nav__submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: var(--idpg-canvas);
+    border: 1px solid var(--idpg-hairline);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px var(--idpg-hairline);
+    padding: 4px;
+    list-style: none;
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.95);
+    transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+    z-index: 100;
+    max-height: none;
+    overflow: visible;
+  }
+  .idpg-nav__submenu::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 20px;
+    width: 12px;
+    height: 12px;
+    background: var(--idpg-canvas);
+    border-top: 1px solid var(--idpg-hairline);
+    border-left: 1px solid var(--idpg-hairline);
+    transform: rotate(45deg);
+    z-index: 1;
+  }
+  .idpg-nav__submenu .idpg-nav__link {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    display: block;
+    color: var(--idpg-body);
+  }
+  .idpg-nav__submenu .idpg-nav__link:hover, .idpg-nav__submenu .idpg-nav__link:focus {
+    background-color: var(--idpg-surface-strong);
+    color: var(--idpg-ink);
+  }
+  .idpg-nav,
+  .admin-bar .idpg-nav {
+    position: static;
+    width: auto;
+    flex: 1;
+    height: auto;
+    max-width: none;
+    padding: 0;
+    background-color: transparent;
+    z-index: auto;
+    overflow: visible;
+    transform: none;
+    transition: none;
+    box-shadow: none;
+  }
+  .idpg-nav__header,
+  .admin-bar .idpg-nav__header {
+    display: none;
+  }
+  .idpg-nav__list,
+  .admin-bar .idpg-nav__list {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .idpg-nav__link,
+  .admin-bar .idpg-nav__link {
+    display: inline-flex;
+    align-items: center;
+    width: auto;
+    padding: 10px 16px;
+    color: var(--idpg-ink);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  .idpg-nav__link:hover, .idpg-nav__link:focus,
+  .admin-bar .idpg-nav__link:hover,
+  .admin-bar .idpg-nav__link:focus {
+    color: var(--idpg-muted);
+    background-color: transparent;
+    outline: none;
+  }
+  .idpg-nav__link:focus-visible,
+  .admin-bar .idpg-nav__link:focus-visible {
+    outline: 2px solid var(--idpg-primary);
+    outline-offset: -2px;
+  }
+  .idpg-nav__link.current-menu-item, .idpg-nav__link.current_page_item,
+  .admin-bar .idpg-nav__link.current-menu-item,
+  .admin-bar .idpg-nav__link.current_page_item {
+    color: var(--idpg-primary);
+    background-color: var(--idpg-primary-bg);
+    font-weight: 600;
+  }
+  .site-main {
+    padding-top: var(--idpg-header-h, 72px);
+    padding-bottom: 40px;
+  }
+}

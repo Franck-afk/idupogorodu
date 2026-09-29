@@ -1,0 +1,132 @@
+// ============================================================================
+// nav
+//
+// Перенесено дословно из style.css (DEV-87). Декларации не переписывались:
+// до переноса SCSS-дерево отставало от style.css, из-за чего
+// `npm run compile:css` откатывал дизайн — терялись 103 CSS-токена из
+// :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
+// var(--idpg-*). Теперь style.css собирается из этих партиалов.
+//
+// ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
+// переименовывать без перепроверки: правила опираются на очерёдность.
+// ============================================================================
+.idpg-nav {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100dvh;
+  padding: 16px;
+  background-color: var(--idpg-surface-soft);
+  z-index: 105;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.05);
+}
+.idpg-nav__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 10px 0 16px;
+  border-bottom: 1px solid var(--idpg-hairline);
+  margin-bottom: 16px;
+}
+.idpg-nav__logo {
+  font-family: "Gilroy", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--idpg-ink);
+  text-decoration: none;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+}
+.idpg-nav__logo:hover, .idpg-nav__logo:focus {
+  color: var(--idpg-primary);
+  outline: none;
+}
+.idpg-nav__logo:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: 2px;
+}
+.idpg-nav__arrow {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  transition: transform 0.2s ease;
+}
+.idpg-nav__item--open > .idpg-nav__link > .idpg-nav__arrow {
+  transform: rotate(180deg);
+}
+.idpg-nav__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--idpg-hairline);
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+  color: var(--idpg-ink);
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.idpg-nav__close:hover, .idpg-nav__close:focus {
+  border-color: var(--idpg-hairline);
+  background-color: var(--idpg-surface-soft);
+}
+.idpg-nav__close:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: 2px;
+}
+.idpg-nav__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.idpg-nav__item {
+  position: relative;
+}
+.idpg-nav__link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  color: var(--idpg-ink);
+  font-family: "Gilroy", sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.idpg-nav__link:hover, .idpg-nav__link:focus {
+  background-color: var(--idpg-surface-soft);
+  color: var(--idpg-muted);
+  outline: none;
+}
+.idpg-nav__link:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: -2px;
+}
+.idpg-nav__link.current-menu-item, .idpg-nav__link.current_page_item {
+  color: var(--idpg-primary);
+  background-color: var(--idpg-primary-bg);
+  font-weight: 600;
+}
+.idpg-nav__submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0;
+}
+.idpg-nav__item--open > .idpg-nav__submenu {
+  max-height: 500px;
+}
+.idpg-nav--open {
+  transform: translateX(0);
+}

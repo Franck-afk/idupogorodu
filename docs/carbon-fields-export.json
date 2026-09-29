@@ -1,0 +1,943 @@
+{
+    "generator": "Carbon Fields",
+    "site": "https://idupogorudu.test/",
+    "generated": "2026-09-28 18:43:23",
+    "containers": [
+        {
+            "id": "carbon_fields_container_6feccbaf",
+            "type": "post_meta",
+            "title": "Основная информация",
+            "layout": "tabbed-horizontal",
+            "classes": [],
+            "settings": {
+                "meta_box_context": "normal",
+                "meta_box_priority": "high"
+            },
+            "conditions": {
+                "relation": "AND",
+                "conditions": [
+                    {
+                        "type": "boolean",
+                        "compare": "=",
+                        "value": false
+                    }
+                ]
+            },
+            "fields": [
+                {
+                    "id": "carbon-22f14",
+                    "type": "date",
+                    "label": "Дата начала",
+                    "name": "_idpg_start_date",
+                    "base_name": "idpg_start_date",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {},
+                    "help_text": "Укажите дату начала. Поле обязательно для публикации.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "storage_format": "Y-m-d",
+                    "picker_options": {
+                        "allowInput": true,
+                        "altInput": false,
+                        "altFormat": "j M Y",
+                        "dateFormat": "Y-m-d"
+                    }
+                },
+                {
+                    "id": "carbon-e705d",
+                    "type": "date",
+                    "label": "Дата окончания",
+                    "name": "_idpg_end_date",
+                    "base_name": "idpg_end_date",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {},
+                    "help_text": "Оставьте пустым для события одного дня.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "storage_format": "Y-m-d",
+                    "picker_options": {
+                        "allowInput": true,
+                        "altInput": false,
+                        "altFormat": "j M Y",
+                        "dateFormat": "Y-m-d"
+                    }
+                },
+                {
+                    "id": "carbon-a7ce0",
+                    "type": "checkbox",
+                    "label": "",
+                    "name": "_idpg_all_day",
+                    "base_name": "idpg_all_day",
+                    "value": false,
+                    "default_value": false,
+                    "attributes": {},
+                    "help_text": "Событие идёт весь день — время сеансов не указывается.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "option_value": "yes",
+                    "option_label": "Весь день"
+                },
+                {
+                    "id": "carbon-5fc52",
+                    "type": "complex",
+                    "label": "Сеансы",
+                    "name": "_idpg_sessions",
+                    "base_name": "idpg_sessions",
+                    "value": [],
+                    "default_value": [],
+                    "attributes": {},
+                    "help_text": "Время начала, цена и ссылка на билеты для каждого сеанса.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 0,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "duplicate_groups_allowed": true,
+                    "group_types": [
+                        {
+                            "name": "_",
+                            "label": ""
+                        }
+                    ],
+                    "layout": "tabbed-horizontal",
+                    "labels": {
+                        "singular_name": "Entry",
+                        "plural_name": "Entries"
+                    },
+                    "min": -1,
+                    "max": -1,
+                    "multiple_groups": false,
+                    "groups": [
+                        {
+                            "group_id": "carbon-group-f38d5",
+                            "name": "_",
+                            "label": "",
+                            "label_template": null,
+                            "fields": [
+                                {
+                                    "id": "carbon-8d458",
+                                    "type": "time",
+                                    "label": "Время",
+                                    "name": "_time",
+                                    "base_name": "time",
+                                    "value": "",
+                                    "default_value": "",
+                                    "attributes": {},
+                                    "help_text": "Например: 19:00",
+                                    "context": null,
+                                    "required": false,
+                                    "width": 33,
+                                    "classes": [],
+                                    "conditional_logic": [],
+                                    "storage_format": "H:i",
+                                    "picker_options": {
+                                        "allowInput": true,
+                                        "enableTime": true,
+                                        "noCalendar": true,
+                                        "enableSeconds": false,
+                                        "altInput": false,
+                                        "altFormat": "h:i:S K",
+                                        "time_24hr": true,
+                                        "dateFormat": "H:i"
+                                    }
+                                },
+                                {
+                                    "id": "carbon-be828",
+                                    "type": "text",
+                                    "label": "Цена",
+                                    "name": "_price",
+                                    "base_name": "price",
+                                    "value": "",
+                                    "default_value": "",
+                                    "attributes": {
+                                        "type": "number",
+                                        "min": "0",
+                                        "step": "0.01"
+                                    },
+                                    "help_text": "Цена билета для этого сеанса.",
+                                    "context": null,
+                                    "required": false,
+                                    "width": 33,
+                                    "classes": [],
+                                    "conditional_logic": []
+                                },
+                                {
+                                    "id": "carbon-15bea",
+                                    "type": "text",
+                                    "label": "Ссылка на билеты",
+                                    "name": "_url",
+                                    "base_name": "url",
+                                    "value": "",
+                                    "default_value": "",
+                                    "attributes": {
+                                        "type": "url",
+                                        "placeholder": "https://"
+                                    },
+                                    "help_text": "Ссылка на покупку билета для этого сеанса (необязательно).",
+                                    "context": null,
+                                    "required": false,
+                                    "width": 33,
+                                    "classes": [],
+                                    "conditional_logic": []
+                                }
+                            ],
+                            "collapsed": false
+                        }
+                    ],
+                    "collapsed": false
+                }
+            ],
+            "nonce": {
+                "name": "carbon_fields_container_6feccbaf_nonce",
+                "value": "195de52f72"
+            }
+        },
+        {
+            "id": "carbon_fields_container_5e66fb37",
+            "type": "post_meta",
+            "title": "Событие: место и продвижение",
+            "layout": "tabbed-horizontal",
+            "classes": [],
+            "settings": {
+                "meta_box_context": "side",
+                "meta_box_priority": "high",
+                "tabs": {
+                    "Место проведения": [
+                        "_idpg_venue",
+                        "_idpg_address"
+                    ],
+                    "Дополнительно": [
+                        "_idpg_banner_request",
+                        "_idpg_is_online",
+                        "_idpg_stream_url"
+                    ]
+                }
+            },
+            "conditions": {
+                "relation": "AND",
+                "conditions": [
+                    {
+                        "type": "boolean",
+                        "compare": "=",
+                        "value": false
+                    }
+                ]
+            },
+            "fields": [
+                {
+                    "id": "carbon-e650d",
+                    "type": "select",
+                    "label": "Площадка",
+                    "name": "_idpg_venue",
+                    "base_name": "idpg_venue",
+                    "value": "0",
+                    "default_value": "",
+                    "attributes": {},
+                    "help_text": "Выберите площадку. Если её нет — укажите адрес вручную.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 100,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "options": [
+                        {
+                            "value": "0",
+                            "label": "— Не выбрана —"
+                        },
+                        {
+                            "value": "130",
+                            "label": "ДК \"Интеграл\""
+                        },
+                        {
+                            "value": "142",
+                            "label": "ДК \"Металлург\""
+                        },
+                        {
+                            "value": "138",
+                            "label": "ДК \"Родина\""
+                        },
+                        {
+                            "value": "140",
+                            "label": "Кинотеатр \"Октябрь\""
+                        },
+                        {
+                            "value": "141",
+                            "label": "Музей ИЗО"
+                        },
+                        {
+                            "value": "139",
+                            "label": "Театр драмы"
+                        },
+                        {
+                            "value": "143",
+                            "label": "ТЦ \"Петровский\""
+                        }
+                    ]
+                },
+                {
+                    "id": "carbon-fadbd",
+                    "type": "text",
+                    "label": "Адрес",
+                    "name": "_idpg_address",
+                    "base_name": "idpg_address",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {},
+                    "help_text": "Заполняется, если адрес отличается от адреса площадки.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 100,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-3dbb2",
+                    "type": "checkbox",
+                    "label": "",
+                    "name": "_idpg_banner_request",
+                    "base_name": "idpg_banner_request",
+                    "value": false,
+                    "default_value": false,
+                    "attributes": {},
+                    "help_text": "Показ платный. После отправки заявки администратор свяжется с вами для оплаты; событие попадёт в баннер после подтверждения.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 100,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "option_value": "yes",
+                    "option_label": "Подать заявку на показ в баннере на главной"
+                },
+                {
+                    "id": "carbon-ce39f",
+                    "type": "checkbox",
+                    "label": "",
+                    "name": "_idpg_is_online",
+                    "base_name": "idpg_is_online",
+                    "value": false,
+                    "default_value": false,
+                    "attributes": {},
+                    "help_text": "Отметьте, если событие проходит онлайн (трансляция в интернете).",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 50,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "option_value": "yes",
+                    "option_label": "Онлайн-событие"
+                },
+                {
+                    "id": "carbon-0e59e",
+                    "type": "text",
+                    "label": "Ссылка на трансляцию",
+                    "name": "_idpg_stream_url",
+                    "base_name": "idpg_stream_url",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "url",
+                        "placeholder": "https://"
+                    },
+                    "help_text": "Ссылка на страницу/трансляцию, куда перейдут зрители.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 100,
+                    "classes": [],
+                    "conditional_logic": []
+                }
+            ],
+            "nonce": {
+                "name": "carbon_fields_container_5e66fb37_nonce",
+                "value": "e781316a63"
+            }
+        },
+        {
+            "id": "carbon_fields_container_c7c0997d",
+            "type": "post_meta",
+            "title": "Билеты и цены",
+            "layout": "tabbed-horizontal",
+            "classes": [],
+            "settings": {
+                "meta_box_context": "normal",
+                "meta_box_priority": "high"
+            },
+            "conditions": {
+                "relation": "AND",
+                "conditions": [
+                    {
+                        "type": "boolean",
+                        "compare": "=",
+                        "value": false
+                    }
+                ]
+            },
+            "fields": [
+                {
+                    "id": "carbon-04127",
+                    "type": "select",
+                    "label": "Статус билетов",
+                    "name": "_idpg_ticket_status",
+                    "base_name": "idpg_ticket_status",
+                    "value": "in_sale",
+                    "default_value": "in_sale",
+                    "attributes": {},
+                    "help_text": "Укажите состояние продажи билетов — например «Распроданы», если мест нет.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 25,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "options": [
+                        {
+                            "value": "in_sale",
+                            "label": "В продаже"
+                        },
+                        {
+                            "value": "sold_out",
+                            "label": "Распроданы"
+                        },
+                        {
+                            "value": "cancelled",
+                            "label": "Отменено"
+                        },
+                        {
+                            "value": "postponed",
+                            "label": "Перенесено"
+                        }
+                    ]
+                },
+                {
+                    "id": "carbon-6ed34",
+                    "type": "checkbox",
+                    "label": "",
+                    "name": "_idpg_is_free",
+                    "base_name": "idpg_is_free",
+                    "value": false,
+                    "default_value": false,
+                    "attributes": {},
+                    "help_text": "Цены ниже игнорируются — на фронте выводится «Вход свободный».",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 25,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "option_value": "yes",
+                    "option_label": "Бесплатное событие"
+                },
+                {
+                    "id": "carbon-ec916",
+                    "type": "select",
+                    "label": "Валюта",
+                    "name": "_idpg_currency",
+                    "base_name": "idpg_currency",
+                    "value": "RUB",
+                    "default_value": "RUB",
+                    "attributes": {},
+                    "help_text": "Валюта, в которой указаны цены билетов.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 25,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "options": [
+                        {
+                            "value": "RUB",
+                            "label": "RUB"
+                        },
+                        {
+                            "value": "USD",
+                            "label": "USD"
+                        },
+                        {
+                            "value": "EUR",
+                            "label": "EUR"
+                        }
+                    ]
+                },
+                {
+                    "id": "carbon-36d8b",
+                    "type": "text",
+                    "label": "VIP-цена",
+                    "name": "_idpg_vip_price",
+                    "base_name": "idpg_vip_price",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "number",
+                        "min": "0",
+                        "step": "0.01"
+                    },
+                    "help_text": "Цена VIP-билета. Оставьте пустым, если VIP-билетов нет.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 25,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-11a36",
+                    "type": "text",
+                    "label": "Цена от",
+                    "name": "_idpg_price_from",
+                    "base_name": "idpg_price_from",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "number",
+                        "min": "0",
+                        "step": "0.01"
+                    },
+                    "help_text": "Минимальная цена билета.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 25,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-f476e",
+                    "type": "text",
+                    "label": "Цена до",
+                    "name": "_idpg_price_to",
+                    "base_name": "idpg_price_to",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "number",
+                        "min": "0",
+                        "step": "0.01"
+                    },
+                    "help_text": "Максимальная цена билета.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 25,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-0941d",
+                    "type": "select",
+                    "label": "Тип продажи билетов",
+                    "name": "_idpg_ticket_type",
+                    "base_name": "idpg_ticket_type",
+                    "value": "external_link",
+                    "default_value": "external_link",
+                    "attributes": {},
+                    "help_text": "«Внешняя ссылка» — кнопка ведёт на ваш сайт продаж; «Виджет Яндекс.Билетов» — вставьте код виджета ниже.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 25,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "options": [
+                        {
+                            "value": "external_link",
+                            "label": "Внешняя ссылка"
+                        },
+                        {
+                            "value": "widget_yandex",
+                            "label": "Виджет Яндекс.Билетов"
+                        }
+                    ]
+                },
+                {
+                    "id": "carbon-dae66",
+                    "type": "text",
+                    "label": "ID во внешней системе",
+                    "name": "_idpg_external_id",
+                    "base_name": "idpg_external_id",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {},
+                    "help_text": "Используется cron-синхронизацией статусов билетов.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 25,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-1c5cf",
+                    "type": "text",
+                    "label": "URL страницы продажи",
+                    "name": "_idpg_ticket_url",
+                    "base_name": "idpg_ticket_url",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "url",
+                        "placeholder": "https://"
+                    },
+                    "help_text": "Ссылка, по которой посетители купят билет. Открывается в новой вкладке.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 0,
+                    "classes": [],
+                    "conditional_logic": {
+                        "relation": "AND",
+                        "rules": [
+                            {
+                                "compare": "=",
+                                "value": "external_link",
+                                "field": "idpg_ticket_type"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": "carbon-1fcdc",
+                    "type": "text",
+                    "label": "Ссылка на Яндекс.Форму",
+                    "name": "_idpg_yandex_form_url",
+                    "base_name": "idpg_yandex_form_url",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "url",
+                        "placeholder": "https://forms.yandex.ru/"
+                    },
+                    "help_text": "Организатор указывает ссылку на Яндекс.Форму — на странице события появится кнопка «Зарегистрироваться на событие».",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 0,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-99dce",
+                    "type": "html",
+                    "label": "Idpg Yandex Form Button",
+                    "name": "_idpg_yandex_form_button",
+                    "base_name": "idpg_yandex_form_button",
+                    "value": "",
+                    "default_value": "<a class=\"button\" href=\"https://forms.yandex.ru\" target=\"_blank\" rel=\"noopener noreferrer\">Создать Яндекс.Форму</a>",
+                    "attributes": {},
+                    "help_text": null,
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 0,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "html": "<a class=\"button\" href=\"https://forms.yandex.ru\" target=\"_blank\" rel=\"noopener noreferrer\">Создать Яндекс.Форму</a>"
+                },
+                {
+                    "id": "carbon-8ef77",
+                    "type": "textarea",
+                    "label": "Код виджета",
+                    "name": "_idpg_widget_code",
+                    "base_name": "idpg_widget_code",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {},
+                    "help_text": "HTML/JS код виджета продажи билетов. Вставляется на страницу события как есть.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 0,
+                    "classes": [],
+                    "conditional_logic": {
+                        "relation": "AND",
+                        "rules": [
+                            {
+                                "compare": "=",
+                                "value": "widget_yandex",
+                                "field": "idpg_ticket_type"
+                            }
+                        ]
+                    },
+                    "rows": 6
+                }
+            ],
+            "nonce": {
+                "name": "carbon_fields_container_c7c0997d_nonce",
+                "value": "4242f21af7"
+            }
+        },
+        {
+            "id": "carbon_fields_container_c24797c4",
+            "type": "post_meta",
+            "title": "Медиа",
+            "layout": "tabbed-horizontal",
+            "classes": [],
+            "settings": {
+                "meta_box_context": "normal",
+                "meta_box_priority": "default"
+            },
+            "conditions": {
+                "relation": "AND",
+                "conditions": [
+                    {
+                        "type": "boolean",
+                        "compare": "=",
+                        "value": false
+                    }
+                ]
+            },
+            "fields": [
+                {
+                    "id": "carbon-080d4",
+                    "type": "text",
+                    "label": "Видео-трейлер",
+                    "name": "_idpg_video_trailer",
+                    "base_name": "idpg_video_trailer",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "url",
+                        "placeholder": "https://"
+                    },
+                    "help_text": "Ссылка на трейлер: YouTube, VK Видео, Rutube.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 0,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-69f7f",
+                    "type": "media_gallery",
+                    "label": "Галерея",
+                    "name": "_idpg_gallery",
+                    "base_name": "idpg_gallery",
+                    "value": [],
+                    "default_value": [],
+                    "attributes": {},
+                    "help_text": "Несколько изображений; порядок задаётся перетаскиванием.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 0,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "value_type": "id",
+                    "type_filter": "image",
+                    "can_edit_inline": true,
+                    "duplicates_allowed": false
+                },
+                {
+                    "id": "carbon-213d0",
+                    "type": "textarea",
+                    "label": "Код встраивания трансляции",
+                    "name": "_idpg_stream_embed",
+                    "base_name": "idpg_stream_embed",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {},
+                    "help_text": "Вставьте HTML-код плеера для онлайн-трансляции. Доступно также в «Настройки организатора».",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 0,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "rows": 5
+                }
+            ],
+            "nonce": {
+                "name": "carbon_fields_container_c24797c4_nonce",
+                "value": "dd6f1d9da2"
+            }
+        },
+        {
+            "id": "carbon_fields_container_29450a37",
+            "type": "post_meta",
+            "title": "Данные площадки",
+            "layout": "tabbed-horizontal",
+            "classes": [],
+            "settings": {
+                "meta_box_context": "normal",
+                "meta_box_priority": "high"
+            },
+            "conditions": {
+                "relation": "AND",
+                "conditions": [
+                    {
+                        "type": "boolean",
+                        "compare": "=",
+                        "value": false
+                    }
+                ]
+            },
+            "fields": [
+                {
+                    "id": "carbon-13d5e",
+                    "type": "select",
+                    "label": "Тип площадки",
+                    "name": "_idpg_venue_type",
+                    "base_name": "idpg_venue_type",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {},
+                    "help_text": null,
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": [],
+                    "options": [
+                        {
+                            "value": "",
+                            "label": "— Не выбран —"
+                        },
+                        {
+                            "value": "theater",
+                            "label": "Театр"
+                        },
+                        {
+                            "value": "cinema",
+                            "label": "Кинотеатр"
+                        },
+                        {
+                            "value": "museum",
+                            "label": "Музей"
+                        },
+                        {
+                            "value": "concert",
+                            "label": "Концертный зал"
+                        }
+                    ]
+                },
+                {
+                    "id": "carbon-97bd7",
+                    "type": "text",
+                    "label": "Адрес",
+                    "name": "_idpg_venue_address",
+                    "base_name": "idpg_venue_address",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {},
+                    "help_text": null,
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-9eba9",
+                    "type": "text",
+                    "label": "Телефон",
+                    "name": "_idpg_venue_phone",
+                    "base_name": "idpg_venue_phone",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "tel"
+                    },
+                    "help_text": null,
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-60ad7",
+                    "type": "text",
+                    "label": "Email",
+                    "name": "_idpg_venue_email",
+                    "base_name": "idpg_venue_email",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "email"
+                    },
+                    "help_text": null,
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-379d2",
+                    "type": "text",
+                    "label": "Сайт",
+                    "name": "_idpg_venue_website",
+                    "base_name": "idpg_venue_website",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "url",
+                        "placeholder": "https://"
+                    },
+                    "help_text": null,
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-a0887",
+                    "type": "text",
+                    "label": "Вместимость",
+                    "name": "_idpg_venue_capacity",
+                    "base_name": "idpg_venue_capacity",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "number",
+                        "min": "0"
+                    },
+                    "help_text": null,
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-c0270",
+                    "type": "text",
+                    "label": "Широта",
+                    "name": "_idpg_venue_lat",
+                    "base_name": "idpg_venue_lat",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "text",
+                        "placeholder": "56.8527"
+                    },
+                    "help_text": "Десятичные градусы, например 56.8527. Используется для микроразметки GeoCoordinates.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": []
+                },
+                {
+                    "id": "carbon-6ba52",
+                    "type": "text",
+                    "label": "Долгота",
+                    "name": "_idpg_venue_lng",
+                    "base_name": "idpg_venue_lng",
+                    "value": "",
+                    "default_value": "",
+                    "attributes": {
+                        "type": "text",
+                        "placeholder": "53.2115"
+                    },
+                    "help_text": "Десятичные градусы, например 53.2115. Используется для микроразметки GeoCoordinates.",
+                    "context": "post_meta",
+                    "required": false,
+                    "width": 33,
+                    "classes": [],
+                    "conditional_logic": []
+                }
+            ],
+            "nonce": {
+                "name": "carbon_fields_container_29450a37_nonce",
+                "value": "22488c2e47"
+            }
+        }
+    ]
+}
