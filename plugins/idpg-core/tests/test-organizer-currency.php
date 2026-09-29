@@ -275,6 +275,116 @@ class Test_Organizer_Currency extends WP_UnitTestCase {
 	}
 
 	// =====================================================================
+	// Отображение: пустая валюта читается как рубли (DEV-95, дополнение)
+	// =====================================================================
+
+	/**
+	 * Путь к inc/template-tags.php темы.
+	 *
+	 * @return string
+	 */
+	protected function template_tags() {
+		return $this->theme_path() . '/inc/template-tags.php';
+	}
+
+	/**
+	 * Событие с пустой валютой отдаёт в мета-данных RUB.
+	 *
+	 * Организаторский путь выставляет валюту явно, но события, созданные
+	 * до DEV-95 или в обход REST (импорт, CLI, прямой wp_insert_post),
+	 * хранят пустую строку. Без дефолта карточка выводила бы цену «500»
+	 * вообще без символа.
+	 */
+	public function test_empty_currency_falls_back_to_rub() {
+		$event_id = self::factory()->post->create(
+			array(
+				'post_type' => 'event',
+				'post_title' => 'Событие без валюты',
+			)
+		);
+
+		$this->assertSame( '', get_post_meta( $event_id, self::META, true ) );
+
+		$meta = IDPG_Template_Helper::get_event_meta( $event_id );
+
+		$this->assertSame( 'RUB', $meta['currency'] );
+	}
+
+	/**
+	 * Валюта, выставленная явно, дефолтом не затирается.
+	 *
+	 * Администратор по-прежнему может назначить событию USD — это его
+	 * право, и карточка обязана показать именно доллар.
+	 */
+	public function test_explicit_currency_is_preserved() {
+		$event_id = self::factory()->post->create(
+			array(
+				'post_type' => 'event',
+				'post_title' => 'Событие в долларах',
+			)
+		);
+
+		update_post_meta( $event_id, self::META, 'USD' );
+
+		$meta = IDPG_Template_Helper::get_event_meta( $event_id );
+
+		$this->assertSame( 'USD', $meta['currency'] );
+	}
+
+	/**
+	 * Символ пустой валюты — рубль, а не пустая строка.
+	 *
+	 * `idpg_core_currency_symbol()` вызывается из карточки события и с
+	 * одиночной страницы напрямую, минуя мета-данные, поэтому дефолт
+	 * нужен и в самой функции.
+	 */
+	public function test_currency_symbol_falls_back_to_ruble() {
+		if ( ! function_exists( 'idpg_core_currency_symbol' ) ) {
+			$tags = $this->template_tags();
+
+			$this->assertFileExists( $tags );
+			require_once $tags;
+		}
+
+		$this->assertSame( '₽', idpg_core_currency_symbol( '' ) );
+		$this->assertSame( '₽', idpg_core_currency_symbol( '   ' ) );
+		$this->assertSame( '₽', idpg_core_currency_symbol( null ) );
+		$this->assertSame( '₽', idpg_core_currency_symbol( 'rub' ) );
+	}
+
+	/**
+	 * Известные валюты не ломаются: символ соответствует коду.
+	 */
+	public function test_currency_symbol_keeps_known_currencies() {
+		if ( ! function_exists( 'idpg_core_currency_symbol' ) ) {
+			$this->assertFileExists( $this->template_tags() );
+			require_once $this->template_tags();
+		}
+
+		$this->assertSame( '₽', idpg_core_currency_symbol( 'RUB' ) );
+		$this->assertSame( '$', idpg_core_currency_symbol( 'USD' ) );
+		$this->assertSame( '€', idpg_core_currency_symbol( 'EUR' ) );
+	}
+
+	/**
+	 * Цена с пустой валютой выводится с символом рубля.
+	 *
+	 * Сквозная проверка того, ради чего вводился дефолт: карточка не
+	 * показывает голое число.
+	 */
+	public function test_format_price_shows_ruble_for_empty_currency() {
+		if ( ! function_exists( 'idpg_core_format_price' ) ) {
+			$this->assertFileExists( $this->template_tags() );
+			require_once $this->template_tags();
+		}
+
+		$price = idpg_core_format_price( '500', '', '', false );
+
+		$this->assertStringContainsString( '500', $price );
+		$this->assertStringContainsString( '₽', $price );
+	}
+
+	// =====================================================================
 	// Форма
 	// =====================================================================
 

@@ -22,6 +22,14 @@ if ( ! function_exists( 'idpg_core_event_meta' ) ) {
 			return IDPG_Template_Helper::get_event_meta( $post_id );
 		}
 
+		// DEV-95: организатор работает только в рублях, а организаторский
+		// путь выставляет `_idpg_currency` явно. События, созданные до этого
+		// правила или в обход REST (импорт, CLI, прямой wp_insert_post),
+		// остаются с пустой валютой — и карточка выводила бы цену без
+		// символа. Пустое значение здесь заменяется на RUB, чтобы карточка
+		// и прайс всегда показывали ₽.
+		$currency = (string) get_post_meta( $post_id, '_idpg_currency', true );
+
 		return array(
 			'status'      => get_post_meta( $post_id, '_idpg_ticket_status', true ),
 			'ticket_type' => get_post_meta( $post_id, '_idpg_ticket_type', true ),
@@ -33,7 +41,7 @@ if ( ! function_exists( 'idpg_core_event_meta' ) ) {
 			'price_to'    => get_post_meta( $post_id, '_idpg_price_to', true ),
 			'vip_price'   => get_post_meta( $post_id, '_idpg_vip_price', true ),
 			'is_free'     => 'yes' === get_post_meta( $post_id, '_idpg_is_free', true ),
-			'currency'    => get_post_meta( $post_id, '_idpg_currency', true ),
+			'currency'    => '' === trim( $currency ) ? 'RUB' : $currency,
 			'address'     => get_post_meta( $post_id, '_idpg_address', true ),
 			'is_online'   => 'yes' === get_post_meta( $post_id, '_idpg_is_online', true ),
 			'stream_url'  => get_post_meta( $post_id, '_idpg_stream_url', true ),
@@ -260,10 +268,22 @@ if ( ! function_exists( 'idpg_core_currency_symbol' ) ) {
 	/**
 	 * Символ валюты по коду.
 	 *
+	 * DEV-95: пустая валюта трактуется как рубли, а не как «символ не
+	 * найден». Организатор выбирать валюту не вправе, а события,
+	 * созданные до правила или в обход организаторского пути, хранят
+	 * пустую строку — без дефолта карточка выводила бы цену вроде
+	 * «500» вообще без символа.
+	 *
 	 * @param string $currency Код валюты (RUB, USD, EUR).
 	 * @return string Символ.
 	 */
 	function idpg_core_currency_symbol( $currency ) {
+		$currency = is_string( $currency ) ? strtoupper( trim( $currency ) ) : '';
+
+		if ( '' === $currency ) {
+			$currency = 'RUB';
+		}
+
 		$symbols = array(
 			'RUB' => '₽',
 			'USD' => '$',

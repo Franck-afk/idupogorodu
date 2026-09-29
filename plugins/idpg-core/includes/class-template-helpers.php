@@ -241,6 +241,14 @@ class IDPG_Template_Helper {
 			return $cached;
 		}
 
+		// DEV-95: организатор работает только в рублях, а организаторский путь
+		// выставляет `_idpg_currency` явно при сохранении. События, созданные
+		// до этого правила или в обход REST (импорт, CLI, прямой
+		// wp_insert_post), остаются с пустой валютой — и карточка выводила бы
+		// цену вроде «500» вообще без символа. Пустое значение здесь
+		// заменяется на RUB, чтобы карточка и прайс всегда показывали ₽.
+		$currency = (string) get_post_meta( $post_id, '_idpg_currency', true );
+
 		$meta = array(
 			'status'      => get_post_meta( $post_id, '_idpg_ticket_status', true ),
 			'ticket_type' => get_post_meta( $post_id, '_idpg_ticket_type', true ),
@@ -252,7 +260,7 @@ class IDPG_Template_Helper {
 			'price_to'    => get_post_meta( $post_id, '_idpg_price_to', true ),
 			'vip_price'   => get_post_meta( $post_id, '_idpg_vip_price', true ),
 			'is_free'     => 'yes' === get_post_meta( $post_id, '_idpg_is_free', true ),
-			'currency'    => get_post_meta( $post_id, '_idpg_currency', true ),
+			'currency'    => '' === trim( $currency ) ? 'RUB' : $currency,
 			'address'     => get_post_meta( $post_id, '_idpg_address', true ),
 			'is_online'   => 'yes' === get_post_meta( $post_id, '_idpg_is_online', true ),
 			'stream_url'  => get_post_meta( $post_id, '_idpg_stream_url', true ),
