@@ -371,6 +371,38 @@ SCSS во временный файл и сравнивает набор пра�
 | 7 | Поля из ТЗ п.11 не реализованы | `idpg_pin_expires`, `idpg_venue_hours`, `idpg_venue_social`, `idpg_legal_type`, `idpg_inn`, `idpg_verified`, `idpg_documents`, панель организатора в админке — в коде отсутствуют. Реализованы `_idpg_stream_embed` и `_idpg_venue_type` |
 | 8 | Координаты события из ТЗ не реализованы | `_idpg_coordinates_lat/lng`, `_idpg_address` — в коде нет (гео хранится только у площадки) |
 | 9 | `documents`/`verified` организатора | Реализовано частично и иначе: подтверждение по email + модерация публикаций |
+| 10 | `require_once` ≠ работающий класс | **Закрыто DEV-100**: пять классов организатора были подключены, но не инициализированы — хуки висели в конструкторах, которые никто не вызывал. Сейчас все 39 файлов `includes/` подключены, все классы инициализируются, на это есть набор `tests/test-class-init.php` (39 тестов / 96 утверждений) |
+
+---
+
+## 5.1 Инициализация классов плагина (DEV-100)
+
+> Правило: **`require_once` подключает файл, но не запускает класс.**
+> Хуки вешаются в конструкторе, а конструктор вызывается из `::instance()`
+> или `::init()`. Класс без такого вызова молча не работает: REST-маршруты
+> не регистрируются, фильтры не висят, а сайт отдаёт 200 с пустым ответом.
+
+Состояние на 29.09.2026 — все 39 файлов `includes/` подключены в
+`idpg-core.php`, все классы инициализированы. Способы инициализации:
+
+| Способ | Классы | Где вызывается |
+|---|---|---|
+| `::instance()` в `idpg_core_init()` | 23 класса (`IDPG_CPT`, `IDPG_Roles`, `IDPG_REST_API`, `IDPG_Auth`, `IDPG_REST_Organizer`, `IDPG_Privacy` ядро при `require`, `IDPG_Promotion` и др.) | `idpg-core.php`, функция `idpg_core_init()` |
+| `::instance()` при загрузке файла | `IDPG_Current_Event_Banner`, `IDPG_User_Purge`, `IDPG_Privacy` | `idpg-core.php:99` и конец соответствующих файлов |
+| Статический `::init()` | `IDPG_Organizer_URL`, `IDPG_Organizer_Page`, `IDPG_City_URL`, `IDPG_Favorites`, `IDPG_Organizer_Scope` | `idpg_core_init()` либо конец файла |
+| `register_widget()` на `widgets_init` | `IDPG_City_Selector_Widget`, `IDPG_Event_Calendar_Widget`, `IDPG_Expected_Events_Widget` | `idpg_core_register_plugin_widgets()` |
+| Не требуется | `IDPG_Search`, `IDPG_Template_Helper` (статические helper-ы), `IDPG_CLI` (только под `WP_CLI`), `IDPG_Auth_Rate_Limiter`, `IDPG_GeoService` (ленивая инициализация) | — |
+
+**Контроль.** `plugins/idpg-core/tests/test-class-init.php` разбирает все
+файлы `includes/`, строит карту «файл → класс» и требует, чтобы каждый класс
+был описан в одной из таблиц. Неописанный класс валит набор, поэтому новый
+файл нельзя добавить, не решив, как он инициализируется. Дополнительно
+проверяется, что каждый файл подключён в `idpg-core.php`, а конструктор
+каждого синглтона действительно отработал (рефлексия по приватному полю
+`$instance`).
+
+Известная находка: `IDPG_GeoService` инициализируется лениво и не имеет
+потребителей в production-коде — только тесты. Кандидат на удаление.
 
 ---
 
