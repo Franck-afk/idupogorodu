@@ -63,6 +63,29 @@ class IDPG_Roles {
 		add_action( 'init', array( $this, 'sync_role_caps' ), 20 );
 		add_action( 'admin_menu', array( $this, 'hide_unnecessary_menus' ), 999 );
 		add_action( 'wp_before_admin_bar_render', array( $this, 'hide_unnecessary_admin_bar' ), 999 );
+		add_action( 'init', array( $this, 'ensure_safe_default_role' ), 21 );
+	}
+
+	/**
+	 * Не даёт `default_role` снова стать ролью организатора (DEV-98).
+	 *
+	 * `default_role` применяется ядром к каждому новому пользователю без
+	 * явной роли — в том числе созданному из админки. Если там стоит
+	 * `event_organizer`, такой пользователь сразу получает доступ в
+	 * кабинет организатора, минуя подтверждение email, которое выдаёт
+	 * роль только `IDPG_Organizer_Verify`.
+	 *
+	 * Проверка идемпотентна: при корректном значении опция не
+	 * переписывается, поэтому лишних записей в `wp_options` нет.
+	 *
+	 * @return void
+	 */
+	public function ensure_safe_default_role() {
+		if ( get_option( 'default_role' ) !== self::ROLE_SLUG ) {
+			return;
+		}
+
+		update_option( 'default_role', 'subscriber' );
 	}
 
 	/**

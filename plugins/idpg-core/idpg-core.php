@@ -340,10 +340,14 @@ add_filter( 'aios_whitelisted_rest_routes', 'idpg_core_aios_whitelist_filter' );
  *
  * Регистрирует CPT, таксономии, создаёт роли и планирует крон.
  */
-function idpg_core_activate() {
-	IDPG_CPT::instance()->register_post_types();
-	IDPG_CPT::instance()->register_taxonomies();
-	IDPG_Roles::instance()->create_roles();
+	function idpg_core_activate() {
+		IDPG_CPT::instance()->register_post_types();
+		IDPG_CPT::instance()->register_taxonomies();
+		IDPG_Roles::instance()->create_roles();
+
+		// DEV-98: роль организатора выдаётся только после подтверждения
+		// email, поэтому ролью по умолчанию она быть не может.
+		IDPG_Roles::instance()->ensure_safe_default_role();
 
 	IDPG_Ticket_Sync::instance()->schedule_sync();
 

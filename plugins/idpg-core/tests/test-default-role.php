@@ -1,11 +1,20 @@
 <?php
 /**
- * Юнит-тесты DEV-81: default_role не должна быть subscriber.
+ * Юнит-тесты DEV-81 и DEV-98: значение default_role.
  *
- * Модель сайта: роль `subscriber` не должна существовать как роль
- * пользователя — все пользователи сайта организаторы. `default_role`
- * в `wp_options` отвечает за роль нового пользователя, созданного без
- * явного указания роли, и потому тоже не должна быть `subscriber`.
+ * DEV-81: роль `subscriber` не должна быть ролью пользователя сайта —
+ * все пользователи сайта организаторы, поэтому пустая `default_role`
+ * предпочтительнее. WordPress не даёт пустое значение, пока роль
+ * `subscriber` существует (см. `sanitize_option()`), и задача была
+ * закрыта решением владельца 28.09.2026 — боевая БД не менялась.
+ *
+ * DEV-98: это решение создавало дыру. `default_role` применяется ядром к
+ * каждому новому пользователю без явной роли, в том числе созданному из
+ * админки, поэтому стоявшее там `event_organizer` выдавало доступ в
+ * кабинет организатора мимо подтверждения email — а роль по модели
+ * выдаёт только `IDPG_Organizer_Verify` после клика по ссылке из письма.
+ * Принято `default_role = subscriber`, а `ensure_safe_default_role()`
+ * возвращает значение, если кто-то снова выставит роль организатора.
  *
  * Отдельно зафиксировано поведение ядра WordPress: `sanitize_option()`
  * для `default_role` подставляет `subscriber`, если переданного значения
@@ -235,6 +244,117 @@ class Test_Default_Role extends WP_UnitTestCase {
 		$this->assertNotNull( $subscriber );
 		$this->assertTrue( $subscriber->has_cap( 'read' ) );
 		$this->assertTrue( $subscriber->has_cap( 'upload_files' ) );
+	}
+
+	// =====================================================================
+	// DEV-98: default_role не должна быть ролью организатора
+	// =====================================================================
+
+	/**
+	 * Страховка на прикладном уровне: если кто-то снова выставит
+	 * `default_role = event_organizer`, плагин вернёт `subscriber`.
+	 *
+	 * Один только `update_option()` в активации не помогает: значение
+	 * может измениться позже, в том числе вручную через админку.
+	 */
+	public function test_plugin_resets_organizer_default_role() {
+		$this->force_default_role( IDPG_Roles::ROLE_SLUG );
+		$this->assertSame( IDPG_Roles::ROLE_SLUG, get_option( 'default_role' ) );
+
+		IDPG_Roles::instance()->ensure_safe_default_role();
+
+		$this->assertSame( 'subscriber', get_option( 'default_role' ) );
+	}
+
+	/**
+	 * Корректное значение опции не переписывается.
+	 *
+	 * Иначе плагин писал бы в `wp_options` на каждом запросе.
+	 */
+	public function test_safe_default_role_is_not_rewritten() {
+		$this->force_default_role( 'subscriber' );
+
+		IDPG_Roles::instance()->ensure_safe_default_role();
+
+		$this->assertSame( 'subscriber', get_option( 'default_role' ) );
+	}
+
+	/**
+	 * Сквозной сценарий: регистрация → подтверждение → доступ в кабинет.
+	 *
+	 * Закрывает требование DEV-98 целиком: роль организатора появляется
+	 * только после подтверждения по ссылке из письма.
+	 */
+	public function test_role_flow_register_then_verify() {
+		$this->force_default_role( 'subscriber' );
+
+		$response = $this->register_organizer(
+			array(
+				'email' => 'dev98-flow@example.com',
+				'org_name' => 'ООО «Поток»',
+			)
+		);
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$user = get_user_by( 'email', 'dev98-flow@example.com' );
+
+		$this->assertNotFalse( $user );
+
+		// До подтверждения — обычный подписчик, в кабинет не пускает.
+		$this->assertContains( 'subscriber', (array) $user->roles );
+		$this->assertNotContains( IDPG_Roles::ROLE_SLUG, (array) $user->roles );
+		$this->assertSame(
+			IDPG_Organizer_URL::ACCESS_DENIED,
+			IDPG_Organizer_URL::get_access_decision( $user->ID )
+		);
+
+		// Подтверждение по ссылке из письма выдаёт роль организатора.
+		$key = IDPG_Organizer_Verify::instance()->prepare( $user->ID );
+
+		$this->assertNotEmpty( $key );
+
+		$confirmed = IDPG_Organizer_Verify::instance()->confirm( $user->ID, $key );
+
+		$this->assertNotWPError( $confirmed );
+
+		$after = get_user_by( 'id', $user->ID );
+
+		$this->assertContains( IDPG_Roles::ROLE_SLUG, (array) $after->roles );
+		$this->assertSame(
+			IDPG_Organizer_URL::ACCESS_ALLOWED,
+			IDPG_Organizer_URL::get_access_decision( $user->ID )
+		);
+	}
+
+	/**
+	 * Пользователь из админки не получает доступ в кабинет.
+	 *
+	 * `wp_insert_user()` без роли применяет `default_role`. Пока там
+	 * роль организатора, такой пользователь сразу становится организатором.
+	 */
+	public function test_admin_created_user_cannot_enter_cabinet() {
+		$this->force_default_role( 'subscriber' );
+
+		$user_id = wp_insert_user(
+			array(
+				'user_login' => 'dev98_adminmade',
+				'user_pass'  => 'dev98-password',
+				'user_email' => 'dev98-adminmade@example.com',
+			)
+		);
+
+		$this->assertIsInt( $user_id );
+
+		$user = new WP_User( $user_id );
+
+		$this->assertContains( 'subscriber', array_values( $user->roles ) );
+		$this->assertNotContains( IDPG_Roles::ROLE_SLUG, array_values( $user->roles ) );
+		$this->assertFalse( IDPG_Organizer_URL::user_is_organizer( $user_id ) );
+		$this->assertSame(
+			IDPG_Organizer_URL::ACCESS_DENIED,
+			IDPG_Organizer_URL::get_access_decision( $user_id )
+		);
 	}
 
 	// =====================================================================
