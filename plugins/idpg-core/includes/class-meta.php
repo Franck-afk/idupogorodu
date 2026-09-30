@@ -47,6 +47,20 @@ class IDPG_Meta {
 	const SESSIONS_MIRROR = '_idpg_sessions_json';
 
 	/**
+	 * Ключ JSON-зеркала часов работы площадки.
+	 *
+	 * @var string
+	 */
+	const VENUE_HOURS_MIRROR = '_idpg_venue_hours_json';
+
+	/**
+	 * Ключ JSON-зеркала соцсетей площадки.
+	 *
+	 * @var string
+	 */
+	const VENUE_SOCIAL_MIRROR = '_idpg_venue_social_json';
+
+	/**
 	 * Синглтон.
 	 *
 	 * @var IDPG_Meta|null
@@ -343,8 +357,11 @@ class IDPG_Meta {
 			'_idpg_venue_website'  => array( 'type' => 'string' ),
 			'_idpg_venue_capacity' => array( 'type' => 'integer', 'default' => 0 ),
 			// Координаты площадки для гео-разметки Schema.org (GeoCoordinates).
-			'_idpg_venue_lat'      => array( 'type' => 'string' ),
-			'_idpg_venue_lng'      => array( 'type' => 'string' ),
+			'_idpg_venue_lat'       => array( 'type' => 'string' ),
+			'_idpg_venue_lng'       => array( 'type' => 'string' ),
+			// Зеркала complex-полей (DEV-11) — JSON-строки для REST и шаблонов.
+			'_idpg_venue_hours_json'  => array( 'type' => 'string' ),
+			'_idpg_venue_social_json' => array( 'type' => 'string' ),
 		);
 
 		foreach ( $fields as $key => $args ) {
@@ -758,6 +775,48 @@ class IDPG_Meta {
 					->set_attribute( 'placeholder', '53.2115' )
 					->set_help_text( __( 'Десятичные градусы, например 53.2115. Используется для микроразметки GeoCoordinates.', 'idpg-core' ) )
 					->set_width( 33 ),
+				// Часы работы (DEV-11).
+				\Carbon_Fields\Field::make( 'complex', 'idpg_venue_hours', __( 'Часы работы', 'idpg-core' ) )
+					->add_fields( array(
+						\Carbon_Fields\Field::make( 'select', 'day', __( 'День', 'idpg-core' ) )
+							->add_options( array(
+								'mon' => __( 'Понедельник', 'idpg-core' ),
+								'tue' => __( 'Вторник', 'idpg-core' ),
+								'wed' => __( 'Среда', 'idpg-core' ),
+								'thu' => __( 'Четверг', 'idpg-core' ),
+								'fri' => __( 'Пятница', 'idpg-core' ),
+								'sat' => __( 'Суббота', 'idpg-core' ),
+								'sun' => __( 'Воскресенье', 'idpg-core' ),
+							) )
+							->set_width( 25 ),
+						\Carbon_Fields\Field::make( 'time', 'open', __( 'Открытие', 'idpg-core' ) )
+							->set_width( 25 ),
+						\Carbon_Fields\Field::make( 'time', 'close', __( 'Закрытие', 'idpg-core' ) )
+							->set_width( 25 ),
+						\Carbon_Fields\Field::make( 'checkbox', 'is_closed', __( 'Выходной', 'idpg-core' ) )
+							->set_width( 25 ),
+					) )
+					->set_header_template( '<%- day ? day.toUpperCase() : "—" %>' ),
+				// Соцсети (DEV-11).
+				\Carbon_Fields\Field::make( 'complex', 'idpg_venue_social', __( 'Соцсети', 'idpg-core' ) )
+					->add_fields( array(
+						\Carbon_Fields\Field::make( 'select', 'network', __( 'Сеть', 'idpg-core' ) )
+							->add_options( array(
+								'vk'       => 'VK',
+								'tg'       => 'Telegram',
+								'wa'       => 'WhatsApp',
+								'instagram'=> 'Instagram',
+								'youtube'  => 'YouTube',
+								'ok'       => 'Одноклассники',
+								'other'    => __( 'Другое', 'idpg-core' ),
+							) )
+							->set_width( 40 ),
+						\Carbon_Fields\Field::make( 'text', 'url', __( 'Ссылка', 'idpg-core' ) )
+							->set_attribute( 'type', 'url' )
+							->set_attribute( 'placeholder', 'https://' )
+							->set_width( 60 ),
+					) )
+					->set_header_template( '<%- network ? network.toUpperCase() : "—" %>' ),
 			) );
 	}
 
@@ -840,6 +899,99 @@ class IDPG_Meta {
 		}
 
 		self::purge_helper_cache( $post_id );
+	}
+
+	/**
+	 * Дублирование complex-поля часов работы площадки в JSON (DEV-11).
+	 *
+	 * @param int $post_id ID записи.
+	 */
+	public static function mirror_venue_hours( $post_id ) {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id || 'venue' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		if ( ! function_exists( 'carbon_get_post_meta' ) ) {
+			return;
+		}
+
+		$rows  = carbon_get_post_meta( $post_id, 'idpg_venue_hours' );
+		$hours = array();
+
+		if ( is_array( $rows ) ) {
+			foreach ( $rows as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+
+				$day = isset( $row['day'] ) ? trim( (string) $row['day'] ) : '';
+
+				if ( '' === $day ) {
+					continue;
+				}
+
+				$hours[] = array(
+					'day'       => $day,
+					'open'      => isset( $row['open'] ) ? trim( (string) $row['open'] ) : '',
+					'close'     => isset( $row['close'] ) ? trim( (string) $row['close'] ) : '',
+					'is_closed' => ! empty( $row['is_closed'] ),
+				);
+			}
+		}
+
+		if ( empty( $hours ) ) {
+			delete_post_meta( $post_id, self::VENUE_HOURS_MIRROR );
+		} else {
+			update_post_meta( $post_id, self::VENUE_HOURS_MIRROR, wp_json_encode( $hours ) );
+		}
+	}
+
+	/**
+	 * Дублирование complex-поля соцсетей площадки в JSON (DEV-11).
+	 *
+	 * @param int $post_id ID записи.
+	 */
+	public static function mirror_venue_social( $post_id ) {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id || 'venue' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		if ( ! function_exists( 'carbon_get_post_meta' ) ) {
+			return;
+		}
+
+		$rows   = carbon_get_post_meta( $post_id, 'idpg_venue_social' );
+		$social = array();
+
+		if ( is_array( $rows ) ) {
+			foreach ( $rows as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+
+				$network = isset( $row['network'] ) ? trim( (string) $row['network'] ) : '';
+				$url     = isset( $row['url'] ) ? trim( (string) $row['url'] ) : '';
+
+				if ( '' === $network || '' === $url ) {
+					continue;
+				}
+
+				$social[] = array(
+					'network' => $network,
+					'url'     => esc_url_raw( $url ),
+				);
+			}
+		}
+
+		if ( empty( $social ) ) {
+			delete_post_meta( $post_id, self::VENUE_SOCIAL_MIRROR );
+		} else {
+			update_post_meta( $post_id, self::VENUE_SOCIAL_MIRROR, wp_json_encode( $social ) );
+		}
 	}
 
 	/**
@@ -1125,3 +1277,5 @@ class IDPG_Meta {
 
 add_action( 'carbon_fields_register_fields', array( 'IDPG_Meta', 'register_carbon_fields' ) );
 add_action( 'carbon_fields_post_meta_container_saved', array( 'IDPG_Meta', 'mirror_sessions' ) );
+add_action( 'carbon_fields_post_meta_container_saved', array( 'IDPG_Meta', 'mirror_venue_hours' ) );
+add_action( 'carbon_fields_post_meta_container_saved', array( 'IDPG_Meta', 'mirror_venue_social' ) );

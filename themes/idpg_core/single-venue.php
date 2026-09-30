@@ -155,7 +155,72 @@ get_header();
 									<div class="idpg-event-single__info-row">
 										<dt><?php esc_html_e( 'Вместимость', 'idpg_core' ); ?></dt>
 										<dd><?php echo esc_html( number_format_i18n( (int) $idpg_meta['capacity'] ) ); ?></dd>
-</div>
+									</div>
+								<?php endif; ?>
+
+								<?php if ( ! empty( $idpg_meta['hours'] ) ) : ?>
+									<div class="idpg-event-single__info-row">
+										<dt><?php esc_html_e( 'Часы работы', 'idpg_core' ); ?></dt>
+										<dd>
+											<ul class="idpg-venue-hours">
+												<?php
+												$day_labels = array(
+													'mon' => __( 'Пн', 'idpg_core' ),
+													'tue' => __( 'Вт', 'idpg_core' ),
+													'wed' => __( 'Ср', 'idpg_core' ),
+													'thu' => __( 'Чт', 'idpg_core' ),
+													'fri' => __( 'Пт', 'idpg_core' ),
+													'sat' => __( 'Сб', 'idpg_core' ),
+													'sun' => __( 'Вс', 'idpg_core' ),
+												);
+												foreach ( $idpg_meta['hours'] as $idpg_hour ) :
+													$day_label = isset( $day_labels[ $idpg_hour['day'] ] ) ? $day_labels[ $idpg_hour['day'] ] : esc_html( $idpg_hour['day'] );
+													?>
+													<li class="idpg-venue-hours__item<?php echo ! empty( $idpg_hour['is_closed'] ) ? ' idpg-venue-hours__item--closed' : ''; ?>">
+														<span class="idpg-venue-hours__day"><?php echo esc_html( $day_label ); ?></span>
+														<?php if ( ! empty( $idpg_hour['is_closed'] ) ) : ?>
+															<span class="idpg-venue-hours__time"><?php esc_html_e( 'выходной', 'idpg_core' ); ?></span>
+														<?php else : ?>
+															<span class="idpg-venue-hours__time">
+																<?php
+																echo esc_html( $idpg_hour['open'] . ' — ' . $idpg_hour['close'] );
+																?>
+															</span>
+														<?php endif; ?>
+													</li>
+													<?php endforeach; ?>
+											</ul>
+										</dd>
+									</div>
+								<?php endif; ?>
+
+								<?php if ( ! empty( $idpg_meta['social'] ) ) : ?>
+									<div class="idpg-event-single__info-row">
+										<dt><?php esc_html_e( 'Соцсети', 'idpg_core' ); ?></dt>
+										<dd>
+											<ul class="idpg-venue-social">
+												<?php
+												$network_labels = array(
+													'vk'        => 'VK',
+													'tg'        => 'Telegram',
+													'wa'        => 'WhatsApp',
+													'instagram' => 'Instagram',
+													'youtube'   => 'YouTube',
+													'ok'        => 'Одноклассники',
+													'other'     => __( 'Сайт', 'idpg_core' ),
+												);
+												foreach ( $idpg_meta['social'] as $idpg_social ) :
+													$net_label = isset( $network_labels[ $idpg_social['network'] ] ) ? $network_labels[ $idpg_social['network'] ] : esc_html( $idpg_social['network'] );
+													?>
+													<li class="idpg-venue-social__item">
+														<a href="<?php echo esc_url( $idpg_social['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+															<?php echo esc_html( $net_label ); ?>
+														</a>
+													</li>
+													<?php endforeach; ?>
+											</ul>
+										</dd>
+									</div>
 								<?php endif; ?>
 							</dl>
 						</aside>

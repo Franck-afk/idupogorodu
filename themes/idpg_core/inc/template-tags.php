@@ -489,12 +489,20 @@ if ( ! function_exists( 'idpg_core_venue_meta' ) ) {
 	 * @return array Массив мета-данных.
 	 */
 	function idpg_core_venue_meta( $post_id ) {
+		$hours_raw  = get_post_meta( $post_id, '_idpg_venue_hours_json', true );
+		$social_raw = get_post_meta( $post_id, '_idpg_venue_social_json', true );
+
+		$hours  = json_decode( $hours_raw, true );
+		$social = json_decode( $social_raw, true );
+
 		return array(
 			'address'  => get_post_meta( $post_id, '_idpg_venue_address', true ),
 			'phone'    => get_post_meta( $post_id, '_idpg_venue_phone', true ),
 			'email'    => get_post_meta( $post_id, '_idpg_venue_email', true ),
 			'website'  => get_post_meta( $post_id, '_idpg_venue_website', true ),
 			'capacity' => get_post_meta( $post_id, '_idpg_venue_capacity', true ),
+			'hours'    => is_array( $hours ) ? $hours : array(),
+			'social'   => is_array( $social ) ? $social : array(),
 		);
 	}
 }
