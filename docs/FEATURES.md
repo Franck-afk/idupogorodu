@@ -237,6 +237,14 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
   Сторож — `tests/test-theme-version.php` (7 тестов): сверяет оба файла, формат версии,
   единственность объявления и рантайм-значение. Поводом стал откат DEV-102, после которого
   в дереве стояла `1.0.75` при заголовке `1.0.73` — версия не росла, и браузеры отдавали кэш.
+- **Заголовки плагинов приведены к единому виду (DEV-139, 30.09.2026).** У `idpg-core`
+  и `idpg-auth` теперь одинаковый набор: `Requires at least`, `Tested up to`, `Requires PHP`.
+  Значения: `idpg-core` — WP 6.0 / PHP 7.4, `idpg-auth` — WP 5.8 / PHP 7.4, `Tested up to: 6.7`
+  у обоих. PHP-порог **сознательно не поднят до 8.2**: код не использует PHP 8-фич
+  (`str_contains`, `?->`, `enum`, `readonly` — нет), PHPCS `testVersion` = `5.6-`.
+  Сторож — `tests/test-plugin-header.php` (7 тестов). Нюанс: `get_plugin_data()` не разбирает
+  `Tested up to` и использует ключи `RequiresWP` / `RequiresPHP` — `Tested up to` читается
+  отдельно через `get_file_data()`.
 - Стандарты: `.phpcs.xml.dist`, `.circleci/config.yml`, `.cursorrules`.
 - PHPCS в CI (DEV-27A): job `phpcs` прогоняет PHPCS (WordPress + `PHPCompatibilityWP`) по `plugins/idpg-core`,
   `plugins/idpg-auth` и теме `idpg_core`. Легаси-нарушения зафиксированы в baseline — `phpcs-baseline.neon`

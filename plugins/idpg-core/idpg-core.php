@@ -5,6 +5,7 @@
  * Description:       Ядро плагина для сайта-афиши. Регистрирует CPT, таксономии, роли и API для событий и площадок.
  * Version:           1.1.2
  * Requires at least: 6.0
+ * Tested up to:      6.7
  * Requires PHP:      7.4
  * Author:            IDPG Team
  * Author URI:        https://example.com

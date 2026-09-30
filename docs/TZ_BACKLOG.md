@@ -899,10 +899,12 @@ namespace с путями, методами и разделением прав. 
 
 ### DEV-23. Расхождения версий и заголовков
 
-> **Статус: частично закрыто 30.09.2026 (DEV-138).** Версии темы синхронизированы
-> (`IDPG_VERSION` = `style.css` = **1.0.78**), добавлен сторож
-> `tests/test-theme-version.php`. Осталось: в заголовке `plugins/idpg-core/idpg-core.php`
-> нет `Tested up to` (у `idpg-auth` он есть).
+> **Статус: ЗАКРЫТО 30.09.2026 (DEV-138 + DEV-139).**
+> Версии темы синхронизированы (`IDPG_VERSION` = `style.css` = **1.0.78**), сторож —
+> `tests/test-theme-version.php`. Заголовок `idpg-core.php` приведён к единому виду
+> с `idpg-auth`: добавлен `Tested up to: 6.7`, сторож — `tests/test-plugin-header.php`.
+> Оба поля (`Requires at least`, `Tested up to`, `Requires PHP`) присутствуют у всех
+> компонентов.
 
 | | |
 |---|---|
@@ -3508,11 +3510,52 @@ CircleCI после привязки. Поэтому пункты 1–2 приё
 | `test-theme-version.php` | 7 / 7 OK (обратная проба ловит расхождение) |
 | Полный набор `idpg-core` | 523 теста / 1570 утверждений, падений **2** — оба гард сборки CSS (DEV-87), к версии не относятся |
 
-**Остаток.** DEV-23 закрыт частично: версии темы синхронизированы, но в заголовке
-`plugins/idpg-core/idpg-core.php` по-прежнему нет `Tested up to`.
+**Остаток.** DEV-23 был закрыт частично: версии темы синхронизированы, но в заголовке
+`plugins/idpg-core/idpg-core.php` не было `Tested up to`. **Закрыто DEV-139** в тот же
+день — DEV-23 закрыт полностью.
 
 **Ссылки.** DEV-23 (расхождения версий), DEV-84 (заявленный бамп 1.0.77),
 `docs/FEATURES.md` §1.9; журнал — `.workbuddy-ai/memory/2026-09-30.md`.
+
+### DEV-139. `Tested up to` в заголовке idpg-core (закрыто 30.09.2026)
+
+**Статус: закрыто 30.09.2026.** Остаток DEV-23.
+
+**Проблема.** В заголовке `plugins/idpg-core/idpg-core.php` не было `Tested up to`
+(у `idpg-auth` и у темы он есть) — карточку DEV-23 нельзя было закрыть.
+
+**Расхождение в постановке — разрешено решением владельца.** Постановка просила
+`Requires PHP: 8.2` и `Requires at least: 6.4`, но одновременно «сверить с idpg-auth
+для единообразия», а там `7.4` и `5.8`. Проверка по коду: **PHP 8-фич нет** —
+`str_contains` / `str_starts_with` / `?->` / `enum` / `readonly` / promoted ctor
+не используются (совпадения только в `vendor/`), PHPCS `testVersion` = `5.6-`.
+Владелец выбрал **фактические значения** (PHP 7.4 / WP 6.0): код совместим с 7.4,
+подъём порога до 8.2 заблокировал бы установку на PHP 7.4–8.1 без причины и разошёлся
+бы с `idpg-auth` и темой.
+
+**Что сделано.**
+
+- В заголовок добавлена одна строка: `Tested up to: 6.7` (как у `idpg-auth` и темы).
+  `Requires at least: 6.0` и `Requires PHP: 7.4` оставлены без изменений.
+- Проверено рантаймом через `get_plugin_data()` на бутстрапе WP 7.1.2:
+  `RequiresWP` = `6.0`, `RequiresPHP` = `7.4`, `Tested up to` = `6.7`.
+
+**Грабля, вскрытая при проверке.** `get_plugin_data()` **не разбирает**
+`Tested up to` вовсе, а его ключи — `RequiresWP` (`Requires at least`) и
+`RequiresPHP` (`Requires PHP`), не «Requires at least»/«Requires PHP» как строки
+(см. `wp-admin/includes/plugin.php:76-92`). Первая проба из-за этого показала
+«(нет)» у **обоих** плагинов при верных заголовках. `Tested up to` читается
+отдельно — `get_file_data( $file, array( 'Tested' => 'Tested up to' ), 'plugin' )`.
+Тест учитывает это.
+
+**Тест.** `plugins/idpg-core/tests/test-plugin-header.php` — **7 тестов /
+13 утверждений**: файлы на месте, заголовок разбирается, `Requires at least` /
+`Requires PHP` / `Tested up to` присутствуют и по формату похожи на версии,
+`Tested up to` не ниже `Requires at least`, значения совпадают с `idpg-auth`.
+Обратная проба: удаление строки `Tested up to` роняет ровно 3 теста.
+
+**Ссылки.** DEV-23 (закрыт полностью), DEV-138 (версии темы); журнал —
+`.workbuddy-ai/memory/2026-09-30.md`.
 
 ---
 
