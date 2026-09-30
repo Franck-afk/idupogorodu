@@ -227,10 +227,11 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 - `uninstall.php` — очистка опций, транзиентов, user meta, cron (данные событий сохраняются,
   полная зачистка — константой `IDPG_CORE_UNINSTALL_WIPE_DATA`).
 - i18n: `languages/idpg-core.pot`, генератор `bin/make-pot.js` (без внешних зависимостей).
-- Тесты: PHPUnit — 13 файлов (`test-auth-emails`, `test-cpt`, `test-geo-service`, `test-ical-export`,
-  `test-organizer-events`, `test-organizer-page`, `test-organizer-pending`, `test-rest-api`, `test-roles`,
-  `test-template-helper`, `test-theme` и др.), `phpunit.xml.dist`, `bin/install-wp-tests.*`.
-  Итого зелёный прогон: idpg-core — 85 тестов / 210 утверждений (DEV-52, 19.09.2026).
+- Тесты: PHPUnit — **39 файлов** `tests/test-*.php` (на 30.09.2026; список растёт),
+  `phpunit.xml.dist`, `bin/install-wp-tests.*`.
+  Итого прогон на 30.09.2026: idpg-core — **530 тестов / 1583 утверждения**,
+  падений 2 — оба гард сборки CSS (DEV-87). Исторический снимок DEV-52 (19.09.2026) —
+  85 тестов / 210 утверждений.
 - **Версия темы — единый источник кэш-бастинга (DEV-138, 30.09.2026).**
   `IDPG_VERSION` (`themes/idpg_core/functions.php`) = `Version:` в `themes/idpg_core/style.css`
   = **1.0.78**; значение подставляется в `?ver=` у `style.css` и скриптов темы.
@@ -355,8 +356,16 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 
 | | Байт | MD5 |
 |---|---|---|
-| Живой `style.css` | 79 743 | `f8ed3986c384009e487a2f2193962ac7` |
+| Живой `style.css` | 79 743 | `62eb661b4ebc8c9beeba806200cf0de8` |
 | Сборка `npx sass` | 91 613 | `2655d57a044e3ea4c1d584a7e6612907` |
+
+> **MD5 менялся без изменения размера.** Замер DEV-132 (30.09.2026) давал
+> `f8ed3986c384009e487a2f2193962ac7` при тех же 79 743 байтах. Расхождение —
+> следствие DEV-138: в заголовке `style.css` заменено `Version: 1.0.73` →
+> `Version: 1.0.78` (та же длина). **Правила CSS не менялись**, поэтому вывод
+> DEV-132 (сборка ≠ `style.css`, `CHANGED` = 88) остаётся в силе.
+> Это же — наглядный пример правила §15 бэклога: MD5 без привязки к дате
+> и версии устаревает молча.
 
 Различие содержательное, не форматное (оба файла LF, 0 символов CR).
 Замер сторожа `Test_Css_Build`: `MISSING` **0**, правил **525 → 526**

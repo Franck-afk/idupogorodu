@@ -292,7 +292,8 @@ git verify-pack -v .git/objects/pack/*.idx | grep <sha>
 - `git push --dry-run origin master` → `2069e37..765500c` (fast-forward,
   без `--force`);
 - рабочее дерево **не изменено** (`style.css` — те же 79 743 байта,
-  MD5 `f8ed3986…`).
+  MD5 `f8ed3986…` на дату DEV-134; после DEV-138, поднявшего версию темы
+  до 1.0.78, MD5 — `62eb661b…` при том же размере).
 
 ### Уроки
 
