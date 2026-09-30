@@ -197,12 +197,10 @@
 		outline-offset: 2px;
 	}
 
-	&__icon {
-		flex-shrink: 0;
-		width: 14px;
-		height: 14px;
-		color: $color-primary;
-	}
+	// `&__icon` здесь был дублем: то же правило уже задано в
+	// `components/_city-selector.scss` (группой с `.idpg-city-selector__icon`).
+	// Из-за повтора сборка давала лишнее правило `.idpg-city-selector__btn__icon`
+	// (DEV-87, DEV-143): сторож `test-css-build.php` фиксировал его как «лишнее».
 
 	&__name {
 		line-height: 1;

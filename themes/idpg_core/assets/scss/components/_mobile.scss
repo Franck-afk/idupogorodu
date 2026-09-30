@@ -155,3 +155,11 @@
     padding: 40px 16px;
   }
 }
+
+/* Create-event buttons: min 44px touch
+   Перенесено из `components/_recent-events.scss` (DEV-87, DEV-143): в style.css
+   этот блок стоит сразу после основного правила `.create-event__btn`, а этот
+   партиал подключается позже `pages/create-event` — порядок восстановлен. */
+.create-event__btn {
+  min-height: 44px;
+}

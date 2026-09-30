@@ -45,7 +45,9 @@
   outline-offset: 2px;
   border-radius: 2px;
 }
-/* Create-event buttons: min 44px touch */
-.create-event__btn {
-  min-height: 44px;
-}
+
+// `.create-event__btn { min-height: 44px }` перенесено в `components/_mobile.scss`
+// (DEV-87, DEV-143). Причина: в style.css этот блок стоит ПОСЛЕ основного правила
+// `.create-event__btn`, а `components/recent-events` подключается в style.scss
+// раньше `pages/create-event` — поэтому в сборке блок с `min-height` оказывался
+// первым, и сторож `test-css-build.php` видел расхождение деклараций.
