@@ -1449,6 +1449,16 @@ a:focus-visible {
   flex-direction: row;
   align-items: center;
 }
+/* Honeypot (DEV-150): скрыто от людей, но не display:none — браузер
+   не отправляет поля display:none, и приманка выпадает из POST. */
+.auth__hp {
+  position: absolute !important;
+  left: -9999px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+}
 .auth__label {
   font-size: 0.875rem;
   font-weight: 500;

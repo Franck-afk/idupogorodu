@@ -174,7 +174,16 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	}
 
 	// Форма регистрации организатора.
-	if ( ! $is_forgot && isset( $_POST['org_name'] ) && isset( $_POST['email'] ) ) {
+	//
+	// Honeypot (DEV-150): `idpg_company` скрыто от человека, но бот его
+	// заполняет. Такой запрос показывает тот же «успех», что и настоящая
+	// регистрация, и выходит, не создавая аккаунта. Без этой проверки
+	// приманку обходил бы простой POST на страницу без JavaScript.
+	$register_honeypot = isset( $_POST['idpg_company'] ) ? wp_unslash( $_POST['idpg_company'] ) : '';
+
+	if ( ! is_string( $register_honeypot ) || '' !== trim( $register_honeypot ) ) {
+		$register_sent = true;
+	} elseif ( ! $is_forgot && isset( $_POST['org_name'] ) && isset( $_POST['email'] ) ) {
 		$org_name     = sanitize_text_field( wp_unslash( $_POST['org_name'] ) );
 		$contact_name = sanitize_text_field( wp_unslash( $_POST['contact_name'] ) );
 		$email        = sanitize_email( wp_unslash( $_POST['email'] ) );
@@ -551,6 +560,24 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 							</a>
 						</span>
 					</label>
+				</div>
+
+				<?php
+				// Honeypot-поле против ботов (DEV-150). Живой человек его не
+				// видит и не заполняет, бот — заполняет. Скрытие не через
+				// display:none, а уводом за границу экрана: display:none
+				// браузеры не отправляют, и поле выпадает из POST.
+				?>
+				<div class="auth__hp" aria-hidden="true">
+					<label for="auth-register-company"><?php esc_html_e( 'Название компании', 'idpg_core' ); ?></label>
+					<input
+						id="auth-register-company"
+						name="idpg_company"
+						type="text"
+						tabindex="-1"
+						autocomplete="off"
+						value=""
+					>
 				</div>
 
 				<button class="auth__submit" type="submit">

@@ -454,6 +454,14 @@
 				phone:             fd.get( 'phone' ),
 				terms:             fd.get( 'terms' ) === '1',
 				[ PDN_CONSENT_FIELD ]: pdnConsent,
+				// Honeypot (DEV-150). Поле лежит в форме, поэтому FormData
+				// его уже несёт, но payload выше собирается вручную, по
+				// списку полей, — и без этой строки приманка до сервера не
+				// дошла бы вовсе, то есть обход был бы основным путём, а
+				// защищался бы только PHP-fallback без JavaScript.
+				// У человека поле пустое, у бота заполнено.
+				// Приём тот же, что в subscribe.js.
+				idpg_company:      fd.get( 'idpg_company' ) || '',
 			};
 		} );
 	}

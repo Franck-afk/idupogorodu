@@ -222,6 +222,17 @@
 	}
 
 	// -- Метка ----------------------------------------------------------------
+	// Honeypot (DEV-150): скрыто от людей, но не display:none — браузер
+	// не отправляет такие поля, и приманка выпадает из POST.
+	&__hp {
+		position: absolute !important;
+		left: -9999px !important;
+		top: auto !important;
+		width: 1px !important;
+		height: 1px !important;
+		opacity: 0 !important;
+	}
+
 	&__label {
 		font-size: $font-size-sm;
 		font-weight: 500;

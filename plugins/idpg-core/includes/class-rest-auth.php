@@ -152,6 +152,19 @@ class IDPG_REST_Auth {
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					// Honeypot (DEV-150). Поле скрыто от людей, но остаётся
+					// в POST, поэтому его заполняет бот.
+					//
+					// Значение НЕ санитизируется и не типизируется в схеме
+					// намеренно. `sanitize_text_field` отдаёт на массиве пустую
+					// строку, а проверка идёт после санитизации — и бот обходил
+					// приманку, прислав `idpg_company[]=x` вместо скаляра.
+					// Саму строку поле используется только для сравнения с
+					// пустотой и никуда не записывается, поэтому санитизировать
+					// нечего; не-строку обрабатывает проверка в обработчике.
+					'idpg_company' => array(
+						'required' => false,
+					),
 					'terms'            => array(
 						'required'          => false,
 						'type'              => 'boolean',
@@ -369,6 +382,20 @@ class IDPG_REST_Auth {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function handle_register( $request ) {
+		// Honeypot (DEV-150). Поле `idpg_company` скрыто от людей, но бот его
+		// заполняет. Отвечаем ровно тем же, что и успешная регистрация
+		// организатора: аккаунт не создаётся, письмо не уходит, лимит
+		// регистрации не расходуется. Проверка стоит до всего остального —
+		// иначе бот успевает выяснить правила валидации по кодам ошибок.
+		$honeypot = $request->get_param( 'idpg_company' );
+		$is_bait  = is_string( $honeypot )
+			? ( '' !== trim( $honeypot ) )
+			: ( null !== $honeypot );
+
+		if ( $is_bait ) {
+			return $this->get_register_bait_response();
+		}
+
 		if ( is_user_logged_in() ) {
 			return new WP_Error(
 				'already_logged_in',
@@ -573,6 +600,34 @@ class IDPG_REST_Auth {
 				'user_id'      => $user_id,
 				'role'         => $role,
 				'redirect_url' => $redirect_url,
+			),
+			201
+		);
+	}
+
+	/**
+	 * Ответ на регистрацию с заполненным honeypot (приманка для ботов).
+	 *
+	 * Повторяет успешную регистрацию организатора один в один: тот же код
+	 * 201, тот же набор ключей и тот же текст. Отличить приманку можно
+	 * было бы по коду ответа, поэтому 200 здесь не годится — настоящая
+	 * регистрация отвечает 201. Различие остаётся одно, `user_id`: подставить
+	 * настоящий ID без создания пользователя нельзя, поэтому здесь 0.
+	 *
+	 * Текст и код намеренно продублированы из `handle_register()`: общий
+	 * хелпер потребовал бы правки работающего кода регистрации, а при
+	 * расхождении с ним honeypot перестаёт быть неотличимым.
+	 *
+	 * @return WP_REST_Response
+	 */
+	private function get_register_bait_response() {
+		return new WP_REST_Response(
+			array(
+				'success'       => true,
+				'user_id'       => 0,
+				'pending_email' => true,
+				'message'       => __( 'Регистрация почти готова! Мы отправили на ваш email письмо со ссылкой для подтверждения. Перейдите по ней, чтобы войти в кабинет организатора.', 'idpg-core' ),
+				'redirect_url'  => home_url( '/login/' ),
 			),
 			201
 		);
