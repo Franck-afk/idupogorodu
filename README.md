@@ -42,7 +42,10 @@ composer install --no-dev
 - Плагин `idpg-core`: `plugins/idpg-core/README.md`, `CHANGELOG.md`
 - Тема `idpg_core`: `themes/idpg_core/README.md`, `IMPLEMENTATION.md`, `CODING_STANDARDS.md`
 - Плагин `wp-cloud-sync`: `plugins/wp-cloud-sync/README.md`
-- ТЗ проекта: `docs/PLUGIN_TZ.md` (в рабочем каталоге сайта, вне репозитория)
+- Проект целиком: `docs/PROJECT.md` (что реализовано + что делать), `docs/PRODUCTION.md`
+  (чек-лист прода), `.workbuddy-ai/MEMORY.md` (память, грабли, рецепты)
+- Правила для ИИ: [`AGENTS.md`](AGENTS.md)
+- Исходное ТЗ (неактивно, в архиве): `docs/archive/PLUGIN_TZ.md`
 
 ## Правила для AI-агента
 
