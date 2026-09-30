@@ -1,14 +1,29 @@
 @use '../base/variables' as *;
 
 // ============================================================================
-// Футер сайта
+// Футер сайта (DEV-87)
+//
+// Переписано по живому style.css. Расхождение было инверсией дизайна:
+// партиал описывал ТЁМНЫЙ футер (#2d3748, белый текст, полупрозрачные
+// подложки), а сайт показывал СВЕТЛЫЙ (var(--idpg-canvas) с текстом
+// var(--idpg-ink)). Из-за этого любая пересборка возвращала футер к
+// прошлому поколению.
+//
+// Правила ссылок вынесены в components/_footer-links.scss: style.css
+// описывает их одним селектором с `.site-footer__list a`, и держать
+// вторую копию здесь значило бы дублировать правило.
+//
+// Значения сняты с style.css дословно. Порядок свойств не влияет на
+// результат сборки, но сохранён как в оригинале.
 // ============================================================================
 
 .site-footer {
 	margin-top: auto;
-	background-color: #2d3748;
-	color: #ffffff;
+	background-color: var(--idpg-canvas);
+	color: var(--idpg-body);
+	border-top: 1px solid var(--idpg-hairline);
 
+	// --- Сетка подвала ---
 	&__container {
 		max-width: $container-max;
 		width: 100%;
@@ -26,8 +41,10 @@
 			grid-template-columns: repeat(2, 1fr);
 		}
 
+		// На десктопе колонок по-прежнему две, а не четыре: третья и
+		// четвёртая в текущей вёрстке не используются.
 		@media (min-width: $breakpoint-desktop) {
-			grid-template-columns: repeat(4, 1fr);
+			grid-template-columns: repeat(2, 1fr);
 		}
 	}
 
@@ -38,10 +55,10 @@
 
 	&__title {
 		margin: 0 0 16px;
-		font-family: $font-family-display;
+		font-family: $font-family;
 		font-size: 18px;
-		font-weight: 700;
-		color: #ffffff;
+		font-weight: 600;
+		color: var(--idpg-ink);
 	}
 
 	&__list {
@@ -53,34 +70,14 @@
 		list-style: none;
 	}
 
-	&__link {
-		display: inline-block;
-		font-size: 14px;
-		line-height: 1.4;
-		color: #cbd5e0;
-		text-decoration: none;
-		transition: color $transition-fast;
-
-		&:hover,
-		&:focus {
-			color: #ffffff;
-			text-decoration: underline;
-			outline: none;
-		}
-
-		&:focus-visible {
-			outline: 2px solid $color-primary;
-			outline-offset: 2px;
-		}
-	}
-
 	&__text {
 		margin: 0 0 16px;
 		font-size: 14px;
 		line-height: 1.6;
-		color: #cbd5e0;
+		color: var(--idpg-body);
 	}
 
+	// --- Ссылки на соцсети ---
 	&__social {
 		display: flex;
 		flex-wrap: wrap;
@@ -96,11 +93,11 @@
 		justify-content: center;
 		width: 40px;
 		height: 40px;
-		color: #cbd5e0;
-		background-color: rgba(255, 255, 255, 0.08);
-		border: 1px solid rgba(255, 255, 255, 0.16);
-		border-radius: 8px;
-		transition: color $transition-fast, background-color $transition-fast, border-color $transition-fast;
+		color: var(--idpg-body);
+		background-color: var(--idpg-surface-soft);
+		border: 1px solid var(--idpg-hairline);
+		border-radius: var(--idpg-radius-sm, 8px);
+		transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 
 		svg {
 			width: 20px;
@@ -110,18 +107,19 @@
 
 		&:hover,
 		&:focus {
-			color: #ffffff;
-			background-color: rgba(255, 255, 255, 0.14);
-			border-color: rgba(255, 255, 255, 0.35);
+			color: var(--idpg-ink);
+			background-color: var(--idpg-surface-strong);
+			border-color: var(--idpg-hairline);
 			outline: none;
 		}
 
 		&:focus-visible {
-			outline: 2px solid $color-primary;
+			outline: 2px solid var(--idpg-primary);
 			outline-offset: 2px;
 		}
 	}
 
+	// --- Форма подписки ---
 	&__subscribe {
 		display: flex;
 		gap: 8px;
@@ -132,20 +130,20 @@
 			padding: 10px 14px;
 			font-family: $font-family;
 			font-size: 14px;
-			color: #ffffff;
-			background-color: rgba(255, 255, 255, 0.08);
-			border: 1px solid rgba(255, 255, 255, 0.2);
-			border-radius: 8px;
+			color: var(--idpg-ink);
+			background-color: var(--idpg-canvas);
+			border: 1px solid var(--idpg-hairline);
+			border-radius: var(--idpg-radius-sm, 8px);
 			outline: none;
-			transition: border-color $transition-fast, background-color $transition-fast;
+			transition: border-color 0.2s ease, background-color 0.2s ease;
 
 			&::placeholder {
-				color: #a0aec0;
+				color: var(--idpg-muted);
 			}
 
 			&:focus {
-				background-color: rgba(255, 255, 255, 0.14);
-				border-color: $color-primary;
+				background-color: var(--idpg-canvas);
+				border-color: var(--idpg-primary);
 			}
 		}
 
@@ -155,32 +153,70 @@
 			font-family: $font-family;
 			font-size: 14px;
 			font-weight: 600;
-			color: #ffffff;
-			background-color: $color-primary;
-			border: 1px solid $color-primary;
-			border-radius: 8px;
+			color: var(--idpg-on-primary);
+			background-color: var(--idpg-primary);
+			border: 1px solid var(--idpg-primary);
+			border-radius: var(--idpg-radius-pill, 100px);
 			cursor: pointer;
-			transition: background-color $transition-fast, border-color $transition-fast;
+			transition: background-color 0.2s ease, border-color 0.2s ease;
 
 			&:hover,
 			&:focus {
-				background-color: $color-primary-hover;
-				border-color: $color-primary-hover;
+				background-color: var(--idpg-primary-active);
+				border-color: var(--idpg-primary-active);
 			}
 
 			&:focus-visible {
-				outline: 2px solid $color-primary;
+				outline: 2px solid var(--idpg-primary);
 				outline-offset: 2px;
 			}
 		}
 	}
 
+	// --- Нижняя строка ---
 	&__bottom {
 		margin-top: 40px;
 		padding-top: 24px;
-		border-top: 1px solid rgba(255, 255, 255, 0.12);
+		border-top: 1px solid var(--idpg-hairline);
 		font-size: 14px;
-		color: #a0aec0;
+		color: var(--idpg-muted);
 		text-align: center;
+	}
+}
+
+// --- Ссылки в подвале: тач-таргет не ниже 44px ---
+// Отдельным правилом, а не вложенностью: style.css описывает селектор
+// `.site-footer a`, а не `.site-footer__link`.
+.site-footer a {
+	min-height: 44px;
+	display: inline-flex;
+	align-items: center;
+}
+
+// На узких экранах инпут подписки должен быть не меньше 16px,
+// иначе iOS зумит страницу при фокусе.
+@media (max-width: 767px) {
+	.site-footer__subscribe-input {
+		font-size: 16px;
+	}
+}
+
+@media (max-width: 375px) {
+	.site-footer__container {
+		padding: 40px 16px;
+	}
+}
+
+// Нижняя панель на мобильных перекрывает подвал — отступ под ним.
+@media (max-width: 1023px) {
+	.site-footer {
+		margin-bottom: 60px;
+	}
+}
+
+// Безопасные зоны на iPhone с вырезом.
+@supports (padding: env(safe-area-inset-top)) {
+	.site-footer {
+		padding-bottom: env(safe-area-inset-bottom);
 	}
 }

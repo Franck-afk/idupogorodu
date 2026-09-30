@@ -1,0 +1,41 @@
+// ============================================================================
+// Футер — ссылки и элементы списка (перенос из style.css, DEV-87)
+//
+// Почему отдельный файл. Правила ссылок футера отсутствовали в SCSS-дереве:
+// `components/_footer.scss` описывает сетку и колонки, но не сами ссылки.
+// Из-за этого полная пересборка удаляла бы hover-состояние и
+// focus-visible — то есть навигация в подвале теряла бы доступность с
+// клавиатуры. Объявления перенесены дословно.
+//
+// Каскад: подключается ПОСЛЕ components/_footer.scss.
+// ============================================================================
+
+.site-footer__list .menu-item {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	line-height: 2;
+}
+
+.site-footer__link,
+.site-footer__list a {
+	display: inline-block;
+	font-size: 14px;
+	line-height: 1.4;
+	color: var(--idpg-body);
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+
+.site-footer__link:hover, .site-footer__link:focus,
+.site-footer__list a:hover, .site-footer__list a:focus {
+	color: var(--idpg-ink);
+	text-decoration: underline;
+	outline: none;
+}
+
+.site-footer__link:focus-visible,
+.site-footer__list a:focus-visible {
+	outline: 2px solid var(--idpg-primary);
+	outline-offset: 2px;
+}

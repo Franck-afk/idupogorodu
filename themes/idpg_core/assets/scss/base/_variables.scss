@@ -1,24 +1,43 @@
 // ============================================================================
-// Переменные (Salient-inspired)
+// Переменные SCSS — тонкий слой над CSS-токенами (DEV-87)
+//
+// ИСТОРИЯ ПРАВКИ. Раньше здесь стояли жёсткие hex из палитры Tailwind
+// (#2563eb, #0f172a, #e2e8f0 и т.д.), пока живой style.css использовал
+// систему CSS-токенов `var(--idpg-*)` из `base/_tokens.scss`. Из-за
+// расхождения 137 правил при пересборке превращались в hex вместо
+// ссылок на токены — то есть терялась возможность менять тему и тёмную
+// схему через :root.
+//
+// Теперь переменные ссылаются на токены. Правила в партиалах не тронуты:
+// они по-прежнему пишут `$color-text`, но значение приходит из
+// `_tokens.scss`. Так старое дерево и новая система токенов читаются
+// из одного источника, и пересборка даёт ровно тот CSS, что на диске.
+//
+// Числовые величины (кегли, отступы, брейкпоинты, z-index) остаются
+// литералами: токены для них есть, но в style.css они записаны
+// литералами же, и подстановка сломала бы совпадение правил.
 // ============================================================================
 
-// --- Цвета ---
-$color-primary: #2563eb;         // blue-600
-$color-primary-hover: #1d4ed8;   // blue-700
-$color-primary-light: #eff6ff;   // blue-50
-$color-text: #0f172a;            // slate-900
-$color-text-secondary: #475569;  // slate-600
-$color-text-muted: #64748b;      // slate-500
-$color-bg: #ffffff;
-$color-bg-light: #f8fafc;        // slate-50
-$color-bg-hover: #f1f5f9;        // slate-100
-$color-border: #e2e8f0;          // slate-200
-$color-border-hover: #cbd5e1;    // slate-300
-$color-dark: #0f172a;            // slate-900
-$color-dark-hover: #1e293b;      // slate-800
+// --- Цвета: ссылки на токены ---
+$color-primary: var(--idpg-primary);
+$color-primary-hover: var(--idpg-primary-active);
+$color-primary-light: var(--idpg-primary-bg);
+$color-text: var(--idpg-ink);
+$color-text-secondary: var(--idpg-body);
+$color-text-muted: var(--idpg-muted);
+$color-bg: var(--idpg-canvas);
+$color-bg-light: var(--idpg-surface-soft);
+$color-bg-hover: var(--idpg-surface-strong);
+$color-border: var(--idpg-hairline);
+$color-border-hover: var(--idpg-hairline-soft);
+$color-dark: var(--idpg-surface-dark);
+$color-dark-hover: var(--idpg-surface-dark-elevated);
 
 // --- Типографика ---
 $font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+// Акцидентный стек — усечённый, намеренно: логотип в шапке нарисован
+// только Gilroy, и подстановка системного стека после него ломала бы
+// начертание. Заголовки используют $font-family, а не эту переменную.
 $font-family-display: 'Gilroy', sans-serif;
 $font-size-base: 16px;
 $font-size-sm: 0.875rem;
@@ -27,9 +46,9 @@ $line-height: 1.5;
 
 // --- Размеры ---
 $container-max: 1400px;
-$border-radius: 12px;            // rounded-xl
-$border-radius-lg: 16px;         // rounded-2xl
-$border-radius-full: 9999px;     // rounded-full (pill)
+$border-radius: var(--idpg-radius-md);
+$border-radius-lg: var(--idpg-radius-lg);
+$border-radius-full: var(--idpg-radius-full);
 
 // --- Breakpoints ---
 $breakpoint-sm: 640px;
@@ -43,7 +62,7 @@ $z-nav-mobile: 105;
 $z-dropdown: 200;
 
 // --- Переходы ---
-$transition-fast: 0.2s ease;
+$transition-fast: var(--idpg-transition);
 $transition-normal: 0.3s ease;
 
 // --- Тени ---

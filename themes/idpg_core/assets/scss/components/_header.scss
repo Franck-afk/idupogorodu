@@ -27,6 +27,19 @@
 		height: calc(100dvh - 46px);
 	}
 
+	// Повтор flex-раскладки на мобильных. В style.css этот блок стоит
+	// раньше того, который прячет кнопки шапки, и потому проигрывает ему
+	// по каскаду, но нужен сам по себе: без него перенос кнопок на
+	// мобильных зависит от того, что переживёт отмену нижней панели.
+	.idpg-header__actions {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		flex-wrap: wrap;
+		padding-left: 0;
+	}
+
 	.idpg-header__actions {
 		display: flex;
 		align-items: center;

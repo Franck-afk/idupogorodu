@@ -411,6 +411,13 @@ require_once get_template_directory() . '/inc/organizer-menu.php';
  * `page-organizer.php`, поэтому страница всегда получает его и при
  * повторном вызове — если темплейт был снят вручную.
  *
+ * Хук — `after_setup_theme`, как у остальных пяти создателей страниц
+ * (login, reset-password, terms, privacy, offer). Это не только
+ * конвенция файла: `after_setup_theme` срабатывает на каждом запросе
+ * и потому самовосстанавливает страницу, если её удалили, тогда как
+ * `after_switch_theme` выполняется один раз за жизнь темы и повторно
+ * уже не сработает.
+ *
  * @return int ID страницы; 0, если создать не удалось.
  */
 function idpg_core_create_organizer_page() {
@@ -445,7 +452,7 @@ function idpg_core_create_organizer_page() {
 
 	return (int) $page_id;
 }
-add_action( 'after_switch_theme', 'idpg_core_create_organizer_page' );
+add_action( 'after_setup_theme', 'idpg_core_create_organizer_page' );
 
 /**
  * ID страницы кабинета организатора.
@@ -482,6 +489,10 @@ function idpg_core_get_organizer_page_id() {
  * Исключает страницу кабинета организатора из sitemap.
  *
  * Кабинет закрыт от индексации, поэтому в карту сайта не попадает.
+ * Имя хука — точно как в Yoast: `wpseo_exclude_from_sitemap_by_post_ids`
+ * (единственное `post`), вызывается в
+ * `class-post-type-sitemap-provider.php`. Вариант с `posts` (множественное)
+ * в плагине не встречается ни разу, поэтому фильтр с ним не сработал бы.
  *
  * @param array $excluded Список исключений Yoast.
  * @return array
@@ -499,7 +510,7 @@ function idpg_core_exclude_organizer_page_from_sitemap( $excluded ) {
 
 	return array_values( array_unique( $excluded ) );
 }
-add_filter( 'wpseo_exclude_from_sitemap_by_posts_ids', 'idpg_core_exclude_organizer_page_from_sitemap' );
+add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', 'idpg_core_exclude_organizer_page_from_sitemap' );
 
 /**
  * Автосоздание меню навигации по умолчанию.

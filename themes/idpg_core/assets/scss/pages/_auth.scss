@@ -3,45 +3,61 @@
 // ============================================================================
 // Страница авторизации (вход / регистрация / восстановление пароля)
 // BEM-блок: .auth
+//
+// Переписано по живому style.css (DEV-87). Расхождение было не в синтаксисе,
+// а в композиции страницы:
+//
+//   было  — карточка 440px с тенью и скруглением по центру мягкого фона;
+//   стало — полноэкранная раскладка: тело на всю высоту, карточка без
+//           рамки занимает всю ширину, а на десктопе рядом появляется
+//           блок-иллюстрация (см. pages/_auth-dev85.scss).
+//
+// Блоки иллюстрации, соцвхода и «глаза» пароля вынесены в
+// pages/_auth-dev85.scss: до DEV-87 они жили только в собранном style.css
+// и не имели источника.
+//
+// ВНИМАНИЕ. Значения здесь записаны литералами токенов, а не через
+// $color-*: несколько правил используют токен внутри rgba() и calc(), где
+// Sass-подстановка невозможна, а смешивание подходов давало расхождение
+// с style.css.
 // ============================================================================
 
-// -- Тело страницы (без хедера и футера) ------------------------------------
+// -- Тело страницы (без хедера и футера) -------------------------------------
 .auth-body {
 	display: flex;
-	align-items: center;
-	justify-content: center;
+	align-items: stretch;
+	justify-content: flex-start;
 	min-height: 100vh;
-	padding: 24px 16px;
-	background-color: $color-bg-light;
+	padding: 0;
+	margin: 0;
+	background-color: var(--idpg-canvas);
 
-	// iOS Safari: адресная строка перекрывает 100vh
+	// iOS Safari: адресная строка перекрывает 100vh, поэтому на таких
+	// браузерах высоту задаём динамической.
 	@supports (min-height: 100dvh) {
 		min-height: 100dvh;
 	}
 }
 
 .auth {
-	// -- Центрирование карточки -----------------------------------------------
+	// Раскладка страницы. Карточка и иллюстрация делят ширину: на
+	// десктопе flex-direction переключается на row в media-блоке ниже.
 	display: flex;
-	justify-content: center;
-	padding: 24px 16px;
-
-	@media ( min-width: $breakpoint-tablet ) {
-		padding-top: 64px;
-	}
+	flex-direction: column;
+	width: 100%;
+	max-width: none;
+	min-height: 100vh;
+	margin: 0;
+	background: var(--idpg-canvas);
 
 	// -- Карточка -------------------------------------------------------------
 	&__card {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 40px 24px;
+		max-width: 100%;
 		width: 100%;
-		max-width: 440px;
-		background: $color-bg;
-		border-radius: $border-radius;
-		box-shadow: $shadow-lg;
-		padding: 24px;
-
-		@media ( min-width: $breakpoint-tablet ) {
-			padding: 32px;
-		}
 	}
 
 	// -- Шапка (лого + заголовок) ---------------------------------------------
@@ -50,22 +66,17 @@
 		margin-bottom: 24px;
 	}
 
-	&__logo-link {
-		display: inline-block;
-		margin-bottom: 16px;
-	}
-
 	&__logo-text {
-		font-family: $font-family-display;
+		font-family: $font-family;
 		font-size: 1.5rem;
 		font-weight: 700;
-		color: $color-primary;
+		color: var(--idpg-primary);
 	}
 
 	&__title {
 		font-size: $font-size-lg;
 		font-weight: 600;
-		color: $color-text;
+		color: var(--idpg-ink);
 		margin: 0;
 	}
 
@@ -104,6 +115,8 @@
 		margin: 0;
 	}
 
+	// Кнопка закрытия сообщения — тач-таргет 44×44, иначе на телефоне
+	// её почти не попасть.
 	&__message-close {
 		flex-shrink: 0;
 		background: none;
@@ -111,10 +124,15 @@
 		font-size: 1.25rem;
 		line-height: 1;
 		cursor: pointer;
-		padding: 0 4px;
+		padding: 8px;
+		min-width: 44px;
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		opacity: 0.7;
 		color: inherit;
-		transition: opacity $transition-fast;
+		transition: opacity 0.2s ease;
 
 		&:hover {
 			opacity: 1;
@@ -124,10 +142,12 @@
 	// -- Табы -----------------------------------------------------------------
 	&__tabs {
 		display: flex;
-		border-bottom: 1px solid $color-border;
+		border-bottom: 1px solid var(--idpg-hairline);
 		margin-bottom: 24px;
 		gap: 4px;
 
+		// На узких экранах ряд табов прокручивается, а не сжимается:
+		// иначе подпись «Регистрация» обрезается.
 		@media (max-width: 480px) {
 			overflow-x: auto;
 			-webkit-overflow-scrolling: touch;
@@ -145,47 +165,40 @@
 		padding: 10px 4px;
 		font-size: $font-size-sm;
 		font-weight: 500;
-		color: $color-text-muted;
+		color: var(--idpg-muted);
 		cursor: pointer;
 		background: none;
 		border: none;
 		border-bottom: 2px solid transparent;
 		margin-bottom: -1px;
 		white-space: nowrap;
-		transition:
-			color $transition-fast,
-			border-color $transition-fast;
+		transition: color 0.2s ease, border-color 0.2s ease;
 
+		// Узкие экраны: табы не сжимаются, а прокручиваются. Иначе
+		// подписи вроде «Регистрация» обрезаются.
 		@media (max-width: 480px) {
 			flex: 0 0 auto;
 			padding: 10px 12px;
 		}
 
 		&:hover {
-			color: $color-text-secondary;
+			color: var(--idpg-body);
 		}
 
 		&--active {
-			color: $color-primary;
-			border-bottom-color: $color-primary;
+			color: var(--idpg-primary);
+			border-bottom-color: var(--idpg-primary);
 		}
 	}
 
-	// -- Панели форм (fade-переключение) --------------------------------------
+	// Панели переключаются по display, а не по прозрачности: у скрытой
+	// панели не должен оставаться зазор в потоке.
 	&__panel {
-		opacity: 0;
-		visibility: hidden;
-		max-height: 0;
-		overflow: hidden;
-		transition:
-			opacity $transition-normal,
-			visibility $transition-normal,
-			max-height $transition-normal;
+		display: none;
 
 		&--active {
-			opacity: 1;
-			visibility: visible;
-			max-height: 2000px;
+			display: block;
+			animation: auth-fade-in 0.3s ease;
 		}
 	}
 
@@ -212,30 +225,30 @@
 	&__label {
 		font-size: $font-size-sm;
 		font-weight: 500;
-		color: $color-text-secondary;
+		color: var(--idpg-body);
 	}
 
 	// -- Инпут ----------------------------------------------------------------
 	&__input {
 		width: 100%;
 		padding: 10px 16px;
-		font-size: $font-size-base;
-		color: $color-text;
-		background: $color-bg;
-		border: 1px solid $color-border;
+		// 16px, а не $font-size-base: меньший кегль заставляет iOS
+		// зумировать страницу при фокусе.
+		font-size: 16px;
+		color: var(--idpg-ink);
+		background: var(--idpg-canvas);
+		border: 1px solid var(--idpg-hairline);
 		border-radius: 8px;
-		transition:
-			border-color $transition-fast,
-			box-shadow $transition-fast;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
 		outline: none;
 
 		&::placeholder {
-			color: $color-text-muted;
+			color: var(--idpg-muted);
 		}
 
 		&:focus {
-			border-color: $color-primary;
-			box-shadow: 0 0 0 3px rgba($color-primary, 0.15);
+			border-color: var(--idpg-primary);
+			box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.15);
 		}
 
 		// Ошибка (выставляется JS).
@@ -244,7 +257,7 @@
 
 			&:focus {
 				border-color: #ef4444;
-				box-shadow: 0 0 0 3px rgba(#ef4444, 0.15);
+				box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 			}
 		}
 	}
@@ -263,15 +276,15 @@
 		gap: 8px;
 		cursor: pointer;
 		font-size: $font-size-sm;
-		color: $color-text-secondary;
+		color: var(--idpg-body);
 	}
 
 	&__checkbox {
 		width: 16px;
 		height: 16px;
 		border-radius: 4px;
-		border: 1px solid $color-border;
-		accent-color: $color-primary;
+		border: 1px solid var(--idpg-hairline);
+		accent-color: var(--idpg-primary);
 		cursor: pointer;
 		flex-shrink: 0;
 	}
@@ -288,19 +301,17 @@
 		justify-content: center;
 		width: 100%;
 		padding: 12px 24px;
-		font-size: $font-size-base;
+		font-size: 16px;
 		font-weight: 600;
 		color: #fff;
-		background: $color-primary;
+		background: var(--idpg-primary);
 		border: none;
 		border-radius: 8px;
 		cursor: pointer;
-		transition:
-			background $transition-fast,
-			opacity $transition-fast;
+		transition: background 0.2s ease, opacity 0.2s ease;
 
 		&:hover {
-			background: $color-primary-hover;
+			background: var(--idpg-primary-active);
 		}
 
 		&:active {
@@ -333,7 +344,7 @@
 		position: absolute;
 		width: 20px;
 		height: 20px;
-		border: 2px solid rgba(#fff, 0.3);
+		border: 2px solid rgba(255, 255, 255, 0.3);
 		border-top-color: #fff;
 		border-radius: 50%;
 		animation: auth-spin 0.6s linear infinite;
@@ -341,13 +352,13 @@
 
 	// -- Ссылки ---------------------------------------------------------------
 	&__link {
-		color: $color-primary;
+		color: var(--idpg-primary);
 		text-decoration: none;
 		font-size: $font-size-sm;
-		transition: color $transition-fast;
+		transition: color 0.2s ease;
 
 		&:hover {
-			color: $color-primary-hover;
+			color: var(--idpg-primary-active);
 			text-decoration: underline;
 		}
 	}
@@ -365,7 +376,7 @@
 	// -- Описание (для forgot) ------------------------------------------------
 	&__description {
 		font-size: $font-size-sm;
-		color: $color-text-muted;
+		color: var(--idpg-muted);
 		margin: 0;
 		line-height: 1.5;
 	}
@@ -373,11 +384,11 @@
 	// -- Подсказка (организатор) ----------------------------------------------
 	&__hint {
 		font-size: 0.75rem;
-		color: $color-text-muted;
+		color: var(--idpg-muted);
 		margin: 0;
 		line-height: 1.4;
 		padding: 8px 12px;
-		background: $color-primary-light;
+		background: var(--idpg-primary-bg);
 		border-radius: 6px;
 	}
 }

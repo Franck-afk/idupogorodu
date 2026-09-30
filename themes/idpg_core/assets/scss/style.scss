@@ -14,17 +14,67 @@ Text Domain: idpg_core
 Tags: custom-background,custom-logo,custom-menu,featured-images,threaded-comments,translation-ready
 */
 
+// ============================================================================
+// ПОРЯДОК @use = ПОРЯДОК КАСКАДА. Не переставлять без перепроверки:
+// style.css собирается из этих партиалов, и правила опираются на
+// очерёдность (DEV-87).
+//
+// Схема: переменные → токены → base → components → pages → responsive.
+// Токены идут до всего остального: остальные правила ссылаются на
+// var(--idpg-*), и :root должен быть объявлен раньше. Медиазапросы —
+// в самом конце, иначе перебили бы десктопные правила.
+// ============================================================================
+
+// --- Переменные и токены ---
 @use 'base/variables' as *;
+@use 'base/tokens';
+
+// --- Базовые слои ---
 @use 'base/reset';
 @use 'base/typography';
+
+// --- Компоненты ---
 @use 'components/container';
+@use 'components/buttons';
+@use 'components/nav';
+@use 'components/search';
+@use 'components/menu-toggle';
+@use 'components/auth-dropdown';
+@use 'components/city-selector';
+@use 'components/city-modal';
+@use 'components/recent-events';
+@use 'components/widget-areas';
 @use 'components/header';
 @use 'components/footer';
+@use 'components/footer-links';
+@use 'components/home-sidebar';
+@use 'components/home-main';
+
+// bottom-bar подключается ПОСЛЕ header: его блок @media (max-width:1023px)
+// прячет кнопки шапки, и в style.css он стоит в самом конце файла. При
+// обратном порядке пересборка отдала бы шапке кнопки раньше, чем их скроет.
+@use 'components/bottom-bar';
+
+// --- Страницы ---
 @use 'pages/auth';
+@use 'pages/auth-dev85';
 @use 'pages/create-event';
 @use 'pages/cabinet';
 @use 'pages/dashboard';
-@use 'components/home-sidebar';
+
+// pages/organizer и pages/venue-form здесь НЕ подключаются осознанно.
+// Их правила (.idpg-org-*, .venue-form__*) отдаются отдельным файлом
+// assets/css/organizer.css, который вешается через wp_enqueue_style только
+// в кабинете организатора. Подключение партиала здесь продублировало бы
+// весь кабинет на каждой странице сайта.
+
+// components/mobile подключается последним перед адаптивом: в нём тач-таргеты
+// (минимум 44×44 по Apple HIG), и в style.css этот блок стоит ближе к концу.
+// Более раннее подключение перебивало бы базовые правила тех же элементов —
+// например, задавало бы .auth__tab высоту до того, как объявлен сам таб.
+@use 'components/mobile';
+
+// --- Адаптив: последним, перебивает всё остальное по каскаду ---
 @use 'responsive';
 
 // --- Утилиты ---
@@ -44,7 +94,10 @@ Tags: custom-background,custom-logo,custom-menu,featured-images,threaded-comment
 // --- Контент ---
 .site-main {
 	flex: 1;
-	padding-top: 88px;
+	// Отступ сверху задаётся из JS по фактической высоте шапки
+	// (--idpg-header-h), иначе при фиксированной шапке первый экран
+	// наезжает на неё. Раньше здесь стоял жёсткий 88px.
+	padding-top: var(--idpg-header-h, 72px);
 	padding-bottom: 24px;
 
 	&__inner {

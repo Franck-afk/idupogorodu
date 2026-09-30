@@ -1,0 +1,257 @@
+// ============================================================================
+// Страница входа/регистрации — блоки, добавленные DEV-85 (перенос из style.css)
+//
+// Почему отдельный файл. До DEV-87 эти правила жили только в собранном
+// style.css и не имели источника в SCSS-дереве: любая полная пересборка
+// молча удаляла их. Сейчас они перенесены сюда дословно — объявления не
+// переписывались, чтобы `npm run compile:css` давал тот же результат.
+//
+// Каскад: подключается ПОСЛЕ pages/_auth.scss, поскольку дополняет уже
+// описанную там карточку (переопределяет flex-раскладку и радиусы на
+// десктопе). Медиазапросы внутри — обычные, порядок директив @use в
+// style.scss их не переставляет.
+// ============================================================================
+
+// --- Блок-иллюстрация слева на десктопе ---
+.auth__hero {
+	display: none;
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 400px;
+	background: var(--idpg-surface-dark);
+	overflow: hidden;
+	border-radius: 0;
+}
+
+.auth__hero-img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0.4;
+}
+
+.auth__hero-overlay {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(160deg, rgba(10, 11, 13, 0.95) 0%, rgba(0, 82, 255, 0.3) 100%);
+}
+
+.auth__hero-content {
+	position: relative;
+	z-index: 1;
+	color: var(--idpg-on-dark);
+	max-width: 480px;
+}
+
+.auth__hero-badge {
+	display: inline-block;
+	padding: 6px 16px;
+	margin-bottom: 24px;
+	font-family: "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.95);
+	background: rgba(0, 82, 255, 0.3);
+	border: 1px solid rgba(0, 82, 255, 0.6);
+	border-radius: var(--idpg-radius-pill, 100px);
+	backdrop-filter: blur(8px);
+}
+
+.auth__hero-title {
+	margin: 0 0 16px;
+	font-family: "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-size: clamp(1.5rem, 3vw, 2.5rem);
+	font-weight: 600;
+	line-height: 1.15;
+	letter-spacing: -0.02em;
+	color: #ffffff;
+}
+
+.auth__hero-text {
+	margin: 0 0 24px;
+	max-width: 48ch;
+	font-size: 1.0625rem;
+	line-height: 1.6;
+	color: rgba(255, 255, 255, 0.85);
+}
+
+.auth__hero-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	font-size: 0.9375rem;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.auth__hero-list li {
+	position: relative;
+	padding-left: 28px;
+	line-height: 1.4;
+}
+
+.auth__hero-list li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 8px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.8);
+}
+
+// --- Логотип над формой ---
+.auth__logo-link {
+	display: inline-block;
+	margin-bottom: 16px;
+}
+
+.auth__logo-link .custom-logo {
+	width: 120px;
+	height: auto;
+	max-width: 100%;
+}
+
+// --- Соцвход: правка отступов и разделителя под карточку ---
+.auth__social .wp-auth-ru-wrap {
+	margin-bottom: 0;
+}
+
+.auth__social .wp-auth-ru-divider {
+	color: var(--idpg-muted);
+}
+
+.auth__social .wp-auth-ru-icon {
+	display: none;
+}
+
+.auth__social .wp-auth-ru-divider::before {
+	border-top-color: var(--idpg-hairline);
+}
+
+.auth__social .wp-auth-ru-divider span {
+	background: var(--idpg-auth-card);
+}
+
+.auth__social--bottom .wp-auth-ru-wrap {
+	display: flex;
+	flex-direction: column;
+}
+
+.auth__social--bottom .wp-auth-ru-btn {
+	order: 2;
+}
+
+.auth__social--bottom .wp-auth-ru-divider {
+	order: 1;
+	display: block;
+	color: var(--idpg-muted);
+	margin: 0 0 30px;
+}
+
+.auth__social--bottom .wp-auth-ru-wrap + .wp-auth-ru-wrap .wp-auth-ru-divider {
+	display: none;
+}
+
+.auth__social--bottom .wp-auth-ru-wrap + .wp-auth-ru-wrap .wp-auth-ru-btn {
+	margin-top: 20px;
+}
+
+// --- Показать/скрыть пароль («глаз») ---
+.auth__password {
+	position: relative;
+}
+
+.auth__password .auth__input {
+	padding-right: 44px;
+}
+
+.auth__password-toggle {
+	position: absolute;
+	top: 50%;
+	right: 4px;
+	transform: translateY(-50%);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: var(--idpg-muted);
+	cursor: pointer;
+	border-radius: 6px;
+	transition: color 0.2s ease, background 0.2s ease;
+}
+
+.auth__password-toggle:hover {
+	color: var(--idpg-primary);
+	background: rgba(0, 82, 255, 0.08);
+}
+
+.auth__password-toggle svg {
+	width: 20px;
+	height: 20px;
+}
+
+.auth__password-toggle:focus-visible {
+	outline: 2px solid var(--idpg-primary);
+	outline-offset: 1px;
+}
+
+// --- Адаптив: карточка на всю высоту и две колонки на десктопе ---
+@supports (min-height: 100dvh) {
+	.auth {
+		min-height: 100dvh;
+	}
+}
+
+@media (min-width: 768px) {
+	.auth__card {
+		padding: 60px 48px;
+	}
+}
+
+@media (min-width: 1024px) {
+	.auth {
+		flex-direction: row;
+		height: 100vh;
+	}
+
+	.auth__card {
+		flex: 0 0 clamp(420px, 38vw, 560px);
+		max-width: clamp(420px, 38vw, 560px);
+		padding: 64px clamp(40px, 5vw, 72px) 64px clamp(32px, 4vw, 56px);
+		border-radius: 0;
+		border: none;
+		box-shadow: none;
+		overflow-y: auto;
+	}
+
+	.auth__hero {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: flex-start;
+		padding: 48px clamp(48px, 6vw, 104px) 48px clamp(40px, 5vw, 72px);
+	}
+}
+
+// На мобильных браузерах адресная строка меняет высоту — 100vh там
+// недостаточно, поэтому переопределяем на динамическую.
+@supports (height: 100dvh) {
+	@media (min-width: 1024px) {
+		.auth {
+			height: 100dvh;
+		}
+	}
+}

@@ -1,7 +1,8 @@
 # Полный список реализованного в проекте «Иду по городу»
 
 Инвентаризация по фактическому коду (не по документации). Дата: 15.09.2026, дополнено (аудит
-ЛК организатора DEV-00A) 19.09.2026. Проверено: `plugins/idpg-core` (v1.1.2),
+ЛК организатора DEV-00A) 19.09.2026, уточнено (DEV-130: число классов, регрессии DEV-102;
+DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plugins/idpg-core` (v1.1.2),
 `plugins/idpg-auth` (v1.0.0), `themes/idpg_core` (v1.0.75), `themes/idpg_core-child` (v1.0.0),
 `docs/`, `deploy.sh`, `DOCUMENTATION.md`.
 
@@ -14,7 +15,16 @@
 
 ---
 
-## 1. Плагин IDPG Core (ядро) — 33 класса
+## 1. Плагин IDPG Core (ядро) — 39 классов
+
+> **Счёт классов уточнён 30.09.2026 (DEV-130).** В шапке стояло «33 класса» —
+> это число соответствовало дереву до DEV-97/102. Фактически `idpg-core.php`
+> подключает **39** файлов классов (проверено: 39 строк `require_once IDPG_CORE_DIR`
+> в блоке подключений). Пять классов (`organizer-url`, `rest-organizer`,
+> `event-rejection`, `promotion`, `privacy`) были подключены, но не
+> инициализировались — их `::instance()` добавлены в `idpg_core_init()`
+> восстановлением DEV-102; регрессия закрыта тестом `test-class-init.php` (DEV-100).
+> Карточка восстановления — `TZ_BACKLOG.md` DEV-102, порядок — `docs/PRODUCTION.md` §12.
 
 ### 1.1 Контент-модель
 
@@ -101,6 +111,17 @@
   `restrict_admin_access()`, отключение стандартной регистрации WP.
 - Серверная проверка чекбокса оферты при регистрации; корректный JSON 429 при блокировке IP
   плагином All-In-One WP Security.
+- **Rate limiter сброса пароля — два независимых лимита (DEV-93).** Лимит по email
+  (`check_password_reset_attempt()`) считает запросы к одному адресу, но не видит перебор
+  **множества разных** адресов с одной машины. Поэтому добавлен лимит по IP:
+  `RESET_IP_LIMIT = 10` запросов за `RESET_IP_WINDOW = 3600` с, метод
+  `check_password_reset_ip_attempt()` (`class-auth-rate-limiter.php:272`), вызываемый из
+  `handle_forgot_password()` **до** расхода лимита по email (`class-rest-auth.php:601`).
+  Порядок принципиален: иначе перебор адресов исчерпывал бы квоту письма раньше, чем
+  срабатывала бы защита по IP. Транзиентный ключ, окно скользящее, неразрешённый адрес
+  пропускается. Тесты — `tests/test-auth-rate-limiter.php` (6 тестов / 31 утверждение:
+  в пределах лимита, блокировка сверх, скоуп по адресу, неразрешённый IP, мусорные данные,
+  перебор адресов, неизменность лимита по email).
 - Отдельное согласие на обработку ПДн (152-ФЗ): обязательный чекбокс `idpg_pdn_consent`
   (REST и PHP-fallback без JS), серверная проверка `400 pdn_consent_required`, запись факта
   согласия в user meta `idpg_pdn_consent` (редакция, источник, хеш IP).
@@ -135,7 +156,15 @@
 - `class-organizer-scope.php` — организатор/подписчик видит в медиатеке только свои вложения
   (список + REST media-modal), список событий скоупится `IDPG_City_Filter::filter_events_for_organizer()`.
 - `class-event-moderation.php` — организатор не может публиковать: событие уходит в `pending`,
-  письма админам о новом событии и организатору об одобрении.
+  письма админам о новом событии и организатору об одобрении. Правила **по цене** применяет
+  вторая фаза `schedule_price_moderation()` (`:180`): бесплатное (`is_free=yes`) публикуется
+  сразу, платное с полными билетными данными остаётся на модерации, платное без данных
+  билетов понижается до `draft` с подсказкой. Штатный триггер — хук Carbon Fields
+  `carbon_fields_post_meta_container_saved` (`:102`); на REST-пути отправки события его нет,
+  поэтому `class-rest-organizer.php:1266` вызывает фазу **явно**, под защитой
+  `class_exists( 'IDPG_Event_Moderation' )`. Обработка отложена на `shutdown` — в Gutenberg
+  статус поста приходит первым запросом, а мета вторым, и решение должно учитывать оба
+  (проверено DEV-130, 30.09.2026).
 - `class-user-purge.php` — полная зачистка при удалении организатора (постеры, вложения-потомки,
   аватар, сиротские `_edit_last`/`_edit_lock`), с учётом выбора «переназначить записи».
 
@@ -291,32 +320,65 @@
   `organizer.js`, `widget-ad.js` + `widget-ad-front.js`, `customize-preview.js`,
   `customize-sidebar-sticky.js`, `social-icons.js`, `pikaday.js` + `pikaday.range.js` +
   `pikaday-locale-ru.js`; vendor: Toastify, xlsx.full.min.js.
-- **CSS/SCSS:** `style.css` (сборка), `templates.css`, `editor-style.css`, `subscribe.css`,
+- **CSS/SCSS:** `style.css` (исходник истины, см. 3.4.1), `templates.css`, `editor-style.css`, `subscribe.css`,
   `organizer.css`, `widget-areas-admin.css`, SCSS-исходники (`base/`, `components/`, `pages/`, `responsive.scss`).
 
 ### 3.4.1 Сборка CSS (DEV-87)
 
-`style.css` — **собираемый артефакт**, а не ручной файл. Сборка:
+> **⚠️ Сборка НЕ эквивалентна `style.css` — `npm run compile:css` запускать нельзя.**
+> Перепроверено 30.09.2026 (DEV-132). Ранее здесь было записано, что `style.css` —
+> «собираемый артефакт», а сборка ему равна; **это опровергнуто**. Подробности —
+> `TZ_BACKLOG.md` §14.
+
+**Фактическое состояние.** `style.css` — **исходник истины**, а не артефакт.
+
+| | Байт | MD5 |
+|---|---|---|
+| Живой `style.css` | 79 743 | `f8ed3986c384009e487a2f2193962ac7` |
+| Сборка `npx sass` | 91 613 | `2655d57a044e3ea4c1d584a7e6612907` |
+
+Различие содержательное, не форматное (оба файла LF, 0 символов CR).
+Замер сторожа `Test_Css_Build`: `MISSING` **0**, правил **525 → 526**
+(лишнее `.idpg-city-selector__btn__icon`), `CHANGED` **88**.
+
+**Причина — незавершённая миграция на токены.** `style.css` использует
+`var(--idpg-*)` (373 ссылки, 103 токена в `:root`); четыре партиала компонентов
+до сих пор держат жёсткий legacy-hex — `pages/_create-event.scss` (78),
+`pages/_dashboard.scss` (41), `pages/_cabinet.scss` (38),
+`components/_home-sidebar.scss` (13), итого **170 значений**. Пересборка вернула бы
+жёсткие `#2563eb` / `#0f172a` / `#64748b` вместо `--idpg-primary` / `--idpg-ink` /
+`--idpg-muted`. `base/_variables.scss` на токены уже переведён (`:22-30`), поэтому
+остальные компоненты собираются верно.
+
+**Что осталось (критерий закрытия DEV-87):** перевести четыре партиала и остаток
+`_variables.scss` на `var(--idpg-*)`, убрать дубль `.idpg-city-selector__btn__icon`;
+`CHANGED` и `added` должны стать нулями, оба CSS-теста — зелёными; только после
+этого `style.css` можно перегенерировать из SCSS.
+
+**Проверка сборки (только в отдельный файл!):**
 
 ```
 cd wp-content/themes/idpg_core
-npm install          # ставит sass из devDependencies
-npm run compile:css  # sass assets/scss/style.scss:style.css --no-source-map --style=expanded
+npx sass assets/scss/style.scss %TEMP%\style-check.css --no-source-map --style=expanded
 ```
+
+Путь вывода — **только Windows-стилем**: POSIX `/tmp/…` sass молча игнорирует.
+Направлять вывод **никогда** в `style.css` — это откатит токены (именно так
+29.09 был испорчен замер, см. `TZ_BACKLOG.md` §14).
 
 Структура `assets/scss/` (порядок `@use` в `style.scss` = порядок каскада):
 
 | Каталог | Содержимое |
 |---|---|
-| `base/` | `_tokens.scss` — 103 CSS-переменные в `:root`, `_reset.scss`, `_typography.scss` |
+| `base/` | `_tokens.scss` — 103 CSS-переменные в `:root`, `_reset.scss`, `_typography.scss`, `_variables.scss` (переведён на `--idpg-*`) |
 | `components/` | `_header`, `_nav`, `_auth-dropdown`, `_menu-toggle`, `_city-selector`, `_city-modal`, `_bottom-bar`, `_search`, `_footer`, `_container`, `_buttons`, `_home-sidebar`, `_widget-areas`, `_recent-events`, `_mobile` |
 | `pages/` | `_auth`, `_create-event`, `_cabinet`, `_dashboard`, `_organizer` |
 | корень | `responsive.scss`, `style.scss` (точка входа) |
 
 **Дизайн-система — CSS Custom Properties.** Палитра, поверхности, типографика и
-тень заданы переменными `--idpg-*` в `:root` (103 шт., 373 ссылки). SCSS-переменные
-`base/_variables.scss` — наследие до DEV-87, сейчас не используются: партиалы
-перенесены дословно, без `$var`.
+тень заданы переменными `--idpg-*` в `:root` (103 шт., 373 ссылки). Часть
+партиалов (`pages/_create-event`, `pages/_cabinet`, `pages/_dashboard`,
+`components/_home-sidebar`) ещё не переведена — см. выше.
 
 **Правила при переносе (нарушение ломает каскад):**
 - не переставлять `@use` в `style.scss` — очерёдность определяет приоритет;
@@ -328,8 +390,9 @@ npm run compile:css  # sass assets/scss/style.scss:style.css --no-source-map --s
 
 **Сторож сборки.** `tests/test-css-build.php` (в наборе `idpg-core`) собирает
 SCSS во временный файл и сравнивает набор правил с `style.css` на уровне
-селектор + декларации + контекст `@media`. Требует нулевую разницу, поэтому
-расхождение источника и сборки больше не может накопиться незаметно. Без node
+селектор + декларации + контекст `@media`. Требует нулевую разницу. **Сейчас
+2 теста падают — это корректное состояние:** гард перечисляет остаток миграции
+(88 правил). «Позеленить» его правкой теста было бы маскировкой. Без node
 тест пропускается.
 
 **Активна дочерняя тема** `idpg_core-child` (см. 3.5): `style.css` родителя
@@ -406,7 +469,7 @@ SCSS во временный файл и сравнивает набор пра�
 
 ---
 
-## 6. ЛК организатора: фактическое состояние (сверено 28.09.2026)
+## 6. ЛК организатора: фактическое состояние (сверено 28.09.2026, уточнено 30.09.2026)
 
 > **Источник:** сверка по текущему дереву `idpg-core` 1.1.2 / тема 1.0.75
 > (проверка `require`, `enqueue`, наличия REST-маршрутов и методов), а не
@@ -414,15 +477,29 @@ SCSS во временный файл и сравнивает набор пра�
 > обвязка ЛК (DEV-37/38/39) ещё не была применена, и документ утверждал, что
 > роутер, меню и ассеты «не подключены». Сейчас это не так — см. §6.1.
 > Историческая версия сохранена в `docs/README_DEV-00A.md`.
+>
+> **Уточнение от 30.09.2026 (DEV-130).** Проверка трёх «P0»-пунктов в рантайме
+> подтвердила работу меню и ассетов (DEV-38) и лимита сброса пароля по IP
+> (DEV-93), но выявила **две регрессии, внесённые восстановлением DEV-102**:
+> страница `/organizer/` больше не создаётся (хук `after_switch_theme` вместо
+> `after_setup_theme`) и исключение из sitemap Yoast не срабатывает (опечатка
+> в имени фильтра). Подробности — `TZ_BACKLOG.md` §12.
+>
+> **Регрессии закрыты 30.09.2026 (DEV-131).** Обе правки — по одной строке в
+> `themes/idpg_core/functions.php`: хук `after_setup_theme` (`:455`) и фильтр
+> `wpseo_exclude_from_sitemap_by_post_ids` (`:513`). Проверено в рантайме
+> (страница создаётся и самовосстанавливается, фильтр отдаёт ID) и юнит-тестами
+> `test-organizer-page-creation.php` (12 тестов, 23 утверждения — зелёные).
+> Карточка и разбор — `TZ_BACKLOG.md` DEV-102 (регрессии) и §13 (починка).
 
 ### 6.1 Что фактически работает
 
 | Компонент | Состояние |
 |---|---|
 | Роутер `/organizer/` и `/organizer/{section}/` (`IDPG_Organizer_URL`) | **Подключён и работает**: `require_once` в `idpg-core.php:109`, `IDPG_Organizer_URL::init()` в `:151`. Rewrite-правила, query vars, `template_include`, принудительный flush по `REWRITE_VERSION`. **DEV-37** |
-| Меню кабинета (`inc/organizer-menu.php`, 7 функций `idpg_organizer_*`) | **Подключено**: `require_once` в `functions.php:416`. Даёт `idpg_organizer_menu()`, `idpg_organizer_section_url()`, `idpg_core_is_organizer_cabinet()`, скрытие баннера над подвалом. **DEV-38** |
-| Ассеты кабинета | **Подключены**: `assets/css/organizer.css` (`functions.php:212-215`) и `assets/js/organizer.js` (`:221`) — только на `/organizer/*`. **DEV-38** |
-| Страница WP `/organizer/` | **Создаётся автоматически**: `idpg_core_create_organizer_page()` на `after_setup_theme` (`functions.php:782`), ID в `_idpg_organizer_page_id`. Нужна для крошек, меню и исключения из sitemap Yoast. **DEV-39** |
+| Меню кабинета (`inc/organizer-menu.php`, 7 функций `idpg_organizer_*`) | **Подключено**: `require_once` в `functions.php:404`. Даёт `idpg_organizer_menu()`, `idpg_organizer_section_url()`, `idpg_core_is_organizer_cabinet()`, скрытие баннера над подвалом. **DEV-38** |
+| Ассеты кабинета | **Подключены**: `assets/css/organizer.css` (`functions.php:212-215`) и `organizer.js` (`:216`), `organizer-event-form.js` (`:217`), `organizer-venue-form.js` (`:218`) — все только на `/organizer/*`. **DEV-38, DEV-98** |
+| Страница WP `/organizer/` | **Работает (регрессии закрыты DEV-131, 30.09.2026).** `idpg_core_create_organizer_page()` висит на `after_setup_theme` (`functions.php:455`) — хук срабатывает на каждом запросе, поэтому удалённая страница самовосстанавливается, а `idpg_core_get_organizer_page_id()` восстанавливает опцию `_idpg_organizer_page_id` по слагу. Первоисточник — DEV-39; DEV-102 откатил хук на `after_switch_theme` (срабатывает раз за жизнь темы), из-за чего у переключённой темы страницы не было, а `get_organizer_page_id()` отдавал 0. Вторая регрессия того же коммита: исключение из sitemap висело на `wpseo_exclude_from_sitemap_by_posts_ids`, тогда как Yoast вызывает `wpseo_exclude_from_sitemap_by_post_ids` (единственное `post`) — фильтр (`functions.php:513`) был мёртв. Обе правки — по одной строке, покрыты тестами `test-organizer-page-creation.php`. **DEV-39, DEV-131** (карточка — DEV-102, разбор — §13) |
 | `page-organizer.php` + `template-parts/organizer/section-{dashboard,events,profile}.php` | Работают: обслуживаются роутером, разделы рендерятся серверно, `organizer.js` переключает видимость и адрес без перезагрузки. **DEV-37/38** |
 | Проверка доступа `get_access_decision()` | Гость → `/login/`, нет роли → `403`, организатор и выше → кабинет. Отдельного состояния «pending» нет. **DEV-72** |
 | `guard_cabinet_redirect()` | Работает (`class-organizer-url.php:255`): не даёт зациклиться при попытке зайти в кабинет без прав. **DEV-63** |
