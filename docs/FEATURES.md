@@ -238,6 +238,13 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
   сборка падает только на **новых** ошибках (`--runtime-set ignore_warnings_on_exit 1` — предупреждения не валят job).
   Замер объёма на 19.09.2026: `idpg-core` — 644 ошибки / 421 предупреждение, `idpg-auth` — 2814 / 241,
   тема `idpg_core` — 829 / 211.
+- **CI на CircleCI (DEV-136, 30.09.2026):** в `.circleci/config.yml` два job'а — `phpunit`
+  (`cimg/php:8.4` + `cimg/mysql:8.4`, ставит WP test library и прогоняет тесты `idpg-core` и `idpg-auth`)
+  и `phpcs` (три прогона по компонентам). **Проект пока НЕ привязан** в CircleCI, поэтому job'ы
+  на push не запускаются. Владельцу: CircleCI → Add Projects → `github.com/Franck-afk/idpg-source` → Follow;
+  после привязки проверить, что job'ы стартуют на тестовом push.
+- **Ветка `dev/phpcs-baseline` удалена (DEV-136).** Была избыточна: `a381795` целиком вошла
+  в `master` через merge (DEV-59) и достижима из него. На удалёнке остались `master` и `main`.
 - Composer: Carbon Fields 3.6 + dev-зависимости PHPUnit.
 
 ---

@@ -306,6 +306,37 @@ git verify-pack -v .git/objects/pack/*.idx | grep <sha>
 
 ---
 
+## 13. CI на CircleCI (🟡, DEV-136)
+
+Репозиторий `github.com/Franck-afk/idpg-source` (приватный). В `.circleci/config.yml`
+описаны два job'а:
+
+| Job | Что делает |
+|---|---|
+| `phpunit` | `cimg/php:8.4` + `cimg/mysql:8.4`; ставит WP test library, прогоняет PHPUnit по `idpg-core` и `idpg-auth` |
+| `phpcs` | три прогона PHPCS (WordPress + `PHPCompatibilityWP`) по `idpg-core`, `idpg-auth`, теме `idpg_core`; baseline через `forrest79/phpcs-ignores`, падает только на новых ошибках |
+
+**Статус на 30.09.2026: проект НЕ привязан в CircleCI** — job'ы на push не
+запускаются. Привязка — вне кода, делает владелец:
+
+1. CircleCI → **Add Projects**;
+2. выбрать `github.com/Franck-afk/idpg-source`;
+3. **Follow** (при первом запуске CircleCI попросит доступ к приватному репо —
+   подтвердить в GitHub).
+4. Сделать тестовый push и убедиться, что job'ы `phpunit` и `phpcs` стартуют.
+
+**Ветка `dev/phpcs-baseline` удалена (DEV-136, 30.09.2026).** Она была избыточна:
+`a381795` целиком вошла в `master` через merge (DEV-59) и достижима из него
+(`git merge-base --is-ancestor a381795 master` → 0). Удаление без `--force`:
+`git push origin --delete dev/phpcs-baseline`. Локальной ветки не было.
+На удалёнке остались `master` (`1f6fe9a`) и `main` (`fdf4ca0`).
+
+**Проверка состояния CI без CircleCI-аккаунта.** Репозиторий приватный —
+неавторизованный GitHub API отдаёт 404, `gh` не установлен. Статус job'ов
+виден только в веб-интерфейсе CircleCI после привязки.
+
+---
+
 ## Финальная проверка перед запуском
 
 1. `wp-cron` запускается системным планировщиком; событие `idpg_cron_sync_tickets`
