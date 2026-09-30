@@ -243,8 +243,10 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 	/**
 	 * Rewrite-правила кабинета регистрируются.
 	 *
-	 * Правила опознаются по query-переменной раздела. С DEV-72 страницы
-	 * анкеты `/organizer/complete/` больше нет, поэтому правил ровно два:
+	 * Правила опознаются по query-переменной раздела. Анкеты
+	 * `/organizer/complete/` больше нет: DEV-72 снял её продуктово, DEV-141
+	 * удалил остатки (класс `IDPG_Organizer_Page`, шаблон, скрипт и его
+	 * rewrite-правило). Поэтому правил кабинета ровно два:
 	 * `/organizer/{section}/` и база `/organizer/`.
 	 */
 	public function test_rewrite_rules_registered() {

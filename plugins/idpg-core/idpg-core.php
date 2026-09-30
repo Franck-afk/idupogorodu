@@ -113,7 +113,6 @@ require_once IDPG_CORE_DIR . 'includes/class-city-selector-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-calendar-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-expected-events-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-user-purge.php';
-require_once IDPG_CORE_DIR . 'includes/class-organizer-page.php';
 require_once IDPG_CORE_DIR . 'includes/class-rest-organizer.php';
 require_once IDPG_CORE_DIR . 'includes/class-dashboard-stats.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-moderation.php';
@@ -150,9 +149,6 @@ function idpg_core_init() {
 
 	// Статистика проекта на dashboard (админ / организатор).
 	IDPG_Dashboard_Stats::instance();
-
-	// Страница доуполнения анкеты организатора /organizer/complete/.
-	IDPG_Organizer_Page::init();
 
 	// Модерация публикации событий организаторов (pending + уведомления).
 	IDPG_Event_Moderation::instance();

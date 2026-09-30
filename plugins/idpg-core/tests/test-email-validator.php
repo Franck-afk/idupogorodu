@@ -106,8 +106,9 @@ class Test_Email_Validator extends WP_UnitTestCase {
 	 * Затронутый маршрут проверяет email замыканием.
 	 *
 	 * Второе вхождение дефекта было в маршруте анкеты организатора
-	 * `/auth/organizer-complete`, но с DEV-72 анкеты больше нет, поэтому
-	 * остаётся единственный маршрут — forgot-password.
+	 * `/auth/organizer-complete`. Анкета снята DEV-72 (маршрут), остатки
+	 * удалены DEV-141 (класс, шаблон, скрипт, rewrite), поэтому остаётся
+	 * единственный маршрут — forgot-password.
 	 */
 	public function test_target_routes_use_closure_validator() {
 		$routes = rest_get_server()->get_routes();

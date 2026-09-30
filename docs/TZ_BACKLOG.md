@@ -3580,6 +3580,77 @@ CircleCI после привязки. Поэтому пункты 1–2 приё
 **Ссылки.** DEV-23 (закрыт полностью), DEV-138 (версии темы); журнал —
 `.workbuddy-ai/memory/2026-09-30.md`.
 
+### DEV-141. Удаление остатков анкеты `/organizer/complete/` (закрыто 30.09.2026)
+
+**Статус: закрыто 30.09.2026.** Найдено при разборе ЛК организатора (анализ
+по запросу владельца).
+
+**Проблема.** DEV-72 снял анкету продуктово (данные организации переехали
+в `/organizer/profile/`), но удалил **только REST-маршрут**
+`/idpg/v1/auth/organizer-complete`. На месте и **подключено** осталось:
+
+- `includes/class-organizer-page.php` — `require_once` в `idpg-core.php:116`,
+  `IDPG_Organizer_Page::init()` в `:155`;
+- шаблон `page-organizer-complete.php` (6,7 КБ);
+- скрипт `assets/js/organizer-complete.js` (3,4 КБ) — **нигде не enqueue-ился**;
+- rewrite-правило `^organizer/complete/?$` — живое, URL отвечал 302 на `/login/`;
+- чтение флага `_idpg_org_pending` в двух местах — при том что **никто его
+  не записывал**.
+
+Итог: анкета была полностью мертва. Флаг всегда пуст → `is_pending()` всегда
+`false` → форма не показывалась (выводилась ветка «Анкета уже заполнена»);
+а если бы показалась, `POST` ушёл бы в несуществующий маршрут → 404.
+
+**Три документа противоречили друг другу:** `FEATURES.md` §6.1 — «удалено
+вместе с классом, шаблоном и скриптом»; `TZ_IMPLEMENTED.md` §9 п.1 — «не
+работает»; `FEATURES.md` §6.4 G7 — «`_idpg_org_pending` удалён».
+
+**Что сделано.**
+
+1. Удалены файлы: `includes/class-organizer-page.php`,
+   `page-organizer-complete.php`, `assets/js/organizer-complete.js`.
+2. Из `idpg-core.php` убраны `require_once` и `IDPG_Organizer_Page::init()`.
+3. Rewrite-правило ушло вместе с классом, который его регистрировал. Чтобы
+   правило исчезло и из **сохранённой** опции `rewrite_rules`,
+   `IDPG_Organizer_URL::REWRITE_VERSION` поднят **3 → 4** — штатный механизм
+   `maybe_flush()` сбрасывает правила однократно на следующем запросе.
+   Проверено: в правилах осталось 6 записей про organizer, `organizer/complete`
+   среди них нет.
+4. Удалена осиротевшая опция `idpg_organizer_complete_rewrite_flushed`.
+5. Чтение `_idpg_org_pending` вычищено полностью (grep по `plugins/` и `themes/`
+   пуст). **Живой флаг `idpg_org_pending` (`IDPG_Organizer_Verify::META_PENDING`,
+   подтверждение email) не тронут** — это разные ключи, их легко спутать.
+6. Тесты: из `test-class-init.php` убрана запись `IDPG_Organizer_Page`;
+   комментарии в `test-organizer-page.php`, `test-organizer-social-login.php`,
+   `test-email-validator.php` приведены к факту.
+
+**Приёмка.**
+
+| Проверка | Результат |
+|---|---|
+| `/organizer/complete/` и `/organizer/complete` | **404** |
+| `/organizer/` | 302 → `/login/` (штатная защита гостя) |
+| `/organizer/profile/`, `/organizer/events/`, `/organizer/venues/` | 302 → `/login/` |
+| `/organizer/event/new/`, `/organizer/venue/new/` | 302 → `/login/` |
+| контрольные `/`, `/login/`, `/afisha/` | 200 / 200 / 301 — не сломаны |
+| Полный набор `idpg-core` | 529 тестов / 1581 утверждение, падений **2** — оба гард сборки CSS (DEV-87), к задаче не относятся |
+
+Уменьшение счётчика на 1 тест (−2 утверждения) объяснимо: `test-class-init.php`
+строит проверки через `@dataProvider data_static_init` по карте `STATIC_INIT`,
+поэтому удаление одной записи убирает одну строку прогона.
+
+**Не тронуто (ограничение задачи):** `/organizer/profile/`, `/organizer/event/`,
+`/organizer/venue/`, `class-organizer-url.php` (кроме версии правил),
+`class-organizer-verify.php`.
+
+**Документы приведены к факту:** `FEATURES.md` §6.1 (строка про анкету), §6.2
+(врезка о последнем мёртвом модуле), §6.2.2 (снята устаревшая врезка «интерфейса
+нет, см. G5»), §6.4 G7; `TZ_IMPLEMENTED.md` §9 п.1.
+
+**Ссылки.** DEV-72 (продуктовое решение), DEV-94 (закрытие G5/G6);
+`FEATURES.md` §6; `TZ_IMPLEMENTED.md` §9; журнал —
+`.workbuddy-ai/memory/2026-09-30.md`.
+
 ---
 
 ## 12. DEV-130 (P0, S). Проверка статуса трёх P0-задач (30.09.2026)

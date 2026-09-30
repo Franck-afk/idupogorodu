@@ -501,7 +501,7 @@ WP-CLI команда `wp idpg migrate-meta`; запуск при активац
 
 | # | Пункт | Текущее состояние |
 |---|---|---|
-| 1 | REST `/idpg/v1/auth/organizer-complete` | маршрут **не зарегистрирован**; форма `/organizer/complete/` и `organizer-complete.js` отправляют запрос в никуда — функция доуполнения анкеты не работает |
+| 1 | REST `/idpg/v1/auth/organizer-complete` и анкета `/organizer/complete/` | **Снято с объёма.** DEV-72 решил, что анкеты нет (данные организации — в `/organizer/profile/`), и удалил REST-маршрут; остатки (класс `IDPG_Organizer_Page`, шаблон `page-organizer-complete.php`, скрипт `organizer-complete.js`, rewrite-правило) висели подключёнными, но нерабочими — флаг `_idpg_org_pending` никем не записывался. **DEV-141 (30.09.2026) удалил остатки**, URL `/organizer/complete/` отдаёт 404 |
 | 2 | Синхронизация билетов | заглушка: `IDPG_TICKET_API_URL` = `example.com`, запросы блокируются защитой; реальный API не подключён |
 | 3 | Система баннеров middle/bottom с UTM и периодом показа (`class-banners.php`) | файл отсутствует; заменено баннером текущего события и областями виджетов |
 | 4 | Встроенный модуль соц-авторизации в ядре (`includes/social-auth/*`) | отсутствует; соц-вход вынесен в отдельный плагин `idpg-auth` |

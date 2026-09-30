@@ -80,9 +80,6 @@ class Test_Class_Init extends WP_UnitTestCase {
 		'IDPG_Organizer_URL'  => array(
 			'wp_redirect' => 'guard_cabinet_redirect',
 		),
-		'IDPG_Organizer_Page' => array(
-			'admin_notices' => 'admin_pending_notice',
-		),
 	);
 
 	/**
