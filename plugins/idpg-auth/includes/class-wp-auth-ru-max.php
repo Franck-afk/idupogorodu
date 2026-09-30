@@ -136,10 +136,6 @@ class WP_Auth_Ru_Max extends WP_Auth_Ru_Provider {
         );
     }
 
-    protected function new_user_role() {
-        return get_option( 'default_role', 'subscriber' );
-    }
-
     protected function log_subject( $email, $provider_id ) {
         return 'MAX ID: ' . $provider_id;
     }

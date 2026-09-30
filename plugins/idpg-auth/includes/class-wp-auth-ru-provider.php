@@ -285,10 +285,22 @@ abstract class WP_Auth_Ru_Provider {
     /**
      * Роль нового пользователя.
      *
+     * Берётся из `default_role` сайта (обычно subscriber), а не из
+     * жёсткой роли организатора. Чтобы соц-вход выдавал другую роль,
+     * используйте фильтр `idpg_auth_new_user_role`.
+     *
      * @return string
      */
     protected function new_user_role() {
-        return 'event_organizer';
+        $role = get_option( 'default_role', 'subscriber' );
+
+        /**
+         * Фильтр роли нового пользователя при соц-входе.
+         *
+         * @param string $role     Роль (из default_role).
+         * @param string $provider Слаг провайдера (vk, yandex, max...).
+         */
+        return apply_filters( 'idpg_auth_new_user_role', $role, static::PROVIDER );
     }
 
     /**

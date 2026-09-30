@@ -685,23 +685,28 @@
 | **Приёмка** | Соц-организатор при первом входе помечается pending (оба ключа); без анкеты — остаётся pending даже без флага; после заполнения — allowed; повторный вход не возвращает pending. |
 | **Объём** | S |
 
-### DEV-51. Соц-вход не выдаёт роль `event_organizer`
+### DEV-51. Соц-вход не выдаёт роль `event_organizer` — ЗАКРЫТО (30.09.2026)
 
-> **Статус: в работе 19.09.2026 (локальное дерево, ещё не релиз).**
-> В `class-wp-auth-ru-provider.php` (idpg-auth) `new_user_role()` больше не
-> возвращает жёсткую `event_organizer`: берёт `get_option('default_role',
-> 'subscriber')` и пропускает через новый фильтр `idpg_auth_new_user_role
-> ( $role, static::PROVIDER )`. VK и Яндекс наследуют этот метод (через
-> `WP_Auth_Ru_OAuth_Provider`), MAX уже возвращал `default_role` — не тронут.
-> Согласованность с DEV-50: новый соц-пользователь становится `subscriber`
-> и не проходит хук `maybe_mark_social_organizer_pending` (не организатор);
-> легаси-соц-организаторы (роль выдана до DEV-51) по-прежнему помечаются
-> pending при входе. REST `/auth/register type=organizer` (idpg-core)
-> автономен: явно ставит `subscriber`, роль — только через verify — не сломан.
-> PHPUnit: создана обвязка `plugins/idpg-auth/tests/` (bootstrap.php +
-> phpunit.xml.dist по образцу idpg-core), тест `tests/test-social-roles.php`
-> (VK/Яндекс/MAX → `default_role`, фильтр переопределяет роль). Окружение
-> PHPUnit на стенде отсутствует — тест написан, но не прогнан.
+> **Статус: ЗАКРЫТО.** Код был в локальном дереве с 19.09, но не попал в
+> репозиторий (DEV-102 откатил изменение). Восстановлено и проверено 30.09.
+
+**Проверка по коду:**
+
+| Проверка | Результат |
+|---|---|
+| `new_user_role()` в `class-wp-auth-ru-provider.php` | `get_option('default_role','subscriber')` + `apply_filters('idpg_auth_new_user_role', $role, static::PROVIDER)` — **исправлено** |
+| Дубль у MAX | **Удалён** (`class-wp-auth-ru-max.php`), базовый класс покрывает |
+| VK / Яндекс | Наследуют базовый класс, `event_organizer` **не выдают** |
+| Фильтр `idpg_auth_new_user_role` | Работает: тест `test_filter_overrides_role_for_vk` проходит |
+| Тесты idpg-auth | **5 тестов / 9 утверждений, OK** |
+| Полный набор idpg-core | **529 тестов / 1581 утверждение, падений 0** — регрессий нет |
+
+**Что сделано:**
+- `class-wp-auth-ru-provider.php:290` — `new_user_role()` возвращал жёсткую
+  `'event_organizer'`; заменено на `get_option('default_role','subscriber')`
+  + фильтр `idpg_auth_new_user_role` (2 аргумента: `$role`, `$provider`).
+- Удалён дублирующий `new_user_role()` из `class-wp-auth-ru-max.php`
+  (базовый класс делает то же самое + фильтр).
 
 | | |
 |---|---|
