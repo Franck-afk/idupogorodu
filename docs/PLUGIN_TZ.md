@@ -428,7 +428,7 @@ includes/
 │   ├── widget-areas.php           — Widget areas (админка)
 │   └── theme-helpers.php
 ├── assets/css/
-│   ├── style.css                  — Основной (compile:css)
+│   ├── style.css                  — Основной (сборка: check:css / compile:css:apply)
 │   └── templates.css              — Стили шаблонов (не перезаписывается)
 ├── page-login.php                 — Авторизация
 ├── page-lk.php                    — ЛК подписчика

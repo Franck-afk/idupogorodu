@@ -17,9 +17,11 @@
   },
   "scripts": {
     "watch": "sass --watch assets/scss/style.scss:style.css --no-source-map",
-    "compile:css": "sass assets/scss/style.scss:style.css --no-source-map --style=expanded",
+    "compile:css:temp": "sass assets/scss/style.scss:style.css.tmp --no-source-map --style=expanded",
+    "check:css": "npm run compile:css:temp && node bin/check-css-build.mjs style.css.tmp style.css",
+    "compile:css:apply": "sass assets/scss/style.scss:style.css --no-source-map --style=expanded",
     "lint:scss": "stylelint 'assets/scss/**/*.scss'",
     "lint:js": "wp-scripts lint-js 'assets/js/*.js'",
-    "bundle": "dir-archiver --src . --dest ../idpg_core.zip --exclude .DS_Store .stylelintrc.json .eslintrc .git .gitattributes .github .gitignore README.md composer.json composer.lock node_modules vendor package-lock.json package.json .travis.yml phpcs.xml.dist assets/scss style.css.map yarn.lock"
+    "bundle": "dir-archiver --src . --dest ../idpg_core.zip --exclude .DS_Store .stylelintrc.json .eslintrc .git .gitattributes .github .gitignore README.md composer.json composer.lock node_modules vendor package-lock.json package.json .travis.yml phpcs.xml.dist assets/scss style.css.map style.css.tmp bin yarn.lock"
   }
 }
