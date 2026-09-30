@@ -481,8 +481,8 @@ SCSS во временный файл и сравнивает набор пра�
 | Способ | Классы | Где вызывается |
 |---|---|---|
 | `::instance()` в `idpg_core_init()` | 23 класса (`IDPG_CPT`, `IDPG_Roles`, `IDPG_REST_API`, `IDPG_Auth`, `IDPG_REST_Organizer`, `IDPG_Privacy` ядро при `require`, `IDPG_Promotion` и др.) | `idpg-core.php`, функция `idpg_core_init()` |
-| `::instance()` при загрузке файла | `IDPG_Current_Event_Banner`, `IDPG_User_Purge`, `IDPG_Privacy` | `idpg-core.php:99` и конец соответствующих файлов |
-| Статический `::init()` | `IDPG_Organizer_URL`, `IDPG_Organizer_Page`, `IDPG_City_URL`, `IDPG_Favorites`, `IDPG_Organizer_Scope` | `idpg_core_init()` либо конец файла |
+| `::instance()` при загрузке файла | `IDPG_Current_Event_Banner`, `IDPG_User_Purge`, `IDPG_Privacy` | `idpg-core.php` ~строка 101 и конец соответствующих файлов |
+| Статический `::init()` | `IDPG_Organizer_URL`, `IDPG_City_URL`, `IDPG_Favorites`, `IDPG_Organizer_Scope` | `idpg_core_init()` либо конец файла. ~~`IDPG_Organizer_Page`~~ удалён DEV-141 вместе с анкетой |
 | `register_widget()` на `widgets_init` | `IDPG_City_Selector_Widget`, `IDPG_Event_Calendar_Widget`, `IDPG_Expected_Events_Widget` | `idpg_core_register_plugin_widgets()` |
 | Не требуется | `IDPG_Search`, `IDPG_Template_Helper` (статические helper-ы), `IDPG_CLI` (только под `WP_CLI`), `IDPG_Auth_Rate_Limiter`, `IDPG_GeoService` (ленивая инициализация) | — |
 
@@ -501,7 +501,7 @@ SCSS во временный файл и сравнивает набор пра�
 
 ## 6. ЛК организатора: фактическое состояние (сверено 28.09.2026, уточнено 30.09.2026)
 
-> **Источник:** сверка по текущему дереву `idpg-core` 1.1.2 / тема 1.0.75
+> **Источник:** сверка по текущему дереву `idpg-core` 1.1.2 / тема 1.0.78
 > (проверка `require`, `enqueue`, наличия REST-маршрутов и методов), а не
 > прежний отчёт DEV-00A от 19.09.2026. **Прежний вывод устарел:** на тот момент
 > обвязка ЛК (DEV-37/38/39) ещё не была применена, и документ утверждал, что
@@ -516,28 +516,34 @@ SCSS во временный файл и сравнивает набор пра�
 > в имени фильтра). Подробности — `TZ_BACKLOG.md` §12.
 >
 > **Регрессии закрыты 30.09.2026 (DEV-131).** Обе правки — по одной строке в
-> `themes/idpg_core/functions.php`: хук `after_setup_theme` (`:455`) и фильтр
-> `wpseo_exclude_from_sitemap_by_post_ids` (`:513`). Проверено в рантайме
+> `themes/idpg_core/functions.php`: хук `after_setup_theme` (~строка 464) и фильтр
+> `wpseo_exclude_from_sitemap_by_post_ids` (~строка 522). Проверено в рантайме
 > (страница создаётся и самовосстанавливается, фильтр отдаёт ID) и юнит-тестами
 > `test-organizer-page-creation.php` (12 тестов, 23 утверждения — зелёные).
 > Карточка и разбор — `TZ_BACKLOG.md` DEV-102 (регрессии) и §13 (починка).
+>
+> **Ревизия номеров строк и счётчиков 30.09.2026 (DEV-142).** Раздел пересверен
+> по коду: все ссылки вида `файл:NNN` заменены на `~строка N` (они смещаются при
+> правках выше по файлу — в `functions.php` темы сдвиг составил +9 после
+> DEV-131/DEV-138, в `idpg-core.php` −3 после DEV-141), счётчик функций меню
+> исправлен 7 → 8. Правило — `TZ_BACKLOG.md` §15.
 
 ### 6.1 Что фактически работает
 
 | Компонент | Состояние |
 |---|---|
-| Роутер `/organizer/` и `/organizer/{section}/` (`IDPG_Organizer_URL`) | **Подключён и работает**: `require_once` в `idpg-core.php:109`, `IDPG_Organizer_URL::init()` в `:151`. Rewrite-правила, query vars, `template_include`, принудительный flush по `REWRITE_VERSION`. **DEV-37** |
-| Меню кабинета (`inc/organizer-menu.php`, 7 функций `idpg_organizer_*`) | **Подключено**: `require_once` в `functions.php:404`. Даёт `idpg_organizer_menu()`, `idpg_organizer_section_url()`, `idpg_core_is_organizer_cabinet()`, скрытие баннера над подвалом. **DEV-38** |
-| Ассеты кабинета | **Подключены**: `assets/css/organizer.css` (`functions.php:212-215`) и `organizer.js` (`:216`), `organizer-event-form.js` (`:217`), `organizer-venue-form.js` (`:218`) — все только на `/organizer/*`. **DEV-38, DEV-98** |
-| Страница WP `/organizer/` | **Работает (регрессии закрыты DEV-131, 30.09.2026).** `idpg_core_create_organizer_page()` висит на `after_setup_theme` (`functions.php:455`) — хук срабатывает на каждом запросе, поэтому удалённая страница самовосстанавливается, а `idpg_core_get_organizer_page_id()` восстанавливает опцию `_idpg_organizer_page_id` по слагу. Первоисточник — DEV-39; DEV-102 откатил хук на `after_switch_theme` (срабатывает раз за жизнь темы), из-за чего у переключённой темы страницы не было, а `get_organizer_page_id()` отдавал 0. Вторая регрессия того же коммита: исключение из sitemap висело на `wpseo_exclude_from_sitemap_by_posts_ids`, тогда как Yoast вызывает `wpseo_exclude_from_sitemap_by_post_ids` (единственное `post`) — фильтр (`functions.php:513`) был мёртв. Обе правки — по одной строке, покрыты тестами `test-organizer-page-creation.php`. **DEV-39, DEV-131** (карточка — DEV-102, разбор — §13) |
-| `page-organizer.php` + `template-parts/organizer/section-{dashboard,events,profile}.php` | Работают: обслуживаются роутером, разделы рендерятся серверно, `organizer.js` переключает видимость и адрес без перезагрузки. **DEV-37/38** |
+| Роутер `/organizer/` и `/organizer/{section}/` (`IDPG_Organizer_URL`) | **Подключён и работает**: `require_once` в `idpg-core.php` ~строка 84, `IDPG_Organizer_URL::init()` ~строка 157. Rewrite-правила, query vars, `template_include`, принудительный flush по `REWRITE_VERSION` (сейчас **4** — поднят в DEV-141, чтобы сбросить правило удалённой анкеты). **DEV-37** |
+| Меню кабинета (`inc/organizer-menu.php`, **8 функций** `idpg_organizer_*` + `idpg_core_is_organizer_cabinet()`) | **Подключено**: `require_once` в `functions.php` ~строка 413. Даёт `idpg_organizer_menu()`, `idpg_organizer_section_url()`, `idpg_core_is_organizer_cabinet()`, скрытие баннера над подвалом. **DEV-38** |
+| Ассеты кабинета | **Подключены**: `assets/css/organizer.css` (`functions.php` ~строка 224), `organizer.js` (~225), `organizer-event-form.js` (~226), `organizer-venue-form.js` (~227) — все только на `/organizer/*`. **DEV-38, DEV-98** |
+| Страница WP `/organizer/` | **Работает (регрессии закрыты DEV-131, 30.09.2026).** `idpg_core_create_organizer_page()` висит на `after_setup_theme` (`functions.php` ~строка 464) — хук срабатывает на каждом запросе, поэтому удалённая страница самовосстанавливается, а `idpg_core_get_organizer_page_id()` восстанавливает опцию `_idpg_organizer_page_id` по слагу. Первоисточник — DEV-39; DEV-102 откатил хук на `after_switch_theme` (срабатывает раз за жизнь темы), из-за чего у переключённой темы страницы не было, а `get_organizer_page_id()` отдавал 0. Вторая регрессия того же коммита: исключение из sitemap висело на `wpseo_exclude_from_sitemap_by_posts_ids`, тогда как Yoast вызывает `wpseo_exclude_from_sitemap_by_post_ids` (единственное `post`) — фильтр (`functions.php` ~строка 522) был мёртв. Обе правки — по одной строке, покрыты тестами `test-organizer-page-creation.php`. **DEV-39, DEV-131** (карточка — DEV-102, разбор — §13) |
+| `page-organizer.php` + `template-parts/organizer/section-{dashboard,events,venues,profile}.php` | Работают: обслуживаются роутером, разделы рендерятся серверно, `organizer.js` переключает видимость и адрес без перезагрузки. **DEV-37/38, DEV-98** |
 | Проверка доступа `get_access_decision()` | Гость → `/login/`, нет роли → `403`, организатор и выше → кабинет. Отдельного состояния «pending» нет. **DEV-72** |
-| `guard_cabinet_redirect()` | Работает (`class-organizer-url.php:255`): не даёт зациклиться при попытке зайти в кабинет без прав. **DEV-63** |
+| `guard_cabinet_redirect()` | Работает (`class-organizer-url.php` ~строка 308): не даёт зациклиться при попытке зайти в кабинет без прав. **DEV-63** |
 | Редирект в кабинет после входа и после подтверждения email | Работает: `after_login_url()` + `idpg_organizer_after_login_url()`, `IDPG_Auth::redirect_organizer_to_cabinet()`, подтверждение по ссылке из письма. **DEV-37, DEV-67** |
 | Подтверждение по email (`IDPG_Organizer_Verify`) | Работает — роль `event_organizer` выдаётся только после перехода по ссылке; флаг ожидания `idpg_org_pending`. **DEV-68** |
 | Редактирование профиля в `/organizer/profile/` | **Работает**: форма + `GET|PUT /idpg/v1/organizer/profile`, с JavaScript и без него. **DEV-73** |
-| Платный показ в баннере на главной | **Работает**: заявка организатора `_idpg_banner_request` → подтверждение админом `_idpg_banner_approved` → событие попадает в выборку баннера (`class-current-event-banner.php:707-713`), колонка статуса в списке событий (`class-meta.php:1098-1113`) |
-| Модерация по платности (`class-event-moderation.php`) | Подключён (`idpg-core.php:151`): орг. не публикует (→ `pending`), бесплатные авто-публикуются, платные с неполными билетными данными → `draft` + уведомления |
+| Платный показ в баннере на главной | **Работает**: заявка организатора `_idpg_banner_request` → подтверждение админом `_idpg_banner_approved` → событие попадает в выборку баннера (`class-current-event-banner.php:707-713`), колонка статуса в списке событий (`class-meta.php`, методы `add_banner_column` ~1096 и `render_banner_column` ~1108) |
+| Модерация по платности (`class-event-moderation.php`) | Подключён (`idpg-core.php` ~строка 154): орг. не публикует (→ `pending`), бесплатные авто-публикуются, платные с неполными билетными данными → `draft` + уведомления |
 | Валюта события у организатора | **Только рубли (решение владельца, DEV-95).** Поле `_idpg_currency` остаётся в модели Carbon для администратора (select `RUB|USD|EUR`, контейнер «Билеты и цены»), но организатор его не выбирает: в форме `/organizer/event/new/` поля нет, параметр `currency` не объявлен в схеме REST `/idpg/v1/organizer/events` и потому игнорируется, а при сохранении `_idpg_currency` принудительно ставится в `RUB` (только если поле ещё пустое — валюту, выставленную админом, правка организатора не затирает). Карточка выводит `₽`. Пустое значение в `_idpg_currency` (события, созданные до DEV-95 или в обход организаторского пути — импорт, CLI) читается как `RUB` и в метаданных события (`IDPG_Template_Helper::get_event_meta()`), и в `idpg_core_currency_symbol()`, поэтому цена всегда выводится с символом; явно выставленная администратором валюта не затирается |
 | Перечисления в маршруте события | **Проверяются сервером (DEV-99).** Все девять перечислений `GET|POST /idpg/v1/organizer/events` — `all_day`, `is_free`, `ticket_type`, `ticket_status`, `banner_request`, `is_online`, `venue_type`, `orderby`, `order` — имеют `validate_callback`, без чего `enum` был декорацией: `is_free=hack` проходил с 201 и ложился в базу. Набор значений повторяет то, что способна отправить форма: у `<select>` (`ticket_type`, `ticket_status`, `venue_type`) в перечисление входит пустая строка — это опция «— Не нужны —» / «— Не выбран —», без неё сохранение новой формы отвергалось с 400; у радио (`all_day`, `is_free`) её нет, скрипт подставляет `no` |
 | Форма создания/правки события (G5) | **Работает**: `page-organizer-event.php` + `organizer-event-form.js` (3 шага, прогресс, сеансы, отправка на модерацию, удаление), маршруты `/organizer/event/new/` и `/organizer/event/{id}/`. **DEV-94** |
@@ -690,7 +696,7 @@ REST-пути нет, поэтому `submit` вызывает
 | ~~G9~~ | `is_pending()` требует роль `event_organizer` | **Закрыто DEV-72**: методов `is_pending()` / `is_pending_organizer()` больше нет | — | — |
 | G10 | Оплата за **публикацию** события (не за баннер) как продукт не определена. Реализована только модерация по платности; платный показ в баннере (`_idpg_banner_request` → `_idpg_banner_approved`) работает | **Отложено решением владельца 29.09.2026**: платёжного провайдера в проекте нет, без него задача невыполнима | P2 | — |
 | ~~G11~~ | ~~Выбор аватара в профиле: UI медиатеки (wp.media) не сделан, `avatar_id` заполняется только через API~~ | **Закрыто решением владельца 29.09.2026 — снято как неактуальное**: аватар существовал только внутри личного кабинета `/lk/`, который по DEV-14 не возвращается. REST `/user/avatar` и UI профиля удалены вместе с ЛК в 1.1.0 | — | — |
-| G12 | `default_role = subscriber` в `wp_options`: роль `subscriber` не должна быть ролью пользователя сайта | **Закрыто решением владельца 28.09.2026 — оставлено `subscriber`**. Через `update_option` задача невыполнима: ядро в `sanitize_option()` (`wp-includes/formatting.php:5158`) подставляет `subscriber`, пока такая роль существует. Обход возможен только прямой записью в `wp_options` в обход валидации ядра. Регистрация организатора от `default_role` не зависит (явный `set_role( 'subscriber' )`) — см. `tests/test-default-role.php` | — | — (решение принято) |
+| G12 | `default_role = subscriber` в `wp_options`: роль `subscriber` не должна быть ролью пользователя сайта | **Закрыто решением владельца 28.09.2026 — оставлено `subscriber`**. Через `update_option` задача невыполнима: ядро в `sanitize_option()` (`wp-includes/formatting.php` ~строки 5155-5157, ветка `case 'default_role'`) подставляет `subscriber`, пока такая роль существует. Обход возможен только прямой записью в `wp_options` в обход валидации ядра. Регистрация организатора от `default_role` не зависит (явный `set_role( 'subscriber' )`) — см. `tests/test-default-role.php` | — | — (решение принято) |
 | ~~G13~~ | ~~Кнопка модератора «Отклонить» и уведомление автору; статус `rejected` был нечем выставить~~ | **Закрыто DEV-46** (§6.2.3): row action + форма с причиной, хук `idpg_event_rejected`, письмо автору. Тесты: `tests/test-event-rejection.php` | — | — |
 
 ### 6.5 Навигация по DEV-33…36 (TZ_BACKLOG)
