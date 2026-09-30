@@ -35,6 +35,17 @@ class IDPG_REST_Auth {
 	const NAMESPACE = 'idpg/v1';
 
 	/**
+	 * Действие nonce для REST-запросов.
+	 *
+	 * Стандартное действие ядра WordPress — `wp_rest`. Совпадает с тем,
+	 * которое проверяет ядро в `rest_cookie_check_errors()`, поэтому
+	 * один и тот же токен подходит и ядру, и проверке ниже.
+	 *
+	 * @var string
+	 */
+	const REST_NONCE_ACTION = 'wp_rest';
+
+	/**
 	 * Получение экземпляра синглтона.
 	 *
 	 * @return IDPG_REST_Auth
@@ -165,7 +176,7 @@ class IDPG_REST_Auth {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'handle_logout' ),
-				'permission_callback' => 'is_user_logged_in',
+				'permission_callback' => array( $this, 'can_logout' ),
 			)
 		);
 
@@ -568,11 +579,99 @@ class IDPG_REST_Auth {
 	}
 
 	/**
+	 * Проверка права на выход из системы.
+	 *
+	 * Порядок проверок важен: nonce проверяется **до** проверки авторизации.
+	 * Ядро WordPress при запросе без nonce обнуляет текущего пользователя
+	 * (`wp_set_current_user( 0 )` в `rest_cookie_check_errors()`), поэтому
+	 * проверка `is_user_logged_in()` первой вернула бы 401 и замаскировала бы
+	 * настоящую причину отказа — отсутствие или подделку токена.
+	 *
+	 * @param WP_REST_Request $request Текущий запрос.
+	 * @return true|WP_Error
+	 */
+	public function can_logout( $request ) {
+		$nonce = $this->check_rest_nonce( $request );
+
+		if ( is_wp_error( $nonce ) ) {
+			return $nonce;
+		}
+
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error(
+				'idpg_logout_not_logged_in',
+				__( 'Необходима авторизация.', 'idpg-core' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		if ( ! current_user_can( 'read' ) ) {
+			return new WP_Error(
+				'idpg_logout_forbidden',
+				__( 'Недостаточно прав для выхода из системы.', 'idpg-core' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Проверка nonce `wp_rest` входящего запроса.
+	 *
+	 * Токен принимается в двух форматах, которые понимает и ядро WordPress:
+	 * заголовок `X-WP-Nonce` и параметр `_wpnonce`.
+	 *
+	 * Отсутствие и невалидность различаются отдельными кодами: «нет токена» —
+	 * это неверно собранный клиент, «токен не подошёл» — подделка или протухание.
+	 *
+	 * @param WP_REST_Request $request Текущий запрос.
+	 * @return true|WP_Error
+	 */
+	private function check_rest_nonce( $request ) {
+		$nonce = $request->get_header( 'x_wp_nonce' );
+
+		if ( ! $nonce ) {
+			$nonce = $request->get_param( '_wpnonce' );
+		}
+
+		if ( ! $nonce || ! is_string( $nonce ) ) {
+			return new WP_Error(
+				'idpg_logout_nonce_missing',
+				__( 'Отсутствует nonce безопасности. Обновите страницу и повторите вход.', 'idpg-core' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		if ( ! wp_verify_nonce( $nonce, self::REST_NONCE_ACTION ) ) {
+			return new WP_Error(
+				'idpg_logout_nonce_invalid',
+				__( 'Nonce безопасности недействителен. Обновите страницу и повторите вход.', 'idpg-core' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Выход из системы.
 	 *
-	 * @return WP_REST_Response
+	 * @param WP_REST_Request|null $request Текущий запрос; null — прямой вызов из кода.
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function handle_logout() {
+	public function handle_logout( $request = null ) {
+		// Повторная проверка nonce внутри обработчика: маршрут защищён
+		// permission_callback, но обработчик вызывается и напрямую из кода
+		// (в том числе из тестов), поэтому контракт держим в двух местах.
+		if ( $request instanceof WP_REST_Request ) {
+			$nonce = $this->check_rest_nonce( $request );
+
+			if ( is_wp_error( $nonce ) ) {
+				return $nonce;
+			}
+		}
+
 		wp_logout();
 
 		return new WP_REST_Response(
