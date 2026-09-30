@@ -231,6 +231,12 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
   `test-organizer-events`, `test-organizer-page`, `test-organizer-pending`, `test-rest-api`, `test-roles`,
   `test-template-helper`, `test-theme` и др.), `phpunit.xml.dist`, `bin/install-wp-tests.*`.
   Итого зелёный прогон: idpg-core — 85 тестов / 210 утверждений (DEV-52, 19.09.2026).
+- **Версия темы — единый источник кэш-бастинга (DEV-138, 30.09.2026).**
+  `IDPG_VERSION` (`themes/idpg_core/functions.php`) = `Version:` в `themes/idpg_core/style.css`
+  = **1.0.78**; значение подставляется в `?ver=` у `style.css` и скриптов темы.
+  Сторож — `tests/test-theme-version.php` (7 тестов): сверяет оба файла, формат версии,
+  единственность объявления и рантайм-значение. Поводом стал откат DEV-102, после которого
+  в дереве стояла `1.0.75` при заголовке `1.0.73` — версия не росла, и браузеры отдавали кэш.
 - Стандарты: `.phpcs.xml.dist`, `.circleci/config.yml`, `.cursorrules`.
 - PHPCS в CI (DEV-27A): job `phpcs` прогоняет PHPCS (WordPress + `PHPCompatibilityWP`) по `plugins/idpg-core`,
   `plugins/idpg-auth` и теме `idpg_core`. Легаси-нарушения зафиксированы в baseline — `phpcs-baseline.neon`
