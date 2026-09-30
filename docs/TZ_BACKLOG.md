@@ -359,15 +359,28 @@
 | **Приёмка** | Событие с прошедшей датой закрепления теряет `_idpg_promoted` после запуска cron; повторный запуск идемпотентен. |
 | **Объём** | M |
 
-### DEV-11. Часы работы и соцсети площадки
+### DEV-11. Часы работы и соцсети площадки — ЗАКРЫТО (30.09.2026)
 
 | | |
 |---|---|
 | **Проблема** | Поля `idpg_venue_hours` (день/открытие/закрытие/выходной) и `idpg_venue_social` (сеть + ссылка) не реализованы; на странице площадки нет этих блоков. |
 | **Требование** | Complex-поля в контейнере «Данные площадки» + зеркала `_idpg_venue_hours_json`, `_idpg_venue_social_json` для шаблонов; вывод на `single-venue.php`. |
-| **Реализация** | `class-meta.php`, `themes/idpg_core/single-venue.php`, `inc/template-tags.php` (хелперы), стили. |
+| **Реализация** | `class-meta.php`, `themes/idpg_core/single-venue.php`, `inc/template-tags.php` (хелперы). |
 | **Приёмка** | Данные сохраняются в админке, выводятся на странице площадки, пустые значения не ломают вёрстку. |
 | **Объём** | M |
+
+**Проверка:**
+
+| Проверка | Результат |
+|---|---|
+| Complex-поле `idpg_venue_hours` в Carbon Fields | **есть**, 4 суб-поля (day, open, close, is_closed) |
+| Complex-поле `idpg_venue_social` | **есть**, 2 суб-поля (network, url) |
+| Зеркала JSON | `_idpg_venue_hours_json`, `_idpg_venue_social_json` — пишутся через `mirror_venue_hours()`/`mirror_venue_social()` на `carbon_fields_post_meta_container_saved` |
+| REST-схема | **зарегистрирована**, `show_in_rest=true` |
+| `idpg_core_venue_meta()` | возвращает `hours` и `social` как массивы; пустые/невалидные → `[]` |
+| `single-venue.php` | выводит часы работы списком (с пометкой «выходной») и соцсети ссылками |
+| Тесты | `test-venue-hours-social.php` — 4 теста / 15 утверждений, OK |
+| Полный набор | 533 теста / 1596 утверждений, падений 0 |
 
 ### DEV-12. Профиль организатора: реквизиты и верификация
 
