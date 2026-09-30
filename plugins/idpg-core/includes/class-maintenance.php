@@ -42,6 +42,20 @@ class IDPG_Maintenance {
 	const ACCESS_COOKIE = 'idpg_maintenance_pass';
 
 	/**
+	 * Действие nonce для формы пароля доступа.
+	 *
+	 * @var string
+	 */
+	const ACCESS_NONCE_ACTION = 'idpg_maintenance_access';
+
+	/**
+	 * Имя поля с nonce в форме пароля доступа.
+	 *
+	 * @var string
+	 */
+	const ACCESS_NONCE_FIELD = 'idpg_maintenance_nonce';
+
+	/**
 	 * Получение экземпляра синглтона.
 	 *
 	 * @return IDPG_Maintenance
@@ -946,24 +960,55 @@ class IDPG_Maintenance {
 	}
 
 	/**
-	 * Обработка ввода пароля доступа на заглушке.
+	 * Решение: можно ли выдать доступ по введённому паролю.
 	 *
-	 * @return bool True, если пароль введён и доступ предоставлен.
+	 * Вынесено из `handle_access_password()` отдельно от выдачи cookie, потому
+	 * что успешная ветка заканчивается `exit`, а `setcookie()` в CLI ничего не
+	 * делает и в `$_COOKIE` не попадает. Позитивный сценарий «верный пароль →
+	 * доступ» иначе нечем проверить. Логика не менялась: те же проверки в том
+	 * же порядке, тот же результат.
+	 *
+	 * Порядок проверок важен: nonce проверяется до сравнения пароля. Иначе
+	 * запрос с верным паролем, но без nonce выдавал бы доступ — то есть форма
+	 * оставалась бы без защиты от подделки, ради которой и добавлена.
+	 *
+	 * @return bool True, если пароль верный и nonce валиден.
 	 */
-	private function handle_access_password() {
+	private function is_access_request_valid() {
 		$password = get_option( 'idpg_maintenance_password', '' );
 
 		if ( '' === $password ) {
 			return false;
 		}
 
-		if ( ! isset( $_POST['idpg_maintenance_pass'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! isset( $_POST['idpg_maintenance_pass'] ) ) {
 			return false;
 		}
 
-		$submitted = sanitize_text_field( wp_unslash( $_POST['idpg_maintenance_pass'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		// Без валидного nonce отказ молчаливый: страница отрисовывается
+		// заново, а сообщение «Неверный пароль.» показывается по факту
+		// наличия поля в POST. Отдельная строка про nonce не нужна — для
+		// посетителя разницы нет, а отличить одно от другого он не должен.
+		$nonce = isset( $_POST[ self::ACCESS_NONCE_FIELD ] )
+			? sanitize_text_field( wp_unslash( $_POST[ self::ACCESS_NONCE_FIELD ] ) )
+			: '';
 
-		if ( ! hash_equals( $password, $submitted ) ) {
+		if ( ! wp_verify_nonce( $nonce, self::ACCESS_NONCE_ACTION ) ) {
+			return false;
+		}
+
+		$submitted = sanitize_text_field( wp_unslash( $_POST['idpg_maintenance_pass'] ) );
+
+		return hash_equals( $password, $submitted );
+	}
+
+	/**
+	 * Обработка ввода пароля доступа на заглушке.
+	 *
+	 * @return bool True, если пароль введён и доступ предоставлен.
+	 */
+	private function handle_access_password() {
+		if ( ! $this->is_access_request_valid() ) {
 			return false;
 		}
 
@@ -1465,6 +1510,7 @@ class IDPG_Maintenance {
 
 				<?php if ( '' !== $password ) : ?>
 					<form class="idpg-maintenance__password" method="post">
+						<?php wp_nonce_field( self::ACCESS_NONCE_ACTION, self::ACCESS_NONCE_FIELD ); ?>
 						<input
 							type="password"
 							name="idpg_maintenance_pass"
@@ -1473,7 +1519,7 @@ class IDPG_Maintenance {
 						>
 						<button type="submit"><?php esc_html_e( 'Открыть', 'idpg-core' ); ?></button>
 					</form>
-					<?php if ( isset( $_POST['idpg_maintenance_pass'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification ?>
+					<?php if ( isset( $_POST['idpg_maintenance_pass'] ) ) : ?>
 						<p class="idpg-maintenance__error"><?php esc_html_e( 'Неверный пароль.', 'idpg-core' ); ?></p>
 					<?php endif; ?>
 				<?php endif; ?>
