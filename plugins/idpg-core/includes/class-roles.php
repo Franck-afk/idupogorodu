@@ -63,6 +63,8 @@ class IDPG_Roles {
 		add_action( 'init', array( $this, 'sync_role_caps' ), 20 );
 		add_action( 'admin_menu', array( $this, 'hide_unnecessary_menus' ), 999 );
 		add_action( 'wp_before_admin_bar_render', array( $this, 'hide_unnecessary_admin_bar' ), 999 );
+		add_action( 'show_admin_bar', array( $this, 'hide_frontend_admin_bar' ), 999 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'hide_admin_bar_css' ), 999 );
 		add_action( 'init', array( $this, 'ensure_safe_default_role' ), 21 );
 	}
 
@@ -423,6 +425,67 @@ class IDPG_Roles {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Проверка: текущий пользователь — организатор.
+	 *
+	 * @return bool
+	 */
+	private function is_current_user_organizer() {
+		$user = wp_get_current_user();
+
+		if ( ! $user->exists() ) {
+			return false;
+		}
+
+		return in_array( self::ROLE_SLUG, (array) $user->roles, true );
+	}
+
+	/**
+	 * Убирает верхнюю панель WordPress (admin bar) у организатора на сайте.
+	 *
+	 * Штатный путь: фильтр `show_admin_bar` — `is_admin_bar_showing()`
+	 * применяет его на фронтенде (`wp-includes/admin-bar.php`).
+	 *
+	 * @param bool $show_admin_bar Текущее решение ядра.
+	 * @return bool
+	 */
+	public function hide_frontend_admin_bar( $show_admin_bar ) {
+		if ( is_admin() ) {
+			return $show_admin_bar;
+		}
+
+		if ( $this->is_current_user_organizer() ) {
+			return false;
+		}
+
+		return $show_admin_bar;
+	}
+
+	/**
+	 * Прячет верхнюю панель WordPress в админке организатора через CSS.
+	 *
+	 * В админке фильтр `show_admin_bar` бесполезен: `is_admin_bar_showing()`
+	 * возвращает true по ветке `is_admin()` до применения фильтра
+	 * (`wp-includes/admin-bar.php`), поэтому штатно панель там не отключается.
+	 * Панель скрывается визуально, но остаётся в DOM — вместе со ссылками
+	 * «Выйти» и профилем, поэтому организатор не теряет доступ к выходу.
+	 *
+	 * Отступ сверху снимается у `html.wp-toolbar`, потому что именно этот
+	 * класс ставит `wp-admin/includes/template.php`, а не `body.admin-bar`.
+	 *
+	 * @return void
+	 */
+	public function hide_admin_bar_css() {
+		if ( ! $this->is_current_user_organizer() ) {
+			return;
+		}
+
+		$css = '#wpadminbar{display:none !important;}'
+			. 'html.wp-toolbar{padding-top:0 !important;}';
+
+		wp_add_inline_style( 'admin-bar', $css );
 	}
 
 	/**
