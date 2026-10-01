@@ -24,6 +24,6 @@
     "compile:css:apply": "sass assets/scss/style.scss:style.css --no-source-map --style=expanded",
       "lint:scss": "stylelint \"assets/scss/**/*.scss\"",
     "lint:js": "wp-scripts lint-js assets/js/*.js",
-    "bundle": "dir-archiver --src . --dest ../idpg_core.zip --exclude .DS_Store .stylelintrc.json .eslintrc .git .gitattributes .github .gitignore README.md composer.json composer.lock node_modules vendor package-lock.json package.json .travis.yml phpcs.xml.dist assets/scss style.css.map style.css.tmp bin yarn.lock"
+    "bundle": "dir-archiver --src . --dest ../idpg_core.zip --exclude .DS_Store .stylelintrc.json .eslintrc.json .eslintignore babel.config.js .git .gitattributes .github .gitignore README.md composer.json composer.lock node_modules vendor package-lock.json package.json .travis.yml phpcs.xml.dist assets/scss style.css.map style.css.tmp bin yarn.lock"
   }
 }
