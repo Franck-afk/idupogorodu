@@ -258,12 +258,6 @@ ignoreErrors:
 		path: includes\class-city-selector-widget.php
 
 	-
-		sniff: Universal.Files.SeparateFunctionsFromOO.Mixed
-		message: 'A file should either contain function declarations or OO structure declarations, but not both. Found 1 function declaration(s) and 1 OO structure declaration(s). The first function declaration was found on line 689; the first OO declaration was found on line 20'
-		count: 1
-		path: includes\class-city-selector-widget.php
-
-	-
 		sniff: Universal.NamingConventions.NoReservedKeywordParameterNames.newFound
 		message: 'It is recommended not to use reserved keyword "new" as function parameter name. Found: $new'
 		count: 1
@@ -1002,12 +996,6 @@ ignoreErrors:
 		path: includes\class-event-moderation.php
 
 	-
-		sniff: PSR2.Files.EndFileNewline.NoneFound
-		message: Expected 1 newline at end of file; 0 found
-		count: 1
-		path: includes\class-event-moderation.php
-
-	-
 		sniff: WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
 		message: 'When a multi-item array is declared with explicit keys, each value should start on a new line.'
 		count: 1
@@ -1570,24 +1558,6 @@ ignoreErrors:
 		message: 'A function call to __() with texts containing placeholders was found, but was not accompanied by a "translators:" comment on the line above to clarify the meaning of the placeholders.'
 		count: 1
 		path: includes\class-notifications.php
-
-	-
-		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
-		message: Expected 1 spaces after parameter type; 2 found
-		count: 1
-		path: includes\class-organizer-page.php
-
-	-
-		sniff: Squiz.Commenting.FunctionComment.SpacingAfterParamType
-		message: Expected 2 spaces after parameter type; 3 found
-		count: 1
-		path: includes\class-organizer-page.php
-
-	-
-		sniff: WordPress.Files.FileName.InvalidClassFileName
-		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-organizer-page.php, but found class-organizer-page.php.'
-		count: 1
-		path: includes\class-organizer-page.php
 
 	-
 		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
@@ -2245,55 +2215,13 @@ ignoreErrors:
 
 	-
 		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''org_name''" and double arrow, but found 1.'
-		count: 1
-		path: includes\class-rest-auth.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''password''" and double arrow, but found 1.'
-		count: 1
-		path: includes\class-rest-auth.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 		message: 'Array double arrow not aligned correctly; expected 5 space(s) between "''type''" and double arrow, but found 14.'
 		count: 5
 		path: includes\class-rest-auth.php
 
 	-
 		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''email''" and double arrow, but found 4.'
-		count: 1
-		path: includes\class-rest-auth.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''phone''" and double arrow, but found 4.'
-		count: 1
-		path: includes\class-rest-auth.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''terms''" and double arrow, but found 4.'
-		count: 1
-		path: includes\class-rest-auth.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 		message: 'Array double arrow not aligned correctly; expected 8 space(s) between "''type''" and double arrow, but found 14.'
-		count: 1
-		path: includes\class-rest-auth.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''name''" and double arrow, but found 5.'
-		count: 1
-		path: includes\class-rest-auth.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 9 space(s) between "''type''" and double arrow, but found 5.'
 		count: 1
 		path: includes\class-rest-auth.php
 
@@ -2976,18 +2904,6 @@ ignoreErrors:
 		path: tests\test-organizer-events.php
 
 	-
-		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
-		message: Equals sign not aligned with surrounding assignments; expected 4 spaces but found 1 space
-		count: 1
-		path: tests\test-organizer-pending.php
-
-	-
-		sniff: PSR2.Files.EndFileNewline.NoneFound
-		message: Expected 1 newline at end of file; 0 found
-		count: 1
-		path: tests\test-organizer-pending.php
-
-	-
 		sniff: Generic.Commenting.DocComment.ShortNotCapital
 		message: Doc comment short description must start with a capital letter
 		count: 1
@@ -3166,5 +3082,3 @@ ignoreErrors:
 		message: Overriding WordPress globals is prohibited. Found assignment to $wpdb
 		count: 1
 		path: uninstall.php
-
-

@@ -57,6 +57,43 @@ cd /d/laragon/www/idupogorodu/wp-content && bash bin/phpcs-patches/apply.sh "$TO
 Патч `0001` нужен для **применения** baseline, патч `0002` — для его **генерации**.
 При обычной проверке кода (job `phpcs`) работает только `0001`.
 
+## Имя файла baseline важнее патчей (DEV-183, 01.10.2026)
+
+**Патчи чинят только инъекцию класса `File`. Имя файла они не чинят — а без правильного
+имени baseline не находится вовсе, и патчи не помогают.**
+
+`Ignores.php` ищет baseline так:
+
+```php
+$filter = dirname($configFile) . '/' . basename($configFile, '.xml') . '*.neon';
+```
+
+То есть имя файла **обязано начинаться с имени ruleset-файла**. При `basename( '.phpcs.xml.dist', '.xml' )`
+получается `.phpcs.xml.dist`, и пакет ищет `.phpcs.xml.dist*.neon`. Файл `phpcs-baseline.neon`
+под это не подпадает → `glob()` пуст → пакет строит **ноль** ключей → ни одна запись не списывается.
+
+Как выглядит поломка:
+
+| Проверка | idpg-core | idpg-auth | тема |
+|---|---|---|---|
+| baseline не находится (`phpcs-baseline.neon`) | 869 ошибок | 2220 | 870 |
+| baseline находится (`.phpcs.xml.dist-baseline.neon`) | **195 ошибок** | **4** | **77** |
+
+Правильные имена сейчас:
+
+- `plugins/idpg-core/.phpcs.xml.dist-baseline.neon`
+- `plugins/idpg-auth/.phpcs.xml.dist-baseline.neon`
+- `themes/idpg_core/.phpcs.xml.dist-baseline.neon`
+
+**Как проверить, что baseline вообще применяется.** Сравнить прогон с `--bootstrap` и без него,
+либо прогнать `bootstrap-outdated.php` — он печатает неиспользованные записи
+(`Ignored sniff … was not matched in report`). Если таких записей много, а число ошибок
+не снизилось — baseline не подхватывается.
+
+**Чего делать не надо:** менять в baseline разделители путей (`\` → `/`). `Ignores.php`
+нормализует оба варианта через `str_replace( [ '/', '\\' ], DIRECTORY_SEPARATOR, … )`, поэтому
+замена 512 строк на слэши даёт ровно тот же результат — проверено 01.10.2026.
+
 ## Как применять
 
 После каждой переустановки `vendor`:

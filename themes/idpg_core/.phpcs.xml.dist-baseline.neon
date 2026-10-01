@@ -1831,48 +1831,6 @@ ignoreErrors:
 
 	-
 		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
-		message: Equals sign not aligned with surrounding assignments; expected 17 spaces but found 1 space
-		count: 1
-		path: page-organizer-complete.php
-
-	-
-		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$display_name".'
-		count: 1
-		path: page-organizer-complete.php
-
-	-
-		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$first_name".'
-		count: 1
-		path: page-organizer-complete.php
-
-	-
-		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$is_pending_organizer".'
-		count: 1
-		path: page-organizer-complete.php
-
-	-
-		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$last_name".'
-		count: 1
-		path: page-organizer-complete.php
-
-	-
-		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$needs_email".'
-		count: 1
-		path: page-organizer-complete.php
-
-	-
-		sniff: WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-		message: 'Global variables defined by a theme/plugin should start with the theme/plugin prefix. Found: "$user".'
-		count: 1
-		path: page-organizer-complete.php
-
-	-
-		sniff: Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 		message: Equals sign not aligned with surrounding assignments; expected 8 spaces but found 1 space
 		count: 1
 		path: page-privacy.php
@@ -2214,66 +2172,6 @@ ignoreErrors:
 		path: single-venue.php
 
 	-
-		sniff: Internal.LineEndings.Mixed
-		message: File has mixed line endings; this may cause incorrect results
-		count: 1
-		path: single-venue.php
-
-	-
-		sniff: Squiz.WhiteSpace.SuperfluousWhitespace.EndLine
-		message: Whitespace found at end of line
-		count: 18
-		path: single-venue.php
-
-	-
-		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
-		message: 'Expected 1 space between the comma and "''compare''". Found: a new line'
-		count: 1
-		path: single-venue.php
-
-	-
-		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
-		message: 'Expected 1 space between the comma and "''meta_key''". Found: a new line'
-		count: 1
-		path: single-venue.php
-
-	-
-		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
-		message: 'Expected 1 space between the comma and "''meta_query''". Found: a new line'
-		count: 1
-		path: single-venue.php
-
-	-
-		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
-		message: 'Expected 1 space between the comma and "''order''". Found: a new line'
-		count: 1
-		path: single-venue.php
-
-	-
-		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
-		message: 'Expected 1 space between the comma and "''orderby''". Found: a new line'
-		count: 1
-		path: single-venue.php
-
-	-
-		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
-		message: 'Expected 1 space between the comma and "''post_status''". Found: a new line'
-		count: 1
-		path: single-venue.php
-
-	-
-		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
-		message: 'Expected 1 space between the comma and "''posts_per_page''". Found: a new line'
-		count: 1
-		path: single-venue.php
-
-	-
-		sniff: Universal.WhiteSpace.CommaSpacing.TooMuchSpaceAfter
-		message: 'Expected 1 space between the comma and "''value''". Found: a new line'
-		count: 1
-		path: single-venue.php
-
-	-
 		sniff: WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		message: 'Detected usage of meta_key, possible slow query.'
 		count: 1
@@ -2356,35 +2254,3 @@ ignoreErrors:
 		message: Blank line found at end of control structure
 		count: 1
 		path: template-parts\home-section.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 1 space(s) between ")" and double arrow, but found 2.'
-		count: 1
-		path: template-parts\organizer\section-profile.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 11 space(s) between ")" and double arrow, but found 12.'
-		count: 1
-		path: template-parts\organizer\section-profile.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 3 space(s) between ")" and double arrow, but found 4.'
-		count: 1
-		path: template-parts\organizer\section-profile.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 5 space(s) between ")" and double arrow, but found 6.'
-		count: 1
-		path: template-parts\organizer\section-profile.php
-
-	-
-		sniff: WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
-		message: 'Array double arrow not aligned correctly; expected 9 space(s) between ")" and double arrow, but found 10.'
-		count: 1
-		path: template-parts\organizer\section-profile.php
-
-
