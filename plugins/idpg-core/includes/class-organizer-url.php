@@ -181,6 +181,47 @@ class IDPG_Organizer_URL {
 	const META_AVATAR_ID = 'idpg_avatar_attachment_id';
 
 	/**
+	 * Мета-ключ организационно-правовой формы.
+	 *
+	 * Значения: 'ip' | 'ooo' | 'fiz' | 'nko'.
+	 *
+	 * @var string
+	 */
+	const META_LEGAL_TYPE = 'idpg_legal_type';
+
+	/**
+	 * Мета-ключ ИНН организатора.
+	 *
+	 * @var string
+	 */
+	const META_INN = 'idpg_inn';
+
+	/**
+	 * Мета-ключ статуса верификации.
+	 *
+	 * Только администратор может менять. Организатор видит, но не правит.
+	 *
+	 * @var string
+	 */
+	const META_VERIFIED = 'idpg_verified';
+
+	/**
+	 * Мета-ключ документов организатора.
+	 *
+	 * Массив ID вложений (JSON), загружаемых через wp.media.
+	 *
+	 * @var string
+	 */
+	const META_DOCUMENTS = 'idpg_documents';
+
+	/**
+	 * Допустимые значения организационно-правовой формы.
+	 *
+	 * @var string[]
+	 */
+	const LEGAL_TYPES = array( 'ip', 'ooo', 'fiz', 'nko' );
+
+	/**
 	 * Максимальная длина текстовых полей профиля.
 	 *
 	 * @var int
@@ -874,6 +915,46 @@ class IDPG_Organizer_URL {
 	 *     @type string $avatar_url   URL аватара ('' — нет).
 	 * }
 	 */
+	/**
+	 * Читает и валидирует список документов организатора.
+	 *
+	 * Возвращает только существующие вложения (attachment).
+	 *
+	 * @param int $user_id ID пользователя.
+	 * @return int[] Массив ID вложений.
+	 */
+	private static function parse_documents_meta( $user_id ) {
+		$raw = get_user_meta( (int) $user_id, self::META_DOCUMENTS, true );
+
+		if ( ! $raw ) {
+			return array();
+		}
+
+		$ids = is_array( $raw ) ? $raw : json_decode( $raw, true );
+
+		if ( ! is_array( $ids ) ) {
+			return array();
+		}
+
+		$valid = array();
+
+		foreach ( $ids as $id ) {
+			$id = absint( $id );
+
+			if ( ! $id ) {
+				continue;
+			}
+
+			$attachment = get_post( $id );
+
+			if ( $attachment && 'attachment' === $attachment->post_type ) {
+				$valid[] = $id;
+			}
+		}
+
+		return array_values( array_unique( $valid ) );
+	}
+
 	public static function get_profile_data( $user = null ) {
 		$user = self::resolve_user( $user );
 
@@ -890,7 +971,11 @@ class IDPG_Organizer_URL {
 			);
 		}
 
-		$avatar_id = (int) get_user_meta( $user->ID, self::META_AVATAR_ID, true );
+		$avatar_id   = (int) get_user_meta( $user->ID, self::META_AVATAR_ID, true );
+		$legal_type  = (string) get_user_meta( $user->ID, self::META_LEGAL_TYPE, true );
+		$inn         = (string) get_user_meta( $user->ID, self::META_INN, true );
+		$verified    = (bool) get_user_meta( $user->ID, self::META_VERIFIED, true );
+		$documents   = self::parse_documents_meta( $user->ID );
 
 		return array(
 			'user_id'      => (int) $user->ID,
@@ -901,6 +986,10 @@ class IDPG_Organizer_URL {
 			'phone'        => (string) get_user_meta( $user->ID, self::META_PHONE, true ),
 			'avatar_id'    => $avatar_id,
 			'avatar_url'   => $avatar_id ? (string) wp_get_attachment_image_url( $avatar_id, 'medium' ) : '',
+			'legal_type'   => in_array( $legal_type, self::LEGAL_TYPES, true ) ? $legal_type : '',
+			'inn'          => $inn,
+			'verified'     => $verified,
+			'documents'    => $documents,
 		);
 	}
 
@@ -953,6 +1042,54 @@ class IDPG_Organizer_URL {
 			}
 
 			$clean['avatar_id'] = $avatar_id;
+		}
+
+		// Организационно-правовая форма.
+		if ( array_key_exists( 'legal_type', $input ) ) {
+			$lt = sanitize_key( (string) $input['legal_type'] );
+
+			if ( in_array( $lt, self::LEGAL_TYPES, true ) ) {
+				$clean['legal_type'] = $lt;
+			} else {
+				$clean['legal_type'] = '';
+			}
+		}
+
+		// ИНН: 10 или 12 цифр.
+		if ( array_key_exists( 'inn', $input ) ) {
+			$inn = sanitize_text_field( (string) $input['inn'] );
+
+			if ( '' === $inn || preg_match( '/^\d{10}$|^\d{12}$/', $inn ) ) {
+				$clean['inn'] = $inn;
+			} else {
+				return new WP_Error(
+					'idpg_profile_invalid_inn',
+					__( 'ИНН должен содержать 10 или 12 цифр.', 'idpg_core' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		// Документы: массив ID вложений.
+		if ( array_key_exists( 'documents', $input ) ) {
+			$docs = is_array( $input['documents'] ) ? $input['documents'] : array();
+			$valid = array();
+
+			foreach ( $docs as $doc_id ) {
+				$doc_id = absint( $doc_id );
+
+				if ( ! $doc_id ) {
+					continue;
+				}
+
+				$attachment = get_post( $doc_id );
+
+				if ( $attachment && 'attachment' === $attachment->post_type ) {
+					$valid[] = $doc_id;
+				}
+			}
+
+			$clean['documents'] = array_values( array_unique( $valid ) );
 		}
 
 		/**
@@ -1015,6 +1152,8 @@ class IDPG_Organizer_URL {
 			'org_name'     => self::META_ORG_NAME,
 			'contact_name' => self::META_CONTACT_NAME,
 			'phone'        => self::META_PHONE,
+			'legal_type'   => self::META_LEGAL_TYPE,
+			'inn'          => self::META_INN,
 		);
 
 		foreach ( $meta_map as $field => $meta_key ) {
@@ -1027,6 +1166,10 @@ class IDPG_Organizer_URL {
 
 		if ( array_key_exists( 'avatar_id', $clean ) ) {
 			update_user_meta( $user->ID, self::META_AVATAR_ID, $clean['avatar_id'] );
+		}
+
+		if ( array_key_exists( 'documents', $clean ) ) {
+			update_user_meta( $user->ID, self::META_DOCUMENTS, wp_json_encode( $clean['documents'] ) );
 		}
 
 		/**

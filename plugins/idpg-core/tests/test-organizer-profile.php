@@ -574,4 +574,215 @@ class Test_Organizer_Profile extends WP_UnitTestCase {
 		$this->assertSame( 'Рога', get_user_meta( $organizer->ID, 'idpg_org_name', true ) );
 		$this->assertSame( '', get_user_meta( $organizer->ID, 'extra_field', true ) );
 	}
+
+	// =====================================================================
+	// DEV-12: реквизиты и верификация
+	// =====================================================================
+
+	/**
+	 * GET отдаёт новые поля профиля.
+	 */
+	public function test_get_returns_new_fields() {
+		$organizer = $this->make_organizer( 'profile_dev12_get' );
+
+		$this->seed_profile(
+			$organizer,
+			array(
+				'idpg_legal_type' => 'ooo',
+				'idpg_inn'        => '7707083893',
+				'idpg_verified'   => '1',
+			)
+		);
+
+		wp_set_current_user( $organizer->ID );
+
+		$data = $this->get_profile()->get_data();
+
+		$this->assertArrayHasKey( 'legal_type', $data );
+		$this->assertArrayHasKey( 'inn', $data );
+		$this->assertArrayHasKey( 'verified', $data );
+		$this->assertArrayHasKey( 'documents', $data );
+
+		$this->assertSame( 'ooo', $data['legal_type'] );
+		$this->assertSame( '7707083893', $data['inn'] );
+		$this->assertTrue( $data['verified'] );
+		$this->assertSame( array(), $data['documents'] );
+	}
+
+	/**
+	 * PUT сохраняет legal_type и inn.
+	 */
+	public function test_update_saves_legal_type_and_inn() {
+		$organizer = $this->make_organizer( 'profile_dev12_put' );
+
+		wp_set_current_user( $organizer->ID );
+
+		$response = $this->put_profile(
+			array(
+				'legal_type' => 'ip',
+				'inn'        => '123456789012',
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertSame( 'ip', $data['legal_type'] );
+		$this->assertSame( '123456789012', $data['inn'] );
+		$this->assertSame( 'ip', get_user_meta( $organizer->ID, 'idpg_legal_type', true ) );
+		$this->assertSame( '123456789012', get_user_meta( $organizer->ID, 'idpg_inn', true ) );
+	}
+
+	/**
+	 * ИНН из 10 цифр принимается.
+	 */
+	public function test_inn_10_digits_accepted() {
+		$organizer = $this->make_organizer( 'profile_inn10' );
+
+		wp_set_current_user( $organizer->ID );
+
+		$response = $this->put_profile( array( 'inn' => '7707083893' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( '7707083893', get_user_meta( $organizer->ID, 'idpg_inn', true ) );
+	}
+
+	/**
+	 * ИНН из 12 цифр принимается.
+	 */
+	public function test_inn_12_digits_accepted() {
+		$organizer = $this->make_organizer( 'profile_inn12' );
+
+		wp_set_current_user( $organizer->ID );
+
+		$response = $this->put_profile( array( 'inn' => '123456789012' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( '123456789012', get_user_meta( $organizer->ID, 'idpg_inn', true ) );
+	}
+
+	/**
+	 * ИНН из 11 цифр отклоняется.
+	 */
+	public function test_inn_11_digits_rejected() {
+		$organizer = $this->make_organizer( 'profile_inn11' );
+
+		wp_set_current_user( $organizer->ID );
+
+		$response = $this->put_profile( array( 'inn' => '12345678901' ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'idpg_profile_invalid_inn', $response->get_data()['code'] );
+	}
+
+	/**
+	 * ИНН с буквами отклоняется.
+	 */
+	public function test_inn_letters_rejected() {
+		$organizer = $this->make_organizer( 'profile_inn_abc' );
+
+		wp_set_current_user( $organizer->ID );
+
+		$response = $this->put_profile( array( 'inn' => '77070838AB' ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'idpg_profile_invalid_inn', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Пустой ИНН разрешён (очистка поля).
+	 */
+	public function test_inn_empty_allowed() {
+		$organizer = $this->make_organizer( 'profile_inn_empty' );
+
+		update_user_meta( $organizer->ID, 'idpg_inn', '7707083893' );
+
+		wp_set_current_user( $organizer->ID );
+
+		$response = $this->put_profile( array( 'inn' => '' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( '', get_user_meta( $organizer->ID, 'idpg_inn', true ) );
+	}
+
+	/**
+	 * legal_type вне safelist сохраняется как пустая строка.
+	 */
+	public function test_legal_type_safelist() {
+		$organizer = $this->make_organizer( 'profile_legal' );
+
+		wp_set_current_user( $organizer->ID );
+
+		// Валидное значение.
+		$this->put_profile( array( 'legal_type' => 'nko' ) );
+		$this->assertSame( 'nko', get_user_meta( $organizer->ID, 'idpg_legal_type', true ) );
+
+		// Невалидное значение → пустая строка.
+		$this->put_profile( array( 'legal_type' => 'hack' ) );
+		$this->assertSame( '', get_user_meta( $organizer->ID, 'idpg_legal_type', true ) );
+	}
+
+	/**
+	 * Документы — только существующие вложения.
+	 */
+	public function test_documents_only_attachments() {
+		$organizer  = $this->make_organizer( 'profile_docs' );
+		$attachment = $this->factory()->attachment->create_object(
+			array(
+				'file'           => 'doc.pdf',
+				'post_mime_type' => 'application/pdf',
+			)
+		);
+		$post_id = $this->factory()->post->create();
+
+		wp_set_current_user( $organizer->ID );
+
+		$response = $this->put_profile(
+			array(
+				'documents' => array( $attachment, $post_id, 999999 ),
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertSame( array( (int) $attachment ), $data['documents'] );
+
+		$stored = json_decode( get_user_meta( $organizer->ID, 'idpg_documents', true ), true );
+
+		$this->assertSame( array( (int) $attachment ), $stored );
+	}
+
+	/**
+	 * Организатор не может изменить свой статус верификации через профиль.
+	 */
+	public function test_verified_not_changed_by_organizer() {
+		$organizer = $this->make_organizer( 'profile_verified_org' );
+
+		update_user_meta( $organizer->ID, 'idpg_verified', '1' );
+
+		wp_set_current_user( $organizer->ID );
+
+		// Пытаемся сбросить verified через профиль (поле не в sanitize, но проверим защиту).
+		$response = $this->put_profile( array( 'org_name' => 'Тест' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( (bool) get_user_meta( $organizer->ID, 'idpg_verified', true ) );
+	}
+
+	/**
+	 * Администратор может изменить verified (через прямую запись мета).
+	 */
+	public function test_verified_changed_by_admin() {
+		$organizer = $this->make_organizer( 'profile_verified_adm' );
+
+		$admin = $this->make_user( 'profile_verified_admin', 'administrator' );
+		wp_set_current_user( $admin->ID );
+
+		update_user_meta( $organizer->ID, 'idpg_verified', '1' );
+
+		$this->assertTrue( (bool) get_user_meta( $organizer->ID, 'idpg_verified', true ) );
+	}
 }

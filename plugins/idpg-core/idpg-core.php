@@ -73,6 +73,7 @@ if ( ! defined( 'IDPG_TICKET_API_URL' ) ) {
 /**
  * Подключение файлов классов.
  */
+require_once IDPG_CORE_DIR . 'includes/class-helpers.php';
 require_once IDPG_CORE_DIR . 'includes/class-cpt.php';
 require_once IDPG_CORE_DIR . 'includes/class-roles.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-filter.php';
@@ -82,6 +83,7 @@ require_once IDPG_CORE_DIR . 'includes/class-media.php';
 require_once IDPG_CORE_DIR . 'includes/class-favorites.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-scope.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-url.php';
+require_once IDPG_CORE_DIR . 'includes/class-organizer-meta.php';
 require_once IDPG_CORE_DIR . 'includes/class-template-helpers.php';
 require_once IDPG_CORE_DIR . 'includes/class-ticket-sync.php';
 require_once IDPG_CORE_DIR . 'includes/class-rest-api.php';

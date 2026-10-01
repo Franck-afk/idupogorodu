@@ -312,6 +312,20 @@ class IDPG_REST_Organizer {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_profile' ),
 					'permission_callback' => array( $this, 'can_profile' ),
+					'args'                => array(
+						'legal_type' => array(
+							'type'    => 'string',
+							'enum'    => IDPG_Organizer_URL::LEGAL_TYPES,
+						),
+						'inn'        => array(
+							'type'    => 'string',
+							'pattern' => '^\d{10}$|^\d{12}$',
+						),
+						'documents'  => array(
+							'type'  => 'array',
+							'items' => array( 'type' => 'integer' ),
+						),
+					),
 				),
 			)
 		);
@@ -2061,9 +2075,9 @@ class IDPG_REST_Organizer {
 			'price_from'   => (string) get_post_meta( $post->ID, '_idpg_price_from', true ),
 			'price_to'     => (string) get_post_meta( $post->ID, '_idpg_price_to', true ),
 			'vip_price'    => (string) get_post_meta( $post->ID, '_idpg_vip_price', true ),
-			'ticket_status' => (string) get_post_meta( $post->ID, '_idpg_ticket_status', true ),
-			'ticket_type'  => (string) get_post_meta( $post->ID, '_idpg_ticket_type', true ),
-			'ticket_url'   => (string) get_post_meta( $post->ID, '_idpg_ticket_url', true ),
+		'ticket_status' => IDPG_Helpers::get_ticket_status( $post->ID ),
+		'ticket_type'  => IDPG_Helpers::get_ticket_type( $post->ID ),
+		'ticket_url'   => IDPG_Helpers::get_ticket_url( $post->ID ),
 			'yandex_form_url' => (string) get_post_meta( $post->ID, '_idpg_yandex_form_url', true ),
 			'widget_code'  => (string) get_post_meta( $post->ID, '_idpg_widget_code', true ),
 			'address'      => (string) get_post_meta( $post->ID, '_idpg_address', true ),

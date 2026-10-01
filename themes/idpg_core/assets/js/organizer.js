@@ -168,9 +168,17 @@
 
       // idpg_org_profile_submit / idpg_org_profile_nonce — только для
       // no-JS пути, REST их не принимает.
-      ['display_name', 'org_name', 'contact_name', 'phone', 'avatar_id'].forEach(function(name){
+      ['display_name', 'org_name', 'contact_name', 'phone', 'avatar_id', 'legal_type', 'inn'].forEach(function(name){
         if (data.has(name)) payload[name] = data.get(name);
       });
+
+      if (data.has('documents')) {
+        try {
+          payload.documents = JSON.parse(data.get('documents'));
+        } catch (e) {
+          payload.documents = [];
+        }
+      }
 
       setBusy(true);
 

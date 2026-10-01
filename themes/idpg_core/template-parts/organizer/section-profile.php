@@ -19,6 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( current_user_can( 'upload_files' ) ) {
+	wp_enqueue_media();
+}
+
 // Данные профиля берём из IDPG_Organizer_URL — тот же источник, что и у
 // REST-ответа, поэтому форма и API не показывают разные значения.
 $idpg_org_profile = class_exists( 'IDPG_Organizer_URL' )
@@ -149,6 +153,69 @@ $idpg_org_notice = isset( $idpg_org_profile_notice ) ? (string) $idpg_org_profil
 			>
 		</p>
 
+		<p class="idpg-org-field">
+			<label class="idpg-org-field__label" for="idpg-org-legal-type">
+				<?php esc_html_e( 'Организационно-правовая форма', 'idpg_core' ); ?>
+			</label>
+			<select
+				class="idpg-org-field__input"
+				id="idpg-org-legal-type"
+				name="legal_type"
+			>
+				<?php
+				$idpg_org_legal_types = array(
+					''    => __( '— Не выбрана —', 'idpg_core' ),
+					'ip'  => __( 'Индивидуальный предприниматель', 'idpg_core' ),
+					'ooo' => __( 'Общество с ограниченной ответственностью', 'idpg_core' ),
+					'fiz' => __( 'Физическое лицо', 'idpg_core' ),
+					'nko' => __( 'Некоммерческая организация', 'idpg_core' ),
+				);
+				foreach ( $idpg_org_legal_types as $val => $label ) :
+					?>
+					<option value="<?php echo esc_attr( $val ); ?>" <?php selected( $idpg_org_profile['legal_type'], $val ); ?>>
+						<?php echo esc_html( $label ); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+		</p>
+
+		<p class="idpg-org-field">
+			<label class="idpg-org-field__label" for="idpg-org-inn">
+				<?php esc_html_e( 'ИНН', 'idpg_core' ); ?>
+			</label>
+			<input
+				class="idpg-org-field__input"
+				type="text"
+				id="idpg-org-inn"
+				name="inn"
+				value="<?php echo esc_attr( $idpg_org_profile['inn'] ); ?>"
+				pattern="\d{10}|\d{12}"
+				maxlength="12"
+				inputmode="numeric"
+				aria-describedby="idpg-org-inn-hint"
+			>
+			<span class="idpg-org-field__hint" id="idpg-org-inn-hint">
+				<?php esc_html_e( '10 или 12 цифр без пробелов.', 'idpg_core' ); ?>
+			</span>
+		</p>
+
+		<p class="idpg-org-field idpg-org-field--readonly">
+			<span class="idpg-org-field__label">
+				<?php esc_html_e( 'Верификация', 'idpg_core' ); ?>
+			</span>
+			<span class="idpg-org-field__value">
+				<?php if ( ! empty( $idpg_org_profile['verified'] ) ) : ?>
+					<span class="idpg-org-badge idpg-org-badge--success">
+						<?php esc_html_e( 'Верифицирован', 'idpg_core' ); ?>
+					</span>
+				<?php else : ?>
+					<span class="idpg-org-badge idpg-org-badge--pending">
+						<?php esc_html_e( 'Не верифицирован', 'idpg_core' ); ?>
+					</span>
+				<?php endif; ?>
+			</span>
+		</p>
+
 		<?php if ( ! empty( $idpg_org_profile['avatar_url'] ) ) : ?>
 			<p class="idpg-org-field idpg-org-field--avatar">
 				<span class="idpg-org-field__label"><?php esc_html_e( 'Аватар', 'idpg_core' ); ?></span>
@@ -162,6 +229,48 @@ $idpg_org_notice = isset( $idpg_org_profile_notice ) ? (string) $idpg_org_profil
 			</p>
 		<?php endif; ?>
 
+		<div class="idpg-org-field idpg-org-field--documents">
+			<span class="idpg-org-field__label"><?php esc_html_e( 'Документы', 'idpg_core' ); ?></span>
+
+			<input
+				type="hidden"
+				name="documents"
+				value="<?php echo esc_attr( wp_json_encode( $idpg_org_profile['documents'] ) ); ?>"
+				data-idpg-documents-input
+			>
+
+			<ul class="idpg-org-documents-list" data-idpg-documents-list>
+				<?php foreach ( $idpg_org_profile['documents'] as $doc_id ) : ?>
+					<?php
+					$doc = get_post( $doc_id );
+					if ( ! $doc ) {
+						continue;
+					}
+					?>
+					<li class="idpg-org-document" data-idpg-document-id="<?php echo esc_attr( (string) $doc_id ); ?>">
+						<span class="idpg-org-document__name"><?php echo esc_html( get_the_title( $doc_id ) ); ?></span>
+						<button type="button" class="idpg-org-document__remove" data-idpg-document-remove>
+							<?php esc_html_e( 'Удалить', 'idpg_core' ); ?>
+						</button>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+
+			<?php if ( current_user_can( 'upload_files' ) ) : ?>
+				<button
+					type="button"
+					class="idpg-btn idpg-btn--secondary"
+					data-idpg-documents-add
+				>
+					<?php esc_html_e( 'Добавить документы', 'idpg_core' ); ?>
+				</button>
+			<?php else : ?>
+				<p class="idpg-org-field__hint">
+					<?php esc_html_e( 'У вас нет прав на загрузку файлов.', 'idpg_core' ); ?>
+				</p>
+			<?php endif; ?>
+		</div>
+
 	</div>
 
 	<p class="idpg-org-profile__actions">
@@ -173,3 +282,64 @@ $idpg_org_notice = isset( $idpg_org_profile_notice ) ? (string) $idpg_org_profil
 		</span>
 	</p>
 </form>
+
+<?php if ( current_user_can( 'upload_files' ) ) : ?>
+<script>
+(function(){
+  var addBtn = document.querySelector('[data-idpg-documents-add]');
+  if (!addBtn) return;
+
+  var input = document.querySelector('[data-idpg-documents-input]');
+  var list  = document.querySelector('[data-idpg-documents-list]');
+
+  function getIds(){
+    try { return JSON.parse(input.value || '[]'); } catch(e) { return []; }
+  }
+
+  function setIds(ids){
+    input.value = JSON.stringify(ids);
+  }
+
+  function addDocument(id, title){
+    var ids = getIds();
+    if (ids.indexOf(id) !== -1) return;
+    ids.push(id);
+    setIds(ids);
+
+    var li = document.createElement('li');
+    li.className = 'idpg-org-document';
+    li.setAttribute('data-idpg-document-id', String(id));
+    li.innerHTML = '<span class="idpg-org-document__name">' + title + '</span>' +
+      '<button type="button" class="idpg-org-document__remove"><?php echo esc_js( __( 'Удалить', 'idpg_core' ) ); ?></button>';
+    list.appendChild(li);
+  }
+
+  list.addEventListener('click', function(e){
+    if (!e.target.matches('[data-idpg-document-remove]')) return;
+    var li = e.target.closest('[data-idpg-document-id]');
+    if (!li) return;
+    var id = parseInt(li.getAttribute('data-idpg-document-id'), 10);
+    var ids = getIds().filter(function(i){ return i !== id; });
+    setIds(ids);
+    li.remove();
+  });
+
+  addBtn.addEventListener('click', function(){
+    var frame = wp.media({
+      title: '<?php echo esc_js( __( 'Выберите документы', 'idpg_core' ) ); ?>',
+      button: { text: '<?php echo esc_js( __( 'Добавить', 'idpg_core' ) ); ?>' },
+      multiple: true,
+      library: { type: 'application/pdf,image/*' }
+    });
+
+    frame.on('select', function(){
+      frame.state().get('selection').each(function(attachment){
+        addDocument(attachment.id, attachment.get('title'));
+      });
+    });
+
+    frame.open();
+  });
+})();
+</script>
+<?php endif;
