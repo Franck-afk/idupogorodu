@@ -23,13 +23,13 @@ $idpg_venues_new_url = class_exists( 'IDPG_Organizer_URL' )
 ?>
 
 <div
-	class="dashboard"
+	class="idpg-org-body"
 	data-idpg-venues
 	data-idpg-venues-list-url="<?php echo esc_url( rest_url( 'idpg/v1/organizer/venues' ) ); ?>"
 	data-idpg-venues-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>"
 	data-idpg-venues-new-url="<?php echo esc_url( $idpg_venues_new_url ); ?>"
 >
-	<p class="dashboard__actions">
+	<p class="idpg-org-actions">
 		<a class="idpg-btn idpg-btn--primary" href="<?php echo esc_url( $idpg_venues_new_url ); ?>">
 			<?php esc_html_e( '+ Создать площадку', 'idpg_core' ); ?>
 		</a>
@@ -49,11 +49,11 @@ $idpg_venues_new_url = class_exists( 'IDPG_Organizer_URL' )
 		должен выглядеть как «у вас нет площадок», иначе организатор заведёт
 		дубли, решив, что потерял данные.
 	-->
-	<p class="dashboard__empty" data-idpg-venues-loading>
+	<p class="idpg-org-empty" data-idpg-venues-loading>
 		<?php esc_html_e( 'Загрузка…', 'idpg_core' ); ?>
 	</p>
 
-	<table class="dashboard__table" data-idpg-venues-table hidden>
+	<table class="idpg-org-table" data-idpg-venues-table hidden>
 		<thead>
 			<tr>
 				<th scope="col"><?php esc_html_e( 'Площадка', 'idpg_core' ); ?></th>
@@ -64,9 +64,9 @@ $idpg_venues_new_url = class_exists( 'IDPG_Organizer_URL' )
 		<tbody data-idpg-venues-body></tbody>
 	</table>
 
-	<div class="dashboard__empty" hidden data-idpg-venues-empty>
-		<p class="dashboard__title"><?php esc_html_e( 'Пока ни одной площадки', 'idpg_core' ); ?></p>
-		<p class="dashboard__subtitle">
+	<div class="idpg-org-empty" hidden data-idpg-venues-empty>
+		<p class="idpg-org-empty__title"><?php esc_html_e( 'Пока ни одной площадки', 'idpg_core' ); ?></p>
+		<p class="idpg-org-empty__text">
 			<?php esc_html_e( 'Создайте площадку, чтобы затем выбирать её в событиях.', 'idpg_core' ); ?>
 		</p>
 	</div>

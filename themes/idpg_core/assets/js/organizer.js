@@ -35,6 +35,31 @@
     concert: 'Концертный зал'
   };
 
+  // Подписи колонок таблиц объявлены здесь по той же причине, что и
+  // VENUE_TYPE_LABELS выше: initStats/initEvents/initVenues вызываются
+  // ниже, а строки таблиц строятся синхронно внутри них, когда ответ REST
+  // приходит мгновенно (кеш, Service Worker, тестовый стенд). Присваивание
+  // позже строк — значит undefined в VENUE_COLUMNS[0] и упавшая таблица.
+  //
+  // На экранах уже 640px таблица перестраивается в список карточек, и подпись
+  // колонки показывается через `td::before { content: attr(data-label) }`.
+  // Значение data-label обязан проставить скрипт: из разметки шаблона в ячейку
+  // оно не попадёт, потому что строки целиком строятся здесь.
+  var EVENT_COLUMNS = ['Событие', 'Статус', 'Просмотры'];
+  var VENUE_COLUMNS = ['Площадка', 'Тип', 'Адрес'];
+
+  /**
+   * Ячейка таблицы с подписью колонки для мобильной раскладки.
+   *
+   * @param {string} label Подпись колонки.
+   * @returns {HTMLTableCellElement} Готовая ячейка.
+   */
+  function cellWithLabel(label){
+    var td = document.createElement('td');
+    td.setAttribute('data-label', label);
+    return td;
+  }
+
   initStats(root);
   initEvents(root);
   initVenues(root);
@@ -241,13 +266,17 @@
 
   /**
    * Метки статусов. Русские подписи и классы бейджей — из
-   * `_dashboard.scss` (`.dashboard__badge--*`).
+   * `_organizer.scss` (`.idpg-org-badge--*`).
+   *
+   * У `rejected` собственный класс: отклонённое модерацией событие — это
+   * ошибка, а не черновик, и рисовать его тем же серым, что и draft, было
+   * вводящим в заблуждение (DEV-196).
    */
   var STATUS_META = {
-    publish:  { label: 'Опубликовано', badge: 'dashboard__badge--publish' },
-    pending:  { label: 'На модерации', badge: 'dashboard__badge--pending' },
-    draft:    { label: 'Черновик', badge: 'dashboard__badge--draft' },
-    rejected: { label: 'Отклонено', badge: 'dashboard__badge--draft' }
+    publish:  { label: 'Опубликовано', badge: 'idpg-org-badge--publish' },
+    pending:  { label: 'На модерации', badge: 'idpg-org-badge--pending' },
+    draft:    { label: 'Черновик', badge: 'idpg-org-badge--draft' },
+    rejected: { label: 'Отклонено', badge: 'idpg-org-badge--rejected' }
   };
 
   /**
@@ -443,7 +472,7 @@
     function renderFilters(){
       Array.prototype.forEach.call(filters, function(btn){
         btn.classList.toggle(
-          'dashboard__filter-btn--active',
+          'idpg-org-filter--active',
           btn.getAttribute('data-idpg-events-filter') === state.status
         );
       });
@@ -483,19 +512,19 @@
      * @returns {Element} Элемент-контейнер с img или без него.
      */
     function posterCell(posterId){
-      var cell = document.createElement('div');
-      cell.className = 'dashboard__table-thumb';
+      var thumb = document.createElement('div');
+      thumb.className = 'idpg-org-table__thumb';
 
       var url = attachmentUrl(posterId);
-      if (!url) return cell;
+      if (!url) return thumb;
 
       var img = document.createElement('img');
       img.src = url;
       img.alt = '';
       img.loading = 'lazy';
-      cell.appendChild(img);
+      thumb.appendChild(img);
 
-      return cell;
+      return thumb;
     }
 
     /**
@@ -558,7 +587,7 @@
      */
     function editLink(item){
       var a = document.createElement('a');
-      a.className = 'dashboard__table-title';
+      a.className = 'idpg-org-table__title';
       a.href = editBase + item.id + '/';
       a.textContent = item.title || 'Без названия';
       return a;
@@ -574,7 +603,7 @@
       if (item.status !== 'publish' || !item.permalink) return null;
 
       var a = document.createElement('a');
-      a.className = 'dashboard__table-links';
+      a.className = 'idpg-org-table__links';
       a.href = item.permalink;
       a.textContent = 'Открыть';
       a.target = '_blank';
@@ -596,31 +625,31 @@
       items.forEach(function(item){
         var tr = document.createElement('tr');
 
-        var titleCell = document.createElement('td');
+        var titleCell = cellWithLabel(EVENT_COLUMNS[0]);
         titleCell.appendChild(posterCell(item.poster_id));
         var link = editLink(item);
         var wrap = document.createElement('div');
-        wrap.className = 'dashboard__table-title';
+        wrap.className = 'idpg-org-table__title';
         wrap.appendChild(link);
         var pl = permalinkLink(item);
         if (pl){
           var links = document.createElement('div');
-          links.className = 'dashboard__table-links';
+          links.className = 'idpg-org-table__links';
           links.appendChild(pl);
           wrap.appendChild(links);
         }
         titleCell.appendChild(wrap);
         tr.appendChild(titleCell);
 
-        var statusCell = document.createElement('td');
-        var meta = STATUS_META[item.status] || { label: item.status, badge: 'dashboard__badge--draft' };
+        var statusCell = cellWithLabel(EVENT_COLUMNS[1]);
+        var meta = STATUS_META[item.status] || { label: item.status, badge: 'idpg-org-badge--draft' };
         var badge = document.createElement('span');
-        badge.className = 'dashboard__badge ' + meta.badge;
+        badge.className = 'idpg-org-badge ' + meta.badge;
         badge.textContent = meta.label;
         statusCell.appendChild(badge);
         tr.appendChild(statusCell);
 
-        var viewsCell = document.createElement('td');
+        var viewsCell = cellWithLabel(EVENT_COLUMNS[2]);
         viewsCell.textContent = String(item.views || 0);
         tr.appendChild(viewsCell);
 
@@ -770,14 +799,14 @@
    */
   function venueRow(venue){
     var tr = document.createElement('tr');
-    var titleCell = document.createElement('td');
-    var typeCell = document.createElement('td');
-    var addressCell = document.createElement('td');
+    var titleCell = cellWithLabel(VENUE_COLUMNS[0]);
+    var typeCell = cellWithLabel(VENUE_COLUMNS[1]);
+    var addressCell = cellWithLabel(VENUE_COLUMNS[2]);
 
     // Чужая опубликованная площадка: она видна, чтобы её можно было выбрать
     // в событии, но правки у организатора нет — клик по форме правки упёрся
     // бы в 403. Поэтому это текст, а не ссылка, и отдельный класс: общий
-    // `dashboard__table-title` красит при наведении и выдаёт span за ссылку.
+    // `idpg-org-table__title` красит при наведении и выдаёт span за ссылку.
     if (!venue.is_own){
       var note = document.createElement('span');
       note.className = 'venue-form__note';

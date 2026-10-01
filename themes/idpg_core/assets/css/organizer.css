@@ -1,295 +1,676 @@
-/* ==========================================================================
-   Кабинет организатора (/organizer/)
-   Стили только для страницы кабинета — область ограничена .idpg-org-page,
-   глобальные классы темы не переопределяются.
-   ========================================================================== */
-
+@charset "UTF-8";
+/* --- Страница и каркас ---------------------------------------------------- */
 .idpg-org-page {
-	padding: 32px 0 64px;
+  padding-bottom: var(--idpg-space-xl);
 }
 
-/* --- Шапка кабинета --- */
 .idpg-org-header {
-	margin-bottom: 24px;
+  margin-bottom: var(--idpg-space-lg);
 }
 
 .idpg-org-header__title {
-	margin: 0 0 6px;
-	font-size: clamp(24px, 3vw, 34px);
-	line-height: 1.2;
-	color: var(--idpg-ink);
+  margin: 0 0 var(--idpg-space-xxs);
+  font-family: "Gilroy", sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--idpg-ink);
 }
 
 .idpg-org-header__subtitle {
-	margin: 0;
-	font-size: 15px;
-	color: var(--idpg-body);
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--idpg-muted);
 }
 
-/* --- Раскладка: сайдбар + контент --- */
 .idpg-org-layout {
-	display: grid;
-	grid-template-columns: 260px minmax(0, 1fr);
-	gap: 24px;
-	align-items: start;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--idpg-space-lg);
 }
 
-/* --- Сайдбар --- */
-.idpg-org-sidebar {
-	padding: 8px;
-	background: var(--idpg-canvas);
-	border: 1px solid var(--idpg-hairline);
-	border-radius: 16px;
+@media (min-width: 1024px) {
+  .idpg-org-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: var(--idpg-space-xl);
+    align-items: start;
+  }
 }
-
+@media (min-width: 1024px) {
+  .idpg-org-sidebar {
+    position: sticky;
+    top: 104px;
+  }
+}
+/* --- Меню разделов -------------------------------------------------------- */
 .idpg-org-nav {
-	margin: 0;
-	padding: 0;
-	list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--idpg-space-xxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.idpg-org-nav__item + .idpg-org-nav__item {
-	margin-top: 2px;
+@media (max-width: 1023px) {
+  .idpg-org-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: var(--idpg-space-xxs);
+    -webkit-overflow-scrolling: touch;
+  }
 }
-
 .idpg-org-nav__link {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 11px 14px;
-	font-size: 15px;
-	font-weight: 500;
-	color: var(--idpg-ink);
-	text-decoration: none;
-	border-radius: 12px;
-	transition: background-color var(--idpg-transition), color var(--idpg-transition);
+  display: flex;
+  align-items: center;
+  gap: var(--idpg-space-xs);
+  padding: var(--idpg-space-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--idpg-body);
+  text-decoration: none;
+  background: var(--idpg-canvas);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-md);
+  white-space: nowrap;
+  transition: background-color var(--idpg-transition), border-color var(--idpg-transition), color var(--idpg-transition);
 }
 
 .idpg-org-nav__link:hover {
-	background: var(--idpg-surface-soft);
+  color: var(--idpg-ink);
+  background: var(--idpg-surface-soft);
+  border-color: var(--idpg-muted);
 }
 
-.idpg-org-nav__link.is-active,
-.idpg-org-nav__link[aria-current="page"] {
-	color: var(--idpg-primary);
-	background: var(--idpg-primary-bg);
+.idpg-org-nav__link:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: 2px;
+}
+
+.idpg-org-nav__link.is-active {
+  font-weight: 600;
+  color: var(--idpg-primary);
+  background: var(--idpg-primary-bg);
+  border-color: var(--idpg-primary);
 }
 
 .idpg-org-nav__icon {
-	display: inline-flex;
-	justify-content: center;
-	width: 20px;
-	font-size: 15px;
-	line-height: 1;
-	opacity: 0.85;
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1;
 }
 
-/* --- Контент-область --- */
+.idpg-org-nav__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .idpg-org-content {
-	min-width: 0;
+  min-width: 0;
 }
 
+/* --- Карточка раздела ----------------------------------------------------- */
 .idpg-org-section {
-	padding: 24px;
-	background: var(--idpg-canvas);
-	border: 1px solid var(--idpg-hairline);
-	border-radius: 16px;
+  padding: var(--idpg-space-lg) var(--idpg-space-md);
+  background: var(--idpg-canvas);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-md);
 }
 
-/* Явно гасим скрытые разделы: любое объявление display в CSS
-   перебивает служебный display:none от атрибута hidden. */
 .idpg-org-section[hidden] {
-	display: none;
+  display: none;
 }
 
+@media (min-width: 768px) {
+  .idpg-org-section {
+    padding: var(--idpg-space-xl);
+  }
+}
 .idpg-org-section__title {
-	margin: 0 0 8px;
-	font-size: 22px;
-	line-height: 1.25;
-	color: var(--idpg-ink);
-	outline: none;
+  margin: 0 0 var(--idpg-space-xs);
+  font-family: "Gilroy", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--idpg-ink);
 }
 
 .idpg-org-section__lead {
-	margin: 0 0 20px;
-	font-size: 15px;
-	color: var(--idpg-body);
+  margin: 0 0 var(--idpg-space-lg);
+  font-size: 0.875rem;
+  color: var(--idpg-body);
 }
 
-/* --- Карточки сводки (значения — заглушки) --- */
-.idpg-org-cards {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-	gap: 12px;
-	margin-bottom: 20px;
-}
-
-.idpg-org-card {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-	padding: 16px;
-	background: var(--idpg-surface-soft);
-	border: 1px solid var(--idpg-hairline);
-	border-radius: 14px;
-}
-
-.idpg-org-card__label {
-	font-size: 13px;
-	color: var(--idpg-body);
-}
-
-.idpg-org-card__value {
-	font-size: 28px;
-	font-weight: 600;
-	line-height: 1.1;
-	color: var(--idpg-muted-soft);
-}
-
-.idpg-org-card__hint {
-	font-size: 12px;
-	color: var(--idpg-muted);
-}
-
-/* --- Заглушка раздела --- */
-.idpg-org-empty {
-	padding: 24px;
-	text-align: center;
-	background: var(--idpg-surface-soft);
-	border: 1px dashed var(--idpg-hairline);
-	border-radius: 14px;
-}
-
-.idpg-org-empty__title {
-	margin: 0 0 8px;
-	font-size: 17px;
-	font-weight: 600;
-	color: var(--idpg-ink);
-}
-
-.idpg-org-empty__text {
-	margin: 0 0 8px;
-	font-size: 14px;
-	color: var(--idpg-body);
-}
-
-.idpg-org-empty__actions {
-	margin: 16px 0 0;
-}
-
-/* --- Поля профиля --- */
-.idpg-org-fields {
-	margin: 0 0 20px;
-	padding: 0;
-}
-
-.idpg-org-fields__row {
-	display: grid;
-	grid-template-columns: 200px minmax(0, 1fr);
-	gap: 12px;
-	padding: 12px 0;
-	border-bottom: 1px solid var(--idpg-hairline-soft);
-}
-
-.idpg-org-fields__row:last-child {
-	border-bottom: 0;
-}
-
-.idpg-org-fields__label {
-	margin: 0;
-	font-size: 14px;
-	color: var(--idpg-body);
-}
-
-.idpg-org-fields__value {
-	margin: 0;
-	font-size: 15px;
-	color: var(--idpg-ink);
-	word-break: break-word;
-}
-
-.idpg-org-fields__empty {
-	color: var(--idpg-muted-soft);
-}
-
-/* --- Информационные блоки внутри кабинета ---
-   Глобальный класс .idpg-notice в теме не стилизован, поэтому задаём
-   оформление локально, не затрагивая другие страницы. */
-.idpg-org-page .idpg-notice {
-	margin: 0;
-	padding: 14px 16px;
-	font-size: 14px;
-	color: var(--idpg-body);
-	background: var(--idpg-surface-soft);
-	border: 1px solid var(--idpg-hairline);
-	border-radius: 12px;
-}
-
-/* --- 403: нет доступа --- */
+/* --- Отказ в доступе ------------------------------------------------------ */
 .idpg-org-denied {
-	max-width: 620px;
-	margin: 40px auto;
-	padding: 32px 24px;
-	text-align: center;
-	background: var(--idpg-canvas);
-	border: 1px solid var(--idpg-hairline);
-	border-radius: 16px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--idpg-space-xl) var(--idpg-space-lg);
+  text-align: center;
+  background: var(--idpg-canvas);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-md);
 }
 
 .idpg-org-denied__title {
-	margin: 0 0 12px;
-	font-size: 26px;
-	color: var(--idpg-ink);
+  margin: 0 0 var(--idpg-space-sm);
+  font-family: "Gilroy", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--idpg-ink);
 }
 
 .idpg-org-denied__text {
-	margin: 0 0 20px;
-	font-size: 15px;
-	color: var(--idpg-body);
+  margin: 0 0 var(--idpg-space-lg);
+  font-size: 16px;
+  color: var(--idpg-body);
 }
 
 .idpg-org-denied__actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 12px;
-	justify-content: center;
-	margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--idpg-space-sm);
+  justify-content: center;
+  margin: 0;
 }
 
-/* --- Адаптив --- */
-@media (max-width: 900px) {
-	.idpg-org-layout {
-		grid-template-columns: 1fr;
-	}
-
-	.idpg-org-sidebar {
-		padding: 6px;
-	}
-
-	/* Меню в одну строку с горизонтальной прокруткой — как вкладки. */
-	.idpg-org-nav {
-		display: flex;
-		gap: 4px;
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-	}
-
-	.idpg-org-nav__item + .idpg-org-nav__item {
-		margin-top: 0;
-	}
-
-	.idpg-org-nav__link {
-		white-space: nowrap;
-	}
+/* --- Уведомления ---------------------------------------------------------- */
+.idpg-notice {
+  margin-bottom: var(--idpg-space-md);
+  padding: var(--idpg-space-sm) var(--idpg-space-base);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border: 1px solid transparent;
+  border-radius: var(--idpg-radius-sm);
 }
 
+.idpg-notice--info {
+  color: var(--idpg-primary-active);
+  background: var(--idpg-primary-bg);
+  border-color: var(--idpg-status-publish-bg);
+}
+
+.idpg-notice--success {
+  color: var(--idpg-success-text);
+  background: var(--idpg-success-bg);
+  border-color: var(--idpg-hairline);
+}
+
+.idpg-notice--error {
+  color: var(--idpg-error-text);
+  background: var(--idpg-error-bg);
+  border-color: var(--idpg-hairline);
+}
+
+/* --- Внутренний блок раздела --------------------------------------------- */
+.idpg-org-body {
+  display: flow-root;
+}
+
+.idpg-org-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--idpg-space-sm);
+  margin: 0 0 var(--idpg-space-lg);
+}
+
+/* --- Карточки метрик ------------------------------------------------------ */
+.idpg-org-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--idpg-space-sm);
+  margin-bottom: var(--idpg-space-md);
+}
+
+.idpg-org-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--idpg-space-xxs);
+  padding: var(--idpg-space-base);
+  background: var(--idpg-surface-soft);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-md);
+}
+
+.idpg-org-card__value {
+  font-family: "Gilroy", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--idpg-ink);
+}
+
+.idpg-org-card__label {
+  font-size: 0.8125rem;
+  color: var(--idpg-muted);
+}
+
+/* Цвет значения карточки — по модификатору самой карточки. */
+.idpg-org-card--primary .idpg-org-card__value {
+  color: var(--idpg-primary);
+}
+
+.idpg-org-card--success .idpg-org-card__value {
+  color: var(--idpg-up);
+}
+
+.idpg-org-card--warning .idpg-org-card__value {
+  color: var(--idpg-accent-yellow);
+}
+
+.idpg-org-card--muted .idpg-org-card__value {
+  color: var(--idpg-muted);
+}
+
+/* --- Фильтры статусов ----------------------------------------------------- */
+.idpg-org-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--idpg-space-xs);
+  margin-bottom: var(--idpg-space-base);
+}
+
+.idpg-org-filter {
+  padding: var(--idpg-space-xs);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--idpg-muted);
+  background: var(--idpg-canvas);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-full);
+  cursor: pointer;
+  transition: background-color var(--idpg-transition), border-color var(--idpg-transition), color var(--idpg-transition);
+}
+
+.idpg-org-filter:hover {
+  color: var(--idpg-ink);
+  border-color: var(--idpg-muted);
+}
+
+.idpg-org-filter--active {
+  color: var(--idpg-on-primary);
+  background: var(--idpg-primary);
+  border-color: var(--idpg-primary);
+}
+
+.idpg-org-filter:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: 2px;
+}
+
+/* --- Таблица -------------------------------------------------------------- */
+.idpg-org-table {
+  width: 100%;
+  font-size: 0.875rem;
+  border-collapse: collapse;
+}
+
+.idpg-org-table th,
+.idpg-org-table td {
+  padding: var(--idpg-space-sm) var(--idpg-space-xs);
+  text-align: left;
+  border-bottom: 1px solid var(--idpg-hairline);
+}
+
+.idpg-org-table th {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--idpg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.idpg-org-table tbody tr:hover td {
+  background: var(--idpg-surface-soft);
+}
+
+.idpg-org-table__title {
+  font-weight: 600;
+  color: var(--idpg-ink);
+  text-decoration: none;
+}
+
+.idpg-org-table__title:hover {
+  color: var(--idpg-primary);
+}
+
+.idpg-org-table__thumb {
+  width: 40px;
+  height: 40px;
+  margin-right: var(--idpg-space-xs);
+  vertical-align: middle;
+  object-fit: cover;
+  background: var(--idpg-surface-soft);
+  border-radius: var(--idpg-radius-xs);
+}
+
+.idpg-org-table__links {
+  display: flex;
+  gap: var(--idpg-space-xs);
+}
+
+.idpg-org-table__links a {
+  font-size: 0.8125rem;
+  color: var(--idpg-primary);
+  text-decoration: none;
+}
+
+.idpg-org-table__links a:hover {
+  text-decoration: underline;
+}
+
+/*
+  Мобильная раскладка: таблица становится списком карточек, а подпись
+  колонки берётся из data-label, который проставляет organizer.js при
+  создании ячейки. Без атрибута подписи не будет — см. organizer.js,
+  COLUMN_LABELS.
+*/
 @media (max-width: 640px) {
-	.idpg-org-section {
-		padding: 18px;
-	}
+  .idpg-org-table,
+  .idpg-org-table tbody,
+  .idpg-org-table tr,
+  .idpg-org-table td {
+    display: block;
+  }
+  .idpg-org-table thead {
+    display: none;
+  }
+  .idpg-org-table tr {
+    margin-bottom: var(--idpg-space-sm);
+    padding: var(--idpg-space-base);
+    border: 1px solid var(--idpg-hairline);
+    border-radius: var(--idpg-radius-md);
+  }
+  .idpg-org-table tbody tr:hover td {
+    background: transparent;
+  }
+  .idpg-org-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--idpg-space-xs);
+    padding: var(--idpg-space-xxs) 0;
+    border-bottom: none;
+  }
+  .idpg-org-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--idpg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .idpg-org-table td:first-child {
+    padding-top: 0;
+  }
+  .idpg-org-table td:last-child {
+    padding-bottom: 0;
+  }
+}
+/* --- Бейджи статусов ------------------------------------------------------ */
+.idpg-org-badge {
+  display: inline-block;
+  padding: var(--idpg-space-xxs);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: var(--idpg-radius-full);
+}
 
-	.idpg-org-fields__row {
-		grid-template-columns: 1fr;
-		gap: 2px;
-	}
+.idpg-org-badge--publish {
+  color: var(--idpg-status-publish-text);
+  background: var(--idpg-status-publish-bg);
+}
+
+/* Бейдж верификации в разделе «Профиль». */
+.idpg-org-badge--success {
+  color: var(--idpg-success-text);
+  background: var(--idpg-success-bg);
+}
+
+.idpg-org-badge--pending {
+  color: var(--idpg-status-pending-text);
+  background: var(--idpg-status-pending-bg);
+}
+
+.idpg-org-badge--draft {
+  color: var(--idpg-status-draft-text);
+  background: var(--idpg-status-draft-bg);
+}
+
+/* Отклонённое событие — это ошибка модерации, а не черновик,
+   поэтому у него собственный цвет, а не серый как у draft. */
+.idpg-org-badge--rejected {
+  color: var(--idpg-error-text);
+  background: var(--idpg-error-bg);
+}
+
+/* --- Пустое состояние ----------------------------------------------------- */
+.idpg-org-empty {
+  padding: var(--idpg-space-xxl) var(--idpg-space-lg);
+  text-align: center;
+  background: var(--idpg-surface-soft);
+  border: 1px dashed var(--idpg-hairline);
+  border-radius: var(--idpg-radius-md);
+}
+
+.idpg-org-empty__title {
+  margin: 0 0 var(--idpg-space-xs);
+  font-family: "Gilroy", sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--idpg-ink);
+}
+
+.idpg-org-empty__text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--idpg-body);
+}
+
+.idpg-org-empty__text:last-of-type {
+  margin-bottom: 0;
+}
+
+.idpg-org-empty__actions {
+  margin: var(--idpg-space-md) 0 0;
+}
+
+/* --- Постраничная навигация ------------------------------------------------ */
+.idpg-org-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--idpg-space-xs);
+  justify-content: center;
+  margin-top: var(--idpg-space-lg);
+}
+
+.idpg-org-pagination button {
+  padding: var(--idpg-space-xs);
+  font-size: 0.875rem;
+  color: var(--idpg-ink);
+  background: var(--idpg-canvas);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-md);
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .idpg-org-pagination button {
+    padding: var(--idpg-space-xs);
+    font-size: 0.8125rem;
+  }
+}
+.idpg-org-pagination button:hover {
+  background: var(--idpg-surface-soft);
+}
+
+.idpg-org-pagination button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.idpg-org-pagination .idpg-org-page--active {
+  color: var(--idpg-on-primary);
+  background: var(--idpg-primary);
+  border-color: var(--idpg-primary);
+}
+
+/* --- Профиль -------------------------------------------------------------- */
+.idpg-org-profile__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--idpg-space-md);
+}
+
+@media (min-width: 768px) {
+  .idpg-org-profile__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.idpg-org-profile__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--idpg-space-sm);
+  margin: var(--idpg-space-lg) 0 0;
+}
+
+.idpg-org-profile__status {
+  font-size: 0.875rem;
+  color: var(--idpg-muted);
+}
+
+.idpg-org-profile__status[hidden] {
+  display: none;
+}
+
+.idpg-org-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--idpg-space-xs);
+  margin: 0;
+}
+
+.idpg-org-field--avatar {
+  grid-column: 1/-1;
+}
+
+.idpg-org-field__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--idpg-body);
+}
+
+.idpg-org-field__input {
+  width: 100%;
+  padding: var(--idpg-space-base);
+  font-family: "Gilroy", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  color: var(--idpg-ink);
+  background: var(--idpg-canvas);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-sm);
+  outline: none;
+  transition: border-color var(--idpg-transition), box-shadow var(--idpg-transition);
+}
+
+.idpg-org-field__input::placeholder {
+  color: var(--idpg-muted);
+}
+
+.idpg-org-field__input:focus {
+  border-color: var(--idpg-primary);
+  box-shadow: 0 0 0 3px var(--idpg-primary-bg);
+}
+
+.idpg-org-field__input[readonly] {
+  color: var(--idpg-muted);
+  background: var(--idpg-surface-soft);
+  cursor: default;
+}
+
+.idpg-org-field__hint {
+  font-size: 0.8125rem;
+  color: var(--idpg-muted);
+}
+
+/* --- Профиль: поля только для чтения ------------------------------------- */
+/*
+  В форме профиля есть поля, которые нельзя редактировать (верификация,
+  документы). Раньше они размечались классами idpg-org-field--readonly,
+  idpg-org-field__value и т.д., для которых в этом партиале не было ни
+  одного правила — блок выглядел как обычный текст без рамки.
+*/
+.idpg-org-field--readonly .idpg-org-field__value {
+  min-height: 40px;
+  padding: var(--idpg-space-sm) var(--idpg-space-base);
+  font-size: 16px;
+  color: var(--idpg-body);
+  background: var(--idpg-surface-soft);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-sm);
+}
+
+.idpg-org-field--documents {
+  grid-column: 1/-1;
+}
+
+.idpg-org-documents-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.idpg-org-document {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--idpg-space-sm);
+  padding: var(--idpg-space-xs) 0;
+  border-bottom: 1px solid var(--idpg-hairline);
+}
+
+.idpg-org-document:last-child {
+  border-bottom: none;
+}
+
+.idpg-org-document__name {
+  overflow: hidden;
+  font-size: 0.875rem;
+  color: var(--idpg-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.idpg-org-document__remove {
+  flex-shrink: 0;
+  padding: var(--idpg-space-xxs) var(--idpg-space-sm);
+  font-size: 0.8125rem;
+  color: var(--idpg-error-text);
+  background: var(--idpg-error-bg);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-xs);
+  cursor: pointer;
+  transition: background-color var(--idpg-transition), color var(--idpg-transition);
+}
+
+.idpg-org-document__remove:hover {
+  color: var(--idpg-on-primary);
+  background: var(--idpg-down);
+  border-color: var(--idpg-down);
+}
+
+.idpg-org-document__remove:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: 2px;
+}
+
+.idpg-org-field__avatar {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  background: var(--idpg-surface-soft);
+  border: 1px solid var(--idpg-hairline);
+  border-radius: var(--idpg-radius-full);
 }

@@ -23,7 +23,7 @@ $idpg_events_new_url = function_exists( 'idpg_organizer_event_form_url' )
 ?>
 
 <div
-	class="dashboard"
+	class="idpg-org-body"
 	data-idpg-events
 	data-idpg-events-url="<?php echo esc_url( rest_url( 'idpg/v1/organizer/events' ) ); ?>"
 	data-idpg-stats-url="<?php echo esc_url( rest_url( 'idpg/v1/organizer/stats' ) ); ?>"
@@ -31,7 +31,7 @@ $idpg_events_new_url = function_exists( 'idpg_organizer_event_form_url' )
 	data-idpg-media-url="<?php echo esc_url( rest_url( 'wp/v2/media' ) ); ?>"
 	data-idpg-events-edit-base="<?php echo esc_url( home_url( '/organizer/event/' ) ); ?>"
 >
-	<div class="dashboard__filters" data-idpg-events-filters>
+	<div class="idpg-org-filters" data-idpg-events-filters>
 		<?php
 		/*
 		 * `all` сервер не понимает и трактует как «все рабочие статусы»
@@ -49,7 +49,7 @@ $idpg_events_new_url = function_exists( 'idpg_organizer_event_form_url' )
 
 		<?php foreach ( $idpg_events_tabs as $idpg_events_tab => $idpg_events_tab_label ) : ?>
 			<button
-				class="dashboard__filter-btn<?php echo 'all' === $idpg_events_tab ? ' dashboard__filter-btn--active' : ''; ?>"
+				class="idpg-org-filter<?php echo 'all' === $idpg_events_tab ? ' idpg-org-filter--active' : ''; ?>"
 				type="button"
 				data-idpg-events-filter="<?php echo esc_attr( $idpg_events_tab ); ?>"
 			>
@@ -59,13 +59,13 @@ $idpg_events_new_url = function_exists( 'idpg_organizer_event_form_url' )
 		<?php endforeach; ?>
 	</div>
 
-	<p class="dashboard__actions">
+	<p class="idpg-org-actions">
 		<a class="idpg-btn idpg-btn--primary" href="<?php echo esc_url( $idpg_events_new_url ); ?>">
 			<?php esc_html_e( '+ Создать событие', 'idpg_core' ); ?>
 		</a>
 	</p>
 
-	<table class="dashboard__table">
+	<table class="idpg-org-table">
 		<thead>
 			<tr>
 				<th scope="col"><?php esc_html_e( 'Событие', 'idpg_core' ); ?></th>
@@ -80,21 +80,21 @@ $idpg_events_new_url = function_exists( 'idpg_organizer_event_form_url' )
 		</tbody>
 	</table>
 
-	<div class="dashboard__empty" hidden data-idpg-events-empty>
-		<p class="dashboard__title"><?php esc_html_e( 'Пока пусто', 'idpg_core' ); ?></p>
-		<p class="dashboard__subtitle">
+	<div class="idpg-org-empty" hidden data-idpg-events-empty>
+		<p class="idpg-org-empty__title"><?php esc_html_e( 'Пока пусто', 'idpg_core' ); ?></p>
+		<p class="idpg-org-empty__text">
 			<?php esc_html_e( 'Создайте первое событие — после сохранения черновика его можно отправить на модерацию.', 'idpg_core' ); ?>
 		</p>
 	</div>
 
 	<nav
-		class="dashboard__pagination"
+		class="idpg-org-pagination"
 		aria-label="<?php esc_attr_e( 'Постраничная навигация', 'idpg_core' ); ?>"
 		data-idpg-events-pagination
 		hidden
 	>
 		<button
-			class="dashboard__filter-btn"
+			class="idpg-org-filter"
 			type="button"
 			data-idpg-events-prev
 		>
@@ -102,7 +102,7 @@ $idpg_events_new_url = function_exists( 'idpg_organizer_event_form_url' )
 		</button>
 		<span data-idpg-events-page-label></span>
 		<button
-			class="dashboard__filter-btn"
+			class="idpg-org-filter"
 			type="button"
 			data-idpg-events-next
 		>

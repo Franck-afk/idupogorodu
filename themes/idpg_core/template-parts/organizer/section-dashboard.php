@@ -24,12 +24,12 @@ $idpg_dash_new_url = function_exists( 'idpg_organizer_event_form_url' )
 ?>
 
 <div
-	class="dashboard"
+	class="idpg-org-body"
 	data-idpg-stats
 	data-idpg-stats-url="<?php echo esc_url( rest_url( 'idpg/v1/organizer/stats' ) ); ?>"
 	data-idpg-stats-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>"
 >
-	<div class="dashboard__stats" data-idpg-stats-list>
+	<div class="idpg-org-cards" data-idpg-stats-list>
 
 		<?php
 		/*
@@ -58,11 +58,11 @@ $idpg_dash_new_url = function_exists( 'idpg_organizer_event_form_url' )
 		?>
 
 		<?php foreach ( $idpg_dash_cards as $idpg_dash_modifier => $idpg_dash_card ) : ?>
-			<div class="dashboard__stat-card dashboard__stat-card--<?php echo esc_attr( $idpg_dash_modifier ); ?>">
-				<div class="dashboard__stat-number" data-idpg-stats-value="<?php echo esc_attr( $idpg_dash_card['slot'] ); ?>">
+			<div class="idpg-org-card idpg-org-card--<?php echo esc_attr( $idpg_dash_modifier ); ?>">
+				<div class="idpg-org-card__value" data-idpg-stats-value="<?php echo esc_attr( $idpg_dash_card['slot'] ); ?>">
 					&mdash;
 				</div>
-				<div class="dashboard__stat-label">
+				<div class="idpg-org-card__label">
 					<?php echo esc_html( $idpg_dash_card['label'] ); ?>
 				</div>
 			</div>
@@ -70,7 +70,7 @@ $idpg_dash_new_url = function_exists( 'idpg_organizer_event_form_url' )
 
 	</div>
 
-	<p class="dashboard__actions">
+	<p class="idpg-org-actions">
 		<a class="idpg-btn idpg-btn--primary" href="<?php echo esc_url( $idpg_dash_new_url ); ?>">
 			<?php esc_html_e( '+ Создать событие', 'idpg_core' ); ?>
 		</a>

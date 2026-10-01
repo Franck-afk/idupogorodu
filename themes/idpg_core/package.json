@@ -10,19 +10,22 @@
     "idpg"
   ],
   "homepage": "https://idupogorodu.ru",
-    "devDependencies": {
-      "@wordpress/scripts": "^19.2.2",
-      "dir-archiver": "^1.1.1",
-      "sass": "^1.69.0",
-      "stylelint": "^13.13.1",
-      "stylelint-config-recommended-scss": "^4.3.0"
-    },
+  "devDependencies": {
+    "@wordpress/scripts": "^19.2.2",
+    "dir-archiver": "^1.1.1",
+    "sass": "^1.69.0",
+    "stylelint": "^13.13.1",
+    "stylelint-config-recommended-scss": "^4.3.0"
+  },
   "scripts": {
     "watch": "sass --watch assets/scss/style.scss:style.css --no-source-map",
     "compile:css:temp": "sass assets/scss/style.scss:style.css.tmp --no-source-map --style=expanded",
     "check:css": "npm run compile:css:temp && node bin/check-css-build.mjs style.css.tmp style.css",
     "compile:css:apply": "sass assets/scss/style.scss:style.css --no-source-map --style=expanded",
-      "lint:scss": "stylelint \"assets/scss/**/*.scss\"",
+    "compile:organizer-css": "sass assets/scss/pages/_organizer.scss:assets/css/organizer.css --no-source-map --style=expanded",
+    "compile:organizer-css:temp": "sass assets/scss/pages/_organizer.scss:assets/css/organizer.css.tmp --no-source-map --style=expanded",
+    "check:organizer-css": "npm run compile:organizer-css:temp && node bin/check-css-build.mjs assets/css/organizer.css.tmp assets/css/organizer.css",
+    "lint:scss": "stylelint \"assets/scss/**/*.scss\"",
     "lint:js": "wp-scripts lint-js assets/js/*.js",
     "bundle": "dir-archiver --src . --dest ../idpg_core.zip --exclude .DS_Store .stylelintrc.json .eslintrc.json .eslintignore babel.config.js .git .gitattributes .github .gitignore README.md composer.json composer.lock node_modules vendor package-lock.json package.json .travis.yml phpcs.xml.dist assets/scss style.css.map style.css.tmp bin yarn.lock"
   }

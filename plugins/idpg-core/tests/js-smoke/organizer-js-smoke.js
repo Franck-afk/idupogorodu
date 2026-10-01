@@ -224,8 +224,8 @@ console.log('organizer.js — G6 (статистика + список событ
   check('скрипт выполняется без синхронных ошибок', threw === null);
   if (threw) console.log('       ' + threw.stack.split('\n').slice(0, 5).join('\n       '));
 
-  check('состояние из ?status=publish применено к фильтру', filterPub.classList.contains('dashboard__filter-btn--active'));
-  check('фильтр «all» снят при status=publish', !filterAll.classList.contains('dashboard__filter-btn--active'));
+  check('состояние из ?status=publish применено к фильтру', filterPub.classList.contains('idpg-org-filter--active'));
+  check('фильтр «all» снят при status=publish', !filterAll.classList.contains('idpg-org-filter--active'));
   check('обработчик клика на фильтре навешен', filterPub.hasListeners('click'));
   check('обработчик «вперёд» навешен', next.hasListeners('click'));
   check('обработчик «назад» навешен', prev.hasListeners('click'));
@@ -404,6 +404,15 @@ async function asyncChecks() {
     check('адрес площадки выведен', firstRow.children[2].textContent === 'ул. Ленина, 1');
     // Пустой адрес не должен превращаться в «undefined».
     check('пустой адрес заменён на тире', tbody.children[1].children[2].textContent === '—');
+
+    // DEV-196: на экранах уже 640px таблица становится списком карточек, и
+    // подпись колонки рисуется через td::before{content:attr(data-label)}.
+    // Атрибут ставит скрипт: из шаблона в ячейку он не попадает.
+    check(
+      'у ячеек таблицы площадок проставлен data-label',
+      firstRow.children.map((td) => td.getAttribute('data-label')).join(',') === 'Площадка,Тип,Адрес',
+      'подписи: ' + firstRow.children.map((td) => td.getAttribute('data-label')).join(',')
+    );
 
     // Показано ровно одно состояние раздела: заголовки таблицы с нулём
     // строк выглядели бы как сломанная страница.

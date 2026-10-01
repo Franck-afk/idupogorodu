@@ -183,6 +183,26 @@ get_header();
 								</a>
 							</li>
 						<?php endforeach; ?>
+
+						<?php
+						/*
+						 * Выход из аккаунта. Верхняя панель WordPress у организатора
+						 * скрыта (см. IDPG_Roles::hide_frontend_admin_bar()), поэтому
+						 * ссылка на выход в самой панели недоступна — выносим её
+						 * в меню кабинета отдельным пунктом. Пункт намеренно не
+						 * входит в idpg_organizer_menu(): там каждый элемент — это
+						 * раздел со своим template-part, а выход разделом не является.
+						 */
+						?>
+						<li class="idpg-org-nav__item idpg-org-nav__item--logout">
+							<a
+								class="idpg-org-nav__link idpg-org-nav__link--logout"
+								href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>"
+							>
+								<span class="idpg-org-nav__icon" aria-hidden="true">→</span>
+								<span class="idpg-org-nav__label"><?php esc_html_e( 'Выйти', 'idpg_core' ); ?></span>
+							</a>
+						</li>
 					</ul>
 				</nav>
 

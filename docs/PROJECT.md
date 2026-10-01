@@ -5844,3 +5844,176 @@ WordPress не обязан отдавать `uploads` по `home_url()`.
 | Дата | Что сделано |
 |---|---|
 | 2026-09-30 | Guard на существование локального файла логотипа добавлен в `get_logo_url()`; 10 тестов; полный прогон зелёный (567/1678); обратная проба подтверждает, что тесты ловят исходный дефект. Приёмка `DEV-15` выполнена, п. 6 `DEV-29` закрыт по-настоящему |
+
+---
+
+### 21. DEV-196 (P1, L). Переписать UI/UX кабинета организатора
+
+**Статус:** открыта. **Спецификация:** `docs/specs/DEV-196.md`.
+
+#### 21.1 Проблема
+
+Кабинет организатора собран из двух несогласованных систем, которые ни разу не были
+сведены вместе. Разметка разделов использует префикс `dashboard__*`, а общий каркас —
+`idpg-org-*`; стили разделов лежат в `_dashboard.scss`, каркаса — в `_organizer.scss`.
+Следствия, все проверены замером (§21.4):
+
+1. **Мёртвый CSS.** 9 классов из `_organizer.scss` (`idpg-org-cards`, `idpg-org-card*`,
+   `idpg-org-empty*` — 105 строк) не встречаются ни в одном `.php` и ни в одном `.js`.
+   Вместо них разделы используют `dashboard__empty` и `dashboard__stats`.
+2. **Двойной отступ.** `.dashboard` объявлен с `padding: 88px 0 24px` — это отступ
+   самостоятельной страницы. Но класс стоит **внутри** `<section class="idpg-org-section">`,
+   у которого свой `padding: 24px 20px` (32px на десктопе). Дашборд получает
+   88 + 32 = 120px пустоты сверху.
+3. **Пустые подписи в мобильной таблице.** CSS на `max-width: 640px` показывает
+   `td::before { content: attr(data-label) }`, но `organizer.js` создаёт ячейки через
+   `document.createElement('td')` и `data-label` не проставляет — **0 вхождений** в файле.
+   На телефоне таблица событий выглядит как значения без подписей.
+4. **`rejected` не имеет своего бейджа.** В `STATUS_META` (`organizer.js:250`)
+   `rejected` намеренно получает класс `dashboard__badge--draft`, поэтому
+   «Отклонено» выглядит как «Черновик». В `_dashboard.scss` есть только
+   `--publish`, `--pending`, `--draft`.
+5. **Жёсткие цвета вместо токенов.** В `_dashboard.scss` — 8 hex-литералов
+   (7 уникальных: `#16a34a`, `#d97706`, `#dcfce7`, `#166534`, `#fef9c3`, `#854d0e`,
+   `#fff`), хотя в `base/_tokens.scss:116-121` уже объявлены
+   `--idpg-status-publish-bg/text`, `--idpg-status-pending-bg/text`,
+   `--idpg-status-draft-bg/text` с теми же значениями. Они просто не используются.
+   В `_organizer.scss` hex нет.
+6. **Два набора имён токенов.** `_organizer.scss` берёт legacy-алиасы
+   (`--idpg-bg`, `--idpg-text`, `--idpg-border`, `--idpg-text-secondary`), а
+   `_dashboard.scss` — канонические (`--idpg-canvas`, `--idpg-ink`, `--idpg-hairline`,
+   `--idpg-body`). В `base/_tokens.scss:58-66` алиасы объявлены как
+   `--idpg-bg: var(--idpg-canvas)`, то есть значения совпадают: расхождение только
+   в именах, но код читается как два разных языка оформления.
+7. **Токены отступов и радиусов не используются.** В `base/_tokens.scss:124-142`
+   объявлены `--idpg-space-*` (8 значений) и `--idpg-radius-*` (7 значений), но оба
+   файла кабинета пишут отступы и радиусы числами (`4px`, `12px`, `9999px`).
+8. **`organizer.css` не собирается.** В `package.json` есть только `compile:css`
+   для `assets/scss/style.scss:style.css`. `assets/css/organizer.css` (5937 байт)
+   собран вручную и `check:css` его не проверяет — расхождение со SCSS
+   обнаружить нечем.
+
+#### 21.2 Требование
+
+Свести кабинет к одной системе оформления, опирающейся на токены `base/_tokens.scss`,
+не меняя поведения: разметка, стили и презентационные правки `organizer.js`.
+Логика, REST-эндпоинты и контракт `data-idpg-*` не трогаются.
+
+Границы, критерии приёмки и обратная проба — в `docs/specs/DEV-196.md`.
+
+#### 21.3 Объём
+
+Затрагиваются: `page-organizer.php`, `template-parts/organizer/*` (4 раздела),
+`assets/scss/pages/_organizer.scss`, `assets/scss/pages/_dashboard.scss`,
+презентационные строки `assets/js/organizer.js`, `package.json`,
+`assets/css/organizer.css`.
+
+#### 21.4 Замер «до»
+
+| Проверка | Значение |
+|---|---|
+| Неиспользуемых классов в стилях кабинета | 9 |
+| HEX в источнике стилей кабинета (`_organizer.scss`) | 0 |
+| HEX в `_dashboard.scss` (не трогаем, см. §21.7) | 8 |
+| `padding`/`margin`/`gap`/`border-radius` со значением в px | 39 в `_organizer.scss` + 36 в `_dashboard.scss` = 75 |
+| Вхождений `dashboard__` в разметке кабинета | 23 (`section-dashboard.php` 6, `section-events.php` 11, `section-venues.php` 6; `section-profile.php` — 0) |
+| Присваиваний `data-label` в `organizer.js` | 0 |
+| Уникальных `data-idpg-*` в `organizer.js` | 35 |
+| Классов бейджа в стилях кабинета | 3 (`--publish`, `--pending`, `--draft`) |
+| Статусов в `STATUS_META` | 4, включая `rejected` → `--draft` |
+| Разных префиксов в разметке кабинета | 2 (`idpg-org-*`, `dashboard__*`) |
+| Классов профиля без единого правила CSS | 8 |
+| npm-скриптов, собирающих `organizer.css` | 0 |
+| Правил `.idpg-org*` в `style.css` | 0 (ожидаемо: стили кабинета в отдельном файле) |
+| Правил `.dashboard__*` в `style.css` | 50 |
+| Отступ `style.css` от HEAD | 2865 добавлено / 2154 удалено — пересборка, сделанная вне DEV-196 |
+
+#### 21.5 Замер «после»
+
+| Проверка | Было | Стало |
+|---|---|---|
+| Неиспользуемых классов в стилях кабинета | 9 | 0 |
+| HEX в источнике стилей кабинета (`_organizer.scss`) | 0 | 0 |
+| `px` в padding/margin/gap/border-radius | 75 | 0 |
+| `dashboard__` в разметке кабинета | 23 | 0 |
+| Мёртвых селекторов в `organizer.css` | 9 из 72 | 0 из 63 |
+| Присваиваний `data-label` в `organizer.js` | 0 | 7 |
+| Разных бейджей на 4 статуса | 3 | 4 |
+| npm-скриптов сборки `organizer.css` | 0 | 2 |
+| Классов профиля без правил CSS | 8 | 0 |
+| Необъявленных токенов в `_organizer.scss` | — | 0 |
+| PHPCS, ошибок в кабинете | 39 | 39 (новых нет) |
+| JS-дымок | 75 | 76 |
+| PHPUnit | 662 / 1896, 6 падений | 662 / 1896, **5** падений (починено своё) |
+
+Критерии §3: **14 из 14**. Обратная проба: **10 из 10 мутаций пойманы**
+(`bin/revert-probe-organizer-ui.mjs`).
+
+#### 21.7 Чего задача сознательно не сделала
+
+`_dashboard.scss` **не токенизирован**: его 8 hex остались. Требовалось заменить их
+на `--idpg-status-*`, но это означало бы пересобрать `style.css`, а он отличается
+от HEAD на 2865/2154 строк — это пересборка, сделанная вне DEV-196. Взять её в
+коммит значило бы присвоить себе чужую работу. Правила `.dashboard__*` после
+задачи мёртвы (0 файлов темы содержат `dashboard__`), поэтому на результат это не
+влияет. Удаление правил и токенизация вынесены в `DEV-197` §22.2.
+
+#### 21.6 Остаётся за рамками DEV-196
+
+| Что | Почему не здесь |
+|---|---|
+| 5 падений PHPUnit, существовавших до DEV-196 | Не связаны с кабинетом. См. §22 |
+| 50 мёртвых правил `.dashboard__*` в `style.css` | Критерий 13 замораживает `style.css`; после DEV-196 классов `dashboard__` в теме не осталось. См. §22 |
+
+---
+
+### 22. DEV-197 (P1, M). Остатки прохода DEV-196 и 5 падений PHPUnit
+
+**Статус:** открыта. **Источник:** `docs/PROJECT.md` §21, спецификация
+`docs/specs/DEV-196.md` §7.
+
+#### 22.1 Пять падений PHPUnit, существовавших до DEV-196
+
+Все пять воспроизводятся на коде, который DEV-196 не трогал.
+
+| № | Тест | Что показывает |
+|---|---|---|
+| 1 | `Test_Class_Init::test_every_class_in_includes_is_accounted_for` | `IDPG_Organizer_Meta` не описан в списке способов инициализации. Файл `class-organizer-meta.php` не менялся; `tests/test-class-init.php` изменён более ранней правкой |
+| 2 | `Test_Organizer_Profile::test_inn_11_digits_rejected` | ИНН из 11 цифр не отклоняется |
+| 3 | `Test_Organizer_Profile::test_inn_letters_rejected` | Ожидается `''`, приходит `'nko'` — буквы проходят валидацию. Код: `class-organizer-url.php:1060-1062` |
+| 4 | `Test_Organizer_Profile::test_inn_empty_allowed` | Ожидается 200, приходит 400 — пустой ИНН не проходит |
+| 5 | `Test_Organizer_Profile::test_legal_type_safelist` | Ожидается `''`, приходит непустое значение |
+
+Пункт 3 — вероятная причина 2 и 4: проверка ИНН в `class-organizer-url.php`
+не отсекает буквы, и пустое значение обрабатывается не так, как ждут тесты.
+Файл не менялся с момента последнего коммита, поэтому это давний дефект.
+
+**Как воспроизвести:**
+
+```
+set WP_TESTS_DIR=%LOCALAPPDATA%\idpg-tests\wordpress-develop\tests\phpunit
+php vendor/bin/phpunit
+```
+
+Без `WP_TESTS_DIR` bootstrap ищет библиотеку в `%TEMP%\wordpress-tests-lib`
+и падает с «Could not find ... includes/functions.php» — это выглядит как
+отсутствие библиотеки, хотя она установлена.
+
+#### 22.2 Остатки UI/UX, найденные в DEV-196
+
+| Что | Где | Зачем |
+|---|---|---|
+| 50 мёртвых правил `.dashboard__*` в `style.css` (~200 строк) и их 8 hex в `_dashboard.scss` | `assets/scss/pages/_dashboard.scss` | После DEV-196 ни один файл темы не содержит `dashboard__`. DEV-196 не трогала этот файл, потому что пересборка `style.css` сделана вне задачи (§21.7). Работа: удалить правила и заменить hex на `--idpg-status-*` / `--idpg-on-primary` |
+| Нет точных токенов для `#16a34a` и `#d97706` | `base/_tokens.scss` | В `_dashboard.scss` эти цвета не имеют равных токенов: `--idpg-up` = `#05b169`, `--idpg-accent-yellow` = `#f4b000`. Если правила переживут очистку, токены стоит завести |
+| `.dashboard` и `.dashboard__container` в `_dashboard.scss` | там же | Отступ уровня страницы (`padding: 88px`) у блока, который нигде не используется как отдельная страница |
+| JS-стенд не проверяет строки таблицы событий | `plugins/idpg-core/tests/js-smoke/organizer-js-smoke.js` | Сценарий для списка событий есть, но строки не отрисовываются, поэтому бейджи и `data-label` событий дымком не покрыты. DEV-196 закрыл это проверкой в `bin/check-organizer-ui.mjs`, но стенд стоит дополнить |
+| Встроенный JS в `section-profile.php` (строки ~305-315) отступом пробелами | `template-parts/organizer/section-profile.php` | 33 из 39 PHPCS-ошибок кабинета приходятся сюда |
+
+#### 22.3 Окружение
+
+| Что | Статус |
+|---|---|
+| PHPUnit | **работает**, если выставлен `WP_TESTS_DIR` (см. §22.1). MySQL Laragon поднимается только самим Laragon: ручной `mysqld` из непривилегированной сессии падает с `The innodb_system data file 'ibdata1' must be writable`, хотя каталог доступен на запись из PowerShell — причина в правах процесса |
+| `wordpress-tests-lib` | Установлена в `%LOCALAPPDATA%\idpg-tests\wordpress-develop`; переменная `WP_TESTS_DIR` не выставлена глобально, поэтому её надо задавать перед каждым прогоном |
+| `organizer.css` | Больше не собирается вручную: DEV-196 добавил `compile:organizer-css` и `check:organizer-css`. `*.tmp` уже покрыт `.gitignore` (строка 148), отдельная правка не требуется |
+| Приёмка DEV-196 | Скрипты `bin/check-organizer-ui.mjs` (14 критериев) и `bin/revert-probe-organizer-ui.mjs` (10 мутаций). Второй восстанавливает дерево при прерывании — это обязательное требование, см. `MEMORY.md` |
