@@ -154,7 +154,8 @@
   `plugins/idpg-auth/.phpcs.xml.dist-baseline.neon` (**389**),
   `themes/idpg_core/.phpcs.xml.dist-baseline.neon` (**376**) — после DEV-186 (было 528 / 424 / 398).
   **Имя обязано начинаться с имени ruleset-файла** — иначе пакет baseline не найдёт (см. DEV-183 ниже).
-  Механизм — `forrest79/phpcs-ignores` (путь bootstrap — в `bin/phpcs-patches/README.md`), прогон с
+  Механизм — `forrest79/phpcs-ignores` (bootstrap:
+  `<tools>/vendor/forrest79/phpcs-ignores/src/bootstrap.php`), прогон с
   `--runtime-set ignore_warnings_on_exit 1` → **CI валит только ошибки**.
 - Инструменты — `D:\laragon\www\idupogorodu\phpcs-tools2` (вне репозитория): PHPCS 3.13.6 +
   WPCS 3.4.1 + PHPCompatibilityWP 2.1.8. **Два локальных патча** к `forrest79/phpcs-ignores`
