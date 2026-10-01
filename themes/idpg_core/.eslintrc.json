@@ -1,0 +1,49 @@
+{
+  "root": true,
+  "extends": [ "plugin:@wordpress/eslint-plugin/recommended" ],
+  "parser": "@babel/eslint-parser",
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "parserOptions": {
+    "requireConfigFile": true,
+    "ecmaVersion": 2021,
+    "sourceType": "script"
+  },
+  "globals": {
+    "jQuery": "readonly",
+    "$": "readonly",
+    "idpgAdWidgetL10n": "readonly"
+  },
+  "rules": {
+    "prettier/prettier": "off",
+    "no-var": "warn",
+    "prefer-const": "warn",
+    "object-shorthand": "warn",
+    "eqeqeq": [ "error", "always" ],
+    "no-console": "warn",
+    "no-alert": "off",
+    "no-shadow": "warn",
+    "no-unused-vars": [ "warn", { "args": "none" } ],
+    "jsdoc/require-param": "warn",
+    "jsdoc/check-tag-names": "warn",
+    "jsdoc/empty-tags": "warn",
+    "jsdoc/check-line-alignment": "warn",
+    "jsdoc/require-returns-description": "warn",
+    "@wordpress/no-unused-vars-before-return": "warn"
+  },
+  "overrides": [
+    {
+      "files": [ "assets/js/vendor/**" ],
+      "rules": {
+        "no-console": "off",
+        "no-var": "off",
+        "no-shadow": "off",
+        "jsdoc/*": "off",
+        "@wordpress/*": "off"
+      }
+    }
+  ]
+}

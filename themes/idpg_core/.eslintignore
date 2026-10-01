@@ -1,0 +1,9 @@
+node_modules/
+vendor/
+assets/js/vendor/
+assets/css/vendor/
+# Сторонняя библиотека Pikaday (BSD/MIT, David Bushell) и её плагины —
+# не наш код, правила проекта к нему не применяются.
+assets/js/pikaday.js
+assets/js/pikaday.range.js
+assets/js/pikaday-locale-ru.js
