@@ -1,10 +1,11 @@
 <?php
 /**
- * Юнит-тесты редиректа в кабинет после входа через соцсеть (DEV-63).
+ * Юнит-тесты редиректа после входа через соцсеть (DEV-63, поправка DEV-235).
  *
  * idpg-auth в тестовом окружении не загружен, поэтому проверяется слой
- * ядра: регистрация фильтров `wp_auth_ru_*_after_login_redirect` и сама
- * логика выбора адреса. Фактическое применение фильтра плагином
+ * ядра: фильтры `wp_auth_ru_*_after_login_redirect` после DEV-235 больше
+ * не регистрируются (роутер /organizer/* отключён), а для адреса проверяется
+ * логика выбора. Фактическое применение фильтра плагином
  * покрыто тестами idpg-auth (tests/test-social-roles.php).
  *
  * @package Idpg_Core
@@ -40,13 +41,15 @@ class Test_Organizer_Social_Login extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Фильтры подключены для всех провайдеров idpg-auth.
+	 * Фильтры редиректа не регистрируются (DEV-235).
+	 *
+	 * Регистрация шла из `init()` роутера /organizer/* — его отключили.
 	 */
-	public function test_registers_redirect_filter_for_every_provider() {
+	public function test_redirect_filters_are_not_registered_for_providers() {
 		foreach ( IDPG_Organizer_URL::SOCIAL_PROVIDERS as $provider ) {
-			$this->assertTrue(
+			$this->assertFalse(
 				has_filter( 'wp_auth_ru_' . $provider . '_after_login_redirect' ),
-				"Фильтр для провайдера {$provider} должен быть подключён."
+				"Фильтр для провайдера {$provider} больше не подключается (DEV-235)."
 			);
 		}
 	}
@@ -62,14 +65,14 @@ class Test_Organizer_Social_Login extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Организатор после соцвхода попадает в кабинет.
+	 * Организатор после соцвхода попадает на главную (DEV-235).
 	 */
-	public function test_organizer_is_redirected_to_cabinet() {
+	public function test_organizer_is_redirected_to_home() {
 		$user_id = self::factory()->user->create( array( 'role' => 'event_organizer' ) );
 		wp_set_current_user( $user_id );
 
 		$this->assertSame(
-			home_url( '/organizer/' ),
+			home_url( '/' ),
 			IDPG_Organizer_URL::social_login_redirect( $this->provider_default() )
 		);
 	}
@@ -175,10 +178,12 @@ class Test_Organizer_Social_Login extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Защитный фильтр подключён.
+	 * Защитный фильтр больше не подключается (DEV-235).
+	 *
+	 * Регистрация шла из `init()` роутера /organizer/* — его отключили.
 	 */
-	public function test_redirect_guard_is_registered() {
-		$this->assertTrue( has_filter( 'wp_redirect' ) );
+	public function test_redirect_guard_is_not_registered() {
+		$this->assertFalse( has_filter( 'wp_redirect' ) );
 	}
 
 	/**

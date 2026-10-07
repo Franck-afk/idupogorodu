@@ -116,24 +116,25 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 - Подтверждение организатора по email: ключ-хэш + срок в user meta, роль `event_organizer`
   выдаётся только после перехода по ссылке. Флаг ожидания подтверждения —
   `idpg_org_pending` в user meta.
-- **Личный кабинет организатора** `/organizer/` (+ `/organizer/{section}/`, разделы
-  `dashboard` | `events` | `profile`): rewrite + шаблон + меню + JS/CSS. Доступ — только
-  роли `event_organizer` и выше (`administrator`, `editor`): гость → `/login/`, нет прав →
-  `403`, иначе кабинет. Каркас: разделы рендерятся серверно,
-  `organizer.js` переключает видимость и адрес без перезагрузки. Страница исключена из sitemap Yoast.
-  После входа организатор попадает в кабинет (не в `wp-admin`): вход с формы `/login/`,
-  ветка «уже авторизован», фильтр `login_redirect` (приоритет 20) и соцвход;
-  администратор и редактор по-прежнему ведут в `wp-admin`. Ссылка «Панель» в шапке
-  организатору тоже указывает на кабинет.
+- **Личный кабинет организатора `/organizer/` отключён (DEV-235, 07.10.2026).**
+  Роутер `IDPG_Organizer_URL::init()` (rewrite, query vars, `template_include`,
+  guard-редиректы) не вызывается, шаблоны кабинета удалены из темы (DEV-234):
+  `/organizer/` и `/organizer/{section}/` отвечают **404**. Класс
+  `class-organizer-url.php` подключён — профиль и решения о доступе нужны
+  REST `/idpg/v1/organizer/*` и редиректам. После входа (форма `/login/`,
+  ветка «уже авторизован», `login_redirect`, соцвход) и после подтверждения email
+  организатор попадает на главную страницу (`after_login_url()` → `home_url('/')`);
+  администратор и редактор по-прежнему ведут в `wp-admin`.
 - Отдельной анкеты организатора нет (DEV-72): после подтверждения email организатор
-  сразу попадает в кабинет, данные организации заполняются в профиле `/organizer/profile/`.
-- **Редактирование профиля** в разделе `/organizer/profile/` (DEV-73): форма полей
+  попадает на главную, данные организации хранятся в профиле (REST `GET|PUT /organizer/profile`).
+- **Редактирование профиля** организатора (DEV-73): поля
   `display_name`, `idpg_org_name`, `idpg_contact_name`, `idpg_phone` (+ скрытый `avatar_id`);
-  email только для чтения. Работает с JS (`PUT /organizer/profile` без перезагрузки) и без
-  него (обычный `POST` на страницу кабинета, nonce + Post/Redirect/Get). Маршрут не принимает
+  email только для чтения. Работает с JS (`PUT /organizer/profile` без перезагрузки); no-JS
+  путь (`POST` на страницу кабинета) ушёл вместе с отключением `/organizer/` (DEV-235).
+  Маршрут не принимает
   `user_id` — редактируется только собственный профиль; доступ у ролей `event_organizer`
   и выше. Логика санитайза и записи — `IDPG_Organizer_URL::sanitize_profile_input()` /
-  `update_profile()`, общая для REST и no-JS пути.
+  `update_profile()`, используется REST-путём.
   Рекламный баннер над подвалом (виджет в области «Подвал», позиция `before-footer`) в
   кабинете не выводится: фильтр `sidebars_widgets` обнуляет такие области только внутри ЛК,
   на остальных страницах реклама остаётся.
@@ -561,7 +562,8 @@ SCSS во временный файл и сравнивает набор пра�
 |---|---|---|
 | `::instance()` в `idpg_core_init()` | 23 класса (`IDPG_CPT`, `IDPG_Roles`, `IDPG_REST_API`, `IDPG_Auth`, `IDPG_REST_Organizer`, `IDPG_Privacy` ядро при `require`, `IDPG_Promotion` и др.) | `idpg-core.php`, функция `idpg_core_init()` |
 | `::instance()` при загрузке файла | `IDPG_Current_Event_Banner`, `IDPG_User_Purge`, `IDPG_Privacy` | `idpg-core.php` ~строка 101 и конец соответствующих файлов |
-| Статический `::init()` | `IDPG_Organizer_URL`, `IDPG_City_URL`, `IDPG_Favorites`, `IDPG_Organizer_Scope` | `idpg_core_init()` либо конец файла. ~~`IDPG_Organizer_Page`~~ удалён DEV-141 вместе с анкетой |
+| Статический `::init()` | `IDPG_City_URL`, `IDPG_Favorites`, `IDPG_Organizer_Scope` | `idpg_core_init()` либо конец файла. ~~`IDPG_Organizer_Page`~~ удалён DEV-141 вместе с анкетой |
+| `::init()` не вызывается (отключён) | `IDPG_Organizer_URL` | Файл подключён `require_once`, но `IDPG_Organizer_URL::init()` из `idpg_core_init()` убран **DEV-235**: роутер `/organizer/*` отключён. Профиль/доступ/social-логика класса нужна REST и редиректам — потребители остаются |
 | `register_widget()` на `widgets_init` | `IDPG_City_Selector_Widget`, `IDPG_Event_Calendar_Widget`, `IDPG_Expected_Events_Widget` | `idpg_core_register_plugin_widgets()` |
 | Не требуется | `IDPG_Search`, `IDPG_Template_Helper` (статические helper-ы), `IDPG_CLI` (только под `WP_CLI`), `IDPG_Auth_Rate_Limiter`, `IDPG_GeoService` (ленивая инициализация) | — |
 
@@ -611,14 +613,14 @@ SCSS во временный файл и сравнивает набор пра�
 
 | Компонент | Состояние |
 |---|---|
-| Роутер `/organizer/` и `/organizer/{section}/` (`IDPG_Organizer_URL`) | **Подключён и работает**: `require_once` в `idpg-core.php` ~строка 84, `IDPG_Organizer_URL::init()` ~строка 157. Rewrite-правила, query vars, `template_include`, принудительный flush по `REWRITE_VERSION` (сейчас **4** — поднят в DEV-141, чтобы сбросить правило удалённой анкеты). **DEV-37** |
+| Роутер `/organizer/` и `/organizer/{section}/` (`IDPG_Organizer_URL`) | **Отключён (DEV-235, 07.10.2026).** `require_once` в `idpg-core.php` остался (~строка 85), но `IDPG_Organizer_URL::init()` из `idpg_core_init()` убран: rewrite-правила, query vars, `template_include` и guard на `wp_redirect` не регистрируются, принудительный flush по `REWRITE_VERSION` больше не выполняется. `/organizer/` и подразделы → **404** (нужен `flush_rewrite_rules()` и удаление осиротевшей страницы-заглушки — на dev сделано 07.10.2026, на проде повторить). Был подключён и работал с DEV-37. **DEV-37, DEV-235** |
 | Меню кабинета (`inc/organizer-menu.php`, **8 функций** `idpg_organizer_*` + `idpg_core_is_organizer_cabinet()`) | **Подключено**: `require_once` в `functions.php` ~строка 413. Даёт `idpg_organizer_menu()`, `idpg_organizer_section_url()`, `idpg_core_is_organizer_cabinet()`, скрытие баннера над подвалом. **DEV-38** |
 | Ассеты кабинета | **Подключены**: `assets/css/organizer.css` (`functions.php` ~строка 224), `organizer.js` (~225), `organizer-event-form.js` (~226), `organizer-venue-form.js` (~227) — все только на `/organizer/*`. **DEV-38, DEV-98** |
 | Страница WP `/organizer/` | **Работает (регрессии закрыты DEV-131, 30.09.2026).** `idpg_core_create_organizer_page()` висит на `after_setup_theme` (`functions.php` ~строка 464) — хук срабатывает на каждом запросе, поэтому удалённая страница самовосстанавливается, а `idpg_core_get_organizer_page_id()` восстанавливает опцию `_idpg_organizer_page_id` по слагу. Первоисточник — DEV-39; DEV-102 откатил хук на `after_switch_theme` (срабатывает раз за жизнь темы), из-за чего у переключённой темы страницы не было, а `get_organizer_page_id()` отдавал 0. Вторая регрессия того же коммита: исключение из sitemap висело на `wpseo_exclude_from_sitemap_by_posts_ids`, тогда как Yoast вызывает `wpseo_exclude_from_sitemap_by_post_ids` (единственное `post`) — фильтр (`functions.php` ~строка 522) был мёртв. Обе правки — по одной строке, покрыты тестами `test-organizer-page-creation.php`. **DEV-39, DEV-131** (карточка — DEV-102, разбор — §13) |
 | `page-organizer.php` + `template-parts/organizer/section-{dashboard,events,venues,profile}.php` | Работают: обслуживаются роутером, разделы рендерятся серверно, `organizer.js` переключает видимость и адрес без перезагрузки. **DEV-37/38, DEV-98** |
 | Проверка доступа `get_access_decision()` | Гость → `/login/`, нет роли → `403`, организатор и выше → кабинет. Отдельного состояния «pending» нет. **DEV-72** |
-| `guard_cabinet_redirect()` | Работает (`class-organizer-url.php` ~строка 308): не даёт зациклиться при попытке зайти в кабинет без прав. **DEV-63** |
-| Редирект в кабинет после входа и после подтверждения email | Работает: `after_login_url()` + `idpg_organizer_after_login_url()`, `IDPG_Auth::redirect_organizer_to_cabinet()`, подтверждение по ссылке из письма. **DEV-37, DEV-67** |
+| `guard_cabinet_redirect()` | Метод остался (`class-organizer-url.php`, проверяется тестами напрямую), но хук на `wp_redirect` не вешается с DEV-235 — роутер отключён. **DEV-63, DEV-235** |
+| Редирект после входа и после подтверждения email | Работает, но ведёт на главную: `after_login_url()` → `home_url('/')`, фильтр `idpg_organizer_after_login_url()` (право выбора оставлено), подтверждение по ссылке из письма. ~~Редирект «в кабинет» (`IDPG_Auth::redirect_organizer_to_cabinet()`)~~ в коде отсутствует. **DEV-37, DEV-67, DEV-235** |
 | Подтверждение по email (`IDPG_Organizer_Verify`) | Работает — роль `event_organizer` выдаётся только после перехода по ссылке; флаг ожидания `idpg_org_pending`. **DEV-68** |
 | Редактирование профиля в `/organizer/profile/` | **Работает**: форма + `GET|PUT /idpg/v1/organizer/profile`, с JavaScript и без него. **DEV-73** |
 | Платный показ в баннере на главной | **Работает**: заявка организатора `_idpg_banner_request` → подтверждение админом `_idpg_banner_approved` → событие попадает в выборку баннера (`class-current-event-banner.php:707-713`), колонка статуса в списке событий (`class-meta.php`, методы `add_banner_column` ~1096 и `render_banner_column` ~1108) |
@@ -2185,6 +2187,22 @@ Remote настроен, первый push выполнен 19.09.2026 **отд�
 | **Проверка** | Ошибки не изменились и не выросли: **195 / 4 / 77**. Реальные предупреждения без учёта служебных диагностик пакета: 366 / 1 / 118 — без изменений. Служебных диагностик `Ignored sniff` стало 5 / 10 / 0. |
 | **Грабли (важно)** | **Нельзя «подчищать» `count`.** Первая версия скрипта уменьшала `count` там, где фактических нарушений меньше. Это молча глушит легаси: запись `count: 812` при 283 нарушениях — не опечатка. После такой правки предупреждения исчезли, что выглядело как успех, но означало, что сотни настоящих нарушений перестали учитываться. Записи с завышенным `count` легаси по своей природе — их надо чинить в коде, а не уменьшать счётчик. |
 | **Остаток** | 15 записей с завышенным `count` (idpg-core 5, idpg-auth 10) — их пакет помечает `expected N times, but occurred only M`. Это не мёртвые записи: нарушения в них есть, просто меньше, чем записано. Трогать их можно только после DEV-27B (чистка кода), иначе вернётся скрытый долг. |
+| **Объём** | S |
+
+#### DEV-235 (P0, S). Отключение роутера /organizer/* и редиректов организатора
+
+> **Закрыто 07.10.2026.** Вариант **B** (выбор владельца): убрать роутер и
+> редиректы, не возвращая шаблоны кабинета (они удалены из темы в DEV-234).
+
+| | |
+|---|---|
+| **Проблема** | Роутер `/organizer/*` (`IDPG_Organizer_URL::init()`) и редиректы «в кабинет» обслуживают шаблоны, удалённые из темы DEV-234: URL ведут в никуда, тесты фиксируют несуществующее поведение (базовый прогон: 663 теста, 40 ошибок, 8 падений — все в удаляемых/затронутых файлах). |
+| **Требование** | Отключить роутер и редиректы в `idpg-core`; удалить 7 тестов (`test-organizer-{page-creation,menu,venue-form,page,currency,event-form-schema}.php`, `js-smoke/organizer-js-smoke.js`); переработать затронутые тесты; обновить PROJECT.md (§1, §5); отдельный коммит. Приёмка: `/organizer/` → осмысленный ответ (404), редирект корректен, тесты зелёные. |
+| **Отступление (одобрено владельцем)** | `require_once class-organizer-url.php` **оставлен**: класс хранит profile/access/social-логику (6 вызовов в `class-rest-organizer.php`, permission-колбэки). Убран только вызов `IDPG_Organizer_URL::init()`. |
+| **Реализация** | `idpg-core.php`: убран `IDPG_Organizer_URL::init()` (комментарий обновлён). `after_login_url()` и fallback `IDPG_Auth::organizer_cabinet_url()` → `home_url('/')`; удалена const `ORGANIZER_CABINET_URL = '/organizer/'`. Переработано 5 тестов (сверх 7 удалённых): `test-class-init` (запись `IDPG_Organizer_URL` из `STATIC_INIT` → обоснование в `EXCEPTIONS`), `test-organizer-verify-redirect` (адрес → главная), `test-organizer-social-login` (фильтры провайдеров и guard → `assertFalse`, адрес → главная), `test-register-email` (адрес → главная), `test-admin-restrict` (организатор в админке → главная; нашлось при прогоне). |
+| **Результат** | PHPUnit: 663 (40 ошибок, 8 падений) → **OK (540 tests, 1369 assertions)** — все падения «до» ушли с удаляемыми файлами. `php -l` по 7 изменённым файлам чист. Живая проба на dev: `/organizer/`, `/organizer/events/`, `/organizer/profile/` → **404**; `/`, `/login/` → 200. |
+| **Грабли** | **После отключения роутера `/organizer/` отдаёт 301 на главную, а не 404.** Первый шаг — в БД остались rewrite-правила: механизм принудительного flush по `REWRITE_VERSION` жил в `init()` и мёртв, сбрасывает только `flush_rewrite_rules()`. Второй шаг — **осиротевшая страница** «Кабинет организатора» (slug `organizer`, id 721): создавалась до DEV-234, функция из темы удалена, запись в БД осталась — без удаления `/organizer/` отдал бы 200. На dev оба шага выполнены 07.10.2026 (одноразовый скрипт: `flush_rewrite_rules()` + `wp_delete_post()`); **на проде повторить**: пересохранить Постоянные ссылки и удалить страницу с slug `organizer`. |
+| **Остаток** | §6.1 (строки про меню, ассеты, страницу WP, форму профиля) устарела ещё после DEV-234 — в DEV-235 правились только строки про роутер, guard и редиректы (614, 620, 621) плюс §1 и §5.1. |
 | **Объём** | S |
 
 #### DEV-240 (P2, S). Убрать из baseline записи на удалённые файлы темы

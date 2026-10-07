@@ -654,17 +654,17 @@ class IDPG_Organizer_URL {
 	/**
 	 * Куда вести организатора после успешной авторизации.
 	 *
-	 * Возвращает адрес кабинета только для «чистого» организатора: если у
-	 * пользователя есть роль `administrator` или `editor`, метод отдаёт
-	 * пустую строку — такие пользователи остаются в wp-admin, а кабинет
-	 * для них лишь дополнительный вход.
+	 * DEV-235: роутер /organizer/* отключён, поэтому «чистый» организатор
+	 * по умолчанию получает главную страницу. Если у пользователя есть роль
+	 * `administrator` или `editor`, метод отдаёт пустую строку — такие
+	 * пользователи остаются в wp-admin.
 	 *
 	 * Пустая строка означает «решение принимает вызывающий код» (обычно
 	 * `admin_url()`), поэтому метод безопасно подставлять в любую ветку
 	 * редиректа: для администратора поведение не меняется.
 	 *
 	 * @param WP_User|int|string|null $user Пользователь, ID или null (текущий).
-	 * @return string URL кабинета либо пустая строка.
+	 * @return string Адрес после входа либо пустая строка.
 	 */
 	public static function after_login_url( $user = null ) {
 		$user = self::resolve_user( $user );
@@ -686,10 +686,10 @@ class IDPG_Organizer_URL {
 		/**
 		 * Фильтр адреса, куда попадает организатор после авторизации.
 		 *
-		 * @param string  $url  URL кабинета организатора.
+		 * @param string  $url  Адрес по умолчанию — главная (DEV-235).
 		 * @param WP_User $user Пользователь.
 		 */
-		return (string) apply_filters( 'idpg_organizer_after_login_url', self::section_url( self::DEFAULT_SECTION ), $user );
+		return (string) apply_filters( 'idpg_organizer_after_login_url', home_url( '/' ), $user );
 	}
 
 	/**

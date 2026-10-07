@@ -1,15 +1,16 @@
 <?php
 /**
- * Юнит-тесты DEV-67: редирект в ЛК организатора после подтверждения email.
+ * Юнит-тесты DEV-67: редирект после подтверждения email (поправка DEV-235).
  *
  * Сценарий: организатор регистрируется, получает временную ссылку, кликает
- * по ней — роль event_organizer выдаётся, и редирект после подтверждения
- * ведёт в /organizer/, а не на главную.
+ * по ней — роль event_organizer выдаётся. Раньше редирект вёл в /organizer/,
+ * но роутер кабинета отключён (DEV-235): после подтверждения организатор
+ * попадает на главную страницу.
  *
  * Шаблон `page-login.php` считает адрес выражением
  * `IDPG_Organizer_URL::after_login_url( $confirm_result->ID )` — тесты
- * фиксируют именно это выражение, чтобы изменение шаблона не тихо
- * вернуло редирект на главную.
+ * фиксируют именно это выражение, чтобы изменение шаблона не осталось
+ * незамеченным.
  *
  * @package Idpg_Core
  */
@@ -70,13 +71,14 @@ class Test_Organizer_Verify_Redirect extends WP_UnitTestCase {
 	}
 
 	/* ---------------------------------------------------------------------
-	 * Приёмка DEV-67: после подтверждения организатор попадает в /organizer/.
+	 * Приёмка DEV-67: после подтверждения организатор попадает на главную
+	 * (DEV-235: роутер /organizer/* отключён).
 	 * ------------------------------------------------------------------ */
 
 	/**
-	 * Основной сценарий: подтверждение ведёт в кабинет, а не на главную.
+	 * Основной сценарий: подтверждение даёт адрес для перехода.
 	 */
-	public function test_confirmed_organizer_lands_in_cabinet() {
+	public function test_confirmed_organizer_lands_on_home() {
 		list( $user_id, $key ) = $this->make_pending_organizer( 'dev67-happy' );
 
 		$result = IDPG_Organizer_Verify::instance()->confirm( $user_id, $key );
@@ -85,8 +87,8 @@ class Test_Organizer_Verify_Redirect extends WP_UnitTestCase {
 
 		$url = $this->redirect_after_confirm( $result->ID );
 
-		$this->assertSame( home_url( '/organizer/' ), $url );
-		$this->assertNotSame( home_url( '/' ), $url );
+		$this->assertSame( home_url( '/' ), $url );
+		$this->assertNotSame( '', $url );
 	}
 
 	/**
@@ -141,7 +143,7 @@ class Test_Organizer_Verify_Redirect extends WP_UnitTestCase {
 
 		$this->assertNotWPError( $first );
 		$this->assertNotWPError( $again );
-		$this->assertSame( home_url( '/organizer/' ), $this->redirect_after_confirm( $user_id ) );
+		$this->assertSame( home_url( '/' ), $this->redirect_after_confirm( $user_id ) );
 	}
 
 	/**

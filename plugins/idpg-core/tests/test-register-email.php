@@ -215,12 +215,13 @@ class Test_Register_Email extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Ссылка из письма подтверждает email и открывает доступ в ЛК.
+	 * Ссылка из письма подтверждает email и выдаёт роль с адресом входа.
 	 *
 	 * Это полный сценарий приёмки DEV-68: зарегистрировался → получил
-	 * письмо → подтвердил → получил роль → попал в кабинет.
+	 * письмо → подтвердил → получил роль → получил адрес (главная,
+	 * DEV-235: роутер /organizer/* отключён).
 	 */
-	public function test_confirming_email_grants_role_and_cabinet() {
+	public function test_confirming_email_grants_role_and_redirect() {
 		rest_do_request( $this->register_request() );
 
 		$link = $this->link_from_verification_mail();
@@ -237,7 +238,7 @@ class Test_Register_Email extends WP_UnitTestCase {
 		$user = get_user_by( 'id', $result->ID );
 
 		$this->assertContains( IDPG_Roles::ROLE_SLUG, (array) $user->roles );
-		$this->assertSame( home_url( '/organizer/' ), IDPG_Organizer_URL::after_login_url( $result->ID ) );
+		$this->assertSame( home_url( '/' ), IDPG_Organizer_URL::after_login_url( $result->ID ) );
 	}
 
 	/**

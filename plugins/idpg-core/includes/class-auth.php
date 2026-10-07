@@ -41,17 +41,6 @@ class IDPG_Auth {
 	const RESET_PASSWORD_URL = '/reset-password/';
 
 	/**
-	 * URL кабинета организатора.
-	 *
-	 * Запасной адрес на случай, когда `IDPG_Organizer_URL` не подключён и
-	 * спросить его не у кого. Кабинет живёт по адресу `/organizer/`
-	 * (`IDPG_Organizer_URL::section_url()` для корня).
-	 *
-	 * @var string
-	 */
-	const ORGANIZER_CABINET_URL = '/organizer/';
-
-	/**
 	 * Получение экземпляра синглтона.
 	 *
 	 * @return IDPG_Auth
@@ -109,14 +98,14 @@ class IDPG_Auth {
 	}
 
 	/**
-	 * Адрес кабинета организатора.
+	 * Куда отправить организатора после авторизации.
 	 *
 	 * Основной источник — `IDPG_Organizer_URL::after_login_url()`: он же
-	 * отдаёт адрес кабинета при подтверждении email и учитывает фильтр
+	 * отдаёт адрес при подтверждении email и учитывает фильтр
 	 * `idpg_organizer_after_login_url`. Здесь вызывается подстраховкой, потому
-	 * что класс живёт в `class-organizer-url.php` и может быть не подключён
-	 * (тогда кабинет вообще не обслуживается и организатор на сайт не пустит).
-	 * Пустая строка от метода — тоже повод для запасного адреса.
+	 * что класс живёт в `class-organizer-url.php` и может быть не подключён.
+	 * Пустая строка от метода — тоже повод для запасного адреса: главная
+	 * страница (DEV-235: роутер /organizer/* отключён).
 	 *
 	 * @param WP_User $user Пользователь-организатор.
 	 * @return string
@@ -127,7 +116,7 @@ class IDPG_Auth {
 			: '';
 
 		if ( ! $url ) {
-			$url = home_url( self::ORGANIZER_CABINET_URL );
+			$url = home_url( '/' );
 		}
 
 		return $url;

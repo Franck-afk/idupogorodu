@@ -130,17 +130,20 @@ class Test_Admin_Restrict extends WP_UnitTestCase {
 	// =====================================================================
 
 	/**
-	 * Организатор отправляется в кабинет, а не остаётся в админке.
+	 * Организатор не остаётся в админке: уходит на главную (DEV-235).
+	 *
+	 * Раньше адресом был кабинет /organizer/, но роутер отключён —
+	 * цель редиректа теперь главная страница.
 	 */
-	public function test_organizer_redirected_to_cabinet() {
+	public function test_organizer_redirected_home() {
 		$user    = $this->make_user( 'dev106_org', array( IDPG_Roles::ROLE_SLUG ) );
 		$target  = $this->redirect_target( $user );
 
 		$this->assertNotSame( '', $target, 'Организатор не должен попадать в /wp-admin.' );
-		$this->assertStringContainsString(
-			'/organizer',
+		$this->assertSame(
+			home_url( '/' ),
 			$target,
-			'Организатора нужно отправлять в кабинет, получено: ' . $target
+			'Организатора нужно отправлять на главную, получено: ' . $target
 		);
 	}
 
