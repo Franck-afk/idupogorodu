@@ -152,7 +152,8 @@
 
 - Baseline по компонентам: `plugins/idpg-core/.phpcs.xml.dist-baseline.neon` (**514**),
   `plugins/idpg-auth/.phpcs.xml.dist-baseline.neon` (**389**),
-  `themes/idpg_core/.phpcs.xml.dist-baseline.neon` (**376**) — после DEV-186 (было 528 / 424 / 398).
+  `themes/idpg_core/.phpcs.xml.dist-baseline.neon` (**331**) — после DEV-186 и DEV-240
+  (было 528 / 424 / 398; DEV-186 → 514 / 389 / 376, DEV-240 → 514 / 389 / 331).
   **Имя обязано начинаться с имени ruleset-файла** — иначе пакет baseline не найдёт (см. DEV-183 ниже).
   Механизм — `forrest79/phpcs-ignores` (bootstrap:
   `<tools>/vendor/forrest79/phpcs-ignores/src/bootstrap.php`), прогон с
@@ -206,6 +207,12 @@
   `apply.sh` лежит в `wp-content/bin/phpcs-patches/` (не внутри плагина); пришпиленные тулчейны
   уже пропатчены в `phpcs-tools2`, для отдельных прогонов патчить копию в
   `C:\Users\Costic\AppData\Local\Temp\opencode\phpcs-tools`.
+- **Цифры из карточки сверять с самим файлом (DEV-240, грабли):** карточка заявляла
+  «47 записей, 514 → 514−47», фактически — **45** записей и **376 → 331** (514 — это
+  baseline `idpg-core`, а не темы; «47» — неверный подсчёт в отчёте агента). Надёжный
+  способ: разбор всех `path:` + `Test-Path` каждого пути — для `single-event` /
+  `archive-event` / `taxonomy-event_category` оба дали 38 + 5 + 2 = 45. Проверка «count
+  не тронут» — по diff: 0 вставок, только удалённые строки.
 
 ### Репозиторий (DEV-53 / DEV-59 / DEV-60)
 
@@ -1356,17 +1363,42 @@ $G log --oneline -S "IDPG_CORE_VERSION" -- plugins/idpg-core/idpg-core.php
 - **Проверять такие места только стендом с синхронным `fetch`.** Обычный прогон
   в браузере этот класс дефектов пропускает.
 
-### PHPUnit требует `WP_TESTS_DIR` вручную (DEV-196, 01.10.2026)
+### PHPUnit: запуск, MySQL и грабли (DEV-196, 01.10.2026; DEV-205, 02.10.2026)
 
-- Bootstrap ищет библиотеку в `%TEMP%\wordpress-tests-lib`, а она установлена
-  в `%LOCALAPPDATA%\idpg-tests\wordpress-develop\tests\phpunit` (см.
-  `bin/install-wp-tests.cmd`). Без переменной падает «Could not find ...», что
-  выглядит как отсутствие библиотеки:
-  `set WP_TESTS_DIR=%LOCALAPPDATA%\idpg-tests\wordpress-develop\tests\phpunit`.
-- MySQL Laragon не поднимается из непривилегированной сессии:
-  `The innodb_system data file 'ibdata1' must be writable`, хотя каталог доступен
-  на запись из PowerShell. Нужен запуск Laragon целиком, а не ручной `mysqld`.
+- **`bin\run-tests.cmd` сам выставляет `WP_TESTS_DIR` и
+  `WP_TESTS_PHPUNIT_POLYFILLS_PATH`** (`bin/run-tests.cmd:25-26`). Задавать их
+  руками не нужно — правка 01.10.2026 была неверной. Ручная переменная нужна
+  только для прямого вызова `php vendor/bin/phpunit`: bootstrap ищет библиотеку
+  в `%TEMP%\wordpress-tests-lib`, а она установлена в
+  `%LOCALAPPDATA%\idpg-tests\wordpress-develop\tests\phpunit`.
+- ⚠️ **`run-tests.cmd` возвращает код 0, даже когда PHPUnit ничего не выполнил.**
+  При остановленном MySQL скрипт печатает `wp_die() called / Error establishing
+  a database connection` и выходит с `%ERRORLEVEL% = 0`. Проверять результат
+  только по строке `Tests: ...` / `OK (...)`, а не по коду возврата. Прежняя
+  запись «MySQL не поднимается из непривилегированной сессии, нужен Laragon
+  целиком» тоже была неверна.
+- **Ручной `mysqld` работает, но бинарь должен совпадать с версией каталога
+  данных.** `D:\laragon\data\mysql-8` создан **8.4.3**:
+  - `mysql-8.0.30-winx64\bin\mysqld.exe --datadir=D:/laragon/data/mysql-8`
+    → `Cannot boot server version 80030 on data directory built by version 80403.
+    Downgrade is not supported`;
+  - `mysql-8.4.3-winx64\bin\mysqld.exe --datadir=D:/laragon/data/mysql-8`
+    → стартует, порт 3306 слушается, тесты проходят.
+  Прежняя запись про «`ibdata1 must be writable` из-за прав процесса» — неверный
+  диагноз: причина в несовпадении версий.
+- **PowerShell-TCP-проверка порта врёт.** `New-Object TcpClient('127.0.0.1',3306)`
+  отвечает «закрыт», пока `netstat -ano | findstr :3306` показывает `LISTENING`.
+  Для проверки портов доверять `netstat`, а не сокету из PowerShell.
 - **Сверка PHPCS «до/после» с HEAD искажается артефактами выгрузки.** Файлы,
   выгруженные через PowerShell `Set-Content`, получают BOM и CRLF, и PHPCS даёт
   лишние нарушения (49 против реальных 39). Перед сравнением снимать BOM и
   приводить переводы строк.
+- **Рабочее дерево правится параллельно — числа прогонов устаревают за часы.**
+  02.10.2026: прогон 14:40 дал 662 теста / 1896 утверждений / 6 падений, прогон
+  17:45 после чужих правок DEV-197 — `OK (663 tests, 1901 assertions)`. Перед
+  записью числа в документ перепроверять `git status` и время изменения файлов.
+- **Диагноз «тест проверяет недостижимый код» вместо «тест сломан».** Падения
+  ИНН/`legal_type` выглядели как баг валидации, пока не проверена схема REST:
+  `enum`/`pattern` в `class-rest-organizer.php` отсекали значение раньше
+  колбэка, поэтому собственная ошибка санитайза была недостижима через REST.
+  Чинить схему (убрать дублирующую проверку), а не «усиливать» санитайз.
