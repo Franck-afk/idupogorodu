@@ -1148,6 +1148,13 @@ php vendor/bin/phpunit -c phpunit.xml.dist --filter 'Test_Css_Build'
 не влияют. Читать его сообщения: `Число правил разошлось: … Потеряно: … Лишнее: …`
 и `Декларации правил изменились при сборке: …`.
 
+**В `test_css_custom_properties_survive` нет констант (DEV-257, 07.10.2026):** вместо
+порога «больше 50» он сверяет число `--idpg-*` в `style.css` с числом деклараций в
+`themes/idpg_core/assets/scss/base/_tokens.scss`. Проба мутацией: добавить токен в
+`_tokens.scss` и **не** пересобирать `style.css` — тест обязан упасть
+(«Failed asserting that 101 is identical to 102»). Такой разъезд старый порог
+пропускал молча.
+
 **`CHANGED > 0` или `missing > 0` → `style.css` НЕ перезаписывать** (`compile:css:apply`
 не запускать). Ненулевой `CHANGED` при `missing = 0` означает не потерю правил, а
 незавершённый перенос (в нашем случае — hex вместо `var(--idpg-*)`).

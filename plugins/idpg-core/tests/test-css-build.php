@@ -3,11 +3,14 @@
  * Сторож сборки CSS: `npm run compile:css` не должен терять правила.
  *
  * Контекст. До DEV-87 SCSS-дерево отстало от style.css: в style.css была
- * система из 103 CSS-токенов (на момент c12921c, сейчас 101 — DEV-19) в
- * :root, которой в SCSS не было вовсе. Любая
- * полная пересборка откатывала дизайн — терялись токены и 13 компонентов.
+ * система CSS-токенов в :root, которой в SCSS не было вовсе. Любая полная
+ * пересборка откатывала дизайн — терялись токены и целые компоненты.
  * Живой style.css тогда перенесли в партиалы (см. assets/scss/), и сборка
  * стала эквивалентной.
+ *
+ * Счётчиков в тесте нет намеренно: числа токенов менялись (DEV-19 убрал и
+ * добавил токены в тот же день), и любая константа здесь устарела бы тихо —
+ * тест продолжал бы проходить при разъехавшемся style.css.
  *
  * Тест ловит возврат к расхождению: собирает SCSS во временный файл и
  * сравнивает набор правил с текущим style.css. Нулевая разница — сборка
@@ -372,15 +375,32 @@ class Test_Css_Build extends WP_UnitTestCase {
 
 	/**
 	 * Токены на месте: потеря :root означает потерю всей палитры.
+	 *
+	 * Эталон — сам `_tokens.scss` (единственный источник токенов): сколько
+	 * токенов в нём объявлено, столько же должно быть в style.css. Порог
+	 * «больше N» был бы слабее: и 101, и 103, и 40 прошли бы молча, пока
+	 * сборка не откатывает палитру.
 	 */
 	public function test_css_custom_properties_survive() {
 		$css = file_get_contents( $this->style_css() );
 
 		$this->assertStringContainsString( ':root', $css, 'В style.css нет :root с токенами.' );
-		$this->assertGreaterThan(
-			50,
-			preg_match_all( '/--idpg-[\w-]+\s*:/', $css ),
-			'Слишком мало CSS-переменных --idpg-*: токены выродились.'
+
+		$tokens = $this->real_theme_dir() . '/idpg_core/assets/scss/base/_tokens.scss';
+
+		$this->assertFileExists( $tokens, 'Не найден _tokens.scss — источник токенов.' );
+
+		$declared = (int) preg_match_all(
+			'/^\s*--idpg-[\w-]+\s*:/m',
+			(string) file_get_contents( $tokens )
+		);
+
+		$this->assertGreaterThan( 0, $declared, 'В _tokens.scss нет деклараций --idpg-*.' );
+
+		$this->assertSame(
+			$declared,
+			(int) preg_match_all( '/--idpg-[\w-]+\s*:/', $css ),
+			'Число токенов --idpg-* в style.css не совпадает с _tokens.scss: сборка потеряла или протащила лишние.'
 		);
 	}
 
