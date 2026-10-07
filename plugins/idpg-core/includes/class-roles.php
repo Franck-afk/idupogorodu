@@ -452,9 +452,17 @@ class IDPG_Roles {
 	/**
 	 * Проверка: текущий пользователь — организатор.
 	 *
+	 * DEV-258: метод стал публичным — им пользуется `IDPG_Meta`
+	 * (`enqueue_editor_styles()` и `filter_events_for_organizer()`).
+	 * Проверять роль через `current_user_can( 'event_organizer' )` нельзя:
+	 * такой capability в WordPress не зарегистрирован, и ядро отвечает `true`
+	 * лишь потому, что совпало имя с ролью (BC-механизм `WP_User::has_cap()`).
+	 * Замена на `edit_events` тоже не годится: cap есть и у редактора, и у
+	 * администратора, а здесь нужна именно роль организатора.
+	 *
 	 * @return bool
 	 */
-	private function is_current_user_organizer() {
+	public function is_current_user_organizer() {
 		$user = wp_get_current_user();
 
 		if ( ! $user->exists() ) {

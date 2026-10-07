@@ -2301,6 +2301,18 @@ Remote настроен, первый push выполнен 19.09.2026 **отд�
 | **Остаток** | — |
 | **Объём** | S |
 
+#### DEV-258 (P2, S). `current_user_can( 'event_organizer' )` — проверка по незарегистрированной capability
+
+| | |
+|---|---|
+| **Проблема** | `IDPG_Meta::enqueue_editor_styles()` и `IDPG_Meta::filter_events_for_organizer()` спрашивали `current_user_can( 'event_organizer' )`, хотя такой capability в WordPress не зарегистрирован: `true` ядро возвращает по совпадению имени с ролью (BC-механизм `WP_User::has_cap()`). Проверка работала, но держалась на внутреннем поведении ядра. При разборе всех мест нашлось ещё одно того же рода — `current_user_can( 'administrator' )` в `filter_events_for_organizer()`. |
+| **Требование** | Заменить на зарегистрированную capability или хелпер; проверить все места; прогнать PHPUnit. |
+| **Реализация** | `class-meta.php:158` — `IDPG_Roles::instance()->is_current_user_organizer() && ! current_user_can( 'manage_categories' )`; `:1144` — `current_user_can( 'manage_options' )` (конвенция проекта, у организатора cap явно `false`); `:1150` — `! IDPG_Roles::instance()->is_current_user_organizer()`. `IDPG_Roles::is_current_user_organizer()` сделана **public** — своя копия ролевой проверки противоречила бы запрету на дубли, а `user_is_organizer()` не подходит (см. Грабли). Добавлены 2 теста в `test-admin-restrict.php`: прямая проверка хелпера на 4 ролях + госте и source-level проверка кода `IDPG_Meta` с вырезанными комментариями. |
+| **Проверка** | Замер на 5 ролях (прогон с `wp_set_current_user`, пробник удалён): `current_user_can( 'event_organizer' )` — true только у организатора (то есть вызовы работали корректно, регресса не было); `edit_events` — true у организатора, редактора и админа; `manage_options` — только у админа. «До»: `OK (540 tests, 1371 assertions)`. «После»: `OK (542 tests, 1385 assertions)`. Обратная проба: (1) хелпер временно `return true` → `Роль administrator не должна считаться организатором`; (2) возврат `current_user_can( 'event_organizer' )` в `class-meta.php` → `Проверка по имени роли вместо capability`. Обе мутации откачены, `php -l` — 0 ошибок, grep: в коде `current_user_can( <имя роли> )` не осталось (3 совпадения — только поясняющие комментарии). |
+| **Грабли** | Обе предложенные замены не годятся: `edit_events` и `edit_venues` выданы и редактору, и админу — organizer от них не отличить, а в `filter_events_for_organizer()` это уронило бы редактора (перестал бы видеть чужие события); `IDPG_Organizer_URL::user_is_organizer()` — не проверка роли, у неё `ALLOWED_ROLES = ( event_organizer, administrator, editor )`. Метод не покрывается юнит-тестом: отсекается на `is_admin()`, а `WP_ADMIN` в PHPUnit нельзя включить и выключить — как и `DOING_AJAX`, проверяется по исходнику. `PITFALLS.md` лежит только в `.workbuddy-ai/archive/` — архивы не обновляются, грабли записаны в `MEMORY.md` §«Пользователи, роли, безопасность». |
+| **Остаток** | Такой же приём в чужих плагинах (`all-in-one-wp-security…:135`, `clearfy-pro:777`) — не наш код, не трогаем. |
+| **Объём** | S |
+
 #### DEV-195 (P2, S). pikaday.range.js содержит текст ошибки загрузчика
 
 > **Закрыто 01.10.2026.**

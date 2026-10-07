@@ -274,4 +274,84 @@ class Test_Admin_Restrict extends WP_UnitTestCase {
 			'Guard на DOING_AJAX должен стоять до редиректа, иначе admin-ajax.php перестанет работать.'
 		);
 	}
+
+	/**
+	 * DEV-258: организатор определяется по роли, а не по capability.
+	 *
+	 * `current_user_can( 'event_organizer' )` в WordPress отвечает `true`
+	 * только потому, что имя capability совпало с именем роли. Проверяется
+	 * хелпер, которым эта проверка заменена: организатор — да, редактор,
+	 * администратор и подписчик — нет.
+	 */
+	public function test_organizer_role_check_uses_role_not_capability() {
+		$roles = IDPG_Roles::instance();
+
+		$organizer = $this->make_user( 'role_check_org', array( IDPG_Roles::ROLE_SLUG ) );
+		wp_set_current_user( $organizer->ID );
+
+		$this->assertTrue(
+			$roles->is_current_user_organizer(),
+			'Пользователь с ролью организатора должен определяться как организатор.'
+		);
+
+		foreach ( array( 'administrator', 'editor', 'author', 'subscriber' ) as $other ) {
+			$user = $this->make_user( 'role_check_' . $other, array( $other ) );
+			wp_set_current_user( $user->ID );
+
+			$this->assertFalse(
+				$roles->is_current_user_organizer(),
+				'Роль ' . $other . ' не должна считаться организатором.'
+			);
+		}
+
+		wp_set_current_user( 0 );
+
+		$this->assertFalse(
+			$roles->is_current_user_organizer(),
+			'Гость не должен считаться организатором.'
+		);
+	}
+
+	/**
+	 * DEV-258: в IDPG_Meta не осталось проверок по имени роли.
+	 *
+	 * `filter_events_for_organizer()` недостижим в PHPUnit: он отсекается
+	 * на `is_admin()`, а константу `WP_ADMIN` в процессе тестов нельзя то
+	 * включить и уже нельзя выключить — такой тест ломал бы все следующие.
+	 * Поэтому проверяется исходник: строки-комментарии выбрасываются (в них
+	 * DEV-258 объясняет, почему проверять роль через capability нельзя), а
+	 * в коде не должно остаться ни одного `current_user_can()` с именем роли.
+	 */
+	public function test_meta_checks_rights_and_role_not_role_name() {
+		$file = ( new ReflectionClass( 'IDPG_Meta' ) )->getFileName();
+		$code = preg_replace(
+			array( '#^\s*\*.*$#m', '#^\s*//.*$#m' ),
+			'',
+			(string) file_get_contents( $file )
+		);
+
+		$found = preg_match_all(
+			"/current_user_can\(\s*'(administrator|editor|author|contributor|subscriber|event_organizer)'/",
+			$code,
+			$matches
+		);
+
+		$this->assertSame(
+			0,
+			$found,
+			'Проверка по имени роли вместо capability: ' . implode( ' | ', $matches[0] )
+		);
+
+		$this->assertSame(
+			1,
+			preg_match( "/current_user_can\(\s*'manage_options'\s*\)/", $code ),
+			'Администратор должен отсекаться через зарегистрированную capability manage_options.'
+		);
+
+		$this->assertSame(
+			2,
+			preg_match_all( '/IDPG_Roles::instance\(\)->is_current_user_organizer\(\)/', $code ),
+			'Обе проверки организатора должны идти через хелпер роли.'
+		);
+	}
 }

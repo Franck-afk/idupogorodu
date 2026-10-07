@@ -153,7 +153,9 @@ class IDPG_Meta {
 			// и wp_add_inline_script не работает со стилями.
 			add_action( 'admin_footer', function() {
 				// Организатору — скрыть "Добавить" для возраста/города, но оставить для категорий (может создавать свои).
-				if ( current_user_can( 'event_organizer' ) && ! current_user_can( 'manage_categories' ) ) {
+				// DEV-258: роль организатора проверяется хелпером, а не `current_user_can( 'event_organizer' )` —
+				// такой capability не зарегистрирован и работал бы только по совпадению имени с ролью.
+				if ( IDPG_Roles::instance()->is_current_user_organizer() && ! current_user_can( 'manage_categories' ) ) {
 					echo '<script>(function(){["age_rating","city"].forEach(function(t){var a=document.getElementById(t+"-adder");if(a)a.style.display="none";var b=document.querySelector("#"+t+"div .category-add, #tagsdiv-"+t+" .category-add");if(b)b.style.display="none";});})();</script>';
 				}
 				// Принудительно раскрываем метабокс «Медиа» при загрузке страницы.
@@ -1121,6 +1123,12 @@ class IDPG_Meta {
 	 * edit_others_events = false, поэтому логика дублирует
 	 * ограничение на уровне запроса.
 	 *
+	 * DEV-258: «свой ли это пользователь» решается по зарегистрированным
+	 * правам и по роли. Админ отсекается через `manage_options` (так же,
+	 * как в остальном плагине), организатор — через
+	 * `IDPG_Roles::is_current_user_organizer()`: cap `edit_events` есть и у
+	 * редактора, и у администратора, и организатора от неё не отличить.
+	 *
 	 * @param WP_Query $query Объект запроса.
 	 * @return void
 	 */
@@ -1133,11 +1141,13 @@ class IDPG_Meta {
 			return;
 		}
 
-		if ( current_user_can( 'administrator' ) ) {
+		if ( current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
-		if ( ! current_user_can( 'event_organizer' ) ) {
+		// DEV-258: роль организатора проверяется хелпером `IDPG_Roles`
+		// (незарегистрированный `current_user_can( 'event_organizer' )` заменён).
+		if ( ! IDPG_Roles::instance()->is_current_user_organizer() ) {
 			return;
 		}
 
