@@ -440,13 +440,6 @@ class IDPG_REST_Auth {
 			);
 		}
 
-		$ip = IDPG_Auth_Rate_Limiter::instance()->get_client_ip();
-		$rate_check = IDPG_Auth_Rate_Limiter::instance()->check_registration_attempt( $ip );
-
-		if ( is_wp_error( $rate_check ) ) {
-			return $rate_check;
-		}
-
 		if ( email_exists( $email ) ) {
 			return new WP_Error(
 				'email_exists',
@@ -495,6 +488,18 @@ class IDPG_REST_Auth {
 				__( 'Необходимо согласие с правилами сайта.', 'idpg-core' ),
 				array( 'status' => 400 )
 			);
+		}
+
+		// Лимит регистрации проверяется и тратится последним шагом - уже после
+		// всех проверок полей (DEV-33). Раньше счётчик увеличивался до
+		// email_exists() и валидации организатора, из-за чего попытки с чужим
+		// email или с пустым org_name расходовали лимит впустую, а валидный
+		// пользователь с того же IP получал 429.
+		$ip         = IDPG_Auth_Rate_Limiter::instance()->get_client_ip();
+		$rate_check = IDPG_Auth_Rate_Limiter::instance()->check_registration_attempt( $ip );
+
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
 		}
 
 		// Запоминаем пароль для приветственного письма организатору (до хэширования).

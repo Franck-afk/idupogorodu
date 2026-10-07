@@ -526,7 +526,13 @@ class IDPG_Auth_Emails {
 	 *
 	 * Можно переопределить через фильтр idpg_email_logo_url.
 	 *
-	 * @return string
+	 * DEV-15: значение фильтра дополнительно проверяется на существование
+	 * файла. Раньше проверки не было, и если логотип удаляли из uploads,
+	 * в письме уходил битый <img>. Теперь при отсутствии файла
+	 * возвращается пустая строка, а оба шаблона показывают текстовую
+	 * замену — вёрстка не разъезжается.
+	 *
+	 * @return string URL логотипа либо '' если файла нет.
 	 */
 	private function get_logo_url() {
 		if ( empty( $this->logo_url ) ) {
@@ -536,6 +542,69 @@ class IDPG_Auth_Emails {
 			);
 		}
 
-		return $this->logo_url;
+		return $this->validate_logo_url( $this->logo_url );
+	}
+
+	/**
+	 * Проверяет, что логотип действительно лежит на диске.
+	 *
+	 * Фильтр idpg_email_logo_url может вернуть и внешний адрес (CDN,
+	 * стороннее хранилище) — такой URL проверке не поддаётся и
+	 * отдаётся как есть. Пустая строка на входе тоже остаётся пустой.
+	 *
+	 * @param string $url URL логотипа.
+	 * @return string Тот же URL либо '' если локального файла нет.
+	 */
+	private function validate_logo_url( $url ) {
+		$url = is_string( $url ) ? trim( $url ) : '';
+
+		if ( '' === $url ) {
+			return '';
+		}
+
+		$path = $this->local_path_from_url( $url );
+
+		// Не наш домен — проверить наличие файла нечем.
+		if ( '' === $path ) {
+			return $url;
+		}
+
+		return file_exists( $path ) ? $url : '';
+	}
+
+	/**
+	 * Переводит URL логотипа в путь на диске, если он локальный.
+	 *
+	 * Сопоставляется именно uploads-каталог: WordPress не обязан отдавать
+	 * uploads по home_url() (пример —WP_CONTENT_DIR), поэтому сравнение
+	 * идёт с базовым URL загрузок из wp_get_upload_dir().
+	 *
+	 * @param string $url URL логотипа.
+	 * @return string Путь в файловой системе либо '' если URL внешний.
+	 */
+	private function local_path_from_url( $url ) {
+		$parts = wp_parse_url( $url );
+
+		if ( empty( $parts['host'] ) ) {
+			return '';
+		}
+
+		$home = wp_parse_url( home_url( '/' ) );
+
+		if ( empty( $home['host'] ) || strtolower( $parts['host'] ) !== strtolower( $home['host'] ) ) {
+			return '';
+		}
+
+		$uploads = wp_get_upload_dir();
+
+		if ( 0 !== strpos( $url, $uploads['baseurl'] ) ) {
+			return '';
+		}
+
+		$relative = ltrim( substr( $url, strlen( $uploads['baseurl'] ) ), '/' );
+
+		// Разделитель обязателен: baseurl из wp_get_upload_dir() может быть
+		// без слеша на конце, и простая склейка даёт «uploadsemail-logo.png».
+		return trailingslashit( $uploads['basedir'] ) . str_replace( '/', DIRECTORY_SEPARATOR, $relative );
 	}
 }

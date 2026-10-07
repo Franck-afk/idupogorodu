@@ -64,7 +64,9 @@ echo.
 rem ---------------------------------------------------------------------------
 rem 1. Скачивание и распаковка wordpress-develop (если ещё нет)
 rem ---------------------------------------------------------------------------
-if not exist "%WP_CORE_DIR%\wp-includes\version.php" goto :have_core
+rem DEV-92: условие было инвертировано - при уже скачанном ядре скрипт
+rem пр�������� загрузку заново, а при отсутствующем - молча шёл мимо неё.
+if exist "%WP_CORE_DIR%\wp-includes\version.php" goto :have_core
 echo Скачивание wordpress-develop...
 set "ZIP=%TEMP%\wordpress-develop.zip"
 powershell -NoProfile -Command "Invoke-WebRequest -Uri 'https://github.com/WordPress/wordpress-develop/archive/refs/heads/trunk.zip' -OutFile '%ZIP%' -UseBasicParsing"

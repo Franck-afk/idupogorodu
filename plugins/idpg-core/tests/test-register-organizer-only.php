@@ -251,4 +251,87 @@ class Test_Register_Organizer_Only extends WP_UnitTestCase {
 		$this->assertSame( 429, $response->get_status() );
 		$this->assertSame( 'too_many_registrations', $response->get_data()['code'] );
 	}
+
+	/* ---------------------------------------------------------------------
+	 * DEV-33: отказы по данным не должны расходовать лимит регистрации.
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Текущее значение счётчика регистраций для нашего IP.
+	 *
+	 * @return int
+	 */
+	private function rate_count() {
+		$data = get_transient( $this->rate_key() );
+
+		return is_array( $data ) && isset( $data['count'] ) ? (int) $data['count'] : 0;
+	}
+
+	/**
+	 * Запрос с уже занятым email отклоняется до траты лимита.
+	 */
+	public function test_duplicate_email_does_not_consume_rate_limit() {
+		rest_do_request( $this->register_request( array( 'email' => 'taken@example.com' ) ) );
+		$before = $this->rate_count();
+
+		$response = rest_do_request( $this->register_request( array( 'email' => 'taken@example.com' ) ) );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'email_exists', $response->get_data()['code'] );
+		$this->assertSame( $before, $this->rate_count() );
+	}
+
+	/**
+	 * Пустое название организации отклоняется до траты лимита.
+	 */
+	public function test_missing_org_name_does_not_consume_rate_limit() {
+		$before = $this->rate_count();
+
+		$response = rest_do_request( $this->register_request( array( 'org_name' => null ) ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'empty_org_name', $response->get_data()['code'] );
+		$this->assertSame( $before, $this->rate_count() );
+	}
+
+	/**
+	 * Отсутствие телефона отклоняется до траты лимита.
+	 */
+	public function test_missing_phone_does_not_consume_rate_limit() {
+		$before = $this->rate_count();
+
+		$response = rest_do_request( $this->register_request( array( 'phone' => null ) ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'empty_phone', $response->get_data()['code'] );
+		$this->assertSame( $before, $this->rate_count() );
+	}
+
+	/**
+	 * Отсутствие согласия с правилами отклоняется до траты лимита.
+	 */
+	public function test_missing_terms_does_not_consume_rate_limit() {
+		$before = $this->rate_count();
+
+		$response = rest_do_request( $this->register_request( array( 'terms' => false ) ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'terms_required', $response->get_data()['code'] );
+		$this->assertSame( $before, $this->rate_count() );
+	}
+
+	/**
+	 * Главный сценарий DEV-33: серия заведомо невалидных попыток не
+	 * закрывает лимит настоящей регистрации с того же IP.
+	 */
+	public function test_invalid_attempts_do_not_lock_out_a_valid_registration() {
+		for ( $i = 0; $i < IDPG_Auth_Rate_Limiter::REGISTRATION_LIMIT + 2; $i++ ) {
+			$response = rest_do_request( $this->register_request( array( 'org_name' => null ) ) );
+			$this->assertSame( 400, $response->get_status() );
+		}
+
+		$response = rest_do_request( $this->register_request( array( 'email' => 'valid@example.com' ) ) );
+
+		$this->assertSame( 201, $response->get_status() );
+	}
 }
