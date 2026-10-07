@@ -117,8 +117,64 @@ class El {
   }
 
   focus() {}
-  matches() { return false; }
-  closest() { return null; }
+
+  // DEV-223: выбор документов в профиле проверяет сам элемент
+  // (`e.target.matches`) и удаляет его (`remove`). Заглушка возвращала из
+  // matches всегда false, а remove отсутствовал, поэтому этот кусок логики
+  // было нечем покрыть.
+  matches(sel) { return matches(this, sel); }
+
+  remove() {
+    if (this.parentNode) this.parentNode.removeChild(this);
+  }
+
+  // DEV-206: closest() заглушки всегда возвращал null, поэтому нельзя было
+  // проверить ни клик по варианту кастомного списка, ни то, что скрипт вешает
+  // маркер «замена построена» на обёртку поля. Ищем по реальным предкам.
+  // Сам элемент входит в поиск — как в настоящем Element.closest: без этого
+  // клик по варианту не находил бы его самого.
+  closest(sel) {
+    let node = this;
+    while (node) {
+      if (matches(node, sel)) return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  contains(other) {
+    let node = other;
+    while (node) {
+      if (node === this) return true;
+      node = node.parentNode;
+    }
+    return false;
+  }
+
+  scrollIntoView() {}
+
+  // Собственные события нужны кастомному селекту: он пишет выбранное
+  // значение обратно в нативный select через dispatchEvent(new Event('change')).
+  dispatchEvent(ev) {
+    this.dispatch(ev && ev.type ? ev.type : String(ev), { target: this, bubbles: true });
+    return true;
+  }
+
+  // select: значение и список вариантов. Компонент читает select.options и
+  // select.selectedIndex, поэтому заглушка обязана их отдавать.
+  get options() {
+    return this._options || [];
+  }
+  set options(list) {
+    this._options = list || [];
+  }
+  get selectedIndex() {
+    if (this._selectedIndex === undefined) return this._options ? this._options.length - 1 : -1;
+    return this._selectedIndex;
+  }
+  set selectedIndex(v) {
+    this._selectedIndex = v;
+  }
 }
 
 // Поддерживаемые селекторы: [attr], [attr="v"], .class, tag, tag[attr="v"].
@@ -137,7 +193,7 @@ function matches(node, sel) {
   return node.tagName === sel.toUpperCase();
 }
 
-function runScript(file, { reg, pathname, search, fetchImpl }) {
+function runScript(file, { reg, pathname, search, fetchImpl, onReload }) {
   const root = reg.all[0]; // корневой <main id="primary">
 
   const doc = {
@@ -146,12 +202,28 @@ function runScript(file, { reg, pathname, search, fetchImpl }) {
     // document ищет по всему реестру, включая сам корень: в реальной
     // разметке .idpg-org-page — это и есть <main id="primary">.
     querySelector: (sel) => reg.all.find(n => matches(n, sel)) || null,
-    querySelectorAll: (sel) => reg.all.filter(n => matches(n, sel))
+    querySelectorAll: (sel) => reg.all.filter(n => matches(n, sel)),
+    // organizer-select.js слушает document на click и keydown, чтобы закрывать
+    // открытый список по клику вне и по Tab. readyState = complete заставляет
+    // init() выполниться сразу, без ожидания DOMContentLoaded.
+    readyState: 'complete',
+    addEventListener(type, fn) {
+      (doc._listeners[type] = doc._listeners[type] || []).push(fn);
+    },
+    _listeners: {}
   };
 
   const href = (pathname || '/organizer/') + (search || '');
   const win = {
-    location: { pathname: pathname || '/organizer/', search: search || '', href, origin: 'https://example.test' },
+    // reload нужен после отправки события на модерацию: статус меняется на
+    // сервере, поэтому форма обязана перечитать страницу (DEV-224).
+    location: {
+      pathname: pathname || '/organizer/',
+      search: search || '',
+      href,
+      origin: 'https://example.test',
+      reload: () => { if (onReload) onReload(); }
+    },
     history: { replaceState() {}, pushState() {} },
     confirm: () => true,
     fetch: fetchImpl,
@@ -170,6 +242,15 @@ function runScript(file, { reg, pathname, search, fetchImpl }) {
   ctx.Promise = Promise;
   ctx.setTimeout = setTimeout;
   ctx.console = console;
+  // Кастомный селект рассылает change через new Event(...). В контексте vm
+  // конструктора Event нет, поэтому даём минимальный: скрипту важны только
+  // type и bubbles.
+  ctx.Event = class {
+    constructor(type, init) {
+      this.type = type;
+      this.bubbles = Boolean(init && init.bubbles);
+    }
+  };
 
   vm.runInContext(fs.readFileSync(path.join(JS_DIR, file), 'utf8'), ctx, { filename: file });
   return { doc, win, root };
@@ -242,9 +323,16 @@ console.log('organizer.js — G6 (статистика + список событ
   check('всего два запроса (stats + events)', urls.length === 2, 'получено: ' + urls.length);
 }
 
-// --- organizer-event-form.js: шаги и сеансы (G5) --------------------------
+// --- organizer-event-form.js: одностраничная форма и сеансы (G5) ---------
+//
+// DEV-206. Блок раньше проверял визард из трёх шагов: активную панель,
+// номера шагов и заполнение полосы прогресса на 1/3. Визарда в форме больше
+// нет, поэтому проверять его нечего, а оставшиеся утверждения были ложными:
+// они проходили, потому что проверяли элементы, которых в разметке нет.
+// Вместо них проверяется то, что форма теперь делает: держит условные блоки,
+// добавляет сеансы и берёт общее уведомление кабинета.
 
-console.log('organizer-event-form.js — G5 (шаги + сеансы)');
+console.log('organizer-event-form.js — G5 (одностраничная форма + сеансы)');
 {
   const reg = { all: [] };
   const main = new El('main', reg);
@@ -257,20 +345,16 @@ console.log('organizer-event-form.js — G5 (шаги + сеансы)');
   form.setAttribute('data-idpg-event-nonce', 'nonce');
   form.setAttribute('data-idpg-event-locked', '0');
 
-  const panels = [0, 1, 2].map(() => new El('div', reg));
-  panels.forEach(p => { p.className = 'create-event__panel'; });
+  // Условные блоки: их показывает и прячет refreshConditions() по data-атрибутам.
+  const ticketsBox = new El('div', reg); ticketsBox.setAttribute('data-idpg-tickets', '');
+  const sessionsWrap = new El('div', reg); sessionsWrap.setAttribute('data-idpg-sessions-wrap', '');
 
-  const steps = [0, 1, 2].map(() => new El('li', reg));
-  steps.forEach(s => { s.className = 'create-event__step'; s.setAttribute('data-idpg-event-step', ''); });
-
+  // Полоса прогресса в разметке формы больше не выводится. Элемент оставлен
+  // в дереве намеренно: если визард вернётся, скрипт начнёт писать в его
+  // style.width, и проверка это заметит.
   const progress = new El('div', reg); progress.setAttribute('data-idpg-event-progress', '');
-  const fill = new El('div', reg); fill.className = 'create-event__progress-fill';
-  progress.appendChild(fill);
 
   const statusBox = new El('div', reg); statusBox.setAttribute('data-idpg-event-status', '');
-  const saveBtn = new El('button', reg); saveBtn.setAttribute('data-idpg-event-save', '');
-  const nextBtn = new El('button', reg); nextBtn.setAttribute('data-idpg-event-step-next', '');
-  const prevBtn = new El('button', reg); prevBtn.setAttribute('data-idpg-event-step-prev', '');
   const sessionsList = new El('div', reg); sessionsList.setAttribute('data-idpg-event-sessions-list', '');
   const sessionAdd = new El('button', reg); sessionAdd.setAttribute('data-idpg-event-session-add', '');
 
@@ -285,29 +369,442 @@ console.log('organizer-event-form.js — G5 (шаги + сеансы)');
   if (threw) console.log('       ' + threw.stack.split('\n').slice(0, 5).join('\n       '));
 
   check('форма перехватывает submit', form.hasListeners('submit'));
-  check('форма слушает invalid в фазе захвата', form.hasListeners('invalid'));
   check('обработчик добавления сеанса навешен', sessionAdd.hasListeners('click'));
-  // Ширину задаёт JS как (1/3)*100, поэтому сверяем префикс, а не точное
-  // число: 33.333…% в разных движках печатается по-разному.
-  check('прогресс заполнен примерно на 1/3', String(fill.style.width).indexOf('33.3') === 0);
-  check('aria-valuenow = 1', progress.getAttribute('aria-valuenow') === '1');
-  check('шаг 1 активен', steps[0].classList.contains('create-event__step--active'));
-  check('шаг 1 панель активна', panels[0].classList.contains('create-event__panel--active'));
-  check('панели 2 и 3 скрыты', !panels[1].classList.contains('create-event__panel--active') && !panels[2].classList.contains('create-event__panel--active'));
 
-  // Переход «Далее» должен переключить панель и сдвинуть прогресс.
-  main.dispatch('click', { target: nextBtn, hasAttribute: (a) => nextBtn.hasAttribute(a) });
+  // Визард не должен вернуться: старый код на старте ставил ширину полосы
+  // прогресса и вёл слушатель 'invalid', чтобы показать панель с ошибкой.
+  check('визард не восстановлен: полоса прогресса не тронута', !('width' in progress.style));
+  check('визард не восстановлен: слушателя invalid нет', !form.hasListeners('invalid'));
 
-  check('после «Далее» активна панель 2', panels[1].classList.contains('create-event__panel--active'));
-  check('после «Далее» прогресс 2/3', fill.style.width === '66.66666666666666%' || fill.style.width.indexOf('66.6') === 0);
-  check('после «Далее» шаг 1 помечен как пройденный', steps[0].classList.contains('create-event__step--done'));
-  check('после «Далее» aria-valuenow = 2', progress.getAttribute('aria-valuenow') === '2');
+  // Условная видимость. Событие платное и не на весь день, поэтому билетные
+  // поля и сеансы должны быть показаны. Значение radio скрипт читает через
+  // ':checked', который заглушка селекторов не поддерживает, поэтому здесь
+  // проверяется стартовое состояние, а не переключение.
+  check('билетные поля показаны', ticketsBox.hidden === false);
+  check('блок сеансов показан', sessionsWrap.hidden === false);
 
-  main.dispatch('click', { target: prevBtn, hasAttribute: (a) => prevBtn.hasAttribute(a) });
-  check('после «Назад» активна панель 1', panels[0].classList.contains('create-event__panel--active'));
+  // Сесансы: строка добавляется по кнопке и несёт нужные поля.
+  const rowsBefore = sessionsList.children.length;
+  sessionAdd.dispatch('click', {});
+  check('строка сеанса добавлена', sessionsList.children.length === rowsBefore + 1);
+
+  const added = sessionsList.children[sessionsList.children.length - 1];
+  check('у новой строки есть метка строки сеанса', added.getAttribute('data-idpg-event-session-row') !== null);
+  check('у новой строки есть кнопка удаления', Boolean(added.querySelector('[data-idpg-event-session-remove]')));
+
+  // Имена полей вида session_time[] заглушка селекторов не разбирает: её
+  // регулярка атрибутов — /^\[([\w-]+)\]/, а в имени есть квадратные скобки.
+  // Проверять состав полей здесь бессмысленно — это ограничение стенда,
+  // а не поведение формы.
 }
 
-// --- Асинхронные проверки: список площадок и форма площадки (DEV-50) --------
+// --- organizer-select.js: кастомный выпадающий список (G5) ----------------
+//
+// Отдельный компонент, нужен обеим формам и модалке. Проверяется главное:
+// нативный select прячется ТОЛЬКО после того, как замена построена, —
+// иначе пользователь остаётся без элемента управления.
+
+console.log('organizer-select.js — G5 (кастомный список)');
+{
+  const reg = { all: [] };
+  const main = new El('main', reg);
+  main.setAttribute('id', 'primary');
+
+  // Обёртка поля: скрипт ищет .idpg-org-field через closest().
+  const field = new El('div', reg);
+  field.className = 'idpg-org-field';
+  main.appendChild(field);
+
+  const select = new El('select', reg);
+  select.className = 'idpg-org-field__select';
+  select.setAttribute('name', 'city');
+  select.value = '12';
+  select.options = [
+    { value: '', textContent: '— Выберите город —' },
+    { value: '12', textContent: 'Казань' },
+    { value: '34', textContent: 'Москва' },
+  ];
+  select.selectedIndex = 1;
+  field.appendChild(select);
+
+  let threw = null;
+  try {
+    runScript('organizer-select.js', { reg, pathname: '/organizer/event/new/', search: '' });
+  } catch (e) { threw = e; }
+
+  check('скрипт выполняется без синхронных ошибок', threw === null);
+  if (threw) console.log('       ' + threw.stack.split('\n').slice(0, 6).join('\n       '));
+
+  const find = (sel) => reg.all.find((n) => matches(n, sel));
+
+  check('список вариантов собран', Boolean(find('.idpg-org-select__menu')));
+  check('вариантов в списке три', reg.all.filter((n) => matches(n, '[data-index]')).length === 3);
+
+  const button = find('.idpg-org-select__button');
+  const menu = find('.idpg-org-select__menu');
+  const options = reg.all.filter((n) => matches(n, '[data-index]'));
+
+  // Роли проверяем по атрибуту: заглушка селекторов не разбирает
+  // составные селекторы вида .class[attr="value"].
+  check('кнопка имеет роль combobox', button.getAttribute('role') === 'combobox');
+  check('кнопка объявляет раскрытие', button.getAttribute('aria-expanded') === 'false');
+  check('список имеет роль listbox', menu.getAttribute('role') === 'listbox');
+  check('нативный select помечен как готовый', select.getAttribute('data-idpg-select-ready') === '1');
+
+  // Главное условие: маркер ставится только после построения замены.
+  check(
+    'маркер замены стоит только после сборки контрола',
+    field.classList.contains('idpg-org-field--custom') && Boolean(button)
+  );
+
+  check('текущее значение показано в кнопке', (button.children[0].textContent || '') === 'Казань');
+  check('выбранный вариант помечен', options[1].classList.contains('idpg-org-select__option--selected'));
+
+  // Раскрытие и схлопывание.
+  check('список закрыт по умолчанию', menu.hidden === true);
+  button.dispatch('click', { target: button });
+  check('клик по кнопке открывает список', menu.hidden === false && button.getAttribute('aria-expanded') === 'true');
+
+  // Выбор варианта пишет значение обратно в нативный select.
+  // Событие шлём на списке с target = вариант: заглушка не всплывает события,
+  // а слушатель висит именно на списке.
+  menu.dispatch('click', { target: options[2] });
+  check('выбор варианта меняет значение select', select.value === '34');
+  check('выбранным стал третий вариант', select.selectedIndex === 2);
+  check('после выбора список закрыт', menu.hidden === true);
+  check('кнопка показывает новое значение', (button.children[0].textContent || '') === 'Москва');
+
+  // Клавиатура. Поведение двухуровневое, как у настоящего combobox: первое
+// нажатие стрелки только раскрывает список, второе — переходит к варианту.
+// Раньше проверялось только первое нажатие, поэтому переход не был закреплён.
+  check('список закрыт после выбора', menu.hidden === true);
+  button.dispatch('keydown', { key: 'ArrowDown', target: button, preventDefault() {} });
+  check('стрелка вниз на закрытом списке только раскрывает его', menu.hidden === false);
+  check('раскрытие стрелкой не меняет выбор', select.selectedIndex === 2);
+
+  button.dispatch('keydown', { key: 'ArrowDown', target: button, preventDefault() {} });
+  check('второе нажатие заворачивает к первому варианту', select.selectedIndex === 0);
+  check('пустое значение не подменяет подпись', (button.children[0].textContent || '') === '— Выберите город —');
+}
+
+// --- organizer-date.js: кастомный календарь (G5) -----------------------
+//
+// Проверяется то же главное условие, что и у списков: нативный input[type=date]
+// прячется только после того, как замена построена. Если маркер появится при
+// нерабочем календаре, поле останется без элемента управления.
+
+console.log('organizer-date.js — G5 (кастомный календарь)');
+{
+  const reg = { all: [] };
+  const main = new El('main', reg);
+  main.setAttribute('id', 'primary');
+
+  const field = new El('div', reg);
+  field.className = 'idpg-org-field';
+  main.appendChild(field);
+
+  const input = new El('input', reg);
+  input.className = 'idpg-org-field__input idpg-org-field__date';
+  input.setAttribute('type', 'date');
+  input.setAttribute('name', 'start_date');
+  input.value = '2026-10-15';
+  field.appendChild(input);
+
+  let threw = null;
+  try {
+    runScript('organizer-date.js', { reg, pathname: '/organizer/event/new/', search: '' });
+  } catch (e) { threw = e; }
+
+  check('скрипт выполняется без синхронных ошибок', threw === null);
+  if (threw) console.log('       ' + threw.stack.split('\n').slice(0, 6).join('\n       '));
+
+  const find = (sel) => reg.all.find((n) => matches(n, sel));
+  const button = find('.idpg-org-date__button');
+  const popup = find('.idpg-org-date__popup');
+
+  check('кнопка календаря построена', Boolean(button));
+  check('всплывающее окно построено', Boolean(popup));
+  check('native input помечен как готовый', input.getAttribute('data-idpg-date-ready') === '1');
+  check(
+    'маркер замены стоит только после сборки',
+    find('.idpg-org-date').classList.contains('idpg-org-date--custom') && Boolean(button)
+  );
+
+  // Раскрытие рисует сетку месяца выбранной даты.
+  check('окно закрыто по умолчанию', popup.hidden === true);
+  button.dispatch('click', { target: button });
+  check('клик раскрывает календарь', popup.hidden === false && button.getAttribute('aria-expanded') === 'true');
+
+  const cells = reg.all.filter((n) => matches(n, '[data-date]'));
+  check('в октябре 31 день', cells.length === 31);
+  check('выбрана 15 октября', cells.filter((c) => c.classList.contains('idpg-org-date__cell--selected')).length === 1);
+  check('месяц в родительном падеже', (button.children[0].textContent || '') === '15 октября 2026');
+
+  // Выбор дня пишет значение в нативный input.
+  const target = cells.find((c) => c.getAttribute('data-date') === '2026-10-20');
+  popup.dispatch('click', { target });
+  check('выбор дня записан в input', input.value === '2026-10-20');
+  check('после выбора окно закрыто', popup.hidden === true);
+  check('кнопка показывает новую дату', (button.children[0].textContent || '') === '20 октября 2026');
+
+  // Стрелка месяца назад перерисовывает сетку. Считаем ячейки внутри тела
+  // сетки, а не в реестре стенда: реестр накапливает элементы и не очищается,
+  // поэтому в нём всегда лежат ячейки и прошлого месяца.
+  button.dispatch('click', { target: button });
+  const prev = reg.all.find((n) => n.hasAttribute('data-month-step') && n.getAttribute('data-month-step') === 'prev');
+  check('стрелка месяца есть', Boolean(prev));
+  popup.dispatch('click', { target: prev });
+  const body = find('.idpg-org-date__body');
+  check('сетка перерисована на сентябрь', body.children.filter((n) => n.hasAttribute('data-date')).length === 30);
+  check('заголовок месяца в именительном падеже', (find('.idpg-org-date__month').textContent || '') === 'Сентябрь 2026');
+}
+
+// --- organizer.js: документы профиля (DEV-223) ---------------------------
+//
+// Логика перенесена из инлайнового <script> в organizer.js: инлайн
+// исполнялся до подвальных скриптов, и wp.media к тому моменту не было.
+
+console.log('organizer.js — DEV-223 (документы профиля)');
+{
+  const reg = { all: [] };
+  const main = new El('main', reg);
+  main.setAttribute('id', 'primary');
+  main.className = 'idpg-org-page';
+
+  const hidden = new El('input', reg);
+  hidden.setAttribute('data-idpg-documents-input', '');
+  hidden.value = '[10]';
+  main.appendChild(hidden);
+
+  const list = new El('ul', reg);
+  list.setAttribute('data-idpg-documents-list', '');
+  main.appendChild(list);
+
+  // Уже сохранённый документ выводится сервером.
+  const existing = new El('li', reg);
+  existing.className = 'idpg-org-document';
+  existing.setAttribute('data-idpg-document-id', '10');
+  const existingName = new El('span', reg);
+  existingName.className = 'idpg-org-document__name';
+  existingName.textContent = 'Паспорт.pdf';
+  const existingRemove = new El('button', reg);
+  existingRemove.setAttribute('data-idpg-document-remove', '');
+  existing.appendChild(existingName);
+  existing.appendChild(existingRemove);
+  list.appendChild(existing);
+
+  const addBtn = new El('button', reg);
+  addBtn.setAttribute('data-idpg-documents-add', '');
+  main.appendChild(addBtn);
+
+  // Навигация раздела нужна, чтобы ранний return в organizer.js не оборвал инициализацию.
+  const links = new El('a', reg);
+  links.setAttribute('data-idpg-org-section', 'profile');
+  main.appendChild(links);
+  const panel = new El('div', reg);
+  panel.setAttribute('data-idpg-org-panel', 'profile');
+  main.appendChild(panel);
+
+  let opened = null;
+  const selection = [
+    { id: 21, get: () => 'Договор.pdf' },
+    { id: 22, get: () => 'Скан.jpg' },
+  ];
+  const mediaStub = {
+    title: '',
+    opts: null,
+    open() { opened = this; },
+    on(evt, fn) { this._onSelect = fn; },
+    state: () => ({ get: () => ({ each: (fn) => selection.forEach(fn) }) }),
+  };
+
+  let threw = null;
+  try {
+    const out = runScript('organizer.js', {
+      reg,
+      pathname: '/organizer/profile/',
+      search: '',
+      fetchImpl: () => Promise.resolve(jsonResponse(true, {})),
+    });
+    // Скрипт читает window.wp — подставляем заглушку медиатеки.
+    out.win.wp = { media: (opts) => Object.assign(mediaStub, { opts }) };
+  } catch (e) { threw = e; }
+
+  check('скрипт выполняется без синхронных ошибок', threw === null);
+  if (threw) console.log('       ' + threw.stack.split('\n').slice(0, 6).join('\n       '));
+
+  check('кнопка добавления получила обработчик', addBtn.hasListeners('click'));
+
+  addBtn.dispatch('click', {});
+  check('медиатека открылась', opened !== null);
+  check('фильтр типов файлов прежний', opened && opened.opts.library.type === 'application/pdf,image/*');
+  check('мультивыбор прежний', opened && opened.opts.multiple === true);
+
+  opened._onSelect();
+  check('документы добавлены в список', list.children.length === 3);
+  check('id сохранены в скрытое поле', hidden.value === '[10,21,22]');
+
+  const added = list.children[1];
+  check('у документа проставлен id', added.getAttribute('data-idpg-document-id') === '21');
+  check('название вставлено как текст', added.children[0].textContent === 'Договор.pdf');
+
+  // Повторный выбор тех же документов не должен ничего продублировать.
+  opened._onSelect();
+  check('повторный выбор не дублирует записи', hidden.value === '[10,21,22]' && list.children.length === 3);
+
+  // Удаление убирает и из списка, и из скрытого поля.
+  const removeBtn = list.children[1].children[1];
+  list.dispatch('click', { target: removeBtn });
+  check('документ удалён из списка', list.children.length === 2);
+  check('id удалён из скрытого поля', hidden.value === '[10,22]');
+}
+
+// --- organizer-event-form.js: сохранение уходит в REST (G5) -------------
+  //
+  // Отдельный блок от проверок выше: там скрипт только запускался, здесь
+  // нажимается кнопка и проверяется фактический запрос. «Кнопка на месте»
+  // ничего не значит — обработчик мог не навеситься вовсе.
+  //
+  // Блок обёрнут в async-IIFE, а не лежит в asyncChecks(): ему нужен await,
+  // а asyncChecks() объявлена ниже по файлу. Функции flush и jsonResponse
+  // подняты hoisting'ом, поэтому порядок объявления не важен.
+
+  (async function () {
+  console.log('organizer-event-form.js — G5 (сохранение события)');
+  {
+    const reg = { all: [] };
+    const main = new El('main', reg);
+    main.setAttribute('id', 'primary');
+
+    const form = new El('form', reg);
+    form.setAttribute('data-idpg-event-form', '');
+    form.setAttribute('data-idpg-event-id', '0');
+    form.setAttribute('data-idpg-event-create-url', 'https://example.test/wp-json/idpg/v1/organizer/events');
+    form.setAttribute('data-idpg-event-nonce', 'nonce');
+    form.setAttribute('data-idpg-event-locked', '0');
+
+    const field = (name, val) => {
+      const input = new El('input', reg);
+      input.setAttribute('name', name);
+      input.value = val;
+      form.appendChild(input);
+      return input;
+    };
+
+    field('title', 'Ночной концерт');
+    field('city', '12');
+    const saveBtn = new El('button', reg);
+    saveBtn.setAttribute('data-idpg-event-save', '');
+    saveBtn.setAttribute('data-idpg-event-publish', '');
+    form.appendChild(saveBtn);
+
+    // Вторичное действие DEV-224: остаться в черновике.
+    const draftBtn = new El('button', reg);
+    draftBtn.setAttribute('data-idpg-event-save-draft', '');
+    form.appendChild(draftBtn);
+
+    const calls = [];
+    const fetchImpl = (url, options) => {
+      calls.push({
+        url: String(url),
+        method: (options && options.method) || 'GET',
+        headers: (options && options.headers) || {},
+        body: options && options.body,
+      });
+      return Promise.resolve(jsonResponse(true, { data: { id: 77 }, message: 'Сохранено' }));
+    };
+
+    let reloads = 0;
+    let threw = null;
+    try {
+      runScript('organizer-event-form.js', {
+        reg,
+        fetchImpl,
+        pathname: '/organizer/event/new/',
+        search: '',
+        onReload: () => { reloads++; }
+      });
+    } catch (e) { threw = e; }
+
+    check('скрипт выполняется без синхронных ошибок', threw === null);
+    if (threw) console.log('       ' + threw.stack.split('\n').slice(0, 5).join('\n       '));
+
+    check('кнопка сохранения найдена', form.querySelector('[data-idpg-event-save]') === saveBtn);
+    check('форма перехватывает submit', form.hasListeners('submit'));
+
+    form.dispatch('submit', { preventDefault() {} });
+    await flush();
+
+    const save = calls[0] || {};
+    check('сохранение уходит POST-ом на коллекцию', save.method === 'POST' && /organizer\/events$/.test(save.url));
+    check(
+      'nonce передаётся заголовком, а не в URL',
+      save.headers['X-WP-Nonce'] === 'nonce' && save.url.indexOf('nonce') === -1
+    );
+    check(
+      'тело запроса — JSON с названием',
+      /^[{]/.test(String(save.body)) && String(save.body).indexOf('Ночной концерт') !== -1
+    );
+    check(
+      'город уходит числом',
+      String(save.body).indexOf('"city":12') !== -1,
+      'тело: ' + String(save.body).slice(0, 220)
+    );
+
+    // DEV-224. Главная кнопка одна и не оставляет черновик: после успешного
+    // сохранения событие само уходит на модерацию. Раньше отправка была
+    // отдельной кнопкой, её можно было не нажать — и событие навсегда
+    // оставалось в draft, из-за чего не появлялось даже на главной.
+    const submitCall = calls[1] || {};
+    check(
+      'после сохранения событие уходит на модерацию',
+      submitCall.method === 'POST' && /organizer\/events\/77\/submit$/.test(submitCall.url),
+      'запросы: ' + calls.map(c => c.method + ' ' + c.url).join(' | ')
+    );
+    check('после отправки страница перечитывается', reloads === 1);
+
+    // Ответ с id переводит форму в режим правки: повторное сохранение должно
+    // обновлять тот же черновик, а не создавать новый.
+    check('id нового события записан в форму', form.getAttribute('data-idpg-event-id') === '77');
+
+    calls.length = 0;
+    form.dispatch('submit', { preventDefault() {} });
+    await flush();
+    const second = calls[0] || {};
+    check(
+      'повторное сохранение уходит PUT-ом по id',
+      second.method === 'PUT' && /organizer\/events\/77$/.test(second.url)
+    );
+
+    // Вторичная кнопка оставляет событие в черновике: только сохранение, без
+    // обращения к /submit. Флаг одноразовый — следующее сохранение главной
+    // кнопкой снова публикует, поэтому организатор не застревает в черновиках.
+    calls.length = 0;
+    reloads = 0;
+    draftBtn.dispatch('click', {});
+    form.dispatch('submit', { preventDefault() {} });
+    await flush();
+
+    check(
+      'черновик сохраняется, но не отправляется на модерацию',
+      calls.length === 1 && /organizer\/events\/77$/.test(calls[0].url) && calls[0].method === 'PUT',
+      'запросы: ' + calls.map(c => c.method + ' ' + c.url).join(' | ')
+    );
+    check('черновик не перечитывает страницу', reloads === 0);
+
+    calls.length = 0;
+    reloads = 0;
+    form.dispatch('submit', { preventDefault() {} });
+    await flush();
+    check(
+      'после черновика главная кнопка снова публикует',
+      (calls[1] || {}).url !== undefined && /organizer\/events\/77\/submit$/.test(calls[1].url),
+      'запросы: ' + calls.map(c => c.method + ' ' + c.url).join(' | ')
+    );
+  }
+  })();
+
+  // --- Асинхронные проверки: список площадок и форма площадки (DEV-50) --------
 
 /**
  * Даёт микро- и макроочереди выполниться.
@@ -715,7 +1212,7 @@ async function asyncChecks() {
     const created = find('[data-idpg-venue-delete]');
 
     check('после сохранения кнопка удаления появилась', created !== null);
-    check('кнопка удаления опасного вида', created !== null && created.className.indexOf('venue-form__danger') !== -1);
+    check('кнопка удаления опасного вида', created !== null && created.className.indexOf('idpg-btn--danger') !== -1);
 
     if (created){
       check('на созданной кнопке есть обработчик', created.hasListeners('click'));

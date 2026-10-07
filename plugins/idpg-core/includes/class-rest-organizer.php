@@ -313,13 +313,18 @@ class IDPG_REST_Organizer {
 					'callback'            => array( $this, 'update_profile' ),
 					'permission_callback' => array( $this, 'can_profile' ),
 					'args'                => array(
+						// DEV-197: значения legal_type и inn проверяет
+						// IDPG_Organizer_URL::sanitize_profile_input() — тот же
+						// код, что и у no-JS формы в page-organizer.php.
+						// Здесь стояли enum и pattern: схема отсекала запрос
+						// до колбэка и отдавала rest_invalid_param, поэтому
+						// REST и форма расходились в поведении — форма пустой
+						// ИНН принимала, а REST на нём же отвечал 400.
 						'legal_type' => array(
-							'type'    => 'string',
-							'enum'    => IDPG_Organizer_URL::LEGAL_TYPES,
+							'type' => 'string',
 						),
 						'inn'        => array(
-							'type'    => 'string',
-							'pattern' => '^\d{10}$|^\d{12}$',
+							'type' => 'string',
 						),
 						'documents'  => array(
 							'type'  => 'array',

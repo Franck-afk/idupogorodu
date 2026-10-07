@@ -702,15 +702,29 @@ class Test_Organizer_Venue_Form extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'wp_safe_redirect', $page );
 	}
 
-	/**
-	 * Постер выбирается через wp.media, и скрипты подключаются по наличию
-	 * upload_files.
+/**
+	 * Медиатеку подключает functions.php, а не сам шаблон (DEV-206).
+	 *
+	 * Раньше тест требовал `wp_enqueue_media()` внутри формы площадки. Так и было
+	 * написано, и так оно и работало: вызов из тела шаблона происходит уже после
+	 * `wp_head()`, поэтому в подвале `media-views` печатался ПОСЛЕ скрипта формы,
+	 * и `window.wp.media` к моменту запуска был ещё `undefined`. Блок выбора фото
+	 * пропускался целиком — кнопка была на странице и молча ничего не делала.
+	 *
+	 * Теперь критерий обратный: в шаблоне вызова быть НЕ должно, а в functions.php
+	 * — обязательно, вместе с зависимостью `media-views`.
 	 */
-	public function test_venue_form_enqueues_media_only_with_capability() {
-		$source = file_get_contents( $this->theme_path() . '/template-parts/organizer/venue-form.php' );
+	public function test_media_is_enqueued_from_functions_not_from_template() {
+		$form = file_get_contents( $this->theme_path() . '/template-parts/organizer/venue-form.php' );
+		$page = file_get_contents( $this->theme_path() . '/page-organizer-venue.php' );
+		$fn   = file_get_contents( $this->theme_path() . '/functions.php' );
 
-		$this->assertStringContainsString( 'wp_enqueue_media()', $source );
-		$this->assertStringContainsString( "current_user_can( 'upload_files' )", $source );
+		$this->assertStringNotContainsString( 'wp_enqueue_media()', $form, 'Вызов из тела шаблона слишком поздний: медиатека печатается после скрипта формы' );
+		$this->assertStringNotContainsString( 'wp_enqueue_media()', $page, 'Вызов из страницы формы слишком поздний' );
+
+		$this->assertStringContainsString( 'wp_enqueue_media()', $fn, 'Медиатеку подключает functions.php' );
+		$this->assertStringContainsString( "current_user_can( 'upload_files' )", $fn, 'Подключение только при наличии права' );
+		$this->assertStringContainsString( "org_media_deps = array( 'media-views' )", $fn, 'Порядок вывода гарантирует зависимость media-views' );
 	}
 
 	// =====================================================================
@@ -840,7 +854,9 @@ class Test_Organizer_Venue_Form extends WP_UnitTestCase {
 		$this->clear_form_globals();
 
 		$this->assertStringContainsString( 'data-idpg-venue-delete', $html );
-		$this->assertStringContainsString( 'venue-form__danger', $html );
+		// DEV-206: опасный вид кнопки удаления переехал на общий префикс
+		// кабинета вместе с остальными классами формы площадки.
+		$this->assertStringContainsString( 'idpg-btn--danger', $html );
 	}
 
 	/**

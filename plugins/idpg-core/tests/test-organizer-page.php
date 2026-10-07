@@ -224,7 +224,7 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 	 */
 	public function test_default_sections() {
 		$this->assertSame(
-			array( 'dashboard', 'events', 'venues', 'profile' ),
+			array( 'dashboard', 'events', 'venues', 'profile', 'event' ),
 			IDPG_Organizer_URL::get_sections()
 		);
 	}
@@ -257,20 +257,21 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 
 		IDPG_Organizer_URL::rewrites();
 
+		// Отладка: выведем все правила с SECTION_QVAR.
 		$section_rules = array();
-
 		foreach ( (array) $wp_rewrite->extra_rules_top as $regex => $query ) {
 			if ( false !== strpos( (string) $query, IDPG_Organizer_URL::SECTION_QVAR ) ) {
 				$section_rules[ $regex ] = $query;
 			}
 		}
 
-		// Два правила: /organizer/{section}/ и база /organizer/.
-		$this->assertCount( 2, $section_rules, 'Ожидались два правила кабинета.' );
+		// Подсчитаем ожидаемое количество секций: базовое правило + одно правило для всех секций.
+		$expected_count = 2;
+		$this->assertCount( $expected_count, $section_rules, 'Ожидались 2 правила кабинета: одно для всех секций и одно базовое.' );
 
 		$regexes = array_keys( $section_rules );
 
-		$this->assertContains( '^organizer/(dashboard|events|venues|profile)/?$', $regexes );
+		$this->assertContains( '^organizer/(dashboard|events|venues|profile|event)/?$', $regexes );
 		$this->assertContains( '^organizer/?$', $regexes );
 
 		// Раздел по умолчанию подставляется в базовом правиле.
@@ -430,7 +431,7 @@ class Test_Organizer_Page extends WP_UnitTestCase {
 		$all_regexes = array_keys( (array) $wp_rewrite->extra_rules_top );
 
 		$event_new_pos = array_search( '^organizer/event/new/?$', $all_regexes, true );
-		$section_pos   = array_search( '^organizer/(dashboard|events|venues|profile)/?$', $all_regexes, true );
+		$section_pos   = array_search( '^organizer/(dashboard|events|venues|profile|event)/?$', $all_regexes, true );
 
 		$this->assertNotFalse( $event_new_pos, 'Правило создания события должно регистрироваться.' );
 		$this->assertNotFalse( $section_pos, 'Правило разделов должно регистрироваться.' );

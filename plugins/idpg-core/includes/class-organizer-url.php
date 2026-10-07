@@ -106,8 +106,9 @@ class IDPG_Organizer_URL {
 	 * `venues` добавлен DEV-50: площадки — самостоятельная сущность
 	 * организатора (CPT venue), и их некуда было деть: создать площадку
 	 * можно было только через модалку в форме события.
+	 * `event` добавлен здесь для возможности создания события из меню кабинета.
 	 */
-	const SECTIONS = array( 'dashboard', 'events', 'venues', 'profile' );
+	const SECTIONS = array( 'dashboard', 'events', 'venues', 'profile', 'event' );
 
 	/**
 	 * Раздел по умолчанию.
@@ -248,7 +249,7 @@ class IDPG_Organizer_URL {
 	 * `rewrite_rules` — иначе `/organizer/complete/` продолжал бы совпадать
 	 * с мёртвым правилом и отдавал бы не 404.
 	 */
-	const REWRITE_VERSION = 4;
+	const REWRITE_VERSION = 5;
 
 	/**
 	 * Опция-маркер выполненного сброса правил.

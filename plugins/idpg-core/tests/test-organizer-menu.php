@@ -83,7 +83,7 @@ class Test_Organizer_Menu extends WP_UnitTestCase {
 		$items = idpg_organizer_menu();
 
 		$this->assertSame(
-			array( 'dashboard', 'events', 'venues', 'profile' ),
+			array( 'dashboard', 'events', 'venues', 'profile', 'event' ),
 			array_keys( $items )
 		);
 	}
@@ -256,7 +256,7 @@ class Test_Organizer_Menu extends WP_UnitTestCase {
 	 */
 	public function test_menu_sections_returns_slugs() {
 		$this->assertSame(
-			array( 'dashboard', 'events', 'venues', 'profile' ),
+			array( 'dashboard', 'events', 'venues', 'profile', 'event' ),
 			idpg_organizer_menu_sections()
 		);
 	}

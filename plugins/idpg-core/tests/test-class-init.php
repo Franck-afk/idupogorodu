@@ -74,6 +74,14 @@ class Test_Class_Init extends WP_UnitTestCase {
 		'IDPG_Favorites'      => array(
 			'wp_enqueue_scripts' => 'assets',
 		),
+		// DEV-197: статический init() вызывается в конце class-organizer-meta.php.
+		// Приватного статического $instance у класса нет, поэтому проверяются
+		// именно зарегистрированные хуки, а не синглтон.
+		'IDPG_Organizer_Meta'  => array(
+			'carbon_fields_register_fields' => 'register_fields',
+			'personal_options_update'       => 'protect_verification_status',
+			'edit_user_profile_update'      => 'protect_verification_status',
+		),
 		'IDPG_Organizer_Scope' => array(
 			'pre_get_posts' => 'scope_admin_attachments',
 		),
@@ -104,6 +112,7 @@ class Test_Class_Init extends WP_UnitTestCase {
 	private const EXCEPTIONS = array(
 		'IDPG_Search'          => 'Статический helper: все методы public static, состояния нет, хуки не нужны.',
 		'IDPG_Template_Helper' => 'Статический helper: все методы public static, состояния нет, хуки не нужны.',
+		'IDPG_Helpers'         => 'Статический helper (DEV-22): общие get_client_ip()/get_city_tree() и геттеры мета билетов, состояния нет, хуки не нужны.',
 		'IDPG_CLI'             => 'Команды WP-CLI: регистрация происходит в блоке if ( defined( \'WP_CLI\' ) ), в обычном запросе WP_CLI не определён.',
 		'IDPG_Auth_Rate_Limiter' => 'Ленивая инициализация: экземпляр создаётся при первом обращении из обработчиков class-rest-auth.php и class-rest-api.php, до первого запроса он не нужен.',
 		'IDPG_GeoService'      => 'Ленивая инициализация: экземпляр создаётся по требованию. ВНИМАНИЕ: единственный потребитель сейчас — тесты, в production-коде вызовов нет. Кандидат на удаление (DEV-100).',
