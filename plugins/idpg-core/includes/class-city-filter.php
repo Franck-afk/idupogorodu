@@ -34,6 +34,33 @@ class IDPG_City_Filter {
 	const COOKIE_NAME = 'idpg_selected_city';
 
 	/**
+	 * Cookie-подтверждение: «город выбран самим посетителем» (DEV-19).
+	 *
+	 * Раньше cookie COOKIE_NAME ставилась и автоопределением по IP, и ручным
+	 * выбором — различия не было, поэтому определённый по IP город молча
+	 * становился рабочим и выглядел как выбранный. Теперь факт выбора
+	 * хранится отдельной меткой: пока её нет, автоопределение может
+	 * предлагать город, но не «закреплять» его.
+	 *
+	 * @var string
+	 */
+	const COOKIE_CONFIRMED = 'idpg_city_confirmed';
+
+	/**
+	 * Значение cookie-подтверждения.
+	 *
+	 * @var string
+	 */
+	const CONFIRMED_VALUE = '1';
+
+	/**
+	 * Nonce-действие для подтверждения города ссылкой (DEV-19).
+	 *
+	 * @var string
+	 */
+	const CONFIRM_ACTION = 'idpg_confirm_city';
+
+	/**
 	 * ID города по умолчанию (переопределяется константой IDPG_DEFAULT_CITY_ID).
 	 *
 	 * @var int
@@ -93,6 +120,101 @@ class IDPG_City_Filter {
 
 		// Автоопределение города по IP (если cookie ещё не установлен).
 		add_action( 'init', array( $this, 'auto_detect_city' ), 5 );
+
+		// DEV-19: подтверждение определённого по IP города без JS (ссылка с nonce).
+		add_action( 'template_redirect', array( $this, 'maybe_confirm_city_from_link' ), 1 );
+	}
+
+	/**
+	 * Подтверждение города обычной ссылкой (без JavaScript).
+	 *
+	 * Запасной путь для посетителей с отключённым JS: раз виджет и шапка
+	 * рендерят блок подтверждения сервером, кнопка «Да, мой город» должна
+	 * работать без fetch. Действие через GET изменяет cookie — поэтому
+	 * подпись nonce обязательна (AGENTS.md, п.12).
+	 */
+	public function maybe_confirm_city_from_link() {
+		if ( ! isset( $_GET['idpg_confirm_city'] ) ) {
+			return;
+		}
+
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce, self::CONFIRM_ACTION ) ) {
+			return;
+		}
+
+		if ( ! isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
+			// Подтверждать нечего: город не определён и не выбран.
+			return;
+		}
+
+		self::mark_city_confirmed();
+	}
+
+	/**
+	 * Подтверждён ли город посетителем.
+	 *
+	 * @return bool
+	 */
+	public static function is_city_confirmed() {
+		return isset( $_COOKIE[ self::COOKIE_CONFIRMED ] )
+			&& self::CONFIRMED_VALUE === (string) wp_unslash( $_COOKIE[ self::COOKIE_CONFIRMED ] );
+	}
+
+	/**
+	 * Пометить текущий город как подтверждённый посетителем.
+	 *
+	 * Метка ставится на то же время жизни, что и cookie города (30 дней),
+	 * и синхронизируется в $_COOKIE — как это делает set_city_cookie(),
+	 * чтобы текущий запрос тоже видел новое состояние.
+	 */
+	public static function mark_city_confirmed() {
+		if ( ! headers_sent() ) {
+			setcookie(
+				self::COOKIE_CONFIRMED,
+				self::CONFIRMED_VALUE,
+				array(
+					'expires'  => time() + ( 30 * DAY_IN_SECONDS ),
+					'path'     => '/',
+					'samesite' => 'Lax',
+					'httponly' => true,
+				)
+			);
+		}
+
+		$_COOKIE[ self::COOKIE_CONFIRMED ] = self::CONFIRMED_VALUE;
+	}
+
+	/**
+	 * Выбрать город и сразу пометить его подтверждённым.
+	 *
+	 * Ручной выбор посетителя — это и есть подтверждение, поэтому и AJAX,
+	 * и REST-эндпоинт вызывают именно этот метод.
+	 *
+	 * @param int $city_id Term ID.
+	 */
+	public static function set_chosen_city( $city_id ) {
+		self::set_city_cookie( $city_id );
+
+		self::mark_city_confirmed();
+	}
+
+	/**
+	 * Нужно ли предлагать подтвердить определённый по IP город.
+	 *
+	 * Показываем предложение, только когда город действительно пришёл из
+	 * IP-определения и посетитель его ещё не подтвердил. Для всех, кто
+	 * выбрал город вручную, диалога нет.
+	 *
+	 * @return bool
+	 */
+	public static function needs_city_confirmation() {
+		if ( ! self::$detected_from_ip ) {
+			return false;
+		}
+
+		return ! self::is_city_confirmed();
 	}
 
 	/**
@@ -102,8 +224,15 @@ class IDPG_City_Filter {
 	 * Результат кэшируется по IP (успех — сутки, промах — 12 часов,
 	 * недоступность сервиса — 10 минут). Cookie ставится только один раз —
 	 * при первом визите, пока пользователь не выбрал город вручную.
+	 *
+	 * DEV-19: подтверждённый посетителем город автоопределение не трогает
+	 * никогда — выбранный город не должен молча меняться на IP-угадайку.
 	 */
 	public function auto_detect_city() {
+		if ( self::is_city_confirmed() ) {
+			return;
+		}
+
 		if ( isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
 			return;
 		}
@@ -583,60 +712,15 @@ class IDPG_City_Filter {
 	/**
 	 * Дерево городов: регионы → города → районы.
 	 *
-	 * Используется селектором города в шапке сайта.
+	 * DEV-22: реализация вынесена в IDPG_Helpers::get_city_tree(), раньше
+	 * она дублировалась здесь и в IDPG_City_Selector_Widget. Этот метод без
+	 * аргументов и без сортировки сохранён как публичный — вызывается
+	 * виджетом и шаблоном.
 	 *
 	 * @return array Массив регионов с вложенными children.
 	 */
 	public static function get_city_tree() {
-		$terms = get_terms( array(
-			'taxonomy'   => 'city',
-			'hide_empty' => false,
-			'orderby'    => 'name',
-			'order'      => 'ASC',
-		) );
-
-		if ( is_wp_error( $terms ) || empty( $terms ) ) {
-			return array();
-		}
-
-		$flatten = array();
-		foreach ( $terms as $term ) {
-			$flatten[ (int) $term->term_id ] = array(
-				'id'     => (int) $term->term_id,
-				'parent' => (int) $term->parent,
-				'name'   => $term->name,
-				'slug'   => $term->slug,
-				'count'  => (int) $term->count,
-			);
-		}
-
-		$tree = array();
-		foreach ( $flatten as $id => $node ) {
-			if ( 0 === $node['parent'] ) {
-				$tree[ $id ] = $node;
-			}
-		}
-
-		// Второй проход: города (дети регионов) и районы (дети городов).
-		foreach ( $flatten as $id => $node ) {
-			if ( 0 === $node['parent'] ) {
-				continue;
-			}
-			$parent = $node['parent'];
-			if ( isset( $tree[ $parent ] ) ) {
-				$tree[ $parent ]['children'][ $id ] = $node;
-				continue;
-			}
-			foreach ( $tree as &$region ) {
-				if ( isset( $region['children'][ $parent ] ) ) {
-					$region['children'][ $parent ]['children'][ $id ] = $node;
-					break;
-				}
-			}
-			unset( $region );
-		}
-
-		return array_values( $tree );
+		return IDPG_Helpers::get_city_tree( 'alpha' );
 	}
 
 	/**
@@ -794,6 +878,9 @@ class IDPG_City_Filter {
 	 *
 	 * Принимает POST-параметр `city_id` (int). Валидирует,
 	 * что термин существует в таксономии city, и ставит cookie.
+	 *
+	 * DEV-19: выбор из UI — это подтверждение, поэтому дополнительно
+	 * ставится метка COOKIE_CONFIRMED.
 	 */
 	public function ajax_set_city() {
 		check_ajax_referer( 'idpg_set_city', 'nonce' );
@@ -804,11 +891,12 @@ class IDPG_City_Filter {
 			wp_send_json_error( array( 'message' => __( 'Неверный город.', 'idpg-core' ) ) );
 		}
 
-		self::set_city_cookie( $city_id );
+		self::set_chosen_city( $city_id );
 
 		wp_send_json_success( array(
-			'city_id'   => $city_id,
-			'city_name' => self::get_current_city_name(),
+			'city_id'    => $city_id,
+			'city_name'  => self::get_current_city_name(),
+			'confirmed'  => self::is_city_confirmed(),
 		) );
 	}
 }

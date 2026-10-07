@@ -100,11 +100,7 @@
   --idpg-progress-bg:     var(--idpg-surface-strong);
   --idpg-upload-border:   var(--idpg-hairline);
   --idpg-upload-hover:    var(--idpg-surface-strong);
-  --idpg-select-menu-bg:  var(--idpg-canvas);
-  --idpg-select-menu-border: var(--idpg-hairline);
-  --idpg-select-option-hover: var(--idpg-surface-soft);
-  --idpg-select-option-selected: var(--idpg-surface-strong);
-  --idpg-summary-bg:      var(--idpg-surface-soft);
+--idpg-summary-bg:       var(--idpg-surface-soft);
   --idpg-widget-bg:       var(--idpg-canvas);
   --idpg-widget-border:   var(--idpg-hairline-soft);
   --idpg-stat-card-bg:    var(--idpg-canvas);
@@ -121,6 +117,8 @@
   --idpg-status-draft-text: var(--idpg-body);
 
   /* Spacing */
+  --idpg-space-3xs:       2px;
+  --idpg-space-2xs:       6px;
   --idpg-space-xxs:       4px;
   --idpg-space-xs:        8px;
   --idpg-space-sm:        12px;

@@ -48,6 +48,18 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 	const IP_CACHE_TTL = DAY_IN_SECONDS;
 
 	/**
+	 * Счётчик выведенных блоков подтверждения города (DEV-19).
+	 *
+	 * Блок печатается в трёх местах (модалка шапки, панель шапки, виджет),
+	 * поэтому id должны быть уникальны в пределах страницы: первому
+	 * экземпляру достаётся базовый id, следующим — суффикс -2, -3 и т. д.
+	 * За вешание обработчиков отвечает класс .idpg-city-confirm в navigation.js.
+	 *
+	 * @var int
+	 */
+	private static $confirmation_bars = 0;
+
+	/**
 	 * Список доступных сервисов автоопределения.
 	 *
 	 * @return array
@@ -130,6 +142,81 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 		wp_enqueue_style( 'idpg-city-selector' );
 		wp_enqueue_script( 'idpg-city-selector-tom-select' );
 		wp_enqueue_script( 'idpg-city-selector' );
+	}
+
+	/**
+	 * Блок подтверждения города, определённого по IP (DEV-19).
+	 *
+	 * Одна реализация на виджет и шапку темы: разметка не должна
+	 * расходиться между двумя местами вывода.
+	 *
+	 * Кнопка «Да, мой город» — обычная ссылка с wp_nonce_url(), поэтому
+	 * подтверждение работает и без JavaScript. Кнопка «Другой город»
+	 * раскрывает селектор (в шапке — модалку) через data-атрибут.
+	 *
+	 * Блок выводится в нескольких местах страницы, поэтому id получают
+	 * числовой суффикс: первый экземпляр — базовый id, следующие — -2, -3.
+	 * Вешание обработчиков идёт по классу, а не по id (см. navigation.js).
+	 *
+	 * @param string $target Куда ведёт «Другой город»: 'panel' (выпадающий
+	 *                       список в шапке) или 'modal' (модалка на мобильных).
+	 * @return string HTML или пустая строка, если подтверждение не нужно.
+	 */
+	public static function render_confirmation_bar( $target = 'panel' ) {
+		if ( ! class_exists( 'IDPG_City_Filter' ) || ! IDPG_City_Filter::needs_city_confirmation() ) {
+			return '';
+		}
+
+		$city_name = IDPG_City_Filter::get_current_city_name();
+
+		// DEV-19: уникальный id на каждый экземпляр блока на странице.
+		++self::$confirmation_bars;
+		$suffix = self::$confirmation_bars > 1 ? '-' . self::$confirmation_bars : '';
+
+		$id_bar   = 'idpg-city-confirm' . $suffix;
+		$id_yes   = 'idpg-city-confirm-yes' . $suffix;
+		$id_other = 'idpg-city-confirm-other' . $suffix;
+
+		ob_start();
+		?>
+		<div class="idpg-city-confirm" id="<?php echo esc_attr( $id_bar ); ?>" role="group" aria-live="polite">
+			<p class="idpg-city-confirm__text">
+				<?php
+				printf(
+					/* translators: %s — название города. */
+					esc_html__( 'Мы определили ваш город: %s. Это ваш город?', 'idpg-core' ),
+					'<strong>' . esc_html( $city_name ) . '</strong>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				);
+				?>
+			</p>
+			<div class="idpg-city-confirm__actions">
+				<a
+					class="idpg-city-confirm__yes"
+					id="<?php echo esc_attr( $id_yes ); ?>"
+					href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'idpg_confirm_city', '1' ), IDPG_City_Filter::CONFIRM_ACTION ) ); ?>"
+					rel="nofollow"
+				><?php esc_html_e( 'Да, мой город', 'idpg-core' ); ?></a>
+				<button
+					type="button"
+					class="idpg-city-confirm__other"
+					id="<?php echo esc_attr( $id_other ); ?>"
+					data-idpg-city-open="<?php echo esc_attr( $target ); ?>"
+				><?php esc_html_e( 'Другой город', 'idpg-core' ); ?></button>
+			</div>
+		</div>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Сброс счётчика блоков подтверждения.
+	 *
+	 * Нужен тестам: каждый тест должен получать базовые id, а не
+	 * продолжать нумерацию предыдущего. В боевом коде не вызывается —
+	 * счётчик живёт один запрос.
+	 */
+	public static function reset_confirmation_bars() {
+		self::$confirmation_bars = 0;
 	}
 
 	/**
@@ -286,6 +373,9 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 				. '</p>';
 		}
 
+		// DEV-19: предложение подтвердить город, определённый по IP.
+		echo self::render_confirmation_bar( 'panel' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 		$submit_url = isset( $_SERVER['REQUEST_URI'] )
 			? home_url( wp_unslash( $_SERVER['REQUEST_URI'] ) )
 			: home_url( '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
@@ -328,72 +418,15 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 	/**
 	 * Построение дерева городов одним запросом к БД (get_terms).
 	 *
+	 * DEV-22: реализация вынесена в IDPG_Helpers::get_city_tree(), здесь
+	 * осталась только точка входа. Кэш и статический буфер живут выше,
+	 * в get_city_tree( $sort ), поэтому поведение виджета не изменилось.
+	 *
 	 * @param string $sort Ключ сортировки.
 	 * @return array
 	 */
 	private function build_city_tree( $sort ) {
-		$orderby = 'name';
-		$order   = 'ASC';
-
-		if ( 'popular' === $sort ) {
-			$orderby = 'count';
-			$order   = 'DESC';
-		} elseif ( 'manual' === $sort ) {
-			$orderby = 'term_order';
-		}
-
-		$terms = get_terms(
-			array(
-				'taxonomy'   => self::TAXONOMY,
-				'hide_empty' => false,
-				'orderby'    => $orderby,
-				'order'      => $order,
-			)
-		);
-
-		if ( is_wp_error( $terms ) || empty( $terms ) ) {
-			return array();
-		}
-
-		$flatten = array();
-		foreach ( $terms as $term ) {
-			$flatten[ (int) $term->term_id ] = array(
-				'id'     => (int) $term->term_id,
-				'parent' => (int) $term->parent,
-				'name'   => $term->name,
-				'slug'   => $term->slug,
-				'count'  => (int) $term->count,
-			);
-		}
-
-		$tree = array();
-		foreach ( $flatten as $id => $node ) {
-			if ( 0 === $node['parent'] ) {
-				$tree[ $id ] = $node;
-			}
-		}
-
-		// Второй проход: прикрепляем города (дети областей) и районы (дети городов).
-		foreach ( $flatten as $id => $node ) {
-			if ( 0 === $node['parent'] ) {
-				continue;
-			}
-			$parent = $node['parent'];
-			if ( isset( $tree[ $parent ] ) ) {
-				$tree[ $parent ]['children'][ $id ] = $node;
-				continue;
-			}
-			// Район (уровень 3): ищем его город-родителя внутри области и записываем по ссылке.
-			foreach ( $tree as &$region ) {
-				if ( isset( $region['children'][ $parent ] ) ) {
-					$region['children'][ $parent ]['children'][ $id ] = $node;
-					break;
-				}
-			}
-			unset( $region );
-		}
-
-		return array_values( $tree );
+		return IDPG_Helpers::get_city_tree( $sort );
 	}
 
 	/**

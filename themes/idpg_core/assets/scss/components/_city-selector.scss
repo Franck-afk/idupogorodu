@@ -137,3 +137,64 @@
   font-size: 0.875rem;
   color: var(--idpg-body);
 }
+
+// DEV-19: подтверждение города, определённого по IP.
+// Один блок и для шапки, и для виджета — разметка общая.
+.idpg-city-confirm[hidden] {
+  display: none;
+}
+.idpg-city-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--idpg-hairline);
+  border-radius: 10px;
+  background-color: var(--idpg-surface-soft);
+}
+.idpg-city-confirm__text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--idpg-body);
+}
+.idpg-city-confirm__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.idpg-city-confirm__yes,
+.idpg-city-confirm__other {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 7px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+.idpg-city-confirm__yes {
+  color: var(--idpg-on-primary, #fff);
+  background-color: var(--idpg-primary);
+}
+.idpg-city-confirm__yes:hover {
+  background-color: var(--idpg-primary-dark, #003ecc);
+}
+.idpg-city-confirm__yes--loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.idpg-city-confirm__other {
+  color: var(--idpg-ink);
+  background-color: var(--idpg-canvas);
+  border: 1px solid var(--idpg-hairline);
+}
+.idpg-city-confirm__other:hover {
+  border-color: var(--idpg-body);
+}
+.idpg-city-confirm__yes:focus-visible,
+.idpg-city-confirm__other:focus-visible {
+  outline: 2px solid var(--idpg-primary);
+  outline-offset: 2px;
+}

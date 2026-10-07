@@ -25,6 +25,16 @@ $idpg_city_ipnote = class_exists( 'IDPG_City_Filter' ) && IDPG_City_Filter::was_
 		. '</p>'
 	: '';
 
+// DEV-19: блок подтверждения города, определённого по IP. Тот же рендер, что в
+// виджете (IDPG_City_Selector_Widget::render_confirmation_bar()), чтобы разметка
+// не расходилась. 'modal' — открыть мобильную модалку, 'panel' — выпадающий список.
+$idpg_city_confirm_modal = class_exists( 'IDPG_City_Selector_Widget' )
+	? IDPG_City_Selector_Widget::render_confirmation_bar( 'modal' )
+	: '';
+$idpg_city_confirm_panel = class_exists( 'IDPG_City_Selector_Widget' )
+	? IDPG_City_Selector_Widget::render_confirmation_bar( 'panel' )
+	: '';
+
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -94,6 +104,7 @@ $idpg_city_ipnote = class_exists( 'IDPG_City_Filter' ) && IDPG_City_Filter::was_
 			</button>
 		</div>
 		<?php echo $idpg_city_ipnote; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+		<?php echo $idpg_city_confirm_modal; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<?php if ( ! empty( $city_tree ) ) : ?>
 			<select class="idpg-city-modal__select" id="idpg-city-modal-select" data-idpg-city-header>
 				<?php foreach ( $city_tree as $region ) : ?>
@@ -171,9 +182,9 @@ $idpg_city_ipnote = class_exists( 'IDPG_City_Filter' ) && IDPG_City_Filter::was_
 				</svg>
 			</button>
 
-			<div class="idpg-city-selector__panel" id="idpg-city-panel" hidden>
-				<?php echo $idpg_city_ipnote; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-				<?php if ( ! empty( $city_tree ) ) : ?>
+		<div class="idpg-city-selector__panel" id="idpg-city-panel" hidden>
+			<?php echo $idpg_city_ipnote; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<?php if ( ! empty( $city_tree ) ) : ?>
 					<label class="idpg-city-selector__select-label" for="idpg-city-select">
 						<?php esc_html_e( 'Выберите город', 'idpg_core' ); ?>
 					</label>
@@ -208,6 +219,9 @@ $idpg_city_ipnote = class_exists( 'IDPG_City_Filter' ) && IDPG_City_Filter::was_
 				<?php endif; ?>
 			</div>
 		</div>
+
+		<?php /* DEV-19: видимый без открытия панели вопрос «это ваш город?». */ ?>
+		<?php echo $idpg_city_confirm_panel; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 
 		<!-- Блок действий -->
 		<div class="idpg-header__actions">

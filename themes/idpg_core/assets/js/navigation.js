@@ -167,6 +167,79 @@
 		}
 	}
 
+	// DEV-19: подтверждение города, определённого по IP («Да, мой город»).
+	// Блок выводится в нескольких местах страницы (модалка шапки, панель
+	// шапки, виджет), поэтому ищем все экземпляры по классу, а не по id.
+	// Кнопка — обычная ссылка с nonce, поэтому работает и без JS. С JS шлём
+	// REST-запрос без перезагрузки: cookie idpg_city_confirmed ставит сервер.
+	var cityConfirmBars = document.querySelectorAll('.idpg-city-confirm');
+
+	var hideCityConfirm = function () {
+		var i;
+		for (i = 0; i < cityConfirmBars.length; i++) {
+			cityConfirmBars[i].setAttribute('hidden', '');
+		}
+	};
+
+	for (var cbi = 0; cbi < cityConfirmBars.length; cbi++) {
+		(function (bar) {
+			var yes = bar.querySelector('.idpg-city-confirm__yes');
+			var other = bar.querySelector('.idpg-city-confirm__other');
+
+			if (yes) {
+				yes.addEventListener('click', function (e) {
+					var data = window.idpgData || {};
+					if (!data.restUrl || !data.restNonce) {
+						return; // без nonce работает обычный переход по ссылке
+					}
+
+					e.preventDefault();
+					yes.classList.add('idpg-city-confirm__yes--loading');
+
+					window.fetch(data.restUrl + '/city/confirm', {
+						method: 'POST',
+						credentials: 'same-origin',
+						headers: {
+							'Content-Type': 'application/json',
+							'X-WP-Nonce': data.restNonce
+						},
+						body: '{}'
+					}).then(function (response) {
+						if (response.ok) {
+							hideCityConfirm();
+							return;
+						}
+						yes.classList.remove('idpg-city-confirm__yes--loading');
+					}).catch(function () {
+						// Сеть недоступна — оставляем ссылку, чтобы переход сработал.
+						yes.classList.remove('idpg-city-confirm__yes--loading');
+					});
+				});
+			}
+
+			// «Другой город»: раскрыть панель выбора или мобильную модалку.
+			if (other) {
+				other.addEventListener('click', function () {
+					var target = other.getAttribute('data-idpg-city-open');
+
+					if (target === 'modal') {
+						if (cityModal) {
+							cityModal.removeAttribute('hidden');
+							body.classList.add('idpg-body-locked');
+						}
+						return;
+					}
+
+					if (cityDropdown && cityToggle && cityPanel) {
+						cityDropdown.classList.add('idpg-city-selector--open');
+						cityToggle.setAttribute('aria-expanded', 'true');
+						cityPanel.removeAttribute('hidden');
+					}
+				});
+			}
+		}(cityConfirmBars[cbi]));
+	}
+
 	if (cityModalClose) {
 		cityModalClose.addEventListener('click', closeCityModal);
 	}
