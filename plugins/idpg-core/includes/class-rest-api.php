@@ -276,6 +276,28 @@ class IDPG_REST_API {
 			)
 		);
 
+		// POST /track/click — учёт клика по билетной ссылке (DEV-17).
+		// Публичный маршрут: анонимный посетитель жмёт кнопку «Купить билет».
+		// Авторизация не нужна, но нужен валидный nonce 'wp_rest' — иначе
+		// счётчик наполнялся бы чужими запросами. Дополнительно стоит
+		// защита от повторов по IP, чтобы один клик не превращался в десяток.
+		register_rest_route(
+			self::NAMESPACE,
+			'/track/click',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'track_click' ),
+				'permission_callback' => array( $this, 'can_track_click' ),
+				'args'                => array(
+					'event_id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+
 		// POST /city/select — смена города (установка cookie idpg_selected_city).
 		// Публичный маршрут: не требует авторизации, но обязателен valid nonce 'wp_rest'.
 		register_rest_route(
@@ -292,6 +314,19 @@ class IDPG_REST_API {
 						'sanitize_callback' => 'absint',
 					),
 				),
+			)
+		);
+
+		// POST /city/confirm — подтверждение города, определённого по IP (DEV-19).
+		// Публичный маршрут: обязателен valid nonce 'wp_rest', capability не нужны —
+		// это предпочтение посетителя, а не доступ к данным.
+		register_rest_route(
+			self::NAMESPACE,
+			'/city/confirm',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'confirm_city' ),
+				'permission_callback' => array( $this, 'can_select_city' ),
 			)
 		);
 
@@ -383,6 +418,41 @@ class IDPG_REST_API {
 		$nonce = $request->get_header( 'X-WP-Nonce' );
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new WP_Error(
+				'idpg_rest_nonce_failed',
+				__( 'Неверный или отсутствующий nonce-токен.', 'idpg-core' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Проверка прав на учёт клика по билетной ссылке (DEV-17).
+	 *
+	 * Отдельный callback вместо can_select_city(), потому что учёт клика
+	 * отправляется двумя транспортами:
+	 *
+	 * - fetch() — заголовок X-WP-Nonce, основной путь;
+	 * - navigator.sendBeacon() — заголовки выставить нельзя в принципе,
+	 *   поэтому nonce передаётся параметром `_wpnonce` в URL.
+	 *
+	 * Второй вариант слабее первого (nonce может попасть в логи и Referer),
+	 * но для счётчика кликов это приемлемая цена: без него beacon-запрос
+	 * уходил бы без nonce и получал 403, то есть терялся бы всегда.
+	 *
+	 * @param WP_REST_Request $request Запрос.
+	 * @return bool|WP_Error True или объект ошибки.
+	 */
+	public function can_track_click( $request ) {
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+
+		if ( ! $nonce ) {
+			$nonce = $request->get_param( '_wpnonce' );
+		}
+
+		if ( ! $nonce || ! is_string( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new WP_Error(
 				'idpg_rest_nonce_failed',
 				__( 'Неверный или отсутствующий nonce-токен.', 'idpg-core' ),
@@ -536,14 +606,14 @@ class IDPG_REST_API {
 			'date_start'      => get_post_meta( $post->ID, '_idpg_start_date', true ),
 			'date_end'        => get_post_meta( $post->ID, '_idpg_end_date', true ),
 			'all_day'         => 'yes' === get_post_meta( $post->ID, '_idpg_all_day', true ),
-			'status'          => get_post_meta( $post->ID, '_idpg_ticket_status', true ),
+			'status'          => IDPG_Helpers::get_ticket_status( $post->ID ),
 			'price_from'      => get_post_meta( $post->ID, '_idpg_price_from', true ),
 			'price_to'        => get_post_meta( $post->ID, '_idpg_price_to', true ),
 			'vip_price'       => get_post_meta( $post->ID, '_idpg_vip_price', true ),
 			'is_free'         => 'yes' === get_post_meta( $post->ID, '_idpg_is_free', true ),
 			'currency'        => get_post_meta( $post->ID, '_idpg_currency', true ),
-			'ticket_type'     => get_post_meta( $post->ID, '_idpg_ticket_type', true ),
-			'ticket_url'      => get_post_meta( $post->ID, '_idpg_ticket_url', true ),
+			'ticket_type'     => IDPG_Helpers::get_ticket_type( $post->ID ),
+			'ticket_url'      => IDPG_Helpers::get_ticket_url( $post->ID ),
 			'city'            => ! is_wp_error( $terms_city ) ? $terms_city : array(),
 			'category'        => ! is_wp_error( $terms_cat ) ? $terms_cat : array(),
 			'thumbnail'       => IDPG_Media::idpg_get_poster_url( $post->ID, 'medium' ),
@@ -885,7 +955,7 @@ class IDPG_REST_API {
 			);
 		}
 
-		IDPG_City_Filter::set_city_cookie( $city_id );
+		IDPG_City_Filter::set_chosen_city( $city_id );
 
 		return new WP_REST_Response(
 			array(
@@ -893,6 +963,53 @@ class IDPG_REST_API {
 				'city_id'   => $city_id,
 				'city_name' => IDPG_City_Filter::get_current_city_name(),
 				'city_slug' => IDPG_City_Filter::get_current_city_slug(),
+				'confirmed' => IDPG_City_Filter::is_city_confirmed(),
+			),
+			200
+		);
+	}
+
+	/**
+	 * POST /city/confirm — подтверждение текущего города (DEV-19).
+	 *
+	 * Отвечает на вопрос диалога «Мы определили ваш город: Ижевск. Это ваш
+	 * город?». Без подтверждения автоопределение по IP может снова
+	 * предлагать город, но не закреплять его.
+	 *
+	 * Город подтверждается тот, что уже записан в cookie: если cookie нет,
+	 * подтверждать нечего — возвращаем 400, чтобы не плодить метку
+	 * подтверждения без города.
+	 *
+	 * @param WP_REST_Request $request Запрос.
+	 * @return WP_REST_Response|WP_Error Ответ.
+	 */
+	public function confirm_city( $request ) {
+		unset( $request );
+
+		if ( ! class_exists( 'IDPG_City_Filter' ) || ! method_exists( 'IDPG_City_Filter', 'mark_city_confirmed' ) ) {
+			return new WP_Error(
+				'idpg_rest_city_unavailable',
+				__( 'Определение города недоступно.', 'idpg-core' ),
+				array( 'status' => 503 )
+			);
+		}
+
+		if ( ! isset( $_COOKIE[ IDPG_City_Filter::COOKIE_NAME ] ) ) {
+			return new WP_Error(
+				'idpg_rest_no_city_to_confirm',
+				__( 'Город ещё не определён.', 'idpg-core' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		IDPG_City_Filter::mark_city_confirmed();
+
+		return new WP_REST_Response(
+			array(
+				'success'   => true,
+				'confirmed' => true,
+				'city_id'   => IDPG_City_Filter::get_current_city_id(),
+				'city_name' => IDPG_City_Filter::get_current_city_name(),
 			),
 			200
 		);
@@ -1337,6 +1454,35 @@ class IDPG_REST_API {
 				'message' => __( 'Спасибо! Проверьте почту для подтверждения подписки.', 'idpg-core' ),
 			),
 			200
+		);
+	}
+
+	/**
+	 * Учёт клика по билетной ссылке (DEV-17).
+	 *
+	 * @param WP_REST_Request $request Запрос.
+	 * @return WP_REST_Response|WP_Error Ответ.
+	 */
+	public function track_click( $request ) {
+		$event_id = $request->get_param( 'event_id' );
+
+		$post = get_post( $event_id );
+
+		if ( ! $post || 'event' !== get_post_type( $post ) || 'publish' !== $post->post_status ) {
+			return new WP_Error(
+				'idpg_invalid_event',
+				__( 'Событие не найдено.', 'idpg-core' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$clicks = IDPG_Views::increment_clicks( $event_id );
+
+		return new WP_REST_Response(
+			array(
+				'event_id' => $event_id,
+				'clicks'   => $clicks,
+			)
 		);
 	}
 

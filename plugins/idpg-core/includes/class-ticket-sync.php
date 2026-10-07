@@ -113,18 +113,7 @@ class IDPG_Ticket_Sync {
 	public function run_sync() {
 		$this->log( 'Синхронизация статусов билетов запущена.' );
 
-		$events = $this->get_events_for_sync();
-
-		if ( empty( $events ) ) {
-			$this->log( 'Нет событий для синхронизации.' );
-			return;
-		}
-
-		$this->log( sprintf( 'Найдено %d событий для синхронизации.', count( $events ) ) );
-
-		foreach ( $events as $event ) {
-			$this->sync_single_event( $event );
-		}
+		$this->run_sync_counting();
 
 		$this->log( 'Синхронизация статусов билетов завершена.' );
 	}
@@ -143,7 +132,7 @@ class IDPG_Ticket_Sync {
 			'posts_per_page' => -1,
 			'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery
 				array(
-					'key'     => '_idpg_ticket_status',
+					'key'     => IDPG_Helpers::META_TICKET_STATUS,
 					'value'   => 'cancelled',
 					'compare' => '!=',
 				),
@@ -159,7 +148,7 @@ class IDPG_Ticket_Sync {
 	 * @param WP_Post $event Объект события.
 	 */
 	private function sync_single_event( $event ) {
-		$ticket_type = get_post_meta( $event->ID, '_idpg_ticket_type', true );
+		$ticket_type = IDPG_Helpers::get_ticket_type( $event->ID );
 
 		// Синхронизируем только события с внешними билетами.
 		if ( 'external_link' !== $ticket_type ) {
@@ -286,13 +275,13 @@ class IDPG_Ticket_Sync {
 		}
 
 		$new_status     = $status_map[ $api_status ];
-		$current_status = get_post_meta( $event->ID, '_idpg_ticket_status', true );
+		$current_status = IDPG_Helpers::get_ticket_status( $event->ID );
 
 		if ( $new_status === $current_status ) {
 			return; // Статус не изменился — ничего не делаем.
 		}
 
-		update_post_meta( $event->ID, '_idpg_ticket_status', $new_status );
+		update_post_meta( $event->ID, IDPG_Helpers::META_TICKET_STATUS, $new_status );
 
 		IDPG_Meta::purge_helper_cache( $event->ID );
 
@@ -317,13 +306,41 @@ class IDPG_Ticket_Sync {
 	/**
 	 * Ручной запуск синхронизации (для админки или WP-CLI).
 	 *
+	 * Гарантирует, что расписание стоит, и прогоняет синхронизацию.
+	 *
 	 * @return int Количество обработанных событий.
 	 */
 	public function run_sync_now() {
 		$this->schedule_sync();
-		$this->run_sync();
 
-		return true;
+		return $this->run_sync_counting();
+	}
+
+	/**
+	 * Выполнение синхронизации с возвратом числа обработанных событий.
+	 *
+	 * Основной метод run_sync() оставлен без возвращаемого значения, чтобы
+	 * не менять контракт хука cron (DEV-18): добавляем отдельный метод,
+	 * который считает результат, а не правим существующий.
+	 *
+	 * @return int Количество обработанных событий.
+	 */
+	public function run_sync_counting() {
+		$events = $this->get_events_for_sync();
+
+		if ( empty( $events ) ) {
+			$this->log( 'Нет событий для синхронизации.' );
+
+			return 0;
+		}
+
+		$this->log( sprintf( 'Найдено %d событий для синхронизации.', count( $events ) ) );
+
+		foreach ( $events as $event ) {
+			$this->sync_single_event( $event );
+		}
+
+		return count( $events );
 	}
 
 	/**

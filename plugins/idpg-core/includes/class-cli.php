@@ -172,6 +172,7 @@ class IDPG_CLI {
 
 		$report = self::cleanup( ! $force, $reassign_to );
 
+
 		WP_CLI::log( '=== wp idpg cleanup-subscribers ===' );
 		WP_CLI::log(
 			sprintf(
@@ -209,12 +210,43 @@ class IDPG_CLI {
 
 		WP_CLI::success( sprintf( 'Удалено аккаунтов: %d', $report['deleted'] ) );
 	}
+
+	/**
+	 * WP-CLI: `wp idpg sync-tickets` (DEV-18).
+	 *
+	 * Прогоняет синхронизацию статусов билетов с внешним API агрегатора
+	 * вне расписания cron (после правки фида, при разборе инцидента).
+	 * Число обработанных событий печатается и возвращается кодом выхода.
+	 *
+	 * @param array $args       Позиционные аргументы (не используются).
+	 * @param array $assoc_args Именованные аргументы (не используются).
+	 */
+	public static function cli_sync_tickets( $args, $assoc_args ) {
+		unset( $args, $assoc_args );
+
+		WP_CLI::log( '=== wp idpg sync-tickets ===' );
+
+		$processed = IDPG_Ticket_Sync::instance()->run_sync_now();
+
+		if ( ! $processed ) {
+			WP_CLI::warning( 'Событий для синхронизации не найдено.' );
+
+			return;
+		}
+
+		WP_CLI::success( sprintf( 'Обработано событий: %d', $processed ) );
+	}
 }
 
-// Регистрация команды — только в контексте WP-CLI.
+// Регистрация команд — только в контексте WP-CLI.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command(
 		'idpg cleanup-subscribers',
 		array( 'IDPG_CLI', 'cli_cleanup_subscribers' )
+	);
+
+	WP_CLI::add_command(
+		'idpg sync-tickets',
+		array( 'IDPG_CLI', 'cli_sync_tickets' )
 	);
 }

@@ -62,6 +62,41 @@ class IDPG_Views {
 		// Добавление колонок в админку.
 		add_filter( 'manage_event_posts_columns', array( $this, 'add_views_column' ) );
 		add_action( 'manage_event_posts_custom_column', array( $this, 'render_views_column' ), 10, 2 );
+
+		// Учёт кликов по билетным ссылкам (DEV-17).
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_click_assets' ) );
+	}
+
+	/**
+	 * Подключение скрипта учёта кликов на страницах событий.
+	 */
+	public function register_click_assets() {
+		if ( is_admin() ) {
+			return;
+		}
+
+		$js_path = IDPG_CORE_DIR . 'assets/js/ticket-clicks.js';
+
+		if ( ! file_exists( $js_path ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'idpg-ticket-clicks',
+			IDPG_CORE_URL . 'assets/js/ticket-clicks.js',
+			array(),
+			(string) filemtime( $js_path ),
+			true
+		);
+
+		wp_localize_script(
+			'idpg-ticket-clicks',
+			'idpgTicketClicks',
+			array(
+				'restUrl'   => esc_url_raw( rest_url( IDPG_REST_API::NAMESPACE ) ),
+				'restNonce' => wp_create_nonce( 'wp_rest' ),
+			)
+		);
 	}
 
 	/**
@@ -206,18 +241,17 @@ class IDPG_Views {
 	/**
 	 * Получение IP-адреса клиента.
 	 *
+	 * DEV-22: реализация перенесена в IDPG_Helpers. Прежняя локальная копия
+	 * брала HTTP_CLIENT_IP без проверки — этот заголовок подделывается
+	 * клиентом, поэтому счётчик просмотров можно было обнулять одним
+	 * запросом с произвольным значением. Теперь используется единая
+	 * реализация, доверяющая прокси-заголовкам только за прокси.
+	 * Метод сохранён (AGENTS.md, п.1), чтобы не менять внутренние вызовы.
+	 *
 	 * @return string IP-адрес.
 	 */
 	private function get_client_ip() {
-		$ip = '';
-
-		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-			$ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
-		} elseif ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-		}
-
-		return $ip;
+		return IDPG_Helpers::get_client_ip();
 	}
 
 	/**
