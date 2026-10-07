@@ -54,9 +54,9 @@ class IDPG_Template_Helper {
 			return $cached;
 		}
 
-		$status      = get_post_meta( $post_id, '_idpg_ticket_status', true );
-		$ticket_type = get_post_meta( $post_id, '_idpg_ticket_type', true );
-		$ticket_url  = get_post_meta( $post_id, '_idpg_ticket_url', true );
+		$status      = IDPG_Helpers::get_ticket_status( $post_id );
+		$ticket_type = IDPG_Helpers::get_ticket_type( $post_id );
+		$ticket_url  = IDPG_Helpers::get_ticket_url( $post_id );
 		$widget_code = get_post_meta( $post_id, '_idpg_widget_code', true );
 		$is_free     = 'yes' === get_post_meta( $post_id, '_idpg_is_free', true );
 
@@ -250,9 +250,9 @@ class IDPG_Template_Helper {
 		$currency = (string) get_post_meta( $post_id, '_idpg_currency', true );
 
 		$meta = array(
-			'status'      => get_post_meta( $post_id, '_idpg_ticket_status', true ),
-			'ticket_type' => get_post_meta( $post_id, '_idpg_ticket_type', true ),
-			'ticket_url'  => get_post_meta( $post_id, '_idpg_ticket_url', true ),
+			'status'      => IDPG_Helpers::get_ticket_status( $post_id ),
+			'ticket_type' => IDPG_Helpers::get_ticket_type( $post_id ),
+			'ticket_url'  => IDPG_Helpers::get_ticket_url( $post_id ),
 			'date_start'  => get_post_meta( $post_id, '_idpg_start_date', true ),
 			'date_end'    => get_post_meta( $post_id, '_idpg_end_date', true ),
 			'all_day'     => 'yes' === get_post_meta( $post_id, '_idpg_all_day', true ),

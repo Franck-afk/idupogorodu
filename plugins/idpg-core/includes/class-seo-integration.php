@@ -178,7 +178,7 @@ class IDPG_SEO_Integration {
 		}
 
 		// --- Статус (перенесено/отменено) ---
-		$status   = get_post_meta( $post_id, '_idpg_ticket_status', true );
+		$status   = IDPG_Helpers::get_ticket_status( $post_id );
 		$statuses = array(
 			'postponed' => 'https://schema.org/EventPostponed',
 			'cancelled' => 'https://schema.org/EventCancelled',
@@ -326,8 +326,8 @@ class IDPG_SEO_Integration {
 		$is_free    = 'yes' === get_post_meta( $post_id, '_idpg_is_free', true );
 		$price_from = (float) get_post_meta( $post_id, '_idpg_price_from', true );
 		$currency   = get_post_meta( $post_id, '_idpg_currency', true );
-		$ticket_url = get_post_meta( $post_id, '_idpg_ticket_url', true );
-		$status     = get_post_meta( $post_id, '_idpg_ticket_status', true );
+		$ticket_url = IDPG_Helpers::get_ticket_url( $post_id );
+		$status     = IDPG_Helpers::get_ticket_status( $post_id );
 
 		// Нечего публиковать — оффера нет.
 		if ( ! $is_free && $price_from <= 0 && ! $ticket_url ) {

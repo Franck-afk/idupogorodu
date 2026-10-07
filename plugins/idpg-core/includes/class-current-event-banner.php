@@ -608,7 +608,7 @@ class IDPG_Current_Event_Banner {
 		$date_raw = get_post_meta( $event->ID, self::META_START, true );
 		$end_raw  = get_post_meta( $event->ID, self::META_END, true );
 		$dates    = $this->format_date_range( $date_raw, $end_raw );
-		$status   = get_post_meta( $event->ID, '_idpg_ticket_status', true );
+		$status   = IDPG_Helpers::get_ticket_status( $event->ID );
 		$meta     = $this->get_event_meta_line( $event->ID );
 
 		$content = '';

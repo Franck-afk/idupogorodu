@@ -334,77 +334,13 @@ class IDPG_Auth_Rate_Limiter {
 	/**
 	 * Получение IP-адреса клиента.
 	 *
-	 * REMOTE_ADDR — адрес, заданный самим веб-сервером, его нельзя подменить.
-	 * Заголовки X-Forwarded-For / X-Real-IP / Client-IP доверяются ТОЛЬКО
-	 * тогда, когда REMOTE_ADDR указывает на прокси (loopback/приватный адрес),
-	 * иначе их можно подделать и обойти ограничения.
-	 * Возвращает валидный IPv4/IPv6-адрес или '0.0.0.0', если определить не удалось.
+	 * Реализация вынесена в IDPG_Helpers (DEV-22): раньше здесь была копия,
+	 * а в IDPG_Views — вторая, небезопасная (доверяла HTTP_CLIENT_IP всем).
+	 * Публичный метод и его контракт сохранены.
 	 *
 	 * @return string
 	 */
 	public function get_client_ip() {
-		$remote = isset( $_SERVER['REMOTE_ADDR'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
-			: '';
-
-		// Прямое соединение с публичным адресом — прокси-заголовки не используем.
-		if ( filter_var( $remote, FILTER_VALIDATE_IP ) && ! $this->is_proxy_address( $remote ) ) {
-			return $remote;
-		}
-
-		// Соединение через прокси (REMOTE_ADDR — адрес прокси).
-		if ( filter_var( $remote, FILTER_VALIDATE_IP ) ) {
-			// Приоритет 1: X-Forwarded-For (самый надёжный за прокси).
-			if ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-				$forwarded = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
-				$ips       = explode( ',', $forwarded );
-				$first     = trim( $ips[0] );
-
-				if ( filter_var( $first, FILTER_VALIDATE_IP ) ) {
-					return $first;
-				}
-			}
-
-			// Приоритет 2: X-Real-IP (используется в nginx).
-			if ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) {
-				$real_ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );
-
-				if ( filter_var( $real_ip, FILTER_VALIDATE_IP ) ) {
-					return $real_ip;
-				}
-			}
-
-			// Приоритет 3: Client-IP (менее стандартный).
-			if ( isset( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-				$client_ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
-
-				if ( filter_var( $client_ip, FILTER_VALIDATE_IP ) ) {
-					return $client_ip;
-				}
-			}
-		}
-
-		if ( filter_var( $remote, FILTER_VALIDATE_IP ) ) {
-			return $remote;
-		}
-
-		return '0.0.0.0';
-	}
-
-	/**
-	 * Является ли адрес адресом прокси-сервера.
-	 *
-	 * Loopback, приватные и зарезервированные диапазоны IPv4/IPv6
-	 * считаются адресами прокси.
-	 *
-	 * @param string $ip IP-адрес.
-	 * @return bool
-	 */
-	private function is_proxy_address( $ip ) {
-		return filter_var(
-			$ip,
-			FILTER_VALIDATE_IP,
-			FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-		) === false;
+		return IDPG_Helpers::get_client_ip();
 	}
 }
