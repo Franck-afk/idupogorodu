@@ -4,7 +4,7 @@ Theme URI: https://idupogorodu.ru
 Author: idpg Team
 Author URI: https://idupogorodu.ru
 Description: Основная тема сайта-афиши ИДПОГОРОДУ.
-Version: 1.0.0
+Version: 1.0.78
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
@@ -58,15 +58,17 @@ Tags: custom-background,custom-logo,custom-menu,featured-images,threaded-comment
 // --- Страницы ---
 @use 'pages/auth';
 @use 'pages/auth-dev85';
-@use 'pages/create-event';
 @use 'pages/cabinet';
-@use 'pages/dashboard';
 
-// pages/organizer и pages/venue-form здесь НЕ подключаются осознанно.
-// Их правила (.idpg-org-*, .venue-form__*) отдаются отдельным файлом
-// assets/css/organizer.css, который вешается через wp_enqueue_style только
-// в кабинете организатора. Подключение партиала здесь продублировало бы
-// весь кабинет на каждой странице сайта.
+// pages/dashboard удалён в DEV-197: все его правила относились к префиксу,
+// который после DEV-196 не встречается ни в одном шаблоне и ни в одном
+// скрипте темы (проверено: 0 вхождений). Мёртвые правила убраны, style.css
+// пересобран. Подключение партиала возвращало бы их обратно.
+
+// pages/create-event и pages/venue-form удалены в DEV-206, pages/organizer —
+// вместе с остальным кабинетом организатора. Стилей кабинета в теме больше нет:
+// и отдельная сборка assets/css/organizer.css, и все партиалы кабинета убраны,
+// подключать здесь нечего.
 
 // components/mobile подключается последним перед адаптивом: в нём тач-таргеты
 // (минимум 44×44 по Apple HIG), и в style.css этот блок стоит ближе к концу.

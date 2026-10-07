@@ -3,8 +3,8 @@
  * Template part for displaying event cards in lists.
  *
  * Вертикальная карточка: фото сверху (4/3), информация на белом фоне ниже.
- * Используется в archive-event.php, front-page.php, search.php,
- * page-favorites.php, single-event.php, single-venue.php и таксономиях.
+ * Используется в front-page.php, search.php, page-favorites.php,
+ * template-parts/home-section.php, single-venue.php и taxonomy-city.php.
  * Работает как с основным циклом, так и с произвольным WP_Query
  * (после setup_postdata).
  *

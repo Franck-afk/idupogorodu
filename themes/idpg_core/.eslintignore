@@ -2,9 +2,3 @@ node_modules/
 vendor/
 assets/js/vendor/
 assets/css/vendor/
-# Сторонняя библиотека Pikaday (BSD/MIT, David Bushell) — не наш код,
-# правила проекта к ней не применяются. Файл pikaday.range.js удалён
-# 01.10.2026 (DEV-195): плагин выбора диапазона дат не использовался,
-# а в репозиторий попал текст ошибки загрузчика npm.
-assets/js/pikaday.js
-assets/js/pikaday-locale-ru.js

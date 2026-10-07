@@ -46,8 +46,7 @@
   border-radius: 2px;
 }
 
-// `.create-event__btn { min-height: 44px }` перенесено в `components/_mobile.scss`
-// (DEV-87, DEV-143). Причина: в style.css этот блок стоит ПОСЛЕ основного правила
-// `.create-event__btn`, а `components/recent-events` подключается в style.scss
-// раньше `pages/create-event` — поэтому в сборке блок с `min-height` оказывался
-// первым, и сторож `test-css-build.php` видел расхождение деклараций.
+// Правило `min-height: 44px` для кнопок кабинета организатора удалено вместе
+// с кабинетом: секция `.idpg-org-form .idpg-btn` исчезла из
+// `components/_mobile.scss`, партиал `pages/_organizer.scss` удалён.
+// История переезда (DEV-87, DEV-143, DEV-206) нигде не используется.
