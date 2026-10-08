@@ -301,13 +301,9 @@ class Test_Default_Role extends WP_UnitTestCase {
 
 		$this->assertNotFalse( $user );
 
-		// До подтверждения — обычный подписчик, в кабинет не пускает.
+		// До подтверждения — обычный подписчик, не организатор.
 		$this->assertContains( 'subscriber', (array) $user->roles );
 		$this->assertNotContains( IDPG_Roles::ROLE_SLUG, (array) $user->roles );
-		$this->assertSame(
-			IDPG_Organizer_URL::ACCESS_DENIED,
-			IDPG_Organizer_URL::get_access_decision( $user->ID )
-		);
 
 		// Подтверждение по ссылке из письма выдаёт роль организатора.
 		$key = IDPG_Organizer_Verify::instance()->prepare( $user->ID );
@@ -321,10 +317,6 @@ class Test_Default_Role extends WP_UnitTestCase {
 		$after = get_user_by( 'id', $user->ID );
 
 		$this->assertContains( IDPG_Roles::ROLE_SLUG, (array) $after->roles );
-		$this->assertSame(
-			IDPG_Organizer_URL::ACCESS_ALLOWED,
-			IDPG_Organizer_URL::get_access_decision( $user->ID )
-		);
 	}
 
 	/**
@@ -351,10 +343,6 @@ class Test_Default_Role extends WP_UnitTestCase {
 		$this->assertContains( 'subscriber', array_values( $user->roles ) );
 		$this->assertNotContains( IDPG_Roles::ROLE_SLUG, array_values( $user->roles ) );
 		$this->assertFalse( IDPG_Organizer_URL::user_is_organizer( $user_id ) );
-		$this->assertSame(
-			IDPG_Organizer_URL::ACCESS_DENIED,
-			IDPG_Organizer_URL::get_access_decision( $user_id )
-		);
 	}
 
 	// =====================================================================
@@ -402,27 +390,9 @@ class Test_Default_Role extends WP_UnitTestCase {
 		$this->assertContains( 'subscriber', array_values( ( new WP_User( $user_id ) )->roles ) );
 	}
 
-	/**
-	 * Безролевой пользователь не попадает в кабинет организатора.
-	 *
-	 * Следствие DEV-81: guard IDPG_Auth::restrict_admin_access() проверяет
-	 * только роль `subscriber`, поэтому безролевого пользователя он не
-	 * перенаправляет. В кабинет такие не пускает уже сам роутер (403).
-	 */
-	public function test_roleless_user_gets_403_on_cabinet() {
-		$this->force_default_role( '' );
-
-		$user_id = wp_insert_user(
-			array(
-				'user_login' => 'dev81_roleless',
-				'user_pass'  => 'dev81-password',
-				'user_email' => 'dev81-roleless@example.com',
-			)
-		);
-
-		$this->assertSame(
-			IDPG_Organizer_URL::ACCESS_DENIED,
-			IDPG_Organizer_URL::get_access_decision( $user_id )
-		);
-	}
+	// DEV-259: удалён тест `test_roleless_user_gets_403_on_cabinet` — он
+	// проверял `IDPG_Organizer_URL::get_access_decision()`, решение которой
+	// принимал удалённый шаблон `page-organizer.php` (DEV-234, роутер
+	// отключён DEV-235). Поведение guard `restrict_admin_access()` для
+	// безролевого покрыто `test-admin-restrict.php`.
 }

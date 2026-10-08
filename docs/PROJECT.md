@@ -6575,3 +6575,21 @@ DEV-196 и DEV-197 подтверждены.
 
 **Ограничения соблюдены:** тронуты только мёртвые файлы и мёртвая строка.
 **Приёмка:** 0 `organizer-settings` в коде; мёртвая строка убрана.
+
+### 36. DEV-259 (P2, S) — тесты проверяли отключённое (08.10.2026)
+
+| Пункт | Что сделано |
+|---|---|
+| Проверка (шаг 1) | `IDPG_Organizer_URL::init()` не вызывается (grep по `plugins/`+`themes/` — 0, в `idpg-core.php` только `require_once`); `guard_cabinet_redirect` и `social_login_redirect` регистрируются **только** из `init()` (`class-organizer-url.php:268,270`) → не зарегистрированы; `is_cabinet_url` используется только guard'ом; `SOCIAL_PROVIDERS` — только отключённым `init_social_login_redirects()` |
+| Расхождения с карточкой | В `test-organizer-verify-redirect.php` **нет** `is_cabinet_url` — файл проверяет живое: `IDPG_Organizer_Verify` и `after_login_url()` (`class-auth.php:115`) → не тронут. В `test-organizer-profile.php` — только живые REST-методы (`sanitize_profile_input`/`update_profile`/`get_profile_data`, потребитель `class-rest-organizer.php`) → не тронут. В `test-default-role.php:308–425` **нет** `social_login_redirect` — там `get_access_decision()` |
+| `get_access_decision()` | Потребителей в коде **0**: docblock ссылается на `page-organizer.php`, удалённый DEV-234 (шаблона в теме нет). Сам метод **не тронут** (рамки задачи — только тесты) |
+| Решение | **A** (мёртвый код = мёртвые тесты). Вариант B отпал: `@group` в проекте не используется (0 вхождений), `phpunit.xml.dist` группы не фильтрует |
+| `test-organizer-social-login.php` | Удалён целиком: 17 методов / **27 тест-кейсов** — `guard_cabinet_redirect` (6), `social_login_redirect` (7), `is_cabinet_url` (1 + 9 датасетов), список провайдеров, 2 latch-теста `assertFalse(has_filter(...))`. Latch «`init()` не вызывается» остаётся в `test-class-init.php:113` и §5.1 |
+| `test-default-role.php` | Убраны 4 блока `get_access_decision()`/`ACCESS_*`: два в `test_role_flow_register_then_verify` и один в `test_admin_created_user_cannot_enter_cabinet` (живые проверки ролей и `user_is_organizer()` сохранены); `test_roleless_user_gets_403_on_cabinet` удалён целиком — вся его суть в решении удалённого роутера. Guard `restrict_admin_access()` покрыт `test-admin-restrict.php` |
+| PHPUnit | **Было 542 / 1385 / 0 → стало 514 / 1352 / 0** (без незакоммиченного `test-rest-organizer-api.php` DEV-261; полный прогон до правок: 571 / 1429 / 18 — все 18 ошибок в этом файле, существовали до DEV-259) |
+| Грабли | Формулировка карточки («verify-redirect → is_cabinet_url», «profile → частично», «default-role → social_login_redirect») не совпала с кодом — фактические цели указаны в таблице выше |
+
+**Ограничения соблюдены:** удалены только тесты, `class-organizer-url.php` не менялся;
+существующие тесты не сломаны (набор зелёный).
+**Приёмка:** тесты не проверяют отключённое — по grep в `tests/` 0 вызовов
+`guard_cabinet_redirect`/`social_login_redirect`/`is_cabinet_url`/`get_access_decision`.
