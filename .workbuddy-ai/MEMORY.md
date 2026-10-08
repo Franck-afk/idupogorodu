@@ -1491,3 +1491,17 @@ $G log --oneline -S "IDPG_CORE_VERSION" -- plugins/idpg-core/idpg-core.php
   после DEV-235 остались только `after_login_url()` (class-auth) и профиль-логика
   (class-rest-organizer), `get_access_decision()` — только тесты. «Нужен REST и
   редиректам» — проверяется grep'ом, а не помнится.
+
+### Контракт REST организатора задокументирован (DEV-264, 08.10.2026)
+
+- **`docs/API.md` — единый контракт REST организатора** (namespace `idpg/v1`):
+  аутентификация (`X-WP-Nonce` + cookie, `is_user_logged_in` + `user_is_organizer`),
+  скоуп «только свои» (чужое → 403), 7 URL-паттернов / 14 методов, таблица кодов
+  ошибок, примеры curl и fetch. Создан в DEV-261; в DEV-264 доведён (базовый URL
+  `idupogorodu.ru`, секция «Скоуп», примеры под прод-домен).
+- **Откуда брать контракт:** `docs/API.md` — правда; `class-rest-organizer.php` —
+  это первоисточник. При изменении маршрутов/полей/кодов обновлять `docs/API.md`
+  в том же коммите (AGENTS: документация в том же коммите, что и код).
+- **Тесты контракта:** `plugins/idpg-core/tests/test-rest-organizer-api.php`
+  (29 тестов, 46 утверждений, 0 падений по DEV-261) — при изменении API держать
+  тесты и `docs/API.md` согласованными.
