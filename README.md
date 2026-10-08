@@ -23,6 +23,11 @@ REST API организатора — `docs/API.md`;
 | `themes/idpg_core/assets/css/subscribe.css`, `editor-style.css`, `widget-areas-admin.css` | Дополнительные слои: подписка, редактор блоков, админка областей виджетов |
 | `themes/idpg_core/theme.json` | Настройки редактора блоков (палитра, шрифт, ширины) |
 
+Партиалы `pages/`: `_auth.scss`, `_auth-dev85.scss`. Мёртвые удалены:
+`_cabinet.scss` (DEV-253, 0 вхождений `cabinet__` в шаблонах),
+`_dashboard.scss` (DEV-197), `_create-event.scss`/`_venue-form.scss`
+(DEV-206) — подключения в `style.scss` не восстанавливать.
+
 Фронтовые стили опираются на токены: в `templates.css` — 225 ссылок `var(--idpg-*)`.
 Голых hex осталось **192**: `editor-style.css` 29, `widget-areas-admin.css` 91,
 `templates.css` 64, `subscribe.css` 8 — план выноса в §12.
@@ -100,7 +105,7 @@ REST API организатора — `docs/API.md`;
 
 - Глобальные блоки — с префиксом `.idpg-`: `.idpg-btn`, `.idpg-events-grid`, `.idpg-notice`.
 - Блочные — по имени страницы или сущности: `.auth`, `.container`.
-- BEM: `block__element--modifier` — `.auth__input`, `.idpg-btn--primary`, `.cabinet__status--publish`.
+- BEM: `block__element--modifier` — `.auth__input`, `.idpg-btn--primary`, `.auth__tab--active`.
 
 ### Карта компонентов
 
@@ -120,10 +125,12 @@ REST API организатора — `docs/API.md`;
 | Страницы входа | `pages/_auth.scss`, `pages/_auth-dev85.scss` | табы входа/регистрации, `.auth__input` (100%, `10px 16px`, 16px, рамка hairline), «глаз» показа пароля 44×44, соцвход |
 | Шаблонные блоки | `assets/css/templates.css` | `.idpg-events-grid` (grid, 3 колонки, gap 24px; модификаторы `--3`, `--v`), `.idpg-notice--info`, `.idpg-archive-header` — архивы и страница избранного |
 
-`pages/_cabinet.scss` подключён в сборке, но **в шаблонах не используется**
-(0 вхождений `cabinet__` в `*.php`) — остаток старого личного кабинета.
-**Приоритет (DEV-255):** первая задача среди чистки мёртвого CSS — вынести
-удаление/разбор партиала в отдельную карточку (удаление только по явному запросу).
+**Мёртвые партиалы удаляются по карточкам.** `pages/_cabinet.scss` удалён в
+**DEV-253**: 0 вхождений `cabinet__` в шаблонах и скриптах, после пересборки
+`.cabinet*` в `style.css` = 0. Ранее тем же способом удалены
+`pages/_dashboard.scss` (DEV-197) и `pages/_create-event.scss`,
+`pages/_venue-form.scss` (DEV-206). Подключение партиала в `style.scss`
+возвращало бы правила обратно.
 
 ### Статусы и бейджи
 

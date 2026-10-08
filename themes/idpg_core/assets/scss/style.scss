@@ -58,7 +58,11 @@ Tags: custom-background,custom-logo,custom-menu,featured-images,threaded-comment
 // --- Страницы ---
 @use 'pages/auth';
 @use 'pages/auth-dev85';
-@use 'pages/cabinet';
+
+// pages/cabinet удалён в DEV-253: класс .cabinet* не встречается ни в одном
+// шаблоне, ни в одном скрипте темы (проверено: 0 вхождений cabinet__ и
+// class="...cabinet..."). Мёртвые правила убраны, style.css пересобран.
+// Подключение партиала возвращало бы их обратно.
 
 // pages/dashboard удалён в DEV-197: все его правила относились к префиксу,
 // который после DEV-196 не встречается ни в одном шаблоне и ни в одном

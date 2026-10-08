@@ -6550,3 +6550,16 @@ DEV-196 и DEV-197 подтверждены.
 | Код и тесты | **Не трогались** (29/46/0 остаются зелёными по DEV-261) |
 
 **Приёмка:** `docs/API.md` существует, примеры рабочие, README ссылается на API.md.
+
+### 34. DEV-253 (P2, S) — _cabinet.scss: мёртвый CSS удалён (08.10.2026)
+
+| Пункт | Что сделано |
+|---|---|
+| Проверка | `cabinet__` в `themes/`+`plugins/` = 0; `class="...cabinet..."` в шаблонах = 0 (PHP-совпадения — только имена функций `is_cabinet_url` и т.п., не CSS-классы). Прецедент DEV-197 (`_dashboard.scss`) |
+| Удаление | `assets/scss/pages/_cabinet.scss` (243 строки `.cabinet*`) удалён; `@use 'pages/cabinet'` убран из `style.scss:61` + комментарий в стиле DEV-197 |
+| Пересборка | `npm run compile:css:apply` → `npm run check:css` OK: 352 правила, MISSING 0 / лишних 0 / CHANGED 0; `.cabinet*` в `style.css` = 0 |
+| Живой сайт | `idupogorodu.test/` → 200, `/login/` → 200; `cabinet` в HTML = 0 на обеих страницах |
+| Документация | README §1 (состав партиалов `pages/` + список удалённых), README §5 (BEM-пример `.cabinet__status--publish` → `.auth__tab--active`, запись об удалении вместо карточки приоритета DEV-255) |
+
+**Ограничения соблюдены:** тронут только мёртвый CSS, PHP/JS/шаблоны не менялись.
+**Приёмка:** 0 `cabinet__` в шаблонах; `_cabinet.scss` удалён; `style.css` без `.cabinet*`.
