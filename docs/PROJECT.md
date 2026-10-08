@@ -6563,3 +6563,15 @@ DEV-196 и DEV-197 подтверждены.
 
 **Ограничения соблюдены:** тронут только мёртвый CSS, PHP/JS/шаблоны не менялись.
 **Приёмка:** 0 `cabinet__` в шаблонах; `_cabinet.scss` удалён; `style.css` без `.cabinet*`.
+
+### 35. DEV-237 (P2, S) — осиротевшие organizer-settings удалены (08.10.2026)
+
+| Пункт | Что сделано |
+|---|---|
+| Проверка | `organizer-settings` в PHP/JS/SCSS: только сами ассеты и `class-roles.php:431` (`remove_menu_page`); `wp_enqueue_*` на эти ассеты — 0; `add_menu_page` для `idpg-organizer-settings` — 0 (страницу никто не регистрирует) |
+| Удаление | `assets/js/organizer-settings.js` (2475 б) и `assets/css/organizer-settings.css` (6160 б) — ни одним `wp_enqueue_*` не подключались |
+| `class-roles.php` | Убрана мёртвая строка `remove_menu_page( 'idpg-organizer-settings' )`; док-блок `hide_unnecessary_menus()` больше не обещает «Органайзер» в списке скрываемых пунктов |
+| Тесты | Тестов на `hide_unnecessary_menus`/`remove_menu_page` и на `organizer-settings` нет — падений не ожидается; `php -l` OK |
+
+**Ограничения соблюдены:** тронуты только мёртвые файлы и мёртвая строка.
+**Приёмка:** 0 `organizer-settings` в коде; мёртвая строка убрана.
