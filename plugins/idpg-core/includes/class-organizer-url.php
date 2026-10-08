@@ -92,10 +92,8 @@ class IDPG_Organizer_URL {
 	 */
 	const PAGE_SLUG = 'organizer';
 
-	/**
-	 * Шаблон темы, обслуживающий кабинет.
-	 */
-	const TEMPLATE = 'page-organizer.php';
+	// DEV-260: const TEMPLATE ('page-organizer.php') удалена — шаблон
+	// удалён из темы DEV-234, проверка is_page_template() всегда давала false.
 
 	/**
 	 * Разделы кабинета по умолчанию.
@@ -499,7 +497,10 @@ class IDPG_Organizer_URL {
 			return true;
 		}
 
-		return (bool) is_page_template( self::TEMPLATE );
+		// DEV-260: проверка `is_page_template( self::TEMPLATE )` убрана —
+		// шаблон `page-organizer.php` удалён из темы DEV-234, страница с ним
+		// существовать не могла, проверка всегда давала false.
+		return false;
 	}
 
 	// =========================================================================
@@ -837,21 +838,14 @@ class IDPG_Organizer_URL {
 	}
 
 	/**
-	 * Шаблон темы, обслуживающий форму события (G5).
-	 */
-	const EVENT_TEMPLATE = 'page-organizer-event.php';
-
-	/**
-	 * Шаблон темы, обслуживающий форму площадки (DEV-50).
-	 */
-	const VENUE_TEMPLATE = 'page-organizer-venue.php';
-
-	/**
 	 * Подключение шаблона кабинета.
 	 *
-	 * Редиректы и проверку прав выполняет сам шаблон
-	 * (`page-organizer.php`) — здесь только выбор файла и корректный
-	 * HTTP-статус.
+	 * DEV-260: выбора файла темы больше нет — константы `EVENT_TEMPLATE`
+	 * и `VENUE_TEMPLATE` (как и `TEMPLATE`) удалены: шаблоны
+	 * `page-organizer*.php` ушли из темы DEV-234, и `locate_template()`
+	 * всегда возвращал false. Метод только снимает 404-статус и отдаёт
+	 * текущий шаблон. Для возврата выбора шаблона нужно вернуть константы
+	 * вместе с файлами темы.
 	 *
 	 * @param string $template Текущий шаблон.
 	 * @return string
@@ -876,17 +870,7 @@ class IDPG_Organizer_URL {
 
 		status_header( 200 );
 
-		if ( $is_venue ) {
-			$wanted = self::VENUE_TEMPLATE;
-		} elseif ( $is_event ) {
-			$wanted = self::EVENT_TEMPLATE;
-		} else {
-			$wanted = self::TEMPLATE;
-		}
-
-		$found = locate_template( $wanted );
-
-		return $found ? $found : $template;
+		return $template;
 	}
 
 	// =========================================================================

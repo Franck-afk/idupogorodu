@@ -6593,3 +6593,20 @@ DEV-196 и DEV-197 подтверждены.
 существующие тесты не сломаны (набор зелёный).
 **Приёмка:** тесты не проверяют отключённое — по grep в `tests/` 0 вызовов
 `guard_cabinet_redirect`/`social_login_redirect`/`is_cabinet_url`/`get_access_decision`.
+
+### 37. DEV-260 (P2, S) — мёртвые константы TEMPLATE в class-organizer-url.php (08.10.2026)
+
+| Пункт | Что сделано |
+|---|---|
+| Проверка (шаг 2) | Все три константы использовались **только внутри файла**: `TEMPLATE` → `is_cabinet_request()` (`is_page_template()` всегда false — файла в теме нет), `EVENT_TEMPLATE`/`VENUE_TEMPLATE` → `template()` → `locate_template()` всегда возвращал false. Внешних ссылок (`IDPG_Organizer_URL::TEMPLATE` и т.п.) в `plugins/`+`themes/` — 0 |
+| Константы | Удалены `TEMPLATE`, `EVENT_TEMPLATE`, `VENUE_TEMPLATE`: **30 → 27** констант в классе |
+| `template()` | Убран блок `$wanted` + `locate_template()` (строка :887) → `return $template`; док-блок дополнен DEV-260. **Поведение не изменилось**: `locate_template()` и раньше всегда давал false, метод и раньше отдавал `$template` |
+| `is_cabinet_request()` | Убран `return (bool) is_page_template( self::TEMPLATE )` → `return false` с комментарием (проверка всегда была false) |
+| Шаг 4 — живые константы | `ALLOWED_ROLES` (:119) — используется в `user_is_organizer()` (:644); 8× `META_*`, `LEGAL_TYPES`, `PROFILE_FIELD_MAXLEN` — профильные методы (`get_profile_data()`/`update_profile()`), их потребитель REST. Все на месте, не тронуты |
+| PHPUnit | **514 / 1352 / 0** — без изменений к базе DEV-259, зелёные |
+| Живая проба | `/` → 200, `/login/` → 200, `/organizer/` → **404**, `/organizer/events/` → **404** (как до правки — роутер отключён DEV-235) |
+
+**Ограничения соблюдены:** другие константы и методы (`user_is_organizer`,
+`get_profile_data`, `template()` без блока выбора файла) не тронуты.
+**Приёмка:** мёртвых констант нет (grep по коду — 0, остались только в
+комментариях DEV-260); роутер не сломан (тесты зелёные, `/organizer/*` → 404).
