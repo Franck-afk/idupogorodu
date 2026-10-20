@@ -625,6 +625,10 @@ function idpg_core_create_privacy_page() {
 	$existing_page = get_page_by_path( $page_slug );
 
 	if ( $existing_page ) {
+		// DEV-309: даже если шаблон уже стоит (ранний return ниже), опция
+		// привязки «Политики конфиденциальности» должна быть выправлена.
+		idpg_core_assign_privacy_page( (int) $existing_page->ID );
+
 		$template = get_post_meta( $existing_page->ID, '_wp_page_template', true );
 		if ( $template === $page_template ) {
 			return;
@@ -658,8 +662,33 @@ function idpg_core_create_privacy_page() {
 	}
 
 	update_post_meta( $page_id, '_wp_page_template', $page_template );
+	idpg_core_assign_privacy_page( (int) $page_id );
 }
 add_action( 'after_setup_theme', 'idpg_core_create_privacy_page' );
+
+/**
+ * Привязывает страницу как «Политика конфиденциальности» сайта (DEV-309).
+ *
+ * Устанавливает опцию `wp_page_for_privacy_policy`, чтобы ссылки в футере,
+ * формах и в админке («Настройки → Конфиденциальность») вели на /privacy/.
+ * Не перезаписывает уже назначенную валидную страницу — её мог выбрать
+ * владелец вручную.
+ *
+ * @param int $page_id ID страницы политики.
+ * @return void
+ */
+function idpg_core_assign_privacy_page( $page_id ) {
+	$page_id = (int) $page_id;
+
+	if ( $page_id <= 0 ) {
+		return;
+	}
+
+	$assigned = (int) get_option( 'wp_page_for_privacy_policy' );
+	if ( $assigned <= 0 || ! get_post( $assigned ) ) {
+		update_option( 'wp_page_for_privacy_policy', $page_id );
+	}
+}
 
 /**
  * Автосоздание страницы «Оферта».
