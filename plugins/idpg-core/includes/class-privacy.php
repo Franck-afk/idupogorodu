@@ -98,6 +98,17 @@ class IDPG_Privacy {
 	const PRIVACY_SLUG = 'privacy';
 
 	/**
+	 * Служебные meta-ключи, исключаемые из само-выгрузки.
+	 *
+	 * Токены сессий и прочие внутренние ключи не являются персональными
+	 * данными субъекта, а их выдача в JSON создала бы риск компрометации
+	 * учётной записи.
+	 *
+	 * @var string[]
+	 */
+	const EXPORT_META_EXCLUDE = array( 'session_tokens' );
+
+	/**
 	 * Получение экземпляра синглтона.
 	 *
 	 * @return IDPG_Privacy
@@ -651,6 +662,10 @@ class IDPG_Privacy {
 		$clean = array();
 		if ( is_array( $meta ) ) {
 			foreach ( $meta as $key => $values ) {
+				// Служебные ключи (например, session_tokens) не выгружаем.
+				if ( in_array( $key, self::EXPORT_META_EXCLUDE, true ) ) {
+					continue;
+				}
 				$clean[ $key ] = array();
 				foreach ( (array) $values as $value ) {
 					$clean[ $key ][] = maybe_unserialize( $value );

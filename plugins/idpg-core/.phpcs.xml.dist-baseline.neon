@@ -4344,6 +4344,12 @@ ignoreErrors:
 		path: tests\test-promotion.php
 
 	-
+		sniff: Generic.Files.OneObjectStructurePerFile.MultipleFound
+		message: Only one object structure is allowed in a file
+		count: 1
+		path: tests\test-privacy-module.php
+
+	-
 		sniff: Generic.Commenting.DocComment.ShortNotCapital
 		message: Doc comment short description must start with a capital letter
 		count: 1

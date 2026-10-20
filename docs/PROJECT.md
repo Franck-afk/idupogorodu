@@ -1955,6 +1955,23 @@ namespace с путями, методами и разделением прав. 
 | **Объём** | S |
 | **Статус** | ✅ Реализовано 20.10.2026. Опция выставлена (114); код привязки добавлен в тему. |
 
+#### DEV-310. Тесты приватности на новом модуле (152-ФЗ)
+
+> Заведено и закрыто 20.10.2026. Старые тесты `test-privacy.php` (25) и
+> `test-privacy-withdrawal.php` (14) проверяли снятый в DEV-288 API
+> (`collect_user_data`, `META_DELETE_REQUEST`, `LOG_LIMIT`, старый withdraw,
+> `META_WITHDRAWAL`) и после перевода модуля на `IDPG_Privacy` давали 20 ошибок
+> и 2 падения. Сценарии перенесены в новые тесты, старые файлы удалены.
+
+| | |
+|---|---|
+| **Проблема** | После DEV-288 тесты `test-privacy.php` и `test-privacy-withdrawal.php` ссылались на удалённый API и не проходили (20 ошибок + 2 падения). Проверяемое поведение (согласие, отзыв, права субъекта, само-выгрузка) осталось непокрытым. Плюс при переносе выявлен дефект: `build_user_export()` выгружал служебный meta-ключ `session_tokens`. |
+| **Требование** | Перенести сценарии старых тестов на новый модуль `IDPG_Privacy`, не воскрешая удалённые файлы; закрыть дефект выгрузки `session_tokens`. |
+| **Реализация** | `tests/test-privacy-module.php` расширен до 24 тестов (`Test_Privacy_Module`) + новый класс `Test_Privacy_Rest` (3 теста). Перенесено: запись/идемпотентность согласия, хук `idpg_privacy_consent_withdrawn`, валидация `withdraw_consent`, `render_subject_tools( $post_id )` (авторизован/гость/после отзыва/без согласия, nonce экспорт-формы), ассеты (`wp_style_is( 'idpg-privacy-banner', 'enqueued' )`), `handle_self_export` требует логина, исключение `session_tokens`. Дефект: в `class-privacy.php` добавлена константа `EXPORT_META_EXCLUDE = array( 'session_tokens' )` и `continue` в цикле meta-ключей `build_user_export()`. |
+| **Приёмка** | `run-tests.cmd --filter Test_Privacy` — все зелёные (`Test_Privacy*` = 33: 24 module + 3 rest + 6 tab); полный PHPUnit `OK (556 tests, 1524 assertions)`; тест `test_session_tokens_excluded_from_export` падал до фикса и зелёный после (обратная проба); мутации ловятся (`record_consent` при регистрации, guard `$user_id <= 0`); PHPCS `class-privacy.php` + `test-privacy-module.php` exit 0. |
+| **Объём** | M |
+| **Статус** | ✅ Реализовано 20.10.2026. Сценарии перенесены, дефект `session_tokens` закрыт. |
+
 ---
 
 ### 4. ФУНКЦИОНАЛЬНЫЕ УЛУЧШЕНИЯ (P2)
