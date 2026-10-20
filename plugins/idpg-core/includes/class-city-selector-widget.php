@@ -62,13 +62,14 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 	/**
 	 * Список доступных сервисов автоопределения.
 	 *
+	 * DEV-305: внешние сервисы удалены (242-ФЗ), осталась локальная база.
+	 *
 	 * @return array
 	 */
 	public static function ip_services() {
 		return array(
-			'none'     => __( 'Не определять', 'idpg-core' ),
-			'ip_api'   => __( 'ip-api.com', 'idpg-core' ),
-			'ipapi_co' => __( 'ipapi.co', 'idpg-core' ),
+			'local' => __( 'Локальная база (РФ)', 'idpg-core' ),
+			'none'  => __( 'Не определять', 'idpg-core' ),
 		);
 	}
 
@@ -229,7 +230,7 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 		$only_with_events = ! empty( $instance['only_with_events'] );
 		$sort             = isset( $instance['sort'] ) ? $instance['sort'] : 'alpha';
 		$display          = isset( $instance['display'] ) ? $instance['display'] : 'dropdown';
-		$ip_service       = isset( $instance['ip_service'] ) ? $instance['ip_service'] : 'none';
+		$ip_service       = isset( $instance['ip_service'] ) ? $instance['ip_service'] : 'local';
 
 		$sorts = array(
 			'alpha'   => __( 'Алфавит', 'idpg-core' ),
@@ -321,8 +322,8 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 		$display = isset( $new['display'] ) ? sanitize_key( $new['display'] ) : 'dropdown';
 		$instance['display'] = in_array( $display, array( 'dropdown', 'buttons' ), true ) ? $display : 'dropdown';
 
-		$ip_service = isset( $new['ip_service'] ) ? sanitize_key( $new['ip_service'] ) : 'none';
-		$instance['ip_service'] = array_key_exists( $ip_service, self::ip_services() ) ? $ip_service : 'none';
+		$ip_service = isset( $new['ip_service'] ) ? sanitize_key( $new['ip_service'] ) : 'local';
+		$instance['ip_service'] = array_key_exists( $ip_service, self::ip_services() ) ? $ip_service : 'local';
 
 		// Сброс кэша дерева городов при изменении настроек.
 		self::purge_tree_cache();
@@ -341,7 +342,7 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 		$only_with_events = ! empty( $instance['only_with_events'] );
 		$sort             = isset( $instance['sort'] ) ? $instance['sort'] : 'alpha';
 		$display          = isset( $instance['display'] ) ? $instance['display'] : 'dropdown';
-		$ip_service       = isset( $instance['ip_service'] ) ? $instance['ip_service'] : 'none';
+		$ip_service       = isset( $instance['ip_service'] ) ? $instance['ip_service'] : 'local';
 
 		$tree = $this->get_city_tree( $sort );
 
@@ -562,7 +563,7 @@ class IDPG_City_Selector_Widget extends WP_Widget {
 	 * Использует общий механизм IDPG_City_Filter::lookup_city_id_by_ip()
 	 * (единый transient-кэш, без дублирующих HTTP-запросов).
 	 *
-	 * @param string $service Ключ сервиса ('none' — отключено, либо ip_api|ipapi_co).
+	 * @param string $service Ключ сервиса ('none' — отключено, либо 'local').
 	 * @param array  $tree    Дерево городов.
 	 * @return array|null
 	 */

@@ -220,10 +220,11 @@ class IDPG_City_Filter {
 	/**
 	 * Автоопределение города по IP посетителя.
 	 *
-	 * Бесплатный сервис ip-api.com (основной) с фолбэком ipapi.co.
-	 * Результат кэшируется по IP (успех — сутки, промах — 12 часов,
-	 * недоступность сервиса — 10 минут). Cookie ставится только один раз —
-	 * при первом визите, пока пользователь не выбрал город вручную.
+	 * DEV-305: источник — локальная база IP→регион (`{prefix}idpg_geo_ranges`),
+	 * внешние сервисы не используются (242-ФЗ). Результат кэшируется по IP
+	 * (успех — сутки, промах — 12 часов, пустая/недоступная база — 10 минут).
+	 * Cookie ставится только один раз — при первом визите, пока пользователь
+	 * не выбрал город вручную.
 	 *
 	 * DEV-19: подтверждённый посетителем город автоопределение не трогает
 	 * никогда — выбранный город не должен молча меняться на IP-угадайку.
@@ -246,7 +247,7 @@ class IDPG_City_Filter {
 		}
 
 		// Настройка виджета «Выбор города» может отключить автоопределение
-		// ('none') или сузить список сервисов; по умолчанию — оба сервиса.
+		// ('none') или оставить локальную базу ('local'); по умолчанию — локальная база.
 		$services = self::allowed_ip_services();
 
 		if ( empty( $services ) ) {
@@ -311,13 +312,16 @@ class IDPG_City_Filter {
 	}
 
 	/**
-	 * Поиск города по IP через внешние сервисы с кэшированием результата.
+	 * Поиск города по IP через локальную базу регионов с кэшированием.
+	 *
+	 * DEV-305: источник — таблица `{prefix}idpg_geo_ranges` (DB-IP Lite по РФ).
+	 * Внешние сервисы не используются — IP не покидает сервер (242-ФЗ).
 	 *
 	 * Публичный метод — используется также виджетом селектора города,
-	 * чтобы не дублировать HTTP-запросы (общий transient-кэш).
+	 * чтобы не дублировать запросы (общий transient-кэш).
 	 *
 	 * @param string $ip       IP-адрес.
-	 * @param array  $services Список сервисов (ip_api, ipapi_co). Пустой список = оба сервиса.
+	 * @param array  $services Список сервисов (['local']). Пустой список = локальная база.
 	 * @return int Term ID или 0.
 	 */
 	public static function lookup_city_id_by_ip( $ip, $services = array() ) {
@@ -327,7 +331,7 @@ class IDPG_City_Filter {
 			return 0;
 		}
 
-		// Нормализация списка сервисов: пустой список = оба сервиса.
+		// Нормализация списка сервисов: пустой список = локальная база.
 		$services = self::normalize_services( $services );
 
 		if ( empty( $services ) ) {
@@ -337,33 +341,21 @@ class IDPG_City_Filter {
 		$key  = 'idpg_city_ip_' . md5( $ip );
 		$lock = $key . '_lock';
 
-		// Параллельный запрос уже выполняет поиск — не дёргаем API повторно.
+		// Параллельный запрос уже выполняет поиск — не дёргаем БД повторно.
 		if ( false !== get_transient( $lock ) ) {
 			return 0;
 		}
 
 		set_transient( $lock, 1, 20 );
 
-		$term_id     = 0;
+		$term_id      = 0;
 		$had_response = false;
 
-		foreach ( $services as $service ) {
-			$data = self::request_ip_data( $service, $ip );
+		$region = IDPG_Geo_Ranges::lookup_region( $ip );
 
-			if ( empty( $data ) ) {
-				continue;
-			}
-
+		if ( '' !== $region ) {
 			$had_response = true;
-
-			$region = isset( $data['region'] ) ? mb_strtolower( trim( (string) $data['region'] ), 'UTF-8' ) : '';
-			$city   = isset( $data['city'] ) ? mb_strtolower( trim( (string) $data['city'] ), 'UTF-8' ) : '';
-
-			$term_id = self::match_city_term( $city, $region );
-
-			if ( $term_id ) {
-				break;
-			}
+			$term_id      = self::match_city_term( '', $region );
 		}
 
 		delete_transient( $lock );
@@ -379,7 +371,7 @@ class IDPG_City_Filter {
 				'term_id' => 0,
 			), self::IP_CACHE_TTL_MISS );
 		} else {
-			// Оба сервиса недоступны — короткий кэш, чтобы скоро повторить попытку.
+			// Таблица пуста/недоступна — короткий кэш, чтобы скоро повторить попытку.
 			set_transient( $key, array(
 				'status'  => 'fail',
 				'term_id' => 0,
@@ -401,12 +393,14 @@ class IDPG_City_Filter {
 	/**
 	 * Список сервисов, разрешённых для глобального автоопределения.
 	 *
-	 * Учитывает настройку `ip_service` виджета «Выбор города»:
-	 * - виджет не размещён или настройка невалидна — оба сервиса;
-	 * - 'none'  — автоопределение отключено;
-	 * - 'ip_api' / 'ipapi_co' — используется только выбранный сервис.
+	 * DEV-305: единственный источник — локальная база IP→регион (242-ФЗ),
+	 * внешние сервисы удалены. Учитывает настройку `ip_service` виджета
+	 * «Выбор города»:
+	 * - виджет не размещён или настройка невалидна — автоопределение включено;
+	 * - 'none'  — автоопределение отключено (фолбэк);
+	 * - 'local' — используется локальная база.
 	 *
-	 * @return array Ключи сервисов.
+	 * @return array Ключи сервисов (['local'] или пустой массив).
 	 */
 	public static function allowed_ip_services() {
 		static $allowed = null;
@@ -415,9 +409,9 @@ class IDPG_City_Filter {
 			return $allowed;
 		}
 
-		$allowed = array( 'ip_api', 'ipapi_co' );
+		$allowed = array( 'local' );
 
-		// Виджет не размещён в активной области — используем оба сервиса.
+		// Виджет не размещён в активной области — автоопределение включено.
 		if ( ! is_active_widget( false, false, IDPG_City_Selector_Widget::ID_BASE ) ) {
 			return $allowed;
 		}
@@ -435,12 +429,12 @@ class IDPG_City_Filter {
 			return $allowed;
 		}
 
-		$ip_service = isset( $instance['ip_service'] ) ? $instance['ip_service'] : 'none';
+		$ip_service = isset( $instance['ip_service'] ) ? $instance['ip_service'] : 'local';
 
 		if ( 'none' === $ip_service ) {
 			$allowed = array();
-		} elseif ( in_array( $ip_service, array( 'ip_api', 'ipapi_co' ), true ) ) {
-			$allowed = array( $ip_service );
+		} elseif ( 'local' === $ip_service ) {
+			$allowed = array( 'local' );
 		}
 
 		return $allowed;
@@ -449,13 +443,14 @@ class IDPG_City_Filter {
 	/**
 	 * Нормализация списка сервисов автоопределения.
 	 *
-	 * Пустой или невалидный список означает «оба сервиса» (безопасный фолбэк).
+	 * DEV-305: остался единственный источник — локальная база. Пустой или
+	 * невалидный список означает «использовать локальную базу».
 	 *
 	 * @param string|array $services Ключ сервиса или массив ключей.
 	 * @return array
 	 */
 	private static function normalize_services( $services ) {
-		$allowed = array( 'ip_api', 'ipapi_co' );
+		$allowed = array( 'local' );
 
 		if ( is_string( $services ) && '' !== $services ) {
 			$services = array( $services );
@@ -465,74 +460,14 @@ class IDPG_City_Filter {
 			return $allowed;
 		}
 
-		$services = array_values( array_intersect( array_map( 'strval', $services ), $allowed ) );
-
-		return $services ? $services : $allowed;
-	}
-
-	/**
-	 * Запрос к внешнему сервису определения города по IP.
-	 *
-	 * @param string $service Ключ сервиса: ip_api | ipapi_co.
-	 * @param string $ip      IP-адрес.
-	 * @return array Поля city/region или пустой массив.
-	 */
-	private static function request_ip_data( $service, $ip ) {
-		$urls = array();
-
-		if ( 'ip_api' === $service ) {
-			// Бесплатный план ip-api.com не поддерживает HTTPS;
-			// сначала пробуем HTTPS (для платных/прокси), при неудаче — HTTP.
-			$urls = array(
-				'https://ip-api.com/json/' . $ip . '?lang=ru&fields=status,regionName,city',
-				'http://ip-api.com/json/' . $ip . '?lang=ru&fields=status,regionName,city',
-			);
-		} elseif ( 'ipapi_co' === $service ) {
-			$urls = array( 'https://ipapi.co/' . $ip . '/json/' );
-		} else {
+		// Явное отключение автоопределения — источник не выбирается.
+		if ( in_array( 'none', array_map( 'strval', $services ), true ) ) {
 			return array();
 		}
 
-		foreach ( $urls as $url ) {
-			$response = wp_remote_get(
-				$url,
-				array(
-					'timeout' => 3,
-					'headers' => array(
-						'User-Agent' => 'IDPG City Filter',
-						'Accept'     => 'application/json',
-					),
-				)
-			);
+		$services = array_values( array_intersect( array_map( 'strval', $services ), $allowed ) );
 
-			if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-				continue;
-			}
-
-			$body = json_decode( wp_remote_retrieve_body( $response ), true );
-
-			if ( ! is_array( $body ) ) {
-				continue;
-			}
-
-			$data = array();
-
-			if ( 'ip_api' === $service ) {
-				if ( isset( $body['status'] ) && 'success' === $body['status'] ) {
-					$data['region'] = isset( $body['regionName'] ) ? $body['regionName'] : '';
-					$data['city']   = isset( $body['city'] ) ? $body['city'] : '';
-
-					return $data;
-				}
-			} elseif ( 'ipapi_co' === $service ) {
-				$data['region'] = isset( $body['region'] ) ? $body['region'] : '';
-				$data['city']   = isset( $body['city'] ) ? $body['city'] : '';
-
-				return $data;
-			}
-		}
-
-		return array();
+		return $services ? $services : $allowed;
 	}
 
 	/**

@@ -1872,6 +1872,54 @@ namespace с путями, методами и разделением прав. 
 | **Приёмка** | При подключении WordPress видит доступное обновление по тегу релиза; при отказе — файла нет и код не содержит мёртвых ссылок. |
 | **Объём** | S |
 
+#### DEV-287. Подготовка проекта к AI-выдаче поисковиков (GEO / answer engines)
+
+> Заведено 20.10.2026 по итогам аудита SEO/geo. Диагностика по коду: JSON-LD
+> Event/Place/GeoCoordinates/Offer уже есть (`class-seo-integration.php`), llms.txt
+> Yoast включён (auto), robots.txt виртуальный — ботов не блокирует, PHP-рендер
+> краулится. Задача — закрыть пробелы ниже.
+
+| | |
+|---|---|
+| **Проблема** | AI-движки (Google AI Overviews, Яндекс.ИИ, Perplexity, ChatGPT) цитируют текст и структурированные данные. Сейчас: (1) на карточках события нет текстового «ответного блока» — только вёрстка полей; (2) в Place-узел JSON-LD не попадают часы работы (`_idpg_venue_hours_json` есть в данных) и соцсети площадки (`_idpg_venue_social_json` → `sameAs`); (3) title/desc-шаблоны Yoast без города (`%%title%% %%sep%% %%sitename%%`), а конкурентный запрос — «события Ижевска»; (4) AI-боты (GPTBot, ClaudeBot, PerplexityBot, Google-Extended) нигде явно не разрешены и могут быть заблокированы файрволом Clearfy/AIOWP. |
+| **Требование** | (1) Текстовый абзац-ответ под H1 на странице события: дата, время, площадка, город, цена — генерируется из меты. (2) `openingHoursSpecification` и `sameAs` в JSON-LD площадки. (3) Город в title и metadesc для event/venue (фильтр `wpseo_title`/`wpseo_metadesc`, город из таксономии `city`). (4) Явный allow AI-ботов в `robots_txt` + проверка, что Clearfy/AIOWP их не режут. |
+| **Реализация** | `plugins/idpg-core/includes/class-seo-integration.php` (schema-узлы), фильтр `wpseo_title`/`wpseo_metadesc` в idpg-core, `themes/idpg_core/template-parts/content-event.php` (+ факт-блок, стили в style.css), `robots_txt` фильтр в idpg-core. Текстовый блок — через хук, префикс `idpg_`, escape на выводе. |
+| **Приёмка** | На странице события виден текстовый абзац с датой/местом/ценой; в JSON-LD площадки присутствуют `openingHoursSpecification` и `sameAs` (проверка по исходнику страницы); title события содержит название города; `GET /robots.txt` содержит allow для GPTBot/ClaudeBot/PerplexityBot/YandexBot; полный прогон PHPUnit зелёный. |
+| **Объём** | M |
+
+#### DEV-288. Модуль 152-ФЗ заново + вкладка «Приватность» на странице «IDPG»
+
+> Заведено 20.10.2026. Модуль приватности утрачен: `class-privacy.php` есть в HEAD,
+> но удалён из рабочего дерева и не подключён; `idpg-city-admin` (DEV-271) не активен
+> и отсутствует на диске. Решение владельца: не восстанавливать, а **написать заново**
+> в `idpg-core` и вывести админ-UI **вкладкой** на существующей странице «IDPG» (тема).
+> Спека — `docs/specs/DEV-288.md`.
+
+| | |
+|---|---|
+| **Проблема** | На живом сайте нет фиксации согласия (вызов `record_consent()` под guard `class_exists` не срабатывает), нет cookie-баннера, нет прав субъекта (выгрузка/удаление/отзыв). Чекбокс ПДн и REST-проверка (`400 pdn_consent_required`) при этом работают — факт согласия нигде не сохраняется. |
+| **Требование** | Написать `IDPG_Privacy` заново: запись согласия (дата/редакция/источник/хеш IP), отзыв, cookie-баннер (`idpg_cookie_consent`), права субъекта (само-выгрузка JSON, запрос удаления, отзыв). Добавить вкладку «Приватность (152-ФЗ)» на страницу «IDPG» без правок меню темы — через точку расширения. |
+| **Реализация** | `plugins/idpg-core/includes/class-privacy.php` (новый), `require_once` + `IDPG_Privacy::instance()` в `idpg-core.php`; тема `inc/widget-areas.php` — фильтр `idpg_widget_areas_admin_tabs` + вывод вкладок; баннер и инструменты субъекта — на существующих классах дизайн-системы `assets/css/privacy.css`; стили вкладки в `widget-areas-admin.css`; тесты `test-privacy-module.php`, `test-privacy-tab.php`. |
+| **Приёмка** | Согласие фиксируется/отзывается/снимается повторным согласием; баннер не показывается после выбора; инструменты субъекта и вкладка работают; nonce + `manage_options`; полный PHPUnit 520/1426 зелёный; PHPCS exit 0; мутации ловятся. |
+| **Объём** | L |
+| **Статус** | ✅ Реализовано 20.10.2026, ждёт визуальной приёмки владельца. Спека `docs/specs/DEV-288.md`. |
+
+#### DEV-305. IP-геолокация — локальная БД (242-ФЗ, отказ от зарубежных API)
+
+> Заведено и реализовано 20.10.2026. Решения владельца: источник — **DB-IP Lite**
+> (РФ-срез CSV); таблица через `dbDelta` + импорт **кнопкой** на странице «IDPG»;
+> внешние вызовы (`ip-api.com`, `ipapi.co`, в т.ч. HTTP) — **удалить полностью**
+> (явное разрешение отклониться от AGENTS §1). Спека — `docs/specs/DEV-305.md`.
+
+| | |
+|---|---|
+| **Проблема** | Определение города по IP уходило на зарубежные сервисы: `request_ip_data()` слал `wp_remote_get()` на `https://ip-api.com/json/{ip}`, при неудаче — на **`http://ip-api.com/json/{ip}`** (открытый HTTP), а также `https://ipapi.co/{ip}/json/`. IP посетителя **передавался за пределы РФ** (сервисы в США) и по незащищённому каналу — нарушение **242-ФЗ** (трансграничная передача ПДн). |
+| **Требование** | Заменить внешние вызовы запросом к локальной БД диапазонов IP → регион РФ (`{prefix}idpg_geo_ranges`), наполняемой владельцем. IP не покидает сервер. Импорт — кнопкой на вкладке «Гео (IP→регион)». |
+| **Реализация** | `plugins/idpg-core/includes/class-geo-ranges.php` (новый: таблица `ip_start`/`ip_end`/`region`, `lookup_region()`, `import_csv()`, `parse_csv_line()`, `region_aliases()`/`localize_region()`, админ-вкладка по фильтру `idpg_widget_areas_admin_tabs`); `idpg-core.php` — `require_once` + `IDPG_Geo_Ranges::instance()` + `idpg_core_create_geo_ranges_table()` при активации; `class-city-filter.php` — `lookup_city_id_by_ip()` берёт `IDPG_Geo_Ranges::lookup_region()`, `allowed_ip_services()` → `local`/`none`, внешние вызовы удалены; `class-city-selector-widget.php` — сервисы `local`/`none`, дефолт `local`; стили вкладки — `widget-areas-admin.css`; тесты `test-geo-ranges.php` (19). |
+| **Приёмка** | `Test_Geo_Ranges` — 19 зелёных; `grep` по плагину `ip-api.com`/`ipapi.co`/`wp_remote_get` — 0 совпадений (`test_no_external_geo_calls`); полный PHPUnit **540/1477** зелёный; PHPCS плагина exit 0; 5 мутаций §6 пойманы. |
+| **Объём** | M |
+| **Статус** | ✅ Реализовано 20.10.2026. Наполнение РФ-выгрузкой — владелец кнопкой импорта. Спека `docs/specs/DEV-305.md`. |
+
 ---
 
 ### 4. ФУНКЦИОНАЛЬНЫЕ УЛУЧШЕНИЯ (P2)

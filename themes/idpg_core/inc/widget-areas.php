@@ -212,11 +212,25 @@ function idpg_widget_areas_render( $position ) {
 }
 
 /**
- * Регистрирует страницу админки «Области виджетов».
+ * Регистрирует верхнее меню «IDPG» и страницу админки «Области виджетов».
+ *
+ * DEV-273: страница вынесена из подменю «Внешний вид» в отдельное верхнее
+ * меню «IDPG» (первый подпункт — «Области виджетов»). Слаг страницы
+ * сохранён прежним, чтобы старые параметры ссылок продолжали работать.
  */
 function idpg_widget_areas_admin_menu() {
+	add_menu_page(
+		'IDPG',
+		'IDPG',
+		'manage_options',
+		'idpg-widget-areas',
+		'idpg_widget_areas_admin_page',
+		'dashicons-welcome-widgets-menus',
+		61
+	);
+
 	add_submenu_page(
-		'themes.php',
+		'idpg-widget-areas',
 		__( 'Области виджетов', 'idpg_core' ),
 		__( 'Области виджетов', 'idpg_core' ),
 		'manage_options',
@@ -232,7 +246,7 @@ add_action( 'admin_menu', 'idpg_widget_areas_admin_menu' );
  * @param string $hook_suffix Текущий хук экрана.
  */
 function idpg_widget_areas_admin_assets( $hook_suffix ) {
-	if ( 'appearance_page_idpg-widget-areas' !== $hook_suffix ) {
+	if ( 'toplevel_page_idpg-widget-areas' !== $hook_suffix ) {
 		return;
 	}
 	wp_enqueue_style(
@@ -289,13 +303,13 @@ function idpg_widget_areas_admin_handle() {
 				update_option( 'sidebars_widgets', $sidebars_widgets );
 			}
 		}
-		wp_safe_redirect( admin_url( 'themes.php?page=idpg-widget-areas&idpg_msg=deleted' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=idpg-widget-areas&tab=list&idpg_msg=deleted' ) );
 		exit;
 	}
 
 	$title = isset( $_POST['idpg_area_title'] ) ? sanitize_text_field( wp_unslash( $_POST['idpg_area_title'] ) ) : '';
 	if ( '' === $title ) {
-		wp_safe_redirect( admin_url( 'themes.php?page=idpg-widget-areas&idpg_msg=empty' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=idpg-widget-areas&tab=form&idpg_msg=empty' ) );
 		exit;
 	}
 
@@ -342,7 +356,7 @@ function idpg_widget_areas_admin_handle() {
 	update_option( 'idpg_widget_areas', $areas );
 
 	$msg = $is_update ? 'updated' : 'added';
-	wp_safe_redirect( admin_url( 'themes.php?page=idpg-widget-areas&idpg_msg=' . $msg ) );
+	wp_safe_redirect( admin_url( 'admin.php?page=idpg-widget-areas&tab=list&idpg_msg=' . $msg ) );
 	exit;
 }
 add_action( 'admin_init', 'idpg_widget_areas_admin_handle' );
@@ -378,18 +392,46 @@ function idpg_widget_areas_select( $id, $selected, $options ) {
 
 /**
  * Вывод страницы админки «Области виджетов».
+ *
+ * DEV-273: разметка повторяет UI Clearfy Pro 3.7.3 — заголовок, ряд кнопок,
+ * две вкладки (список и форма), белая карточка с полями «подпись / контрол /
+ * знак подсказки», правая колонка с боксами и залипающая панель сохранения.
+ * Обработчик сохранения (idpg_widget_areas_admin_handle) и формат опции
+ * idpg_widget_areas не менялись.
  */
 function idpg_widget_areas_admin_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 
-	$areas      = idpg_widget_areas_all();
-	$positions  = idpg_widget_areas_positions();
-	$displays   = idpg_widget_areas_display_options();
-	$edit_slug  = isset( $_GET['edit'] ) ? sanitize_key( wp_unslash( $_GET['edit'] ) ) : '';
-	$editing    = ( $edit_slug && isset( $areas[ $edit_slug ] ) ) ? $areas[ $edit_slug ] : null;
-	$msg        = isset( $_GET['idpg_msg'] ) ? sanitize_key( wp_unslash( $_GET['idpg_msg'] ) ) : '';
+	$areas     = idpg_widget_areas_all();
+	$positions = idpg_widget_areas_positions();
+	$displays  = idpg_widget_areas_display_options();
+	$edit_slug = isset( $_GET['edit'] ) ? sanitize_key( wp_unslash( $_GET['edit'] ) ) : '';
+	$editing   = ( $edit_slug && isset( $areas[ $edit_slug ] ) ) ? $areas[ $edit_slug ] : null;
+	$msg       = isset( $_GET['idpg_msg'] ) ? sanitize_key( wp_unslash( $_GET['idpg_msg'] ) ) : '';
+	$tab       = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+
+	/**
+	 * Фильтр дополнительных вкладок страницы «IDPG».
+	 *
+	 * DEV-288: позволяет плагинам добавлять свои вкладки на страницу
+	 * «Области виджетов» (например, «Приватность» из idpg-core).
+	 *
+	 * @param array $tabs Карта slug => array( 'label' => string, 'callback' => callable ).
+	 */
+	$extra_tabs = apply_filters( 'idpg_widget_areas_admin_tabs', array() );
+	if ( ! is_array( $extra_tabs ) ) {
+		$extra_tabs = array();
+	}
+	$allowed_tabs = array_merge( array( 'list', 'form' ), array_keys( $extra_tabs ) );
+
+	if ( ! in_array( $tab, $allowed_tabs, true ) ) {
+		$tab = $editing ? 'form' : 'list';
+	}
+
+	$base_url    = admin_url( 'admin.php?page=idpg-widget-areas' );
+	$widgets_url = admin_url( 'widgets.php' );
 
 	$pages = get_posts(
 		array(
@@ -401,11 +443,8 @@ function idpg_widget_areas_admin_page() {
 		)
 	);
 	?>
-	<div class="wrap idpg-wa-wrap">
-		<div class="idpg-wa-header">
-			<span class="dashicons-before dashicons-welcome-widgets-menus" aria-hidden="true"></span>
-			<h1><?php esc_html_e( 'Области виджетов', 'idpg_core' ); ?></h1>
-		</div>
+	<div class="wrap idpg idpg-settings-page js-idpg">
+		<h1>IDPG</h1>
 
 		<?php if ( $msg ) : ?>
 			<div id="message" class="notice notice-success is-dismissible">
@@ -432,72 +471,187 @@ function idpg_widget_areas_admin_page() {
 			</div>
 		<?php endif; ?>
 
-		<div class="idpg-wa-intro">
+		<h3><?php esc_html_e( 'Области виджетов', 'idpg_core' ); ?></h3>
+
+		<div class="idpg-cols">
+			<a class="idpg-pseudo-button" href="<?php echo esc_url( add_query_arg( 'tab', 'form', $base_url ) ); ?>">
+				<?php esc_html_e( 'Добавить область', 'idpg_core' ); ?>
+			</a>
+			<a class="idpg-pseudo-button idpg-pseudo-button--gray" href="<?php echo esc_url( $widgets_url ); ?>">
+				<?php esc_html_e( 'Управлять виджетами', 'idpg_core' ); ?>
+			</a>
+
 			<p>
 				<?php
 				printf(
 					/* translators: %s: URL страницы виджетов. */
 					wp_kses_post( __( 'Области появляются на экране <a href="%s">Виджеты</a> — туда добавляются сами виджеты.', 'idpg_core' ) ),
-					esc_url( admin_url( 'widgets.php' ) )
+					esc_url( $widgets_url )
 				);
 				?>
 			</p>
-		</div>
+			<p><strong><?php esc_html_e( 'Не забудьте сохранить настройки', 'idpg_core' ); ?></strong></p>
 
-		<div class="idpg-wa-card">
-			<div class="idpg-wa-card__head">
-				<span class="dashicons dashicons-plus-alt" aria-hidden="true"></span>
-				<h2 class="idpg-wa-card__title">
-					<?php echo $editing ? esc_html__( 'Редактировать область', 'idpg_core' ) : esc_html__( 'Добавить область', 'idpg_core' ); ?>
-				</h2>
-			</div>
+			<div class="idpg-settings-cols">
+				<div class="idpg-settings-col idpg-settings-col--left">
+					<h2 class="idpg-tab-wrapper js-idpg-tabs">
+						<a class="idpg-tab<?php echo esc_attr( 'list' === $tab ? ' idpg-tab-active' : '' ); ?>" id="tab-idpg-list" href="#idpg-list"><?php esc_html_e( 'Список областей', 'idpg_core' ); ?></a>
+						<a class="idpg-tab<?php echo esc_attr( 'form' === $tab ? ' idpg-tab-active' : '' ); ?>" id="tab-idpg-form" href="#idpg-form"><?php echo $editing ? esc_html__( 'Редактировать область', 'idpg_core' ) : esc_html__( 'Добавить область', 'idpg_core' ); ?></a>
+						<?php foreach ( $extra_tabs as $extra_slug => $extra_tab ) : ?>
+							<?php if ( empty( $extra_tab['label'] ) ) : ?>
+								<?php continue; ?>
+							<?php endif; ?>
+							<a class="idpg-tab<?php echo esc_attr( $tab === $extra_slug ? ' idpg-tab-active' : '' ); ?>" id="tab-idpg-<?php echo esc_attr( $extra_slug ); ?>" href="#idpg-<?php echo esc_attr( $extra_slug ); ?>"><?php echo esc_html( $extra_tab['label'] ); ?></a>
+						<?php endforeach; ?>
+					</h2>
 
-			<form class="idpg-wa-form" method="post" action="">
-				<?php wp_nonce_field( 'idpg_widget_areas_action', 'idpg_widget_areas_nonce' ); ?>
-				<input type="hidden" name="idpg_area_action" value="<?php echo $editing ? 'update' : 'add'; ?>">
-				<?php if ( $editing ) : ?>
-					<input type="hidden" name="idpg_area_slug" value="<?php echo esc_attr( $edit_slug ); ?>">
-				<?php endif; ?>
+					<div id="idpg-list" class="idpg-tab-in js-idpg-tab-item<?php echo esc_attr( 'list' === $tab ? ' active' : '' ); ?>">
+						<div class="idpg-field-header"><?php esc_html_e( 'Существующие области', 'idpg_core' ); ?></div>
 
-				<div class="idpg-wa-card__body">
-					<table class="form-table" role="presentation">
-						<tr>
-							<th scope="row"><label for="idpg_area_title"><?php esc_html_e( 'Название', 'idpg_core' ); ?></label></th>
-							<td>
-								<input type="text" class="regular-text" id="idpg_area_title" name="idpg_area_title"
-									value="<?php echo esc_attr( ( $editing && isset( $editing['title'] ) ) ? $editing['title'] : '' ); ?>" required>
-								<p class="description"><?php esc_html_e( 'Отображается на экране «Виджеты» и над областью на фронте.', 'idpg_core' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="idpg_area_position"><?php esc_html_e( 'Место на фронте', 'idpg_core' ); ?></label></th>
-							<td>
-								<?php idpg_widget_areas_select( 'idpg_area_position', ( $editing && isset( $editing['position'] ) ) ? $editing['position'] : 'below-header', $positions ); ?>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="idpg_area_display"><?php esc_html_e( 'Показывать', 'idpg_core' ); ?></label></th>
-							<td>
-								<?php idpg_widget_areas_select( 'idpg_area_display', ( $editing && isset( $editing['display'] ) ) ? $editing['display'] : 'all', $displays ); ?>
-							</td>
-						</tr>
-						<tr id="idpg_area_pages_row">
-							<th scope="row"><?php esc_html_e( 'Страницы', 'idpg_core' ); ?></th>
-							<td>
-								<fieldset>
-									<legend class="screen-reader-text"><?php esc_html_e( 'Страницы для показа', 'idpg_core' ); ?></legend>
+						<?php if ( empty( $areas ) ) : ?>
+							<div class="idpg-areas-empty">
+								<span class="dashicons dashicons-layout" aria-hidden="true"></span>
+								<p><?php esc_html_e( 'Областей пока нет. Создайте первую на вкладке «Добавить область».', 'idpg_core' ); ?></p>
+							</div>
+						<?php else : ?>
+							<div class="idpg-areas">
+								<?php foreach ( $areas as $slug => $area ) : ?>
+									<?php
+									$area_position  = ( isset( $area['position'] ) && isset( $positions[ $area['position'] ] ) ) ? $area['position'] : 'below-header';
+									$area_display   = ( isset( $area['display'] ) && isset( $displays[ $area['display'] ] ) ) ? $area['display'] : 'all';
+									$position_label = $positions[ $area_position ];
+									$display_label  = $displays[ $area_display ];
+									$has_pages      = ( 'specific' === $area_display && ! empty( $area['pages'] ) );
+									$edit_url       = add_query_arg(
+										array(
+											'edit' => $slug,
+											'tab'  => 'form',
+										),
+										$base_url
+									);
+									?>
+									<div class="idpg-area">
+										<span class="dashicons dashicons-welcome-widgets-menus idpg-area__icon" aria-hidden="true"></span>
+										<div class="idpg-area__main">
+											<h3 class="idpg-area__title"><?php echo esc_html( $area['title'] ); ?></h3>
+											<div class="idpg-area__meta">
+												<span class="idpg-badge">
+													<span class="dashicons dashicons-location" aria-hidden="true"></span>
+													<?php echo esc_html( $position_label ); ?>
+												</span>
+												<span class="idpg-badge">
+													<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+													<?php echo esc_html( $display_label ); ?>
+												</span>
+												<?php if ( $has_pages ) : ?>
+													<?php
+													$page_count = count( $area['pages'] );
+													$page_word  = idpg_widget_areas_plural( $page_count, __( 'страница', 'idpg_core' ), __( 'страницы', 'idpg_core' ), __( 'страниц', 'idpg_core' ) );
+													?>
+													<button type="button" class="idpg-badge idpg-badge--link js-idpg-toggle-pages" data-target="pages-<?php echo esc_attr( $slug ); ?>">
+														<span class="dashicons dashicons-admin-page" aria-hidden="true"></span>
+														<?php echo esc_html( $page_count . ' ' . $page_word ); ?>
+													</button>
+													<div id="pages-<?php echo esc_attr( $slug ); ?>" class="idpg-pages-list">
+														<?php
+														foreach ( $area['pages'] as $pid ) {
+															$ptitle = get_the_title( $pid );
+															if ( $ptitle ) {
+																echo esc_html( $ptitle ) . '<br>';
+															}
+														}
+														?>
+													</div>
+												<?php endif; ?>
+											</div>
+										</div>
+										<div class="idpg-area__actions">
+											<a class="idpg-pseudo-button" href="<?php echo esc_url( $edit_url ); ?>">
+												<?php esc_html_e( 'Редактировать', 'idpg_core' ); ?>
+											</a>
+											<form method="post" action="">
+												<?php wp_nonce_field( 'idpg_widget_areas_action', 'idpg_widget_areas_nonce' ); ?>
+												<input type="hidden" name="idpg_area_action" value="delete">
+												<input type="hidden" name="idpg_area_slug" value="<?php echo esc_attr( $slug ); ?>">
+												<button type="submit" class="idpg-pseudo-button idpg-pseudo-button--danger" onclick="return confirm('<?php echo esc_js( __( 'Удалить область?', 'idpg_core' ) ); ?>');">
+													<?php esc_html_e( 'Удалить', 'idpg_core' ); ?>
+												</button>
+											</form>
+										</div>
+									</div>
+								<?php endforeach; ?>
+							</div>
+						<?php endif; ?>
+					</div>
+
+					<div id="idpg-form" class="idpg-tab-in js-idpg-tab-item<?php echo esc_attr( 'form' === $tab ? ' active' : '' ); ?>">
+						<div class="idpg-field-header"><?php echo $editing ? esc_html__( 'Редактировать область', 'idpg_core' ) : esc_html__( 'Добавить область', 'idpg_core' ); ?></div>
+
+						<form method="post" action="" class="js-idpg-form">
+							<?php wp_nonce_field( 'idpg_widget_areas_action', 'idpg_widget_areas_nonce' ); ?>
+							<input type="hidden" name="idpg_area_action" value="<?php echo esc_attr( $editing ? 'update' : 'add' ); ?>">
+							<?php if ( $editing ) : ?>
+								<input type="hidden" name="idpg_area_slug" value="<?php echo esc_attr( $edit_slug ); ?>">
+							<?php endif; ?>
+
+							<div class="idpg-option-field">
+								<label class="idpg-option-field-label" for="idpg_area_title">
+									<span><?php esc_html_e( 'Название', 'idpg_core' ); ?></span>
+								</label>
+								<div class="idpg-option-field-body">
+									<input type="text" class="regular-text" id="idpg_area_title" name="idpg_area_title" value="<?php echo esc_attr( ( $editing && isset( $editing['title'] ) ) ? $editing['title'] : '' ); ?>" required>
+									<p class="description"><?php esc_html_e( 'Отображается на экране «Виджеты» и над областью на фронте.', 'idpg_core' ); ?></p>
+								</div>
+								<span class="idpg-ico-help" title="<?php esc_attr_e( 'Отображается на экране «Виджеты» и над областью на фронте.', 'idpg_core' ); ?>" aria-hidden="true">?</span>
+							</div>
+
+							<div class="idpg-option-field">
+								<label class="idpg-option-field-label" for="idpg_area_position">
+									<span><?php esc_html_e( 'Место на фронте', 'idpg_core' ); ?></span>
+								</label>
+								<div class="idpg-option-field-body">
+									<?php $current_position = ( $editing && isset( $editing['position'] ) ) ? $editing['position'] : 'below-header'; ?>
+									<select id="idpg_area_position" name="idpg_area_position">
+										<?php foreach ( $positions as $value => $label ) : ?>
+											<option value="<?php echo esc_attr( $value ); ?>"<?php selected( $value, $current_position ); ?>><?php echo esc_html( $label ); ?></option>
+										<?php endforeach; ?>
+									</select>
+									<p class="description"><?php esc_html_e( 'Где выводить область относительно шапки и подвала страницы.', 'idpg_core' ); ?></p>
+								</div>
+								<span class="idpg-ico-help" title="<?php esc_attr_e( 'Где выводить область относительно шапки и подвала страницы.', 'idpg_core' ); ?>" aria-hidden="true">?</span>
+							</div>
+
+							<div class="idpg-option-field">
+								<label class="idpg-option-field-label" for="idpg_area_display">
+									<span><?php esc_html_e( 'Показывать', 'idpg_core' ); ?></span>
+								</label>
+								<div class="idpg-option-field-body">
+									<?php $current_display = ( $editing && isset( $editing['display'] ) ) ? $editing['display'] : 'all'; ?>
+									<select id="idpg_area_display" name="idpg_area_display">
+										<?php foreach ( $displays as $value => $label ) : ?>
+											<option value="<?php echo esc_attr( $value ); ?>"<?php selected( $value, $current_display ); ?>><?php echo esc_html( $label ); ?></option>
+										<?php endforeach; ?>
+									</select>
+									<p class="description"><?php esc_html_e( 'На каких страницах показывать область.', 'idpg_core' ); ?></p>
+								</div>
+								<span class="idpg-ico-help" title="<?php esc_attr_e( 'На каких страницах показывать область.', 'idpg_core' ); ?>" aria-hidden="true">?</span>
+							</div>
+
+							<div class="idpg-option-field">
+								<label class="idpg-option-field-label">
+									<span><?php esc_html_e( 'Страницы', 'idpg_core' ); ?></span>
+								</label>
+								<div class="idpg-option-field-body" id="idpg_area_pages_row">
 									<?php if ( $pages ) : ?>
 										<?php
 										$pages_for_edit = isset( $editing['pages'] ) ? $editing['pages'] : array();
-									$selected_pages = $editing ? array_map( 'intval', (array) $pages_for_edit ) : array();
+										$selected_pages = $editing ? array_map( 'intval', (array) $pages_for_edit ) : array();
 										?>
-										<ul class="idpg-wa-pages">
+										<ul class="idpg-pages">
 											<?php foreach ( $pages as $page ) : ?>
 												<li>
-													<label class="idpg-wa-pages__label" data-checked="idpg-wa-page-<?php echo esc_attr( $page->ID ); ?>">
-														<input type="checkbox" name="idpg_area_pages[]" value="<?php echo esc_attr( $page->ID ); ?>"
-															id="idpg-wa-page-<?php echo esc_attr( $page->ID ); ?>"
-															<?php checked( in_array( (int) $page->ID, $selected_pages, true ), true ); ?>>
+													<label class="idpg-page">
+														<input type="checkbox" name="idpg_area_pages[]" value="<?php echo esc_attr( $page->ID ); ?>" id="idpg-wa-page-<?php echo esc_attr( $page->ID ); ?>" <?php checked( in_array( (int) $page->ID, $selected_pages, true ), true ); ?>>
 														<span><?php echo esc_html( get_the_title( $page ) ); ?></span>
 													</label>
 												</li>
@@ -507,166 +661,120 @@ function idpg_widget_areas_admin_page() {
 										<p class="description"><?php esc_html_e( 'Страниц пока нет.', 'idpg_core' ); ?></p>
 									<?php endif; ?>
 									<p class="description"><?php esc_html_e( 'Выберите страницы, если условие показа — «Конкретные страницы».', 'idpg_core' ); ?></p>
-								</fieldset>
-							</td>
-						</tr>
-					</table>
-				</div>
+								</div>
+								<span class="idpg-ico-help" title="<?php esc_attr_e( 'Выберите страницы, если условие показа — «Конкретные страницы».', 'idpg_core' ); ?>" aria-hidden="true">?</span>
+							</div>
 
-				<div class="idpg-wa-form__actions">
-					<?php submit_button( $editing ? __( 'Сохранить область', 'idpg_core' ) : __( 'Добавить область', 'idpg_core' ), 'primary', 'submit', false ); ?>
-					<?php if ( $editing ) : ?>
-						<a class="idpg-wa-cancel button" href="<?php echo esc_url( admin_url( 'themes.php?page=idpg-widget-areas' ) ); ?>">
-							<?php esc_html_e( 'Отмена', 'idpg_core' ); ?>
-						</a>
-					<?php endif; ?>
-				</div>
-			</form>
-		</div>
-
-		<h2 class="title"><?php esc_html_e( 'Существующие области', 'idpg_core' ); ?></h2>
-
-		<?php if ( empty( $areas ) ) : ?>
-			<div class="idpg-wa-areas__empty">
-				<span class="dashicons dashicons-layout" aria-hidden="true"></span>
-				<p><?php esc_html_e( 'Областей пока нет. Создайте первую выше.', 'idpg_core' ); ?></p>
-			</div>
-		<?php else : ?>
-			<div class="idpg-wa-areas">
-				<?php foreach ( $areas as $slug => $area ) : ?>
-					<?php
-					$area_position  = ( isset( $area['position'] ) && isset( $positions[ $area['position'] ] ) ) ? $area['position'] : 'below-header';
-					$area_display   = ( isset( $area['display'] ) && isset( $displays[ $area['display'] ] ) ) ? $area['display'] : 'all';
-					$position_label = $positions[ $area_position ];
-					$display_label  = $displays[ $area_display ];
-					$has_pages      = ( 'specific' === $area_display && ! empty( $area['pages'] ) );
-					?>
-					<div class="idpg-wa-area">
-						<div class="idpg-wa-area__icon">
-							<span class="dashicons dashicons-welcome-widgets-menus" aria-hidden="true"></span>
-						</div>
-						<div class="idpg-wa-area__main">
-							<h3 class="idpg-wa-area__title"><?php echo esc_html( $area['title'] ); ?></h3>
-							<div class="idpg-wa-area__meta">
-								<span class="idpg-wa-badge idpg-wa-badge--position">
-									<span class="dashicons dashicons-location" aria-hidden="true"></span>
-									<?php echo esc_html( $position_label ); ?>
-								</span>
-								<span class="idpg-wa-badge idpg-wa-badge--display">
-									<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
-									<?php echo esc_html( $display_label ); ?>
-								</span>
-								<?php if ( $has_pages ) : ?>
-									<?php
-									$page_count = count( $area['pages'] );
-									$page_word  = idpg_widget_areas_plural( $page_count, __( 'страница', 'idpg_core' ), __( 'страницы', 'idpg_core' ), __( 'страниц', 'idpg_core' ) );
-									?>
-									<button type="button" class="idpg-wa-badge idpg-wa-badge--pages idpg-widget-areas-toggle-pages" data-target="pages-<?php echo esc_attr( $slug ); ?>">
-										<span class="dashicons dashicons-admin-page" aria-hidden="true"></span>
-										<?php echo esc_html( $page_count . ' ' . $page_word ); ?>
-									</button>
-									<div id="pages-<?php echo esc_attr( $slug ); ?>" class="idpg-wa-pages-list">
-										<?php
-										foreach ( $area['pages'] as $pid ) {
-											$ptitle = get_the_title( $pid );
-											if ( $ptitle ) {
-												echo esc_html( $ptitle ) . '<br>';
-											}
-										}
-										?>
-									</div>
+							<div class="idpg-save-container js-idpg-save-container">
+								<?php submit_button( $editing ? __( 'Сохранить область', 'idpg_core' ) : __( 'Добавить область', 'idpg_core' ), 'primary', 'submit', false ); ?>
+								<?php if ( $editing ) : ?>
+									<a class="idpg-cancel" href="<?php echo esc_url( add_query_arg( 'tab', 'list', $base_url ) ); ?>">
+										<?php esc_html_e( 'Отмена', 'idpg_core' ); ?>
+									</a>
 								<?php endif; ?>
 							</div>
-						</div>
-						<div class="idpg-wa-area__actions">
-							<a class="button button-secondary" href="<?php echo esc_url( admin_url( 'themes.php?page=idpg-widget-areas&edit=' . $slug ) ); ?>">
-								<span class="dashicons dashicons-edit" aria-hidden="true"></span>
-								<?php esc_html_e( 'Редактировать', 'idpg_core' ); ?>
-							</a>
-							<form method="post" action="">
-								<input type="hidden" id="idpg_widget_areas_nonce_delete_<?php echo esc_attr( $slug ); ?>" name="idpg_widget_areas_nonce" value="<?php echo esc_attr( wp_create_nonce( 'idpg_widget_areas_action' ) ); ?>">
-								<input type="hidden" name="idpg_area_action" value="delete">
-								<input type="hidden" name="idpg_area_slug" value="<?php echo esc_attr( $slug ); ?>">
-								<button type="submit" class="button button-link-delete" onclick="return confirm('<?php echo esc_js( __( 'Удалить область?', 'idpg_core' ) ); ?>');">
-									<span class="dashicons dashicons-trash" aria-hidden="true"></span>
-									<?php esc_html_e( 'Удалить', 'idpg_core' ); ?>
-								</button>
-							</form>
-						</div>
+						</form>
 					</div>
-				<?php endforeach; ?>
+
+					<?php foreach ( $extra_tabs as $extra_slug => $extra_tab ) : ?>
+						<?php if ( empty( $extra_tab['callback'] ) || ! is_callable( $extra_tab['callback'] ) ) : ?>
+							<?php continue; ?>
+						<?php endif; ?>
+						<div id="idpg-<?php echo esc_attr( $extra_slug ); ?>" class="idpg-tab-in js-idpg-tab-item<?php echo esc_attr( $tab === $extra_slug ? ' active' : '' ); ?>">
+							<?php call_user_func( $extra_tab['callback'] ); ?>
+						</div>
+					<?php endforeach; ?>
+				</div>
+
+				<div class="idpg-settings-col idpg-settings-col--right">
+					<div class="idpg-widget">
+						<h3 class="idpg-widget__title"><?php esc_html_e( 'О теме', 'idpg_core' ); ?></h3>
+						<p>
+							<?php
+							printf(
+								/* translators: %s: версия темы. */
+								esc_html__( 'Версия темы: %s', 'idpg_core' ),
+								esc_html( IDPG_VERSION )
+							);
+							?>
+						</p>
+					</div>
+					<div class="idpg-widget">
+						<h3 class="idpg-widget__title"><?php esc_html_e( 'Полезные ссылки', 'idpg_core' ); ?></h3>
+						<ul>
+							<li><a href="https://developer.wordpress.org/themes/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Документация по темам WordPress', 'idpg_core' ); ?></a></li>
+							<li><a href="https://wordpress.org/support/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Форум поддержки', 'idpg_core' ); ?></a></li>
+						</ul>
+					</div>
+				</div>
 			</div>
-		<?php endif; ?>
+		</div>
 	</div>
 	<script>
 	(function () {
 		'use strict';
 
-		document.querySelectorAll('.idpg-wa-select[data-idpg-select]').forEach(function (wrap) {
-			var input   = wrap.querySelector('input[type="hidden"]');
-			var toggle  = wrap.querySelector('.idpg-wa-select__toggle');
-			var menu    = wrap.querySelector('.idpg-wa-select__menu');
-			var label   = wrap.querySelector('.idpg-wa-select__label');
-			var options = Array.prototype.slice.call(wrap.querySelectorAll('.idpg-wa-select__option'));
-
-			function setSelected(value) {
-				var current = null;
-				options.forEach(function (opt) {
-					var isSel = opt.getAttribute('data-value') === value;
-					opt.classList.toggle('is-selected', isSel);
-					opt.setAttribute('aria-selected', isSel ? 'true' : 'false');
-					if (isSel) { current = opt; }
-				});
-				if (current) { label.textContent = current.textContent.trim(); }
-				input.value = value;
-				input.dispatchEvent(new Event('change', { bubbles: true }));
-			}
-
-			function close() {
-				wrap.classList.remove('is-open');
-				toggle.setAttribute('aria-expanded', 'false');
-			}
-
-			toggle.addEventListener('click', function (e) {
-				e.stopPropagation();
-				var isOpen = wrap.classList.toggle('is-open');
-				toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-			});
-
-			menu.addEventListener('click', function (e) {
-				var opt = e.target.closest('.idpg-wa-select__option');
-				if (!opt) { return; }
-				setSelected(opt.getAttribute('data-value'));
-				close();
-			});
-
-			document.addEventListener('click', close);
-			document.addEventListener('keydown', function (e) {
-				if (e.key === 'Escape') { close(); }
-			});
-		});
-
-		var display = document.getElementById('idpg_area_display');
-		var row = document.getElementById('idpg_area_pages_row');
-		function toggle() {
-			if (row) { row.style.display = (display && display.value === 'specific') ? '' : 'none'; }
-		}
-		if (display) { display.addEventListener('change', toggle); }
-		toggle();
-		document.addEventListener('click', function (e) {
-			var t = e.target;
-			if (t && t.classList.contains('idpg-widget-areas-toggle-pages')) {
-				var el = document.getElementById(t.getAttribute('data-target'));
-				if (el) { el.classList.toggle('is-open'); }
-			}
-		});
-		document.querySelectorAll('.idpg-wa-pages__label').forEach(function (label) {
+		document.querySelectorAll('.idpg-page').forEach(function (label) {
 			var cb = label.querySelector('input[type="checkbox"]');
 			function sync() {
 				label.classList.toggle('is-checked', cb.checked);
 			}
 			if (cb) { cb.addEventListener('change', sync); sync(); }
 		});
+
+		document.addEventListener('click', function (e) {
+			var t = e.target;
+			if (!t) { return; }
+			if (t.classList.contains('js-idpg-toggle-pages')) {
+				e.preventDefault();
+				var el = document.getElementById(t.getAttribute('data-target'));
+				if (el) { el.classList.toggle('is-open'); }
+			}
+		});
+
+		var display = document.getElementById('idpg_area_display');
+		var row     = document.getElementById('idpg_area_pages_row');
+		function toggle() {
+			if (row) { row.style.display = (display && display.value === 'specific') ? '' : 'none'; }
+		}
+		if (display) { display.addEventListener('change', toggle); }
+		toggle();
+
+		var tabs = document.querySelector('.js-idpg-tabs');
+		if (tabs) {
+			var items = Array.prototype.slice.call(document.querySelectorAll('.js-idpg-tab-item'));
+			var links = Array.prototype.slice.call(tabs.querySelectorAll('.idpg-tab'));
+
+			function activate(id) {
+				links.forEach(function (link) {
+					link.classList.toggle('idpg-tab-active', link.getAttribute('href') === '#' + id);
+				});
+				items.forEach(function (item) {
+					item.classList.toggle('active', item.id === id);
+				});
+			}
+
+			var params = new URLSearchParams(window.location.search);
+			if (!params.get('tab')) {
+				var m = document.cookie.match(/(?:^|;\s*)tab-idpg=([a-z0-9_-]+)/);
+				if (m) { activate('idpg-' + m[1]); }
+			}
+
+			tabs.addEventListener('click', function (e) {
+				var link = e.target.closest('.idpg-tab');
+				if (!link) { return; }
+				e.preventDefault();
+				var id = (link.getAttribute('href') || '').replace('#', '');
+				if (!id) { return; }
+				activate(id);
+				document.cookie = 'tab-idpg=' + id.replace('idpg-', '') + ';path=/;max-age=86400';
+				if (window.history && window.history.replaceState) {
+					var url = new URL(window.location.href);
+					url.searchParams.set('tab', id.replace('idpg-', ''));
+					window.history.replaceState(null, '', url.toString());
+				}
+			});
+		}
 	})();
 	</script>
 	<?php
@@ -687,7 +795,7 @@ function idpg_widget_areas_widgets_notice() {
 			printf(
 				/* translators: %s: URL страницы областей. */
 				wp_kses_post( __( 'Здесь находятся все области виджетов. Управлять местами вывода и условиями показа можно на странице <a href="%s">Области виджетов</a>.', 'idpg_core' ) ),
-				esc_url( admin_url( 'themes.php?page=idpg-widget-areas' ) )
+				esc_url( admin_url( 'admin.php?page=idpg-widget-areas' ) )
 			);
 			?>
 		</p>

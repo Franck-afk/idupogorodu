@@ -85,11 +85,11 @@ require_once IDPG_CORE_DIR . 'includes/class-organizer-scope.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-url.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-meta.php';
 require_once IDPG_CORE_DIR . 'includes/class-template-helpers.php';
+require_once IDPG_CORE_DIR . 'includes/class-logger.php';
 require_once IDPG_CORE_DIR . 'includes/class-ticket-sync.php';
 require_once IDPG_CORE_DIR . 'includes/class-rest-api.php';
 require_once IDPG_CORE_DIR . 'includes/class-ical-export.php';
 require_once IDPG_CORE_DIR . 'includes/class-current-event-banner.php';
-require_once IDPG_CORE_DIR . 'includes/class-settings-page.php';
 
 /**
  * Инициализация баннера текущего события (file-load).
@@ -110,16 +110,15 @@ require_once IDPG_CORE_DIR . 'includes/class-rest-auth.php';
 require_once IDPG_CORE_DIR . 'includes/class-auth-rate-limiter.php';
 require_once IDPG_CORE_DIR . 'includes/class-auth-emails.php';
 require_once IDPG_CORE_DIR . 'includes/class-organizer-verify.php';
-require_once IDPG_CORE_DIR . 'includes/class-maintenance.php';
 require_once IDPG_CORE_DIR . 'includes/class-city-selector-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-calendar-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-expected-events-widget.php';
 require_once IDPG_CORE_DIR . 'includes/class-user-purge.php';
+require_once IDPG_CORE_DIR . 'includes/class-privacy.php';
+require_once IDPG_CORE_DIR . 'includes/class-geo-ranges.php';
 require_once IDPG_CORE_DIR . 'includes/class-rest-organizer.php';
 require_once IDPG_CORE_DIR . 'includes/class-dashboard-stats.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-moderation.php';
-require_once IDPG_CORE_DIR . 'includes/class-event-rejection.php';
-require_once IDPG_CORE_DIR . 'includes/class-privacy.php';
 require_once IDPG_CORE_DIR . 'includes/class-promotion.php';
 require_once IDPG_CORE_DIR . 'includes/class-cli.php';
 
@@ -146,8 +145,6 @@ function idpg_core_init() {
 	IDPG_REST_Auth::instance();
 	IDPG_Auth_Emails::instance();
 	IDPG_Organizer_Verify::instance();
-	IDPG_Maintenance::instance();
-	IDPG_Settings_Page::instance();
 
 	// Статистика проекта на dashboard (админ / организатор).
 	IDPG_Dashboard_Stats::instance();
@@ -161,11 +158,14 @@ function idpg_core_init() {
 	// REST-маршруты кабинета организатора (события, площадки, профиль).
 	IDPG_REST_Organizer::instance();
 
-	// Отклонение события модератором (строка действий + admin_post).
-	IDPG_Event_Rejection::instance();
-
 	// Снятие «закреплённости» по истечении срока акции (cron-хуки).
 	IDPG_Promotion::instance();
+
+	// Приватность (152-ФЗ): согласие, cookie-баннер, права субъекта, вкладка «IDPG».
+	IDPG_Privacy::instance();
+
+	// DEV-305: локальная база IP→регион (242-ФЗ), вкладка «Гео» на странице «IDPG».
+	IDPG_Geo_Ranges::instance();
 
 	// Интеграция с Yoast SEO (хуки вешаются только если плагин активен).
 	IDPG_SEO_Integration::instance();
@@ -265,6 +265,38 @@ function idpg_core_create_subscribers_table() {
 }
 
 /**
+ * Создаёт таблицу диапазонов IP → регион (DEV-305, 242-ФЗ).
+ *
+ * Таблица {$wpdb->prefix}idpg_geo_ranges: начало/конец диапазона IPv4 (целое)
+ * и название региона РФ. Наполняется импортом CSV на вкладке «Гео» страницы
+ * «IDPG». Вызывается при активации; безопасна при повторном вызове (dbDelta).
+ *
+ * @return void
+ */
+function idpg_core_create_geo_ranges_table() {
+	global $wpdb;
+
+	$table           = $wpdb->prefix . IDPG_Geo_Ranges::TABLE;
+	$charset_collate = $wpdb->get_charset_collate();
+
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+	$sql = "CREATE TABLE $table (
+	id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	ip_start BIGINT(20) UNSIGNED NOT NULL,
+	ip_end BIGINT(20) UNSIGNED NOT NULL,
+	region VARCHAR(191) NOT NULL DEFAULT '',
+	PRIMARY KEY  (id),
+	KEY range_lookup (ip_start,ip_end)
+) $charset_collate;";
+
+	dbDelta( $sql );
+
+	// Проверять наличие таблицы при следующем запросе нужно заново.
+	IDPG_Geo_Ranges::table_exists( true );
+}
+
+/**
  * Добавляет namespace «idpg» в белый список REST-маршрутов AIOS.
  *
  * AIOS-опция «Disallow Unauthorized REST Requests» блокирует все
@@ -353,6 +385,9 @@ add_filter( 'aios_whitelisted_rest_routes', 'idpg_core_aios_whitelist_filter' );
 	// Таблица подписчиков дайджеста (виджет IDPG_Subscribe_Widget).
 	idpg_core_create_subscribers_table();
 
+	// DEV-305: таблица диапазонов IP→регион для локального geo-определения.
+	idpg_core_create_geo_ranges_table();
+
 	// Белый список REST-маршрутов AIOS: без него AIOS блокирует idpg/v1/*.
 	idpg_core_aios_whitelist_rest();
 
@@ -437,29 +472,6 @@ function idpg_core_aios_compat_notice() {
 	echo '</ul></div>';
 }
 add_action( 'admin_notices', 'idpg_core_aios_compat_notice' );
-
-/**
- * Предупреждение о заглушке внешнего API агрегатора билетов.
- *
- * Показывается только администраторам сайта и только когда
- * IDPG_TICKET_API_URL не переопределён в wp-config.php реальным
- * адресом (т.е. используется заглушка example.com).
- *
- * @return void
- */
-function idpg_core_ticket_api_notice() {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
-	}
-
-	// Реальный адрес задан в wp-config.php — предупреждение не нужно.
-	if ( defined( 'IDPG_TICKET_API_URL' ) && ! empty( IDPG_TICKET_API_URL ) && false === strpos( IDPG_TICKET_API_URL, 'example.com' ) ) {
-		return;
-	}
-
-	echo '<div class="notice notice-warning idpg-ticket-api-notice"><p>' . esc_html__( 'IDPG Core: для синхронизации статусов билетов задан адрес по умолчанию (заглушка example.com). Укажите реальный IDPG_TICKET_API_URL в wp-config.php перед запуском в продакшене.', 'idpg-core' ) . '</p></div>';
-}
-add_action( 'admin_notices', 'idpg_core_ticket_api_notice' );
 
 /**
  * Скрытие уведомления об обновлении ядра WordPress у не-администраторов.

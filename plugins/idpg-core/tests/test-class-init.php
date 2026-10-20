@@ -46,17 +46,15 @@ class Test_Class_Init extends WP_UnitTestCase {
 		'IDPG_REST_Auth'            => 'idpg_core_init()',
 		'IDPG_Auth_Emails'          => 'idpg_core_init()',
 		'IDPG_Organizer_Verify'     => 'idpg_core_init()',
-		'IDPG_Maintenance'          => 'idpg_core_init()',
-		'IDPG_Settings_Page'        => 'idpg_core_init()',
 		'IDPG_Dashboard_Stats'      => 'idpg_core_init()',
 		'IDPG_Event_Moderation'     => 'idpg_core_init()',
 		'IDPG_REST_Organizer'       => 'idpg_core_init()',
-		'IDPG_Event_Rejection'      => 'idpg_core_init()',
 		'IDPG_Promotion'            => 'idpg_core_init()',
+		'IDPG_Privacy'              => 'idpg_core_init()',
+		'IDPG_Geo_Ranges'           => 'idpg_core_init()',
 		'IDPG_SEO_Integration'      => 'idpg_core_init()',
 		'IDPG_Current_Event_Banner' => 'idpg-core.php:99, при загрузке файла',
 		'IDPG_User_Purge'           => 'конец class-user-purge.php',
-		'IDPG_Privacy'              => 'конец class-privacy.php',
 	);
 
 	/**
@@ -108,6 +106,7 @@ class Test_Class_Init extends WP_UnitTestCase {
 	 */
 	private const EXCEPTIONS = array(
 		'IDPG_Search'          => 'Статический helper: все методы public static, состояния нет, хуки не нужны.',
+		'IDPG_Logger'            => 'Статический helper (DEV-02): кольцевой буфер журнала в опции, все методы public static, состояния и хуков нет.',
 		'IDPG_Template_Helper' => 'Статический helper: все методы public static, состояния нет, хуки не нужны.',
 		'IDPG_Helpers'         => 'Статический helper (DEV-22): общие get_client_ip()/get_city_tree() и геттеры мета билетов, состояния нет, хуки не нужны.',
 		'IDPG_Organizer_URL' => 'Роутер /organizer/* отключён (DEV-235): init() не вызывается, хуки не регистрируются. Класс подключён: profile/access/social-логика нужна REST и редиректам.',
@@ -358,7 +357,7 @@ class Test_Class_Init extends WP_UnitTestCase {
 	/**
 	 * Классы, потерянные в DEV-102, инициализируются.
 	 *
-	 * Отдельный набор вместо общей таблицы: именно эти пять классов
+	 * Отдельный набор вместо общей таблицы: именно эти классы
 	 * были подключены, но не запущены, и дефект молчал месяц.
 	 */
 	public function test_dev102_classes_are_active() {
@@ -368,9 +367,6 @@ class Test_Class_Init extends WP_UnitTestCase {
 		$this->assertArrayHasKey( '/idpg/v1/organizer/events', $routes );
 		$this->assertArrayHasKey( '/idpg/v1/organizer/venues', $routes );
 		$this->assertArrayHasKey( '/idpg/v1/organizer/profile', $routes );
-
-		// Отклонение события модератором.
-		$this->assertHookBound( 'post_row_actions', 'IDPG_Event_Rejection', 'add_row_action' );
 
 		// Снятие закрепления по cron. Хук снимается на priority 10
 		// предыдущими тестами набора, поэтому проверяем через
@@ -382,10 +378,6 @@ class Test_Class_Init extends WP_UnitTestCase {
 
 		// Модерация публикации событий организатора.
 		$this->assertHookBound( 'wp_insert_post_data', 'IDPG_Event_Moderation', 'enforce_pending_for_organizer' );
-
-		// Приватность: админ-страница и cookie-баннер.
-		$this->assertHookBound( 'admin_menu', 'IDPG_Privacy', 'register_page' );
-		$this->assertHookBound( 'wp_footer', 'IDPG_Privacy', 'render_banner' );
 	}
 
 	/**

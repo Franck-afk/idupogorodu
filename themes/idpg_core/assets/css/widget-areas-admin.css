@@ -1,686 +1,511 @@
-/* --- Admin page: Widget Areas (idpg_widget_areas) --- */
+/* --- Admin page: Widget Areas (idpg_widget_areas) ---
+ * DEV-273: стилистика страницы повторяет UI Clearfy Pro 3.7.3.
+ * Палитра-эталон: текст #19193d, акцент #165ff4, зелёный #179347,
+ * красный #dd2b19, серый #77939f, рамки #e5e5e5/#e6e6e6/#ccc.
+ */
 
-.idpg-wa-wrap {
-  max-width: 1100px;
+.idpg-settings-page {
+  color: #19193d;
 }
 
-.idpg-wa-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 10px 0 16px;
+.idpg-settings-page h1 {
+  margin-bottom: 10px;
 }
 
-.idpg-wa-header .dashicons-before::before {
-  font-size: 34px;
-  width: 34px;
-  height: 34px;
-  color: #2271b1;
+.idpg-settings-page h3 {
+  color: #19193d;
+  font-size: 1.3em;
 }
 
-.idpg-wa-header h1 {
-  margin: 0;
-  font-size: 23px;
-  line-height: 1.3;
-}
+/* Ряд кнопок и подсказок над карточкой. */
 
-.idpg-wa-intro {
-  background: #fff;
-  border: 1px solid #dcdcde;
-  border-left: 4px solid #2271b1;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  padding: 14px 18px;
-  margin: 0 0 20px;
-  border-radius: 6px;
-  color: #3c434a;
-}
-
-.idpg-wa-intro a {
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.idpg-wa-card {
-  background: #fff;
-  border: 1px solid #dcdcde;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  border-radius: 8px;
-  margin-bottom: 24px;
-  overflow: visible;
-}
-
-.idpg-wa-card__head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 20px;
-  border-bottom: 1px solid #e5e5e5;
-  background: #f6f7f7;
-  border-radius: 7px 7px 0 0;
-}
-
-.idpg-wa-card__head .dashicons {
-  color: #2271b1;
-  font-size: 22px;
-  width: 22px;
-  height: 22px;
-}
-
-.idpg-wa-card__title {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1d2327;
-}
-
-.idpg-wa-card__body {
-  padding: 20px;
-}
-
-.idpg-wa-form .form-table {
-  margin: 0;
-}
-
-.idpg-wa-form .form-table th {
-  width: 200px;
-  padding: 14px 20px 14px 0;
-  vertical-align: top;
-}
-
-.idpg-wa-form .form-table td {
-  padding: 14px 0;
-}
-
-.idpg-wa-form .regular-text {
-  width: 100%;
-  max-width: 420px;
-}
-
-.idpg-wa-select {
-  min-width: 260px;
-}
-
-@media screen and (min-width: 783px) {
-  .idpg-wa-select {
-    min-width: 300px;
-  }
-}
-
-.idpg-wa-select {
-  position: relative;
-  width: fit-content;
-}
-
-.idpg-wa-select__toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  min-height: 34px;
-  padding: 5px 12px;
-  background-color: #fff;
-  border: 1px solid #c3c4c7;
-  border-radius: 6px;
+.idpg-cols p {
   font-size: 13px;
-  line-height: 1.5;
-  color: #1d2327;
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  color: #777;
+  margin: 6px 0;
 }
 
-.idpg-wa-select__toggle:hover {
-  border-color: #8c8f94;
-}
-
-.idpg-wa-select.is-open .idpg-wa-select__toggle,
-.idpg-wa-select__toggle:focus-visible {
-  border-color: #2271b1;
-  box-shadow: 0 0 0 1px #2271b1;
-  outline: 2px solid transparent;
-}
-
-.idpg-wa-select__label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.idpg-wa-select__arrow {
-  flex: 0 0 auto;
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-  color: #505d6a;
-  transition: transform 0.15s ease;
-}
-
-.idpg-wa-select.is-open .idpg-wa-select__arrow {
-  transform: rotate(180deg);
-}
-
-.idpg-wa-select__menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  z-index: 99999;
-  display: none;
-  margin: 0;
-  padding: 4px;
-  list-style: none;
-  background: #fff;
-  border: 1px solid #c3c4c7;
-  border-radius: 8px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-  max-height: 240px;
-  overflow-y: auto;
-}
-
-.idpg-wa-select.is-open .idpg-wa-select__menu {
-  display: block;
-}
-
-.idpg-wa-select__option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  margin: 0;
-  border-radius: 5px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #1d2327;
-  cursor: pointer;
-  transition: background 0.12s ease;
-}
-
-.idpg-wa-select__option:hover {
-  background: #f0f6fc;
-  color: #0a4b78;
-}
-
-.idpg-wa-select__option.is-selected {
-  background: #e8f0fe;
-  color: #0a4b78;
-  font-weight: 600;
-}
-
-.idpg-wa-select__check {
-  flex: 0 0 auto;
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-  visibility: hidden;
-  color: #2271b1;
-}
-
-.idpg-wa-select__option.is-selected .idpg-wa-select__check {
-  visibility: visible;
-}
-
-.idpg-wa-form .description {
-  margin: 6px 0 0;
-  color: #646970;
-}
-
-.idpg-wa-pages {
-  max-height: 220px;
-  overflow: auto;
-  border: 1px solid #c3c4c7;
-  border-radius: 6px;
-  background: #fff;
-  padding: 6px;
-  margin: 0;
-}
-
-.idpg-wa-pages li {
-  margin: 0;
-}
-
-.idpg-wa-pages label,
-.idpg-wa-pages__label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+.idpg-pseudo-button {
+  display: inline-block;
+  padding: 7px 20px;
+  margin: 0 8px 8px 0;
+  border: 2px solid #6da8e1;
   border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.idpg-wa-pages label:hover,
-.idpg-wa-pages__label:hover {
-  background: #f0f6fc;
-}
-
-.idpg-wa-pages label.is-checked,
-.idpg-wa-pages__label.is-checked {
-  background: #f0f6fc;
-}
-
-.idpg-wa-form__actions {
-  padding: 16px 20px;
-  border-top: 1px solid #e5e5e5;
-  background: #f6f7f7;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.idpg-wa-form__actions .button-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.idpg-wa-form__actions .spinner {
-  float: none;
-  margin: 0;
-}
-
-.idpg-wa-cancel {
-  margin-left: auto;
-  text-decoration: none;
-}
-
-/* Existing areas list */
-.idpg-wa-areas {
-  margin: 0;
-}
-
-.idpg-wa-areas__empty {
-  text-align: center;
-  color: #646970;
-  padding: 40px 20px;
-}
-
-.idpg-wa-areas__empty .dashicons {
-  font-size: 40px;
-  width: 40px;
-  height: 40px;
-  color: #c3c4c7;
-  margin-bottom: 10px;
-}
-
-.idpg-wa-area {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  border: 1px solid #dcdcde;
-  border-radius: 8px;
   background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  margin-bottom: 10px;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  color: #165ff4;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.idpg-wa-area:hover {
-  border-color: #2271b1;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+.idpg-pseudo-button:hover,
+.idpg-pseudo-button:focus-visible {
+  background: #165ff4;
+  border-color: #165ff4;
+  color: #fff;
 }
 
-.idpg-wa-area__icon {
-  flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: #f0f6fc;
+.idpg-pseudo-button--gray {
+  border-color: #77939f;
+  color: #77939f;
+}
+
+.idpg-pseudo-button--gray:hover,
+.idpg-pseudo-button--gray:focus-visible {
+  background: #77939f;
+  border-color: #77939f;
+  color: #fff;
+}
+
+.idpg-pseudo-button--danger {
+  border-color: #dd2b19;
+  color: #dd2b19;
+}
+
+.idpg-pseudo-button--danger:hover,
+.idpg-pseudo-button--danger:focus-visible {
+  background: #dd2b19;
+  border-color: #dd2b19;
+  color: #fff;
+}
+
+/* Двухколоночная раскладка: карточка + правая колонка. */
+
+.idpg-settings-cols {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 20px;
 }
 
-.idpg-wa-area__icon .dashicons {
-  font-size: 22px;
-  width: 22px;
-  height: 22px;
-  color: #2271b1;
-}
-
-.idpg-wa-area__main {
+.idpg-settings-col--left {
   flex: 1 1 auto;
   min-width: 0;
 }
 
-.idpg-wa-area__title {
-  margin: 0 0 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1d2327;
-  overflow-wrap: break-word;
+.idpg-settings-col--right {
+  width: 100%;
 }
 
-.idpg-wa-area__meta {
+/* Вкладки. */
+
+.idpg-tab-wrapper {
+  display: flex;
+  gap: 6px;
+  padding-top: 9px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.idpg-tab {
+  padding: 7px 12px;
+  border-top: 2px solid #ccc;
+  border-bottom: 1px solid #e6e6e6;
+  border-radius: .1rem .1rem 0 0;
+  background: #fbfbfb;
+  color: #777;
+  font-size: 14px;
+  line-height: 24px;
+  text-decoration: none;
+  box-shadow: inset 0 -3px 10px rgba(0, 0, 0, .04);
+}
+
+.idpg-tab:hover {
+  color: #165ff4;
+}
+
+.idpg-tab-active,
+.idpg-tab-active:hover {
+  border-top-color: #165ff4;
+  border-bottom-color: #fff;
+  background: #fff;
+  color: #000;
+}
+
+.idpg-tab-in {
+  display: none;
+  padding: 35px 25px 25px;
+  background: #fff;
+  border-radius: 0 .5rem .5rem .5rem;
+  box-shadow: 0 1px 3px rgba(153, 144, 198, .2);
+}
+
+.idpg-tab-in.active {
+  display: block;
+}
+
+/* Заголовок секции внутри карточки. */
+
+.idpg-field-header {
+  margin: 0 0 30px;
+  color: #165ff4;
+  font-size: 1.3em;
+  font-weight: 600;
+}
+
+/* Строка настройки: подпись слева, контрол справа. */
+
+.idpg-option-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-right: 24px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.idpg-ico-help {
+  position: absolute;
+  top: 0;
+  right: 0;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #165ff4;
+  border-radius: 50%;
+  color: #165ff4;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: center;
+  opacity: .7;
+  cursor: help;
+}
+
+.idpg-ico-help:hover {
+  opacity: 1;
+}
+
+.idpg-option-field-label {
+  font-weight: 600;
+  color: #19193d;
+}
+
+.idpg-option-field-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.idpg-option-field-body select {
+  max-width: 100%;
+  margin-bottom: 5px;
+}
+
+.idpg-option-field-body .description {
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Ссылка на страницы, где показывается область. */
+
+.idpg-badge--link {
+  border: none;
+  background: rgba(22, 95, 244, .08);
+  color: #165ff4;
+  cursor: pointer;
+}
+
+.idpg-badge--link:hover,
+.idpg-badge--link:focus-visible {
+  background: #165ff4;
+  color: #fff;
+}
+
+.idpg-pages-list {
+  display: none;
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 5px;
+  padding: 8px 10px;
+  background: #f4f4f4;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  color: #777;
+  font-size: 12px;
+}
+
+.idpg-pages-list.is-open {
+  display: block;
+}
+
+/* Список областей. */
+
+.idpg-areas {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.idpg-area {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
   align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: .5rem;
+  box-shadow: 0 1px 3px rgba(153, 144, 198, .2);
 }
 
-.idpg-wa-badge {
+.idpg-area__icon {
+  color: #165ff4;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.idpg-area__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.idpg-area__title {
+  margin: 0 0 5px;
+  color: #19193d;
+  font-size: 15px;
+}
+
+.idpg-area__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.idpg-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #f4f4f4;
+  color: #777;
   font-size: 12px;
-  line-height: 1;
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: #f0f0f1;
-  color: #3c434a;
-  white-space: nowrap;
 }
 
-.idpg-wa-badge .dashicons {
+.idpg-badge .dashicons {
   font-size: 14px;
   width: 14px;
   height: 14px;
 }
 
-.idpg-wa-badge--position {
-  background: #f0f6fc;
-  color: #0a4b78;
-}
-
-.idpg-wa-badge--display {
-  background: #edfaef;
-  color: #00a32a;
-}
-
-.idpg-wa-badge--pages {
-  background: #fcf9e8;
-  color: #996800;
-  cursor: pointer;
-  border: none;
-}
-
-.idpg-wa-area__actions {
-  flex: 0 0 auto;
+.idpg-area__actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.idpg-wa-area__actions .button {
+.idpg-area__actions form {
+  margin: 0;
+}
+
+.idpg-area__actions .idpg-pseudo-button {
+  margin: 0;
+  padding: 5px 14px;
+  font-size: 13px;
+}
+
+.idpg-areas-empty {
+  padding: 25px;
+  text-align: center;
+  color: #777;
+}
+
+.idpg-areas-empty .dashicons {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: #ccc;
+}
+
+/* Список страниц в форме. */
+
+.idpg-pages {
+  max-height: 260px;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.idpg-pages li {
+  margin: 0 0 6px;
+}
+
+.idpg-page {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
 }
 
-.idpg-wa-area__actions .button-link {
+.idpg-page:hover {
+  border-color: #6da8e1;
+}
+
+.idpg-page.is-checked {
+  border-color: #165ff4;
+  background: rgba(22, 95, 244, .05);
+}
+
+/* Залипающая панель сохранения внизу карточки. */
+
+.idpg-save-container {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 30px -25px -25px;
+  padding: 20px 25px;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  border-radius: 0 0 .5rem .5rem;
+  box-shadow: 0 -10px 20px -20px rgba(0, 0, 0, .2);
+}
+
+.idpg-save-container .button-primary {
+  background: #165ff4;
+  border-color: #165ff4;
+  color: #fff;
+}
+
+.idpg-save-container .button-primary:hover,
+.idpg-save-container .button-primary:focus {
+  background: #0f4dd0;
+  border-color: #0f4dd0;
+  color: #fff;
+}
+
+.idpg-cancel {
+  color: #777;
+  font-size: 14px;
   text-decoration: none;
 }
 
-.idpg-wa-pages-list {
-  display: none;
-  margin-top: 10px;
-  padding: 10px 12px;
-  background: #f6f7f7;
-  border: 1px dashed #c3c4c7;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #50575e;
-  line-height: 1.6;
+.idpg-cancel:hover,
+.idpg-cancel:focus-visible {
+  color: #165ff4;
 }
 
-.idpg-wa-pages-list.is-open {
-  display: block;
-}
+/* Правая колонка: боксы. */
 
-@media screen and (max-width: 782px) {
-  .idpg-wa-form .form-table th {
-    width: auto;
-    padding-bottom: 4px;
-  }
-
-  .idpg-wa-select {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .idpg-wa-area {
-    flex-wrap: wrap;
-  }
-
-  .idpg-wa-area__actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .idpg-wa-header h1 {
-    font-size: 20px;
-  }
-}
-
-/* =========================================================
-   «Существующие области» — улучшенная стилизация
-   ========================================================= */
-
-/* Заголовок секции */
-.idpg-wa-wrap h2.title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 32px 0 14px;
-  padding-bottom: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1d2327;
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.idpg-wa-wrap h2.title::before {
-  content: "";
-  width: 4px;
-  height: 18px;
-  border-radius: 2px;
-  background: #2271b1;
-}
-
-/* Контейнер списка — единая карточка */
-.idpg-wa-areas {
+.idpg-widget {
+  padding: 20px;
+  margin-bottom: 20px;
   background: #fff;
-  border: 1px solid #dcdcde;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  border-radius: .5rem;
+  box-shadow: 0 1px 3px rgba(153, 144, 198, .2);
 }
 
-.idpg-wa-areas > * + * {
-  margin-top: 0;
-}
-
-/* Карточка области */
-.idpg-wa-area {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 16px;
-  margin: 0;
-  border: 1px solid #e0e0e1;
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.03);
-  transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
-}
-
-.idpg-wa-area::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 10px;
-  bottom: 10px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: #2271b1;
-  opacity: 0;
-  transition: opacity 0.18s ease;
-}
-
-.idpg-wa-area:hover {
-  border-color: #c9d8e8;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-
-.idpg-wa-area:hover::before {
-  opacity: 1;
-}
-
-/* Иконка */
-.idpg-wa-area__icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #f0f6fc 0%, #e3eef9 100%);
-  border: 1px solid #d7e5f1;
-}
-
-.idpg-wa-area__icon .dashicons {
-  color: #1d6fb8;
-}
-
-/* Заголовок карточки */
-.idpg-wa-area__title {
+.idpg-widget__title {
+  margin: 0 0 10px;
+  color: #19193d;
   font-size: 14px;
-  font-weight: 600;
-  color: #1d2327;
 }
 
-/* Бейджи */
-.idpg-wa-badge {
-  font-size: 12px;
-  font-weight: 500;
-  padding: 5px 11px;
-  border: 1px solid transparent;
-}
-
-.idpg-wa-badge--position {
-  background: #f0f6fc;
-  color: #0a4b78;
-  border-color: #d7e5f1;
-}
-
-.idpg-wa-badge--display {
-  background: #edfaef;
-  color: #008a20;
-  border-color: #c9eccf;
-}
-
-.idpg-wa-badge--pages {
-  background: #fcf9e8;
-  color: #8a6d00;
-  border-color: #efe6a5;
-}
-
-.idpg-wa-badge--pages:hover,
-.idpg-wa-badge--pages:focus-visible {
-  background: #f7f2d2;
-  border-color: #d9c953;
-}
-
-/* Список страниц внутри бейджа страниц */
-.idpg-wa-pages-list {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: #fff;
-  border: 1px dashed #c3c4c7;
-  border-radius: 6px;
-  color: #50575e;
-}
-
-/* Кнопки действий */
-.idpg-wa-area__actions .button {
-  border-radius: 6px;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
-}
-
-.idpg-wa-area__actions .button-secondary:hover {
-  border-color: #2271b1;
-  color: #1d6fb8;
-}
-
-.idpg-wa-area__actions .button:focus-visible {
-  outline: 2px solid #2271b1;
-  outline-offset: 1px;
-  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.3);
-}
-
-/* Кнопка удаления — акцент на опасность */
-.idpg-wa-area__actions .button-link-delete {
-  color: #b32d2e;
-  border-radius: 6px;
-  padding: 3px 8px;
-}
-
-.idpg-wa-area__actions .button-link-delete:hover {
-  background: #fceaea;
-  color: #a00;
-}
-
-.idpg-wa-area__actions .button-link-delete:focus-visible {
-  outline-color: #b32d2e;
-}
-
-/* Секция при отсутствии областей */
-.idpg-wa-areas__empty {
-  border: 1px dashed #c3c4c7;
-  border-radius: 10px;
-  background: #f6f7f7;
-  color: #646970;
-}
-
-.idpg-wa-areas__empty .dashicons {
-  color: #a7aaad;
-}
-
-@media screen and (max-width: 782px) {
-  .idpg-wa-area {
-    align-items: flex-start;
-  }
-
-  .idpg-wa-area__icon {
-    width: 38px;
-    height: 38px;
-  }
-
-  .idpg-wa-wrap h2.title {
-    font-size: 14px;
-  }
-}
-
-/* =========================================================
-   Выравнивание иконок dashicons внутри кнопок действий
-   ========================================================= */
-.idpg-wa-area__actions .button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  line-height: 1;
-}
-
-.idpg-wa-area__actions .button .dashicons {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-  line-height: 1;
+.idpg-widget p {
   margin: 0;
+  font-size: 13px;
+  color: #777;
 }
 
-.idpg-wa-area__actions .button-link-delete {
-  padding: 4px 10px;
-  line-height: 1;
+.idpg-widget ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: #777;
 }
 
-.idpg-wa-area__actions .button-secondary,
-.idpg-wa-area__actions .button-link-delete {
-  vertical-align: middle;
+.idpg-widget ul a {
+  color: #165ff4;
 }
 
+/* Адаптив. */
 
+@media (min-width: 768px) {
+  .idpg-option-field {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .idpg-option-field-label {
+    flex: 0 0 28%;
+    padding-right: 24px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .idpg-settings-cols {
+    flex-direction: row;
+  }
+
+  .idpg-settings-col--right {
+    flex: 0 0 300px;
+    width: 300px;
+    padding-top: 20px;
+  }
+}
+
+/* --- DEV-288: вкладка «Приватность (152-ФЗ)» --- */
+
+.idpg-privacy-section-title {
+  margin: 30px 0 20px;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #19193d;
+}
+
+.idpg-privacy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.idpg-privacy-section-title + .idpg-option-field .idpg-option-field-body form {
+  margin-bottom: 10px;
+}
+
+/* --- DEV-305: вкладка «Гео (IP→регион)» --- */
+
+.idpg-geo-summary {
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.idpg-geo-summary li {
+  margin: 0 0 6px;
+  color: #19193d;
+}
+
+.idpg-notice {
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  border-left: 4px solid #165ff4;
+  border-radius: 4px;
+  background: #f0f6ff;
+}
+
+.idpg-notice--success {
+  border-left-color: #2e9b4f;
+  background: #eefaf1;
+}
+
+.idpg-notice--error {
+  border-left-color: #dd2b19;
+  background: #fdeeec;
+}

@@ -568,8 +568,11 @@ class IDPG_REST_Auth {
 			 */
 			do_action( 'idpg_auth_after_register', $user_id, $type );
 
-			// Фиксация согласия на обработку персональных данных.
-			IDPG_Privacy::record_consent( $user_id, 'organizer' );
+			// Фиксация согласия на обработку персональных данных
+			// (только при активном плагине idpg-city-admin, DEV-271).
+			if ( class_exists( 'IDPG_Privacy' ) ) {
+				IDPG_Privacy::record_consent( $user_id, 'organizer' );
+			}
 
 			return new WP_REST_Response(
 				array(
