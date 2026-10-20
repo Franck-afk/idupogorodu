@@ -6647,3 +6647,18 @@ DEV-196 и DEV-197 подтверждены.
    но проверяют не то, что заявлено именем.
 
 **Приёмка:** полный прогон зелёный (545/1458/0), файл в git.
+
+### 39. DEV-286 (P2, S) — metadesc Yoast для event/venue (20.10.2026)
+
+Yoast-шаблоны тайтлов для CPT `event`/`venue` были настроены, metadesc-шаблоны — пустые
+(ключи `metadesc-event`/`metadesc-venue` в опции `wpseo_titles` = `s:0:""`, проверено
+в БД стенда). Задача — заполнить шаблоны (Search Appearance → Content Types).
+
+| Пункт | Что сделано |
+|---|---|
+| Шаблон | `%%title%% — %%excerpt%% — %%sep%% — %%sitename%%` для event и venue. Поля события (start_date/venue) в шаблон не брались: `_idpg_start_date` хранится как `Y-m-d\TH:i` — сырой формат непригоден для description |
+| Применение | `update_option('wpseo_titles', ...)` через PHP с загрузкой WordPress (корректная сериализация, без прямого SQL-конкатенации) |
+| Проверка | Независимый перечит опции через MySQL: `s:54:"%%title%% — %%excerpt%% — %%sep%% — %%sitename%%"` у обоих ключей (было `s:0:""`), UTF-8 em dash на месте |
+| Где смотреть | Yoast → Settings → Search Appearance → Content Types → Events/Площадки → Meta description; на карточке события/площадки — `<meta name="description">` |
+
+**Приёмка:** metadesc-шаблоны для event/venue заполнены (были пустые).
