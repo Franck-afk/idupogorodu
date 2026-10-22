@@ -605,9 +605,6 @@ class IDPG_Event_Fields {
 				<h2 class="idpg-privacy-section-title"><?php echo esc_html( $group['title'] ); ?></h2>
 				<table class="form-table" role="presentation" style="max-width:800px;">
 					<?php foreach ( $group['fields'] as $field ) : ?>
-						<?php if ( ! empty( $field['admin_only'] ) ) : ?>
-							<?php continue; ?>
-						<?php endif; ?>
 						<tr>
 							<?php self::render_tab_field( $field, get_post_meta( $event->ID, $field['key'], true ) ); ?>
 						</tr>
