@@ -26,6 +26,12 @@ get_header();
 
 			<?php
 			/* Start the Loop */
+			$is_event_grid = is_post_type_archive( 'event' ) || is_tax( array( 'event_category', 'age_rating' ) );
+
+			if ( $is_event_grid ) {
+				echo '<div class="idpg-events-grid">';
+			}
+
 			while ( have_posts() ) :
 				the_post();
 
@@ -37,6 +43,10 @@ get_header();
 				get_template_part( 'template-parts/content', get_post_type() );
 
 			endwhile;
+
+			if ( $is_event_grid ) {
+				echo '</div>';
+			}
 
 			the_posts_navigation();
 
