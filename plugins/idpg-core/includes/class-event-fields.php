@@ -44,6 +44,16 @@ class IDPG_Event_Fields {
 	const TAB_NONCE_NAME = 'idpg_event_tab_nonce';
 
 	/**
+	 * User meta одноразового сообщения «Поля события сохранены.».
+	 *
+	 * Хранится у пользователя, не в URL: F5, назад/вперёд и
+	 * возвраты на вкладку не повторяют уведомление.
+	 *
+	 * @var string
+	 */
+	const USER_SAVED_META = 'idpg_event_tab_saved';
+
+	/**
 	 * Синглтон.
 	 *
 	 * @var IDPG_Event_Fields|null
@@ -473,11 +483,22 @@ class IDPG_Event_Fields {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$event_id = isset( $_GET['event_id'] ) ? absint( $_GET['event_id'] ) : 0;
 
-		// Сообщение после сохранения.
+		/*
+		 * Сообщение после сохранения — одноразовое.
+		 *
+		 * Ставится user meta в handle_tab_save() и читается здесь
+		 * только на активной вкладке «События»: callbacks вкладок
+		 * страницы IDPG выполняются все при каждой загрузке, поэтому
+		 * без проверки вкладки сообщение «потребил бы» скрытый
+		 * контейнер. Мета удаляется после показа — F5, назад/вперёд
+		 * и возвраты на вкладку не дублируют плашку.
+		 */
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$msg = isset( $_GET['idpg_msg'] ) ? sanitize_key( wp_unslash( $_GET['idpg_msg'] ) ) : '';
+		$is_events_tab = isset( $_GET['tab'] ) && self::TAB_SLUG === sanitize_key( wp_unslash( $_GET['tab'] ) );
+		$saved_meta    = (int) get_user_meta( get_current_user_id(), self::USER_SAVED_META, true );
 
-		if ( 'saved' === $msg ) {
+		if ( $saved_meta && $is_events_tab ) {
+			delete_user_meta( get_current_user_id(), self::USER_SAVED_META );
 			?>
 			<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Поля события сохранены.', 'idpg-core' ); ?></p></div>
 			<?php
@@ -656,7 +677,16 @@ class IDPG_Event_Fields {
 		}
 
 		$base = admin_url( 'admin.php?page=idpg-widget-areas&tab=' . self::TAB_SLUG . '&event_id=' . $event_id );
-		wp_safe_redirect( add_query_arg( 'idpg_msg', 'saved', $base ) );
+
+		/*
+		 * Одноразовое «Поля события сохранены.»: код кладём в user
+		 * meta, а не в URL — иначе idpg_msg=saved висел бы в адресе
+		 * при JS-переключении вкладок и F5, и плашка повторялась
+		 * бы при каждом возврате на вкладку «События».
+		 */
+		update_user_meta( get_current_user_id(), self::USER_SAVED_META, (int) $event_id );
+
+		wp_safe_redirect( $base );
 		exit;
 	}
 

@@ -4,12 +4,14 @@
  *
  * Страница областей виджетов знает только свои коды idpg_msg
  * (added, updated, deleted, empty) и свои вкладки (list, form).
- * Вкладки плагина показывают свои сообщения сами: «События» —
- * «Поля события сохранены.», «Гео» — «Файл пуст или не распознан.».
+ * Вкладки плагина показывают свои сообщения сами: «Гео» —
+ * «Файл пуст или не распознан.», «События» — одноразовое
+ * «Поля события сохранены.» через user meta (не через URL).
  *
- * Ловит два дефекта: пустую зелёную плашку под H1 для чужого кода
- * (saved/imported/error/privacy_deleted) и чужой текст «Не указано
- * название области.» при коде 'empty' на вкладке «Гео».
+ * Ловит три дефекта: пустую зелёную плашку под H1 для чужого
+ * кода (imported/error/privacy_deleted/legacy saved), чужой текст
+ * «Не указано название области.» при коде 'empty' на «Гео» и
+ * повторное показ плашки «Событий» при возвратах/F5.
  *
  * @package idpg-core
  */
@@ -91,13 +93,14 @@ class Test_Widget_Areas_Page_Notice extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Чужой код idpg_msg не даёт пустой плашки под H1.
+	 * Старый URL-код idpg_msg=saved не показывает плашку и не даёт
+	 * пустой страницной notice под H1.
 	 *
-	 * После сохранения вкладки «События» (tab=events&idpg_msg=saved)
-	 * страницная плашка id="message" не рисуется (код чужой), а своё
-	 * сообщение вкладка показывает сама.
+	 * Уведомление «Поля события сохранены.» переехало в одноразовый
+	 * user meta (см. USER_SAVED_META); ссылка с legacy-кодом в адресе
+	 * больше не воскрешает сообщение.
 	 */
-	public function test_foreign_msg_code_renders_no_page_notice() {
+	public function test_legacy_url_msg_saved_renders_nothing() {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$_GET['tab']      = 'events';
 		$_GET['idpg_msg'] = 'saved';
@@ -105,7 +108,47 @@ class Test_Widget_Areas_Page_Notice extends WP_UnitTestCase {
 		$html = $this->render_page();
 
 		$this->assertStringNotContainsString( 'id="message"', $html );
+		$this->assertStringNotContainsString( 'Поля события сохранены.', $html );
+	}
+
+	/**
+	 * Одноразовость: meta показывается ровно один раз и съедается.
+	 *
+	 * После рендера на активной вкладке «События» мета удалена —
+	 * повторный рендер (F5, возврат) плашку не показывает.
+	 */
+	public function test_saved_notice_is_one_shot() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		update_user_meta( get_current_user_id(), IDPG_Event_Fields::USER_SAVED_META, 1 );
+		$_GET['tab'] = 'events';
+
+		$html = $this->render_page();
 		$this->assertStringContainsString( 'Поля события сохранены.', $html );
+		$this->assertSame( '', (string) get_user_meta( get_current_user_id(), IDPG_Event_Fields::USER_SAVED_META, true ) );
+
+		$html_second = $this->render_page();
+		$this->assertStringNotContainsString( 'Поля события сохранены.', $html_second );
+	}
+
+	/**
+	 * Meta не «съедается» скрытым контейнером чужой вкладки.
+	 *
+	 * Callbacks всех вкладок выполняются при каждой загрузке: на
+	 * активной «Гео» сообщение не показывается и meta сохраняется
+	 * до реального открытия вкладки «События».
+	 */
+	public function test_saved_notice_not_consumed_on_other_tab() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		update_user_meta( get_current_user_id(), IDPG_Event_Fields::USER_SAVED_META, 1 );
+		$_GET['tab'] = 'geo';
+
+		$html = $this->render_page();
+		$this->assertStringNotContainsString( 'Поля события сохранены.', $html );
+		$this->assertSame( '1', (string) get_user_meta( get_current_user_id(), IDPG_Event_Fields::USER_SAVED_META, true ) );
+
+		$_GET['tab'] = 'events';
+		$html_events = $this->render_page();
+		$this->assertStringContainsString( 'Поля события сохранены.', $html_events );
 	}
 
 	/**
