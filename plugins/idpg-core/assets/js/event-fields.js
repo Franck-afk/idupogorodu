@@ -5,6 +5,7 @@
  * 2. Галерея: выбор изображений через wp.media.
  * 3. Условная логика: показ/скрытие полей по значению селекта.
  * 4. Даты: кастомный календарь Pikaday вместо нативного type="date".
+ * 5. Селекты: кастомные выпадающие списки Tom Select.
  *
  * @package IDPG_Core
  */
@@ -257,6 +258,28 @@
 	}
 
 	// =========================================================================
+	// Селекты: кастомные выпадающие списки Tom Select
+	// =========================================================================
+
+	function initCustomSelects() {
+		if ( typeof TomSelect === 'undefined' ) {
+			return;
+		}
+
+		$( 'select.idpg-js-select' ).each( function() {
+			if ( this.tomselect ) {
+				return;
+			}
+
+			new TomSelect( this, {
+				create: false,
+				allowEmptyOption: false,
+				maxOptions: 100
+			} );
+		} );
+	}
+
+	// =========================================================================
 	// Инициализация
 	// =========================================================================
 
@@ -267,6 +290,7 @@
 		initVenueHours();
 		initVenueSocial();
 		initDatePickers();
+		initCustomSelects();
 	} );
 
 } )( jQuery );

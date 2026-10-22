@@ -910,7 +910,7 @@ class IDPG_Event_Fields {
 				if ( is_callable( $options ) ) {
 					$options = call_user_func( $options );
 				}
-				echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $id ) . '">';
+				echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $id ) . '" class="idpg-js-select">';
 				foreach ( (array) $options as $opt_value => $opt_label ) {
 					printf(
 						'<option value="%s" %s>%s</option>',
@@ -1054,7 +1054,7 @@ class IDPG_Event_Fields {
 				if ( is_callable( $options ) ) {
 					$options = call_user_func( $options );
 				}
-				echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $id ) . '">';
+				echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $id ) . '" class="idpg-js-select">';
 				foreach ( (array) $options as $opt_value => $opt_label ) {
 					printf(
 						'<option value="%s" %s>%s</option>',
@@ -1269,6 +1269,20 @@ class IDPG_Event_Fields {
 		// Медиа-библиотека для галереи.
 		wp_enqueue_media();
 
+		/*
+		 * Tom Select — кастомные селекты вместо нативного <select>
+		 * (площадка, статус билетов, валюта, тип продажи). Та же
+		 * локальная библиотека, что у селектора города на фронте.
+		 * Подключается раньше editor.css, чтобы переопределения
+		 * стилей в editor.css имели приоритет.
+		 */
+		wp_enqueue_style(
+			'idpg-tom-select',
+			IDPG_CORE_URL . 'assets/vendor/tom-select/tom-select.min.css',
+			array(),
+			IDPG_CORE_VERSION
+		);
+
 		$css_version = file_exists( IDPG_CORE_DIR . 'assets/css/editor.css' )
 			? (string) filemtime( IDPG_CORE_DIR . 'assets/css/editor.css' )
 			: IDPG_CORE_VERSION;
@@ -1309,6 +1323,16 @@ class IDPG_Event_Fields {
 				$idpg_deps[] = 'idpg-pikaday-locale';
 			}
 		}
+
+		// Tom Select (JS) — инициализация в event-fields.js.
+		wp_enqueue_script(
+			'idpg-tom-select',
+			IDPG_CORE_URL . 'assets/vendor/tom-select/tom-select.complete.min.js',
+			array(),
+			IDPG_CORE_VERSION,
+			true
+		);
+		$idpg_deps[] = 'idpg-tom-select';
 
 		wp_enqueue_script(
 			'idpg-event-fields',

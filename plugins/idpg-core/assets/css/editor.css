@@ -346,3 +346,117 @@
 	color: #c3c4c7;
 	cursor: default;
 }
+
+/* =============================================================================
+ * Tom Select — кастомные селекты вкладки «События»
+ *
+ * Библиотека та же, что у селектора города на фронте (vendor/tom-select).
+ * Здесь — адаптация под палитру админ-страницы IDPG: текст #19193d,
+ * акцент #165ff4, рамки #e5e5e5/#c3c4c7 (см. widget-areas-admin.css).
+ * ========================================================================== */
+.idpg-field .ts-wrapper,
+.idpg-field-plain .ts-wrapper {
+	margin: 0 0 5px;
+	font-size: 13px;
+}
+
+.idpg-field .ts-wrapper.single .ts-control,
+.idpg-field-plain .ts-wrapper.single .ts-control {
+	min-height: 30px;
+	padding: 4px 34px 4px 8px;
+	background-color: #fff;
+	background-image: none;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	box-shadow: none;
+	color: #19193d;
+	cursor: pointer;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.idpg-field .ts-wrapper.single .ts-control:hover,
+.idpg-field-plain .ts-wrapper.single .ts-control:hover {
+	border-color: #8c8f94;
+}
+
+.idpg-field .ts-wrapper.focus .ts-control,
+.idpg-field-plain .ts-wrapper.focus .ts-control,
+.idpg-field .ts-wrapper.dropdown-active .ts-control,
+.idpg-field-plain .ts-wrapper.dropdown-active .ts-control {
+	border-color: #165ff4;
+	box-shadow: 0 0 0 1px #165ff4;
+}
+
+.idpg-field .ts-wrapper.single .ts-control .item,
+.idpg-field-plain .ts-wrapper.single .ts-control .item {
+	color: #19193d;
+}
+
+/* Стрелка */
+.idpg-field .ts-wrapper.single .ts-control::after,
+.idpg-field-plain .ts-wrapper.single .ts-control::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 12px;
+	width: 6px;
+	height: 6px;
+	margin: 0;
+	border: 0;
+	border-right: 2px solid #777;
+	border-bottom: 2px solid #777;
+	transform: translateY(-70%) rotate(45deg);
+	pointer-events: none;
+	z-index: 1;
+	transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.idpg-field .ts-wrapper.single.dropdown-active .ts-control::after,
+.idpg-field-plain .ts-wrapper.single.dropdown-active .ts-control::after {
+	border-color: #165ff4;
+	transform: translateY(-30%) rotate(-135deg);
+}
+
+/* Поле поиска в контроле */
+.idpg-field .ts-control > input,
+.idpg-field-plain .ts-control > input {
+	font-size: 13px;
+}
+
+/* Выпадающий список */
+.idpg-field .ts-dropdown,
+.idpg-field-plain .ts-dropdown {
+	position: absolute;
+	z-index: 100001;
+	background-color: #fff;
+	color: #19193d;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+	font-size: 13px;
+	box-sizing: border-box;
+}
+
+.idpg-field .ts-dropdown .option,
+.idpg-field-plain .ts-dropdown .option {
+	padding: 6px 10px;
+	color: #19193d;
+}
+
+.idpg-field .ts-dropdown .option.active,
+.idpg-field-plain .ts-dropdown .option.active {
+	background-color: #f0f6fc;
+	color: #165ff4;
+}
+
+.idpg-field .ts-dropdown .option.selected,
+.idpg-field-plain .ts-dropdown .option.selected {
+	background-color: #165ff4;
+	color: #fff;
+}
+
+.idpg-field .ts-dropdown .ts-dropdown__empty,
+.idpg-field-plain .ts-dropdown .ts-dropdown__empty {
+	padding: 8px 10px;
+	color: #777;
+}
