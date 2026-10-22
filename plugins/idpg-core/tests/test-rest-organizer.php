@@ -419,8 +419,9 @@ class Test_Rest_Organizer extends WP_UnitTestCase {
 			json_decode( get_post_meta( $event_id, '_idpg_sessions_json', true ), true )
 		);
 
-		// Сесансы видны и редактору Carbon Fields — это DEV-48.
-		$this->assertSame( '12:00', carbon_get_post_meta( $event_id, 'idpg_sessions' )[0]['time'] );
+		// Сеансы видны и в основном ключе — это DEV-48.
+		$sessions = get_post_meta( $event_id, '_idpg_sessions', true );
+		$this->assertSame( '12:00', $sessions[0]['time'] );
 	}
 
 	/**
@@ -660,14 +661,10 @@ class Test_Rest_Organizer extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Галерея пишется и читается в том же хранилище, что у редактора.
+	 * Галерея пишется и читается в `_idpg_gallery`.
 	 *
-	 * Регрессия: `idpg_gallery` — поле media_gallery Carbon Fields. CF
-	 * хранит его не под ключом `_idpg_gallery`, а в своём формате
-	 * `_idpg_gallery|||0|value`, поэтому читать и писать его нужно через
-	 * carbon_get/carbon_set_post_meta(). Прежний код писал `idpg_gallery`
-	 * (без подчёркивания) обычным update_post_meta() — такие данные были
-	 * не видны в админке, и наоборот.
+	 * Регрессия: галерея должна храниться под ключом `_idpg_gallery`
+	 * (с подчёркиванием), чтобы данные были видны в админке и наоборот.
 	 */
 	public function test_gallery_roundtrip_uses_carbon_storage() {
 		$organizer = $this->make_organizer( 'gallery_org' );
@@ -686,14 +683,13 @@ class Test_Rest_Organizer extends WP_UnitTestCase {
 
 		$event_id = $response->get_data()['data']['id'];
 
-		// Значение видно тем же способом, каким его читает редактор CF.
+		// Значение видно в основном ключе.
 		$this->assertSame(
-			array( (string) $attachment ),
-			array_map( 'strval', (array) carbon_get_post_meta( $event_id, 'idpg_gallery' ) )
+			array( (int) $attachment ),
+			array_map( 'intval', (array) get_post_meta( $event_id, '_idpg_gallery', true ) )
 		);
 
-		// Ключа без подчёркивания быть не должно — именно его писала старая
-		// версия, и редактор его не читал.
+		// Ключа без подчёркивания быть не должно.
 		$this->assertSame(
 			'',
 			(string) get_post_meta( $event_id, 'idpg_gallery', true ),
@@ -712,8 +708,7 @@ class Test_Rest_Organizer extends WP_UnitTestCase {
 	/**
 	 * Пустая галерея не превращается в мусор при чтении.
 	 *
-	 * CF хранит пустое значение как строку-заглушку `...|||0|_empty`; наружу
-	 * оно должно уходить пустым массивом, а не этой строкой.
+	 * Пустое значение должно уходить пустым массивом.
 	 */
 	public function test_empty_gallery_reads_as_empty_array() {
 		$organizer = $this->make_organizer( 'gallery_empty' );
@@ -723,7 +718,7 @@ class Test_Rest_Organizer extends WP_UnitTestCase {
 		$event_id = $this->make_event( $organizer->ID, 'draft' );
 
 		// Имитируем состояние «поле есть, но не заполнено».
-		carbon_set_post_meta( $event_id, 'idpg_gallery', array() );
+		update_post_meta( $event_id, '_idpg_gallery', array() );
 
 		$data = $this->request( 'GET', self::EVENTS . '/' . $event_id )->get_data();
 

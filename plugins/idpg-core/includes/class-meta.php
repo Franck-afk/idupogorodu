@@ -3,7 +3,8 @@
  * Регистрация мета-полей для CPT event и venue.
  *
  * Мета-поля регистрируются через register_post_meta() для видимости
- * в REST API, а формы в админке строятся на Carbon Fields.
+ * в REST API, а формы в админке строятся на нативных метабоксах
+ * (IDPG_Event_Fields, IDPG_Venue_Fields).
  *
  * Все ключи меты используют единый префикс `_idpg_`.
  *
@@ -17,17 +18,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Класс IDPG_Meta
  *
- * Регистрирует мета-поля для REST API и создаёт формы админки
- * через Carbon Fields.
+ * Регистрирует мета-поля для REST API и содержит зеркала
+ * complex-полей (сеансы, часы, соцсети).
  */
 class IDPG_Meta {
 
 	/**
 	 * Единый префикс мета-ключей плагина.
-	 *
-	 * Carbon Fields сохраняет поле с именем `idpg_foo` в мета-ключ
-	 * `_idpg_foo`, поэтому имена CF-полей задаются без ведущего
-	 * подчёркивания.
 	 *
 	 * @var string
 	 */
@@ -36,11 +33,9 @@ class IDPG_Meta {
 	/**
 	 * Ключ JSON-зеркала сеансов.
 	 *
-	 * Carbon Fields хранит complex-поле `idpg_sessions` в наборе
-	 * служебных ключей (`_idpg_sessions|time|0|0|value` и т.п.), которые
-	 * неудобно читать напрямую. При каждом сохранении записи актуальный
-	 * список сеансов дублируется сюда простой JSON-строкой — её читает
-	 * IDPG_Template_Helper::get_event_sessions().
+	 * Сеансы хранятся в `_idpg_sessions` (сериализованный PHP-массив),
+	 * а для удобства чтения шаблонами дублируются сюда простой
+	 * JSON-строкой — её читает IDPG_Template_Helper::get_event_sessions().
 	 *
 	 * @var string
 	 */
@@ -86,7 +81,7 @@ class IDPG_Meta {
 		add_action( 'init', array( $this, 'register_meta' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_editor_styles' ) );
 		// Памятка-инструкция для организаторов в редакторе события.
-		// Приоритет 1 — чтобы блок встал выше остальных normal/high боксов (Основная, Билеты) и не ломал Carbon Fields.
+		// Приоритет 1 — чтобы блок встал выше остальных normal/high боксов (Основная, Билеты).
 		add_action( 'add_meta_boxes', array( $this, 'register_editor_help_meta_box' ), 1 );
 		// Фильтруем список событий в админке: организатор видит только свои.
 		add_action( 'pre_get_posts', array( $this, 'filter_events_for_organizer' ) );
@@ -124,7 +119,7 @@ class IDPG_Meta {
 	 * Подключение стилей редактора Gutenberg для CPT event/venue.
 	 *
 	 * Расширяет боковую панель блочного редактора и приводит метабоксы
-	 * Carbon Fields к аккуратному виду.
+	 * к аккуратному виду.
 	 *
 	 * @return void
 	 */
@@ -158,22 +153,6 @@ class IDPG_Meta {
 				if ( IDPG_Roles::instance()->is_current_user_organizer() && ! current_user_can( 'manage_categories' ) ) {
 					echo '<script>(function(){["age_rating","city"].forEach(function(t){var a=document.getElementById(t+"-adder");if(a)a.style.display="none";var b=document.querySelector("#"+t+"div .category-add, #tagsdiv-"+t+" .category-add");if(b)b.style.display="none";});})();</script>';
 				}
-				// Принудительно раскрываем метабокс «Медиа» при загрузке страницы.
-				echo '<script>
-(function(){
-  var id="carbon_fields_container_c24797c4";
-  var box=document.getElementById(id);
-  if(!box)return;
-  if(box.classList.contains("closed")){
-    var toggle=box.querySelector(".handlediv,button.handlediv");
-    if(toggle) toggle.click();
-  }
-  var h=box.querySelector(".hndle, .handle");
-  if(h&&!box.classList.contains("carbon-fields-media-open")){
-    box.classList.add("carbon-fields-media-open");
-  }
-})();
-</script>';
 			}, 100 );
 		}
 	}
@@ -279,12 +258,11 @@ class IDPG_Meta {
 	/**
 	 * Мета-поля для CPT event.
 	 *
-	 * Чекбоксы Carbon Fields хранят строку `yes` (или пустое значение),
+	 * Чекбоксы хранят строку `yes` (или пустое значение),
 	 * поэтому регистрируются как `string`, а не `boolean`.
 	 *
-	 * Complex-поле сеансов и media_gallery галереи здесь не регистрируются:
-	 * Carbon Fields отдаёт их в REST через собственный сервис, а простые
-	 * значения доступны через зеркало SESSIONS_MIRROR.
+	 * Сеансы и media_gallery галереи здесь не регистрируются:
+	 * простые значения доступны через зеркало SESSIONS_MIRROR.
 	 */
 	private function register_event_meta() {
 		$fields = array(
@@ -416,444 +394,13 @@ class IDPG_Meta {
 	}
 
 	// =========================================================================
-	// Carbon Fields
-	// =========================================================================
-
-	/**
-	 * Регистрация полей админки через Carbon Fields.
-	 *
-	 * Вызывается на хуке carbon_fields_register_fields. Поля именуются
-	 * без ведущего подчёркивания: Carbon Fields сохраняет их с ключом
-	 * "_имя_поля", что даёт единый префикс меты `_idpg_`.
-	 */
-	public static function register_carbon_fields() {
-		if ( ! class_exists( '\Carbon_Fields\Container' ) ) {
-			return;
-		}
-
-		self::register_event_main_fields();
-		self::register_event_sidebar_fields();
-		self::register_event_ticket_fields();
-		self::register_event_media_fields();
-		self::register_venue_fields();
-
-		add_filter( 'carbon_fields_before_field_save', array( __CLASS__, 'sanitize_carbon_field' ) );
-	}
-
-	/**
-	 * Группа 1: основная информация (даты, весь день, сеансы).
-	 */
-	private static function register_event_main_fields() {
-		\Carbon_Fields\Container::make( 'post_meta', __( 'Основная информация', 'idpg-core' ) )
-			->where( 'post_type', '=', 'event' )
-			->set_context( 'normal' )
-			->set_priority( 'high' )
-			->add_fields( array(
-				\Carbon_Fields\Field::make( 'date', 'idpg_start_date', __( 'Дата начала', 'idpg-core' ) )
-					->set_storage_format( 'Y-m-d' )
-					->set_input_format( 'Y-m-d', 'Y-m-d' )
-					->set_picker_options( array(
-						'allowInput' => true,
-						'altInput'   => false,
-					) )
-					->set_help_text( __( 'Укажите дату начала. Поле обязательно для публикации.', 'idpg-core' ) )
-					->set_width( 33 ),
-				\Carbon_Fields\Field::make( 'date', 'idpg_end_date', __( 'Дата окончания', 'idpg-core' ) )
-					->set_storage_format( 'Y-m-d' )
-					->set_input_format( 'Y-m-d', 'Y-m-d' )
-					->set_picker_options( array(
-						'allowInput' => true,
-						'altInput'   => false,
-					) )
-					->set_help_text( __( 'Оставьте пустым для события одного дня.', 'idpg-core' ) )
-					->set_width( 33 ),
-				\Carbon_Fields\Field::make( 'checkbox', 'idpg_all_day', __( 'Весь день', 'idpg-core' ) )
-					->set_help_text( __( 'Событие идёт весь день — время сеансов не указывается.', 'idpg-core' ) )
-					->set_width( 33 ),
-				\Carbon_Fields\Field::make( 'complex', 'idpg_sessions', __( 'Сеансы', 'idpg-core' ) )
-					->set_layout( 'tabbed-horizontal' )
-					->set_header_template( '<%- time %>' )
-					->set_help_text( __( 'Время начала, цена и ссылка на билеты для каждого сеанса.', 'idpg-core' ) )
-					->add_fields( array(
-						\Carbon_Fields\Field::make( 'time', 'time', __( 'Время', 'idpg-core' ) )
-							->set_storage_format( 'H:i' )
-							->set_input_format( 'H:i', 'H:i' )
-							->set_picker_options( array(
-								'enableSeconds' => false,
-								'time_24hr'     => true,
-								'altInput'      => false,
-							) )
-							->set_help_text( __( 'Например: 19:00', 'idpg-core' ) )
-							->set_width( 33 ),
-						\Carbon_Fields\Field::make( 'text', 'price', __( 'Цена', 'idpg-core' ) )
-							->set_attribute( 'type', 'number' )
-							->set_attribute( 'min', '0' )
-							->set_attribute( 'step', '0.01' )
-							->set_help_text( __( 'Цена билета для этого сеанса.', 'idpg-core' ) )
-							->set_width( 33 ),
-						\Carbon_Fields\Field::make( 'text', 'url', __( 'Ссылка на билеты', 'idpg-core' ) )
-							->set_attribute( 'type', 'url' )
-							->set_attribute( 'placeholder', 'https://' )
-							->set_help_text( __( 'Ссылка на покупку билета для этого сеанса (необязательно).', 'idpg-core' ) )
-							->set_width( 33 ),
-					) ),
-			) );
-	}
-
-	/**
-	 * Группы события в боковой панели редактора Gutenberg.
-	 *
-	 * «Место проведения» и «Дополнительно» объединены в единый сайдбар-контейнер
-	 * с вкладками (add_tab). В правой панели Gutenberg поля попадают в отдельные
-	 * табы вместо двух отдельных метабоксов.
-	 */
-	private static function register_event_sidebar_fields() {
-		$place_fields = array(
-			\Carbon_Fields\Field::make( 'select', 'idpg_venue', __( 'Площадка', 'idpg-core' ) )
-				->set_options( array( __CLASS__, 'get_venue_options' ) )
-				->set_help_text( __( 'Выберите площадку. Если её нет — укажите адрес вручную.', 'idpg-core' ) )
-				->set_width( 100 ),
-			\Carbon_Fields\Field::make( 'text', 'idpg_address', __( 'Адрес', 'idpg-core' ) )
-				->set_help_text( __( 'Заполняется, если адрес отличается от адреса площадки.', 'idpg-core' ) )
-				->set_width( 100 ),
-		);
-
-		\Carbon_Fields\Container::make( 'post_meta', __( 'Событие: место и продвижение', 'idpg-core' ) )
-			->where( 'post_type', '=', 'event' )
-			->set_context( 'side' )
-			->set_priority( 'high' )
-			->add_tab( __( 'Место проведения', 'idpg-core' ), $place_fields )
-			->add_tab( __( 'Дополнительно', 'idpg-core' ), self::build_extra_tab_fields() );
-	}
-
-	/**
-	 * Поля вкладки «Дополнительно».
-	 *
-	 * Часть полей — системные (просмотры, промо, баннеры, источник): они
-	 * доступны только администраторам. Гейт здесь серверный (current_user_can),
-	 * потому что клиентская условная логика Carbon Fields `current_user_capability`
-	 * не поддерживается его Gutenberg-рантаймом и роняет редактор
-	 * (серые «Опубликовать») у пользователей без прав.
-	 *
-	 * @return \Carbon_Fields\Field[] Массив полей вкладки.
-	 */
-	private static function build_extra_tab_fields() {
-		$admin_fields = array();
-
-		if ( current_user_can( 'manage_options' ) ) {
-			// Источник импорта — системное поле, организаторы не видят.
-			$admin_fields[] = \Carbon_Fields\Field::make( 'text', 'idpg_source', __( 'Источник импорта', 'idpg-core' ) )
-				->set_help_text( __( 'Название сервиса, из которого импортировано событие.', 'idpg-core' ) )
-				->set_width( 100 );
-
-			// Закрепление в топе — платная услуга, управление системой.
-			$admin_fields[] = \Carbon_Fields\Field::make( 'checkbox', 'idpg_promoted', __( 'Закрепить в топе', 'idpg-core' ) )
-				->set_help_text( __( 'Событие поднимается наверх в списках и подборках.', 'idpg-core' ) )
-				->set_width( 50 );
-
-			// Срок закрепления: без него закрепление было бы бессрочным,
-			// и снимать его мог бы только cron вручную.
-			$admin_fields[] = \Carbon_Fields\Field::make( 'date', 'idpg_pin_expires', __( 'Закрепить до', 'idpg-core' ) )
-				->set_help_text( __( 'Дата автоматического снятия закрепления. Пусто — закрепление бессрочное.', 'idpg-core' ) )
-				->set_storage_format( 'Y-m-d' )
-				->set_width( 50 );
-
-			// Скрытие из баннеров — системные настройки, организаторы не видят.
-			$admin_fields[] = \Carbon_Fields\Field::make( 'checkbox', 'idpg_hide_from_banner', __( 'Скрыть из баннера на главной', 'idpg-core' ) )
-				->set_help_text( __( 'Событие не будет показываться в hero-баннере на главной странице.', 'idpg-core' ) )
-				->set_width( 100 );
-
-			$admin_fields[] = \Carbon_Fields\Field::make( 'checkbox', 'idpg_hide_full_banner', __( 'Скрыть баннер полностью', 'idpg-core' ) )
-				->set_help_text( __( 'Событие не будет показано в баннере и не будет заменено следующим — баннер на главной скроется полностью.', 'idpg-core' ) )
-				->set_width( 100 );
-
-			// Счётчики — только чтение, организаторы не видят.
-			$admin_fields[] = \Carbon_Fields\Field::make( 'text', 'idpg_views', __( 'Просмотры', 'idpg-core' ) )
-				->set_attribute( 'type', 'number' )
-				->set_attribute( 'min', '0' )
-				->set_attribute( 'readOnly', 'readonly' )
-				->set_help_text( __( 'Счётчик заполняется автоматически.', 'idpg-core' ) )
-				->set_width( 50 );
-
-			$admin_fields[] = \Carbon_Fields\Field::make( 'text', 'idpg_clicks', __( 'Клики', 'idpg-core' ) )
-				->set_attribute( 'type', 'number' )
-				->set_attribute( 'min', '0' )
-				->set_attribute( 'readOnly', 'readonly' )
-				->set_help_text( __( 'Счётчик заполняется автоматически.', 'idpg-core' ) )
-				->set_width( 50 );
-
-			// Подтверждение оплаты показа в баннере на главной.
-			// Организатор подаёт заявку (idpg_banner_request), админ после
-			// фактической оплаты ставит эту галочку — событие попадает в баннер.
-			$admin_fields[] = \Carbon_Fields\Field::make( 'checkbox', 'idpg_banner_approved', __( 'Показ в баннере оплачен и подтверждён', 'idpg-core' ) )
-				->set_help_text( __( 'Отметьте после получения оплаты за показ. Событие появится в баннере на главной (приоритет перед автоматическим показом).', 'idpg-core' ) )
-				->set_width( 100 );
-		}
-
-		// Заявка организатора на показ события в баннере на главной.
-		// Поле доступно всем ролям: организатор подаёт заявку, админ видит её
-		// и подтверждает после оплаты через idpg_banner_approved.
-		$request_field = \Carbon_Fields\Field::make( 'checkbox', 'idpg_banner_request', __( 'Подать заявку на показ в баннере на главной', 'idpg-core' ) )
-			->set_help_text( __( 'Показ платный. После отправки заявки администратор свяжется с вами для оплаты; событие попадёт в баннер после подтверждения.', 'idpg-core' ) )
-			->set_width( 100 );
-
-		// Онлайн-событие — организатор может включать.
-		return array_merge(
-			$admin_fields,
-			array(
-				$request_field,
-				\Carbon_Fields\Field::make( 'checkbox', 'idpg_is_online', __( 'Онлайн-событие', 'idpg-core' ) )
-					->set_help_text( __( 'Отметьте, если событие проходит онлайн (трансляция в интернете).', 'idpg-core' ) )
-					->set_width( 50 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_stream_url', __( 'Ссылка на трансляцию', 'idpg-core' ) )
-					->set_attribute( 'type', 'url' )
-					->set_attribute( 'placeholder', 'https://' )
-					->set_help_text( __( 'Ссылка на страницу/трансляцию, куда перейдут зрители.', 'idpg-core' ) )
-					->set_width( 100 ),
-			)
-		);
-	}
-
-	/**
-	 * Группа 3: билеты и цены.
-	 */
-	private static function register_event_ticket_fields() {
-		\Carbon_Fields\Container::make( 'post_meta', __( 'Билеты и цены', 'idpg-core' ) )
-			->where( 'post_type', '=', 'event' )
-			->set_context( 'normal' )
-			->set_priority( 'high' )
-			->add_fields( array(
-				\Carbon_Fields\Field::make( 'select', 'idpg_ticket_status', __( 'Статус билетов', 'idpg-core' ) )
-					->set_default_value( 'in_sale' )
-					->add_options( array(
-						'in_sale'   => __( 'В продаже', 'idpg-core' ),
-						'sold_out'  => __( 'Распроданы', 'idpg-core' ),
-						'cancelled' => __( 'Отменено', 'idpg-core' ),
-						'postponed' => __( 'Перенесено', 'idpg-core' ),
-					) )
-					->set_help_text( __( 'Укажите состояние продажи билетов — например «Распроданы», если мест нет.', 'idpg-core' ) )
-					->set_width( 25 ),
-				\Carbon_Fields\Field::make( 'checkbox', 'idpg_is_free', __( 'Бесплатное событие', 'idpg-core' ) )
-					->set_help_text( __( 'Цены ниже игнорируются — на фронте выводится «Вход свободный».', 'idpg-core' ) )
-					->set_width( 25 ),
-				\Carbon_Fields\Field::make( 'select', 'idpg_currency', __( 'Валюта', 'idpg-core' ) )
-					->set_default_value( 'RUB' )
-					->add_options( array(
-						'RUB' => 'RUB',
-						'USD' => 'USD',
-						'EUR' => 'EUR',
-					) )
-					->set_help_text( __( 'Валюта, в которой указаны цены билетов.', 'idpg-core' ) )
-					->set_width( 25 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_vip_price', __( 'VIP-цена', 'idpg-core' ) )
-					->set_attribute( 'type', 'number' )
-					->set_attribute( 'min', '0' )
-					->set_attribute( 'step', '0.01' )
-					->set_help_text( __( 'Цена VIP-билета. Оставьте пустым, если VIP-билетов нет.', 'idpg-core' ) )
-					->set_width( 25 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_price_from', __( 'Цена от', 'idpg-core' ) )
-					->set_attribute( 'type', 'number' )
-					->set_attribute( 'min', '0' )
-					->set_attribute( 'step', '0.01' )
-					->set_help_text( __( 'Минимальная цена билета.', 'idpg-core' ) )
-					->set_width( 25 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_price_to', __( 'Цена до', 'idpg-core' ) )
-					->set_attribute( 'type', 'number' )
-					->set_attribute( 'min', '0' )
-					->set_attribute( 'step', '0.01' )
-					->set_help_text( __( 'Максимальная цена билета.', 'idpg-core' ) )
-					->set_width( 25 ),
-				\Carbon_Fields\Field::make( 'select', 'idpg_ticket_type', __( 'Тип продажи билетов', 'idpg-core' ) )
-					->set_default_value( 'external_link' )
-					->add_options( array(
-						'external_link' => __( 'Внешняя ссылка', 'idpg-core' ),
-						'widget_yandex' => __( 'Виджет Яндекс.Билетов', 'idpg-core' ),
-					) )
-					->set_help_text( __( '«Внешняя ссылка» — кнопка ведёт на ваш сайт продаж; «Виджет Яндекс.Билетов» — вставьте код виджета ниже.', 'idpg-core' ) )
-					->set_width( 25 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_external_id', __( 'ID во внешней системе', 'idpg-core' ) )
-					->set_help_text( __( 'Используется cron-синхронизацией статусов билетов.', 'idpg-core' ) )
-					->set_width( 25 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_ticket_url', __( 'URL страницы продажи', 'idpg-core' ) )
-					->set_attribute( 'type', 'url' )
-					->set_attribute( 'placeholder', 'https://' )
-					->set_help_text( __( 'Ссылка, по которой посетители купят билет. Открывается в новой вкладке.', 'idpg-core' ) )
-					->set_conditional_logic( array(
-						array(
-							'field' => 'idpg_ticket_type',
-							'value' => 'external_link',
-						),
-					) ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_yandex_form_url', __( 'Ссылка на Яндекс.Форму', 'idpg-core' ) )
-					->set_attribute( 'type', 'url' )
-					->set_attribute( 'placeholder', 'https://forms.yandex.ru/' )
-					->set_help_text( __( 'Организатор указывает ссылку на Яндекс.Форму — на странице события появится кнопка «Зарегистрироваться на событие».', 'idpg-core' ) ),
-				\Carbon_Fields\Field::make( 'html', 'idpg_yandex_form_button' )
-					->set_html(
-						sprintf(
-							'<a class="button" href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
-							esc_url( 'https://forms.yandex.ru' ),
-							esc_html__( 'Создать Яндекс.Форму', 'idpg-core' )
-						)
-					),
-				\Carbon_Fields\Field::make( 'textarea', 'idpg_widget_code', __( 'Код виджета', 'idpg-core' ) )
-					->set_rows( 6 )
-					->set_help_text( __( 'HTML/JS код виджета продажи билетов. Вставляется на страницу события как есть.', 'idpg-core' ) )
-					->set_conditional_logic( array(
-						array(
-							'field' => 'idpg_ticket_type',
-							'value' => 'widget_yandex',
-						),
-					) ),
-			) );
-	}
-
-	/**
-	 * Группа 4: медиа.
-	 */
-	private static function register_event_media_fields() {
-		\Carbon_Fields\Container::make( 'post_meta', __( 'Медиа', 'idpg-core' ) )
-			->where( 'post_type', '=', 'event' )
-			->set_context( 'normal' )
-			->set_priority( 'default' )
-			->add_fields( array(
-				\Carbon_Fields\Field::make( 'text', 'idpg_video_trailer', __( 'Видео-трейлер', 'idpg-core' ) )
-					->set_attribute( 'type', 'url' )
-					->set_attribute( 'placeholder', 'https://' )
-					->set_help_text( __( 'Ссылка на трейлер: YouTube, VK Видео, Rutube.', 'idpg-core' ) ),
-				\Carbon_Fields\Field::make( 'media_gallery', 'idpg_gallery', __( 'Галерея', 'idpg-core' ) )
-					->set_type( 'image' )
-					->set_duplicates_allowed( false )
-					->set_help_text( __( 'Несколько изображений; порядок задаётся перетаскиванием.', 'idpg-core' ) ),
-				// Код HTML-плеера для встраивания трансляции (YouTube, VK Video, Rutube).
-				\Carbon_Fields\Field::make( 'textarea', 'idpg_stream_embed', __( 'Код встраивания трансляции', 'idpg-core' ) )
-					->set_rows( 5 )
-					->set_help_text( __( 'Вставьте HTML-код плеера для онлайн-трансляции. Доступно также в «Настройки организатора».', 'idpg-core' ) ),
-			) );
-	}
-
-	/**
-	 * Поля для CPT venue.
-	 */
-	private static function register_venue_fields() {
-		\Carbon_Fields\Container::make( 'post_meta', __( 'Данные площадки', 'idpg-core' ) )
-			->where( 'post_type', '=', 'venue' )
-			->set_context( 'normal' )
-			->set_priority( 'high' )
-			->add_fields( array(
-				\Carbon_Fields\Field::make( 'select', 'idpg_venue_type', __( 'Тип площадки', 'idpg-core' ) )
-					->add_options( array(
-						''        => __( '— Не выбран —', 'idpg-core' ),
-						'theater' => __( 'Театр', 'idpg-core' ),
-						'cinema'  => __( 'Кинотеатр', 'idpg-core' ),
-						'museum'  => __( 'Музей', 'idpg-core' ),
-						'concert' => __( 'Концертный зал', 'idpg-core' ),
-					) )
-					->set_width( 33 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_venue_address', __( 'Адрес', 'idpg-core' ) )
-					->set_width( 33 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_venue_phone', __( 'Телефон', 'idpg-core' ) )
-					->set_attribute( 'type', 'tel' )
-					->set_width( 33 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_venue_email', __( 'Email', 'idpg-core' ) )
-					->set_attribute( 'type', 'email' )
-					->set_width( 33 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_venue_website', __( 'Сайт', 'idpg-core' ) )
-					->set_attribute( 'type', 'url' )
-					->set_attribute( 'placeholder', 'https://' )
-					->set_width( 33 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_venue_capacity', __( 'Вместимость', 'idpg-core' ) )
-					->set_attribute( 'type', 'number' )
-					->set_attribute( 'min', '0' )
-					->set_width( 33 ),
-				// Координаты для гео-разметки (Schema.org GeoCoordinates, карты).
-				\Carbon_Fields\Field::make( 'text', 'idpg_venue_lat', __( 'Широта', 'idpg-core' ) )
-					->set_attribute( 'type', 'text' )
-					->set_attribute( 'placeholder', '56.8527' )
-					->set_help_text( __( 'Десятичные градусы, например 56.8527. Используется для микроразметки GeoCoordinates.', 'idpg-core' ) )
-					->set_width( 33 ),
-				\Carbon_Fields\Field::make( 'text', 'idpg_venue_lng', __( 'Долгота', 'idpg-core' ) )
-					->set_attribute( 'type', 'text' )
-					->set_attribute( 'placeholder', '53.2115' )
-					->set_help_text( __( 'Десятичные градусы, например 53.2115. Используется для микроразметки GeoCoordinates.', 'idpg-core' ) )
-					->set_width( 33 ),
-				// Часы работы (DEV-11).
-				\Carbon_Fields\Field::make( 'complex', 'idpg_venue_hours', __( 'Часы работы', 'idpg-core' ) )
-					->add_fields( array(
-						\Carbon_Fields\Field::make( 'select', 'day', __( 'День', 'idpg-core' ) )
-							->add_options( array(
-								'mon' => __( 'Понедельник', 'idpg-core' ),
-								'tue' => __( 'Вторник', 'idpg-core' ),
-								'wed' => __( 'Среда', 'idpg-core' ),
-								'thu' => __( 'Четверг', 'idpg-core' ),
-								'fri' => __( 'Пятница', 'idpg-core' ),
-								'sat' => __( 'Суббота', 'idpg-core' ),
-								'sun' => __( 'Воскресенье', 'idpg-core' ),
-							) )
-							->set_width( 25 ),
-						\Carbon_Fields\Field::make( 'time', 'open', __( 'Открытие', 'idpg-core' ) )
-							->set_width( 25 ),
-						\Carbon_Fields\Field::make( 'time', 'close', __( 'Закрытие', 'idpg-core' ) )
-							->set_width( 25 ),
-						\Carbon_Fields\Field::make( 'checkbox', 'is_closed', __( 'Выходной', 'idpg-core' ) )
-							->set_width( 25 ),
-					) )
-					->set_header_template( '<%- day ? day.toUpperCase() : "—" %>' ),
-				// Соцсети (DEV-11).
-				\Carbon_Fields\Field::make( 'complex', 'idpg_venue_social', __( 'Соцсети', 'idpg-core' ) )
-					->add_fields( array(
-						\Carbon_Fields\Field::make( 'select', 'network', __( 'Сеть', 'idpg-core' ) )
-							->add_options( array(
-								'vk'       => 'VK',
-								'tg'       => 'Telegram',
-								'wa'       => 'WhatsApp',
-								'instagram'=> 'Instagram',
-								'youtube'  => 'YouTube',
-								'ok'       => 'Одноклассники',
-								'other'    => __( 'Другое', 'idpg-core' ),
-							) )
-							->set_width( 40 ),
-						\Carbon_Fields\Field::make( 'text', 'url', __( 'Ссылка', 'idpg-core' ) )
-							->set_attribute( 'type', 'url' )
-							->set_attribute( 'placeholder', 'https://' )
-							->set_width( 60 ),
-					) )
-					->set_header_template( '<%- network ? network.toUpperCase() : "—" %>' ),
-			) );
-	}
-
-	/**
-	 * Список площадок для селекта.
-	 *
-	 * Вызывается лениво Carbon Fields при отрисовке поля.
-	 *
-	 * @return array Массив ID => Название.
-	 */
-	public static function get_venue_options() {
-		$options = array( '0' => __( '— Не выбрана —', 'idpg-core' ) );
-
-		$venues = get_posts( array(
-			'post_type'   => 'venue',
-			'numberposts' => -1,
-			'orderby'     => 'title',
-			'order'       => 'ASC',
-		) );
-
-		foreach ( $venues as $venue ) {
-			$options[ strval( $venue->ID ) ] = $venue->post_title;
-		}
-
-		return $options;
-	}
-
-	// =========================================================================
 	// Зеркало сеансов
 	// =========================================================================
 
 	/**
-	 * Дублирование complex-поля сеансов в простую JSON-строку.
+	 * Дублирование сеансов в простую JSON-строку.
 	 *
-	 * Carbon Fields хранит complex-поля в наборе служебных мета-ключей.
+	 * Сеансы хранятся в `_idpg_sessions` (сериализованный PHP-массив).
 	 * Чтобы шаблоны и внешний код могли читать сеансы одним
 	 * get_post_meta(), после каждого сохранения записи актуальный список
 	 * пишется в SESSIONS_MIRROR.
@@ -867,11 +414,7 @@ class IDPG_Meta {
 			return;
 		}
 
-		if ( ! function_exists( 'carbon_get_post_meta' ) ) {
-			return;
-		}
-
-		$rows     = carbon_get_post_meta( $post_id, 'idpg_sessions' );
+		$rows     = get_post_meta( $post_id, '_idpg_sessions', true );
 		$sessions = array();
 
 		if ( is_array( $rows ) ) {
@@ -904,7 +447,7 @@ class IDPG_Meta {
 	}
 
 	/**
-	 * Дублирование complex-поля часов работы площадки в JSON (DEV-11).
+	 * Дублирование часов работы площадки в JSON (DEV-11).
 	 *
 	 * @param int $post_id ID записи.
 	 */
@@ -915,11 +458,7 @@ class IDPG_Meta {
 			return;
 		}
 
-		if ( ! function_exists( 'carbon_get_post_meta' ) ) {
-			return;
-		}
-
-		$rows  = carbon_get_post_meta( $post_id, 'idpg_venue_hours' );
+		$rows  = get_post_meta( $post_id, '_idpg_venue_hours', true );
 		$hours = array();
 
 		if ( is_array( $rows ) ) {
@@ -951,7 +490,7 @@ class IDPG_Meta {
 	}
 
 	/**
-	 * Дублирование complex-поля соцсетей площадки в JSON (DEV-11).
+	 * Дублирование соцсетей площадки в JSON (DEV-11).
 	 *
 	 * @param int $post_id ID записи.
 	 */
@@ -962,11 +501,7 @@ class IDPG_Meta {
 			return;
 		}
 
-		if ( ! function_exists( 'carbon_get_post_meta' ) ) {
-			return;
-		}
-
-		$rows   = carbon_get_post_meta( $post_id, 'idpg_venue_social' );
+		$rows   = get_post_meta( $post_id, '_idpg_venue_social', true );
 		$social = array();
 
 		if ( is_array( $rows ) ) {
@@ -1064,54 +599,6 @@ class IDPG_Meta {
 		}
 	}
 
-	/**
-	 * Санитизация значений Carbon Fields перед сохранением.
-	 *
-	 * @param \Carbon_Fields\Field\Field $field Поле.
-	 * @return \Carbon_Fields\Field\Field
-	 */
-	public static function sanitize_carbon_field( $field ) {
-		$name  = $field->get_base_name();
-		$value = $field->get_value();
-
-		switch ( $name ) {
-			case 'idpg_venue':
-				$field->set_value( absint( $value ) );
-				break;
-
-			case 'idpg_views':
-			case 'idpg_clicks':
-			case 'idpg_venue_capacity':
-				$field->set_value( absint( $value ) );
-				break;
-
-			case 'idpg_ticket_url':
-			case 'idpg_video_trailer':
-			case 'idpg_stream_url':
-			case 'idpg_venue_website':
-				$field->set_value( esc_url_raw( $value ) );
-				break;
-
-			case 'idpg_widget_code':
-				// Код виджета содержит <script>, поэтому сохраняется как есть,
-				// но только для пользователей с правом unfiltered_html.
-				if ( ! current_user_can( 'unfiltered_html' ) ) {
-					$field->set_value( wp_kses_post( $value ) );
-				}
-				break;
-
-			case 'idpg_stream_embed':
-				// Код встраивания плеера — HTML-фрагмент.
-				// Для организаторов (без unfiltered_html) очищаем через wp_kses_post.
-				if ( ! current_user_can( 'unfiltered_html' ) ) {
-					$field->set_value( wp_kses_post( $value ) );
-				}
-				break;
-		}
-
-		return $field;
-	}
-
 	// =========================================================================
 	// Фильтрация списка событий для организатора
 	// =========================================================================
@@ -1183,8 +670,8 @@ class IDPG_Meta {
 		}
 		// Медиа, Основная, Постер и таксономии — всегда открыты у организатора
 		$hide = array(
-			'carbon_fields_container_c24797c4',
-			'carbon_fields_container_6feccbaf',
+			'idpg_event_media',
+			'idpg_event_main',
 			'postimagediv',
 			'event_categorydiv',
 			'tagsdiv-age_rating',
@@ -1204,7 +691,7 @@ class IDPG_Meta {
 			return $value;
 		}
 		return array_values( array_diff( $value, array(
-			'carbon_fields_container_c24797c4',
+			'idpg_event_media',
 			'event_categorydiv',
 			'tagsdiv-age_rating',
 			'citydiv',
@@ -1285,7 +772,9 @@ class IDPG_Meta {
 	}
 }
 
-add_action( 'carbon_fields_register_fields', array( 'IDPG_Meta', 'register_carbon_fields' ) );
-add_action( 'carbon_fields_post_meta_container_saved', array( 'IDPG_Meta', 'mirror_sessions' ) );
-add_action( 'carbon_fields_post_meta_container_saved', array( 'IDPG_Meta', 'mirror_venue_hours' ) );
-add_action( 'carbon_fields_post_meta_container_saved', array( 'IDPG_Meta', 'mirror_venue_social' ) );
+// Зеркала пересобираются после сохранения поста (нативные метабоксы
+// IDPG_Event_Fields / IDPG_Venue_Fields пишут зеркала напрямую, эти
+// хуки — страховка для программных обновлений).
+add_action( 'save_post_event', array( 'IDPG_Meta', 'mirror_sessions' ), 30 );
+add_action( 'save_post_venue', array( 'IDPG_Meta', 'mirror_venue_hours' ), 30 );
+add_action( 'save_post_venue', array( 'IDPG_Meta', 'mirror_venue_social' ), 30 );

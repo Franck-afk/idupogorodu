@@ -1698,6 +1698,36 @@ ignoreErrors:
 		path: includes\class-organizer-meta.php
 
 	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-event-fields.php, but found class-event-fields.php.'
+		count: 1
+		path: includes\class-event-fields.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $update is never used
+		count: 1
+		path: includes\class-event-fields.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $context is never used
+		count: 1
+		path: includes\class-event-fields.php
+
+	-
+		sniff: WordPress.Files.FileName.InvalidClassFileName
+		message: 'Class file names should be based on the class name with "class-" prepended. Expected class-idpg-venue-fields.php, but found class-venue-fields.php.'
+		count: 1
+		path: includes\class-venue-fields.php
+
+	-
+		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		message: The method parameter $update is never used
+		count: 1
+		path: includes\class-venue-fields.php
+
+	-
 		sniff: Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		message: The method parameter $request is never used
 		count: 1

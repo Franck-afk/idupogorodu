@@ -84,23 +84,18 @@ class IDPG_REST_Organizer {
 	const MAX_PER_PAGE = 50;
 
 	/**
-	 * Имя поля галереи в Carbon Fields (как в `IDPG_Meta`).
-	 *
-	 * В базе поле лежит под ключом `_idpg_gallery` — с подчёркиванием и в
-	 * собственном формате Carbon Fields. Плагин не дублирует константу из
-	 * `IDPG_Meta`, чтобы не тянуть зависимость от модуля мета: имя здесь
-	 * зафиксировано тестом `test-gallery_roundtrip_uses_carbon_storage`.
+	 * Имя поля галереи (ключ без подчёркивания, в базе — `_idpg_gallery`).
 	 *
 	 * @var string
 	 */
 	const GALLERY_FIELD = 'idpg_gallery';
 
 	/**
-	 * Имя complex-поля Carbon Fields с сеансами.
+	 * Имя поля сеансов (ключ без подчёркивания, в базе — `_idpg_sessions`).
 	 *
-	 * Устройство хранения то же, что у галереи: в базе `_idpg_sessions` в
-	 * формате CF, а не JSON. Организатор пишет сюда через
-	 * `carbon_set_post_meta()`, обратное направление (CF → зеркало
+	 * Устройство хранения то же, что у галереи. Организатор пишет
+	 * сюда через `update_post_meta()`, обратное направление
+	 * (сериализованный массив → JSON-зеркало
 	 * `_idpg_sessions_json`) выполняет `IDPG_Meta::mirror_sessions()`.
 	 *
 	 * @var string
@@ -1517,35 +1512,19 @@ class IDPG_REST_Organizer {
 			}
 
 			/*
-			 * Сеансы — complex-поле Carbon Fields (`idpg_sessions`), и в базе
-			 * оно лежит в собственном формате CF. Поэтому пишем его через
-			 * carbon_set_post_meta(), а не update_post_meta() в зеркало:
-			 * раньше здесь сохранялось только зеркало `_idpg_sessions_json`,
-			 * поэтому администратор в wp-admin не видел сеансов,
-			 * заведённых организатором, — ровно тот же баг, что DEV-42
-			 * закрыл для галереи.
-			 *
-			 * Зеркало после записи в CF пересобирает IDPG_Meta::mirror_sessions():
-			 * так обе стороны читаются из одного источника и не могут
-			 * разойтись в правилах нормализации. Плюс он снимает кэш
-			 * карточки, который иначе показал бы старые сеансы.
+			 * Сеансы хранятся в `_idpg_sessions` (сериализованный PHP-массив).
+			 * После записи пересобираем зеркало `_idpg_sessions_json`, из
+			 * которого читают шаблоны, и снимаем кэш карточки.
 			 */
-			if ( function_exists( 'carbon_set_post_meta' ) ) {
-				carbon_set_post_meta( $post_id, self::SESSIONS_FIELD, $rows );
+			if ( empty( $rows ) ) {
+				delete_post_meta( $post_id, '_idpg_sessions' );
+				delete_post_meta( $post_id, '_idpg_sessions_json' );
+			} else {
+				update_post_meta( $post_id, '_idpg_sessions', $rows );
 
 				if ( class_exists( 'IDPG_Meta' ) ) {
 					IDPG_Meta::mirror_sessions( $post_id );
 				}
-
-				return true;
-			}
-
-			// Carbon Fields недоступен — редактор всё равно не откроется,
-			// поэтому пишем только зеркало, из которого читают шаблоны.
-			if ( empty( $rows ) ) {
-				delete_post_meta( $post_id, '_idpg_sessions_json' );
-			} else {
-				update_post_meta( $post_id, '_idpg_sessions_json', wp_json_encode( $rows ) );
 			}
 		}
 
@@ -1553,7 +1532,7 @@ class IDPG_REST_Organizer {
 	}
 
 	/**
-	 * Приведение сеансов к виду complex-поля Carbon Fields.
+	 * Приведение сеансов к виду для хранения.
 	 *
 	 * Правила повторяют `IDPG_Meta::mirror_sessions()`: строка без времени
 	 * не является сеансом, значения обрезаются, ссылка проходит через
@@ -1671,19 +1650,12 @@ class IDPG_REST_Organizer {
 				}
 			}
 
-			// Галерея — поле Carbon Fields (`idpg_gallery`), и хранится оно
-			// в базе под ключом `_idpg_gallery` в собственном формате CF
-			// (для media_gallery — JSON-массив ID, для пустого значения с
-			// суффиксом `|||0|_empty`). Поэтому пишем и читаем через
-			// carbon_get_post_meta(), а не через get_post_meta() с ключом
-			// без подчёркивания: иначе данные из кабинета были бы не видны
-			// в редакторе и наоборот.
-			if ( function_exists( 'carbon_set_post_meta' ) ) {
-				carbon_set_post_meta( $post_id, self::GALLERY_FIELD, $ids );
+			// Галерея хранится в `_idpg_gallery` как сериализованный
+			// PHP-массив ID вложений.
+			if ( empty( $ids ) ) {
+				delete_post_meta( $post_id, '_idpg_gallery' );
 			} else {
-				// Плагин CF выключен — пишем напрямую, редактор в этом
-				// состоянии всё равно недоступен.
-				update_post_meta( $post_id, '_' . self::GALLERY_FIELD, $ids );
+				update_post_meta( $post_id, '_idpg_gallery', $ids );
 			}
 		}
 
@@ -2104,25 +2076,32 @@ class IDPG_REST_Organizer {
 	/**
 	 * ID вложений галереи события.
 	 *
-	 * Читается через Carbon Fields: поле `idpg_gallery` — media_gallery, и
-	 * CF хранит его в собственном формате. Обычный get_post_meta() с ключом
-	 * `_idpg_gallery` вернул бы строку служебного вида для пустой галереи
-	 * (`...|||0|_empty`) или не нашёл бы значение вовсе.
+	 * Галерея хранится в `_idpg_gallery` как сериализованный PHP-массив.
+	 * Для обратной совместимости также парсится старый формат Carbon
+	 * Fields (JSON-строка или маркер пустого значения).
 	 *
 	 * @param int $post_id ID события.
 	 * @return int[]
 	 */
 	private function get_gallery( $post_id ) {
-		$raw = function_exists( 'carbon_get_post_meta' )
-			? carbon_get_post_meta( $post_id, self::GALLERY_FIELD )
-			: get_post_meta( $post_id, '_' . self::GALLERY_FIELD, true );
-
-		// Пустое значение CF приходит строкой-заглушкой, а не массивом.
-		if ( is_string( $raw ) ) {
-			return array();
+		if ( class_exists( 'IDPG_Media' ) ) {
+			return IDPG_Media::idpg_get_gallery_ids( $post_id );
 		}
 
-		return is_array( $raw ) ? array_map( 'absint', $raw ) : array();
+		$raw = get_post_meta( $post_id, '_idpg_gallery', true );
+
+		if ( is_array( $raw ) ) {
+			return array_map( 'absint', $raw );
+		}
+
+		if ( is_string( $raw ) && '' !== $raw && '|||0|_empty' !== $raw ) {
+			$decoded = json_decode( $raw, true );
+			if ( is_array( $decoded ) ) {
+				return array_map( 'absint', $decoded );
+			}
+		}
+
+		return array();
 	}
 
 	/**

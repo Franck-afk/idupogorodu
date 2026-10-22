@@ -23,33 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Composer autoload (Carbon Fields).
- *
- * Подключается до загрузки классов и инициализации синглтонов,
- * чтобы библиотека была доступна на всём протяжении загрузки плагина
- * (и темы, которая загружается позже).
- */
-$composer_autoload = __DIR__ . '/vendor/autoload.php';
-if ( file_exists( $composer_autoload ) ) {
-	require_once $composer_autoload;
-}
-
-/**
- * Carbon Fields bootstrap.
- *
- * Тот же тайминг, что был у темы: after_setup_theme с приоритетом 5.
- * Плагины загружаются раньше темы, поэтому этот boot выполнится первым,
- * а одноимённый boot темы (если ещё присутствует) пропустится по guard'у.
- */
-add_action( 'after_setup_theme', 'idpg_carbon_fields_boot', 5 );
-function idpg_carbon_fields_boot() {
-	if ( function_exists( 'carbon_get_theme_option' ) ) {
-		return;
-	}
-	\Carbon_Fields\Carbon_Fields::boot();
-}
-
-/**
  * Константы плагина.
  */
 define( 'IDPG_CORE_VERSION', '1.1.2' );
@@ -95,12 +68,12 @@ require_once IDPG_CORE_DIR . 'includes/class-current-event-banner.php';
  * Инициализация баннера текущего события (file-load).
  *
  * Синглтон создаётся на этапе загрузки файла (а не в idpg_core_init),
- * чтобы подписка на carbon_fields_register_fields — выполняемая в
- * конструкторе — успевала сработать до init priority 0, на котором CF
- * диспатчит этот хук.
+ * чтобы подписки в конструкторе успевали сработать до init.
  */
 IDPG_Current_Event_Banner::instance();
 require_once IDPG_CORE_DIR . 'includes/class-meta.php';
+require_once IDPG_CORE_DIR . 'includes/class-event-fields.php';
+require_once IDPG_CORE_DIR . 'includes/class-venue-fields.php';
 require_once IDPG_CORE_DIR . 'includes/class-geo-service.php';
 require_once IDPG_CORE_DIR . 'includes/class-migrations.php';
 require_once IDPG_CORE_DIR . 'includes/class-views.php';
@@ -138,6 +111,13 @@ function idpg_core_init() {
 	IDPG_REST_API::instance();
 	IDPG_iCal_Export::instance();
 	IDPG_Meta::instance();
+
+	// Нативные метабоксы полей события + вкладка «События» на странице IDPG.
+	IDPG_Event_Fields::instance();
+
+	// Нативные метабоксы полей площадки.
+	IDPG_Venue_Fields::instance();
+
 	IDPG_Migrations::instance();
 	IDPG_Views::instance();
 	IDPG_Notifications::instance();

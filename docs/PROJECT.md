@@ -1972,6 +1972,17 @@ namespace с путями, методами и разделением прав. 
 | **Объём** | M |
 | **Статус** | ✅ Реализовано 20.10.2026. Сценарии перенесены, дефект `session_tokens` закрыт. |
 
+#### DEV-311. Удаление Carbon Fields — нативные метабоксы и вкладка «События»
+
+| | |
+|---|---|
+| **Проблема** | Carbon Fields — единственная runtime-зависимость плагина (composer `htmlburger/carbon-fields ^3.6`). Требование владельца: перенести поля событий во вкладку «События» на странице IDPG, площадки — на нативные метабоксы, организаторов — на нативные поля профиля, затем полностью удалить CF. |
+| **Требование** | Вкладка IDPG = редактор событий (выбор события + форма всех полей); экран редактирования события освобождается от метабоксов CF; площадка → нативные метабоксы; организатор → нативные поля профиля; CF удаляется полностью и безопасно (данные хранятся в `_idpg_*` пост-мета, фронтенд уже читает `get_post_meta()`). |
+| **Реализация** | Созданы `class-event-fields.php` (нативные метабоксы event + вкладка «События» + save-логика), `class-venue-fields.php` (нативные метабоксы venue), `class-organizer-meta.php` переписан на нативные поля профиля, `assets/js/event-fields.js` (сеансы/галерея/условная логика/hours/social). В `class-meta.php` удалена CF-секция, зеркала переведены на `get_post_meta`. Заменены `carbon_*` вызовы в `class-rest-organizer.php`, `class-media.php`, `class-migrations.php`. Хук `carbon_fields_post_meta_container_saved` заменён на `save_post_event`/`save_post_venue`. Удалён CF boot из `idpg-core.php`, `composer.json` очищен, `vendor/htmlburger` удалён. Обновлены тесты: `test-sessions-sync.php`, `test-rest-organizer.php`, `test-class-init.php`, `test-promotion.php`. |
+| **Приёмка** | `php -l` всех изменённых файлов — без ошибок; полный PHPUnit `OK (558 tests, 1529 assertions)`; PHPCS новых файлов — только baseline-записи (InvalidClassFileName, UnusedFunctionParameter); `grep -r "carbon_"` по `includes/` и `idpg-core.php` — пусто. |
+| **Объём** | L |
+| **Статус** | ✅ Реализовано 22.10.2026. CF удалён, данные в `_idpg_*` мигрированы. |
+
 ---
 
 ### 4. ФУНКЦИОНАЛЬНЫЕ УЛУЧШЕНИЯ (P2)

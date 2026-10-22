@@ -1,17 +1,16 @@
 <?php
 /**
- * Юнит-тесты DEV-48: синхронизация сеансов Carbon Fields ↔ зеркало.
+ * Юнит-тесты DEV-48: синхронизация сеансов `_idpg_sessions` ↔ зеркало.
  *
- * Сеансы хранятся в complex-поле Carbon Fields (`idpg_sessions`, подполя
- * time/price/url). Carbon Fields раскладывает complex-поле по служебным
- * мета-ключам (`_idpg_sessions|time|0|0|value` и т.п.), а шаблоны читают
- * простое зеркало `_idpg_sessions_json`.
+ * Сеансы хранятся в `_idpg_sessions` как сериализованный PHP-массив
+ * (подполя time/price/url), а шаблоны читают простое зеркало
+ * `_idpg_sessions_json`.
  *
  * Проверяется, что обе стороны видят правки друг друга:
- *  - организатор пишет сеансы через REST → редактор CF их видит;
+ *  - организатор пишет сеансы через REST → мета их видит;
  *  - администратор правит сеансы в редакторе → организатор видит их в API;
  *  - пустое значение не остаётся строкой-заглушкой ни в зеркале, ни в API;
- *  - битое значение в хранилище CF не роняет разбор.
+ *  - битое значение в хранилище не роняет разбор.
  *
  * @package Idpg_Core
  */
@@ -111,10 +110,7 @@ class Test_Sessions_Sync extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Сеансы в том виде, в каком их читает редактор Carbon Fields.
-	 *
-	 * CF добавляет служебный ключ `_type`, поэтому сравниваются только
-	 * содержательные подполя.
+	 * Сеансы в том виде, в каком их хранит нативное поле `_idpg_sessions`.
 	 *
 	 * @param int $post_id ID события.
 	 * @return array Список {time, price, url}.
@@ -122,7 +118,7 @@ class Test_Sessions_Sync extends WP_UnitTestCase {
 	protected function sessions_from_carbon( $post_id ) {
 		$out = array();
 
-		foreach ( (array) carbon_get_post_meta( $post_id, 'idpg_sessions' ) as $row ) {
+		foreach ( (array) get_post_meta( $post_id, '_idpg_sessions', true ) as $row ) {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
@@ -140,19 +136,17 @@ class Test_Sessions_Sync extends WP_UnitTestCase {
 	/**
 	 * Эмулировать сохранение сеансов администратором в редакторе.
 	 *
-	 * Так же, как это делает `Post_Meta_Container::save()`: значение пишется
-	 * в complex-поле, затем срабатывает хук
-	 * `carbon_fields_post_meta_container_saved`, на котором висит
-	 * `IDPG_Meta::mirror_sessions()`.
+	 * Нативные метабоксы IDPG_Event_Fields пишут `_idpg_sessions`
+	 * и зеркало на хуке `save_post_event`.
 	 *
 	 * @param int   $post_id ID события.
 	 * @param array $rows    Список сеансов.
 	 * @return void
 	 */
 	protected function save_as_admin( $post_id, $rows ) {
-		carbon_set_post_meta( $post_id, 'idpg_sessions', $rows );
+		update_post_meta( $post_id, '_idpg_sessions', $rows );
 
-		do_action( 'carbon_fields_post_meta_container_saved', $post_id, null );
+		do_action( 'save_post_event', $post_id, get_post( $post_id ), false );
 	}
 
 	// =====================================================================
@@ -160,10 +154,10 @@ class Test_Sessions_Sync extends WP_UnitTestCase {
 	// =====================================================================
 
 	/**
-	 * Сеансы организатора видны в редакторе Carbon Fields.
+	 * Сеансы организатора видны в редакторе (мета `_idpg_sessions`).
 	 *
 	 * Регресс DEV-48: раньше `save_meta()` писал только зеркало, поэтому
-	 * `carbon_get_post_meta()` возвращал пусто, и администратор в wp-admin
+	 * основной ключ оставался пустым, и администратор в wp-admin
 	 * сеансов организатора не видел — в точности как DEV-42 обнаружил для
 	 * галереи.
 	 */
@@ -192,7 +186,7 @@ class Test_Sessions_Sync extends WP_UnitTestCase {
 				array( 'time' => '21:30', 'price' => '900', 'url' => '' ),
 			),
 			$this->sessions_from_carbon( $event_id ),
-			'Сеансы организатора должны попасть в complex-поле Carbon Fields.'
+			'Сеансы организатора должны попасть в `_idpg_sessions`.'
 		);
 	}
 
@@ -362,8 +356,7 @@ class Test_Sessions_Sync extends WP_UnitTestCase {
 	/**
 	 * Пустой список сеансов не остаётся строкой-заглушкой.
 	 *
-	 * Carbon Fields хранит пустое complex-поле как служебные значения с
-	 * суффиксом `|||0|_empty`. Такое не должно ни попасть в зеркало, ни
+	 * Пустое значение не должно ни попасть в зеркало, ни
 	 * уехать в API.
 	 */
 	public function test_empty_sessions_leave_no_placeholder() {
@@ -506,11 +499,11 @@ class Test_Sessions_Sync extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Битое значение в служебных мета-ключах CF не роняет разбор.
+	 * Битое значение в хранилище не роняет разбор.
 	 *
-	 * Хранилище CF — набор отдельных мета-строк, поэтому в него можно
-	 * положить мусор в обход API. `mirror_sessions()` обязан пережить это
-	 * молча: событие не должно падать на фронте из-за испорченной записи.
+	 * В `_idpg_sessions` может лежать мусор (строка вместо массива).
+	 * `mirror_sessions()` обязан пережить это молча: событие не должно
+	 * падать на фронте из-за испорченной записи.
 	 */
 	public function test_corrupt_carbon_storage_does_not_fatal() {
 		$organizer = $this->make_organizer( 'sync_corrupt' );
@@ -523,9 +516,7 @@ class Test_Sessions_Sync extends WP_UnitTestCase {
 			)
 		);
 
-		// Мусор в ключах, которые читает complex-поле.
-		update_post_meta( $event_id, '_idpg_sessions|time|0|0|value', '19:00' );
-		update_post_meta( $event_id, '_idpg_sessions|||0|value', '_' );
+		// Мусор вместо массива сеансов.
 		update_post_meta( $event_id, '_idpg_sessions', 'полностью мусорная строка' );
 
 		// Не должно быть ни фатала, ни исключения.

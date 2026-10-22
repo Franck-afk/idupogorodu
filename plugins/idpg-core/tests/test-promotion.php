@@ -315,29 +315,30 @@ class Test_Promotion extends WP_UnitTestCase {
 	 * ------------------------------------------------------------------ */
 
 	/**
-	 * Поле «Закрепить до» зарегистрировано и в карте мет, и в Carbon Fields.
+	 * Поле «Закрепить до» зарегистрировано и в карте мет, и в метабоксах.
 	 *
-	 * Carbon Fields в тестах не поднимает редактор, поэтому проверяем
-	 * объявление поля по исходнику class-meta.php. Отсутствие поля означало бы,
-	 * что срок некуда вводить: cron есть, а задать дату нечем.
+	 * Проверяем объявление поля по исходникам class-meta.php (карта мет)
+	 * и class-event-fields.php (нативный метабокс). Отсутствие поля
+	 * означало бы, что срок некуда вводить: cron есть, а задать дату нечем.
 	 */
 	public function test_pin_expires_field_is_registered() {
-		$source = file_get_contents( IDPG_CORE_DIR . 'includes/class-meta.php' );
+		$meta_source   = file_get_contents( IDPG_CORE_DIR . 'includes/class-meta.php' );
+		$fields_source = file_get_contents( IDPG_CORE_DIR . 'includes/class-event-fields.php' );
 
 		$this->assertStringContainsString(
 			"'_idpg_pin_expires'",
-			$source,
+			$meta_source,
 			'Метка срока закрепления не зарегистрирована в карте мет.'
 		);
 		$this->assertStringContainsString(
-			"'date', 'idpg_pin_expires'",
-			$source,
-			'Поле «Закрепить до» не объявлено как дата в Carbon Fields.'
+			"'idpg_pin_expires'",
+			$fields_source,
+			'Поле «Закрепить до» не объявлено в метабоксах события.'
 		);
 		$this->assertStringContainsString(
-			"set_storage_format( 'Y-m-d' )",
-			$source,
-			'Поле «Закрепить до» должно храниться в формате Y-m-d.'
+			"_idpg_pin_expires",
+			$fields_source,
+			'Поле «Закрепить до» должно иметь ключ `_idpg_pin_expires`.'
 		);
 	}
 }

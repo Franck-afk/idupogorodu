@@ -2,15 +2,8 @@
     "name": "idpg/idpg-core-plugin",
     "description": "IDPG Core Plugin",
     "type": "wordpress-plugin",
-    "require": {
-        "htmlburger/carbon-fields": "^3.6"
-    },
+    "require": {},
     "autoload": {},
-    "config": {
-        "allow-plugins": {
-            "htmlburger/carbon-fields-installer": true
-        }
-    },
     "require-dev": {
         "phpunit/phpunit": "^9.6 || ^10.5",
         "yoast/phpunit-polyfills": "^3.0"

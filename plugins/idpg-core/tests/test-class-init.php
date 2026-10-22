@@ -38,8 +38,10 @@ class Test_Class_Init extends WP_UnitTestCase {
 		'IDPG_Ticket_Sync'          => 'idpg_core_init()',
 		'IDPG_REST_API'             => 'idpg_core_init()',
 		'IDPG_iCal_Export'          => 'idpg_core_init()',
-		'IDPG_Meta'                 => 'idpg_core_init()',
-		'IDPG_Migrations'           => 'idpg_core_init()',
+		'IDPG_Meta'                => 'idpg_core_init()',
+		'IDPG_Event_Fields'        => 'idpg_core_init()',
+		'IDPG_Venue_Fields'        => 'idpg_core_init()',
+		'IDPG_Migrations'          => 'idpg_core_init()',
 		'IDPG_Views'                => 'idpg_core_init()',
 		'IDPG_Notifications'        => 'idpg_core_init()',
 		'IDPG_Auth'                 => 'idpg_core_init()',
@@ -76,9 +78,10 @@ class Test_Class_Init extends WP_UnitTestCase {
 		// Приватного статического $instance у класса нет, поэтому проверяются
 		// именно зарегистрированные хуки, а не синглтон.
 		'IDPG_Organizer_Meta'  => array(
-			'carbon_fields_register_fields' => 'register_fields',
-			'personal_options_update'       => 'protect_verification_status',
-			'edit_user_profile_update'      => 'protect_verification_status',
+			'show_user_profile'        => 'render_fields',
+			'edit_user_profile'        => 'render_fields',
+			'personal_options_update'  => 'save_fields',
+			'edit_user_profile_update' => 'save_fields',
 		),
 		'IDPG_Organizer_Scope' => array(
 			'pre_get_posts' => 'scope_admin_attachments',

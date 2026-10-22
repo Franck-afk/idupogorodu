@@ -146,17 +146,26 @@ class IDPG_Media {
 	public static function idpg_get_gallery_ids( $post_id ) {
 		$post_id = absint( $post_id );
 
-		if ( ! $post_id || ! function_exists( 'carbon_get_post_meta' ) ) {
+		if ( ! $post_id ) {
 			return array();
 		}
 
-		$gallery = carbon_get_post_meta( $post_id, 'idpg_gallery' );
+		$raw = get_post_meta( $post_id, '_idpg_gallery', true );
 
-		if ( ! is_array( $gallery ) ) {
-			return array();
+		// Нативный формат: массив ID.
+		if ( is_array( $raw ) ) {
+			return array_map( 'absint', $raw );
 		}
 
-		return array_map( 'absint', $gallery );
+		// Старый формат Carbon Fields: JSON-строка или маркер пустого значения.
+		if ( is_string( $raw ) && '' !== $raw && '|||0|_empty' !== $raw ) {
+			$decoded = json_decode( $raw, true );
+			if ( is_array( $decoded ) ) {
+				return array_map( 'absint', $decoded );
+			}
+		}
+
+		return array();
 	}
 
 	/**

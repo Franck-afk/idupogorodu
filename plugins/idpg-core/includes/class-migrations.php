@@ -282,10 +282,6 @@ class IDPG_Migrations {
 	 * 1. Legacy JSON из `_idpg_event_sessions` (уже перенесён в зеркало).
 	 * 2. Время из старого поля даты начала, если оно было не 00:00.
 	 *
-	 * Запись в complex-поле выполняется best-effort: если сборка Carbon
-	 * Fields не предоставляет carbon_set_post_meta(), сеансы остаются
-	 * доступны через JSON-зеркало.
-	 *
 	 * @param int    $post_id      ID события.
 	 * @param string $legacy_start Старое значение даты начала со временем.
 	 */
@@ -296,18 +292,14 @@ class IDPG_Migrations {
 			return;
 		}
 
-		// Зеркало заполняем всегда — его читают шаблоны.
-		update_post_meta( $post_id, IDPG_Meta::SESSIONS_MIRROR, wp_json_encode( $rows ) );
-
-		if ( ! function_exists( 'carbon_set_post_meta' ) || ! function_exists( 'carbon_get_post_meta' ) ) {
-			return;
-		}
-
-		$existing = carbon_get_post_meta( $post_id, 'idpg_sessions' );
+		// Основной ключ и зеркало заполняем всегда — их читают шаблоны.
+		$existing = get_post_meta( $post_id, '_idpg_sessions', true );
 
 		if ( empty( $existing ) ) {
-			carbon_set_post_meta( $post_id, 'idpg_sessions', $rows );
+			update_post_meta( $post_id, '_idpg_sessions', $rows );
 		}
+
+		update_post_meta( $post_id, IDPG_Meta::SESSIONS_MIRROR, wp_json_encode( $rows ) );
 	}
 
 	/**
