@@ -446,7 +446,19 @@ function idpg_widget_areas_admin_page() {
 	<div class="wrap idpg idpg-settings-page js-idpg">
 		<h1>IDPG</h1>
 
-		<?php if ( $msg ) : ?>
+		<?php
+		/*
+		 * Сообщение страницы — только для своих кодов (added,
+		 * updated, deleted, empty) и только на своих вкладках
+		 * (list, form). Вкладки плагина («События», «Гео»,
+		 * «Приватность») показывают свои idpg_msg сами: без этой
+		 * проверки их коды (saved, imported, error, privacy_deleted)
+		 * давали бы под H1 пустую зелёную плашку, а код 'empty' —
+		 * чужой текст («Не указано название области.» на «Гео»).
+		 */
+		$idpg_page_msgs = array( 'added', 'updated', 'deleted', 'empty' );
+		if ( $msg && in_array( $msg, $idpg_page_msgs, true ) && in_array( $tab, array( 'list', 'form' ), true ) ) :
+			?>
 			<div id="message" class="notice notice-success is-dismissible">
 				<p>
 					<?php
