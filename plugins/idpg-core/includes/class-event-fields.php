@@ -1,11 +1,11 @@
 <?php
 /**
- * Нативные метабоксы полей события и вкладка «События» на странице IDPG.
+ * Вкладка «События» на странице IDPG — редактор полей события.
  *
  * Заменяет Carbon Fields: все поля события (даты, сеансы, место,
- * билеты, медиа) выводятся нативными метабоксами на экране
- * редактирования события и формой на вкладке «События» страницы
- * «IDPG» (для администраторов).
+ * билеты, медиа) редактируются только формой на вкладке «События»
+ * страницы «IDPG» (для администраторов). Метабоксы на экране
+ * редактирования события не регистрируются.
  *
  * Данные хранятся в тех же мета-ключах `_idpg_*`, что и раньше,
  * — шаблоны и REST не меняются.
@@ -28,20 +28,6 @@ class IDPG_Event_Fields {
 	 * @var string
 	 */
 	const TAB_SLUG = 'events';
-
-	/**
-	 * Действие nonce для метабокса.
-	 *
-	 * @var string
-	 */
-	const NONCE_ACTION = 'idpg_save_event_fields';
-
-	/**
-	 * Имя поля nonce для метабокса.
-	 *
-	 * @var string
-	 */
-	const NONCE_NAME = 'idpg_event_fields_nonce';
 
 	/**
 	 * Действие nonce для вкладки.
@@ -80,14 +66,10 @@ class IDPG_Event_Fields {
 	 * Конструктор. Привязывает методы к хукам WordPress.
 	 */
 	private function __construct() {
-		// Метабоксы на экране редактирования события.
-		add_action( 'add_meta_boxes', array( $this, 'register_meta_boxes' ) );
-		// Сохранение полей при сохранении поста.
-		add_action( 'save_post_event', array( $this, 'save_post_fields' ), 20, 3 );
 		// Вкладка «События» на странице «IDPG».
 		add_filter( 'idpg_widget_areas_admin_tabs', array( $this, 'register_admin_tab' ) );
 		add_action( 'admin_init', array( $this, 'handle_tab_save' ) );
-		// Скрипты и стили для метабоксов и вкладки.
+		// Скрипты и стили для вкладки.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
@@ -458,72 +440,6 @@ class IDPG_Event_Fields {
 	}
 
 	// =========================================================================
-	// Метабоксы на экране редактирования события
-	// =========================================================================
-
-	/**
-	 * Регистрация метабоксов полей события.
-	 *
-	 * @return void
-	 */
-	public function register_meta_boxes() {
-		if ( ! function_exists( 'get_current_screen' ) ) {
-			return;
-		}
-
-		$screen = get_current_screen();
-		if ( ! $screen || 'event' !== $screen->post_type ) {
-			return;
-		}
-
-		foreach ( self::get_field_groups() as $group ) {
-			add_meta_box(
-				'idpg_event_' . $group['id'],
-				$group['title'],
-				array( $this, 'render_meta_box' ),
-				'event',
-				$group['context'],
-				$group['priority'],
-				array( 'group_id' => $group['id'] )
-			);
-		}
-	}
-
-	/**
-	 * Вывод содержимого метабокса.
-	 *
-	 * @param WP_Post $post    Объект поста.
-	 * @param array   $box     Данные метабокса (с group_id).
-	 * @return void
-	 */
-	public function render_meta_box( $post, $box ) {
-		$group_id = isset( $box['args']['group_id'] ) ? $box['args']['group_id'] : '';
-		$groups   = self::get_field_groups();
-
-		foreach ( $groups as $group ) {
-			if ( $group['id'] !== $group_id ) {
-				continue;
-			}
-
-			wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
-
-			echo '<div class="idpg-event-fields" data-group="' . esc_attr( $group['id'] ) . '">';
-			foreach ( $group['fields'] as $field ) {
-				// Системные поля — только для администраторов.
-				if ( ! empty( $field['admin_only'] ) && ! current_user_can( 'manage_options' ) ) {
-					continue;
-				}
-
-				$value = get_post_meta( $post->ID, $field['key'], true );
-				self::render_field( $field, $value );
-			}
-			echo '</div>';
-
-			break;
-		}
-	}
-
-	// =========================================================================
 	// Вкладка «События» на странице IDPG
 	// =========================================================================
 
@@ -734,10 +650,13 @@ class IDPG_Event_Fields {
 			return;
 		}
 
-		// Флаг: обработчик вкладки (чтобы save_post_fields не сработал повторно).
-		$GLOBALS['idpg_event_tab_saved'] = $event_id;
+		$this->save_fields( $event_id );
 
-		$this->save_fields( $event_id, 'tab' );
+		// Фаза 2 ценовой модерации: save_post_event не срабатывает при
+		// редиректе вкладки, поэтому вызываем явно.
+		if ( class_exists( 'IDPG_Event_Moderation' ) ) {
+			IDPG_Event_Moderation::instance()->schedule_price_moderation( $event_id );
+		}
 
 		$base = admin_url( 'admin.php?page=idpg-widget-areas&tab=' . self::TAB_SLUG . '&event_id=' . $event_id );
 		wp_safe_redirect( add_query_arg( 'idpg_msg', 'saved', $base ) );
@@ -745,51 +664,16 @@ class IDPG_Event_Fields {
 	}
 
 	/**
-	 * Обработчик сохранения поста (save_post_event).
-	 *
-	 * @param int     $post_id ID поста.
-	 * @param WP_Post $post    Объект поста.
-	 * @param bool    $update  Обновление ли это.
-	 * @return void
-	 */
-	public function save_post_fields( $post_id, $post, $update ) {
-		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
-			return;
-		}
-
-		if ( ! $post instanceof WP_Post || 'event' !== $post->post_type ) {
-			return;
-		}
-
-		// Вкладка уже сохранила — не дублируем.
-		if ( isset( $GLOBALS['idpg_event_tab_saved'] ) && $GLOBALS['idpg_event_tab_saved'] === (int) $post_id ) {
-			return;
-		}
-
-		// Проверка nonce (из метабокса).
-		if ( empty( $_POST[ self::NONCE_NAME ] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST[ self::NONCE_NAME ] ) ), self::NONCE_ACTION ) ) {
-			return;
-		}
-
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return;
-		}
-
-		$this->save_fields( $post_id, 'post' );
-	}
-
-	/**
 	 * Сохранение полей события.
 	 *
-	 * Единый метод для метабокса и вкладки. Читает $_POST, санитизирует
-	 * и записывает мета-поля, пересобирает зеркало сеансов.
+	 * Читает $_POST, санитизирует и записывает мета-поля,
+	 * пересобирает зеркало сеансов.
 	 *
-	 * @param int    $post_id ID события.
-	 * @param string $context Контекст: 'post' (метабокс) или 'tab' (вкладка).
+	 * @param int $post_id ID события.
 	 * @return void
 	 */
-	protected function save_fields( $post_id, $context ) {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce проверяется в save_post_fields() и handle_tab_save().
+	protected function save_fields( $post_id ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce проверяется в handle_tab_save().
 		$is_admin = current_user_can( 'manage_options' );
 
 		foreach ( self::get_field_groups() as $group ) {
@@ -1343,21 +1227,13 @@ class IDPG_Event_Fields {
 	// =========================================================================
 
 	/**
-	 * Подключение скриптов и стилей для метабоксов и вкладки.
+	 * Подключение скриптов и стилей для вкладки «События».
 	 *
 	 * @param string $hook_suffix Текущий хук страницы.
 	 * @return void
 	 */
 	public function enqueue_assets( $hook_suffix ) {
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-
-		$is_event_edit = ( 'post.php' === $hook_suffix || 'post-new.php' === $hook_suffix )
-			&& $screen
-			&& 'event' === $screen->post_type;
-
-		$is_idpg_tab = ( 'toplevel_page_idpg-widget-areas' === $hook_suffix );
-
-		if ( ! $is_event_edit && ! $is_idpg_tab ) {
+		if ( 'toplevel_page_idpg-widget-areas' !== $hook_suffix ) {
 			return;
 		}
 
