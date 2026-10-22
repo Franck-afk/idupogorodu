@@ -4,6 +4,7 @@
  * 1. Сеансы: добавление/удаление повторяемых строк.
  * 2. Галерея: выбор изображений через wp.media.
  * 3. Условная логика: показ/скрытие полей по значению селекта.
+ * 4. Даты: кастомный календарь Pikaday вместо нативного type="date".
  *
  * @package IDPG_Core
  */
@@ -216,6 +217,46 @@
 	}
 
 	// =========================================================================
+	// Даты: кастомный календарь Pikaday вместо нативного type="date"
+	// =========================================================================
+
+	function initDatePickers() {
+		if ( typeof Pikaday === 'undefined' ) {
+			return;
+		}
+
+		$( '.idpg-pikaday' ).each( function() {
+			var opts = {
+				field: this,
+				format: 'YYYY-MM-DD',
+				firstDay: 1,
+
+				/*
+				 * Без moment.js в Pikaday по умолчанию берутся Date.parse()
+				 * и toDateString() — задаём строгий формат хранилища
+				 * ГГГГ-ММ-ДД, чтобы в мета не попадала «Fri May 01 2026».
+				 */
+				parse: function( value ) {
+					var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec( String( value ).trim() );
+					return parts ? new Date( +parts[1], +parts[2] - 1, +parts[3] ) : null;
+				},
+				toString: function( date ) {
+					var mm = '0' + ( date.getMonth() + 1 );
+					var dd = '0' + date.getDate();
+					return date.getFullYear() + '-' + mm.slice( -2 ) + '-' + dd.slice( -2 );
+				}
+			};
+
+			// Русская локаль из pikaday-locale-ru.js (глобальный l10n).
+			if ( typeof l10n !== 'undefined' ) {
+				opts.i18n = l10n;
+			}
+
+			new Pikaday( opts );
+		} );
+	}
+
+	// =========================================================================
 	// Инициализация
 	// =========================================================================
 
@@ -225,6 +266,7 @@
 		initConditional();
 		initVenueHours();
 		initVenueSocial();
+		initDatePickers();
 	} );
 
 } )( jQuery );

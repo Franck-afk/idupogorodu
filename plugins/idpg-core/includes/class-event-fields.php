@@ -1047,8 +1047,10 @@ class IDPG_Event_Fields {
 				break;
 
 			case 'date':
+				// Кастомный календарь Pikaday вместо нативного type="date":
+				// значение хранится в том же формате ГГГГ-ММ-ДД.
 				printf(
-					'<input type="date" id="%1$s" name="%1$s" value="%2$s" class="regular-text" />',
+					'<input type="text" id="%1$s" name="%1$s" value="%2$s" placeholder="ГГГГ-ММ-ДД" autocomplete="off" class="regular-text idpg-pikaday" />',
 					esc_attr( $id ),
 					esc_attr( (string) $value )
 				);
@@ -1244,10 +1246,44 @@ class IDPG_Event_Fields {
 		wp_enqueue_style( 'idpg-editor', IDPG_CORE_URL . 'assets/css/editor.css', array(), $css_version );
 
 		// JS: добавление/удаление сеансов, галерея, условная логика.
+		$idpg_deps = array( 'jquery' );
+
+		/*
+		 * Pikaday — кастомный календарь дат полей «Дата начала»/«Дата
+		 * окончания»/«Закрепить до». Библиотека лежит в той же теме
+		 * (используется на архиве афиши) — дублировать файл в плагине
+		 * нельзя, подключаем из темы. Если файла нет (другая тема),
+		 * поля остаются обычными текстовыми вводами.
+		 */
+		$idpg_pikaday      = get_template_directory() . '/assets/js/pikaday.js';
+		$idpg_pikaday_l10n = get_template_directory() . '/assets/js/pikaday-locale-ru.js';
+
+		if ( file_exists( $idpg_pikaday ) ) {
+			wp_enqueue_script(
+				'idpg-pikaday',
+				get_template_directory_uri() . '/assets/js/pikaday.js',
+				array(),
+				(string) filemtime( $idpg_pikaday ),
+				true
+			);
+			$idpg_deps[] = 'idpg-pikaday';
+
+			if ( file_exists( $idpg_pikaday_l10n ) ) {
+				wp_enqueue_script(
+					'idpg-pikaday-locale',
+					get_template_directory_uri() . '/assets/js/pikaday-locale-ru.js',
+					array( 'idpg-pikaday' ),
+					(string) filemtime( $idpg_pikaday_l10n ),
+					true
+				);
+				$idpg_deps[] = 'idpg-pikaday-locale';
+			}
+		}
+
 		wp_enqueue_script(
 			'idpg-event-fields',
 			IDPG_CORE_URL . 'assets/js/event-fields.js',
-			array( 'jquery' ),
+			$idpg_deps,
 			IDPG_CORE_VERSION,
 			true
 		);

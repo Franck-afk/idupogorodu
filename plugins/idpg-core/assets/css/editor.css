@@ -162,3 +162,187 @@
 .idpg-editor-help__list li:last-child {
 	margin-bottom: 0;
 }
+
+/* =============================================================================
+ * Pikaday — кастомный календарь дат на вкладке «События»
+ *
+ * Элемент .pika-single добавляется в body и позиционируется скриптом
+ * относительно поля; здесь — базовая раскладка и состояния дней
+ * (адаптация стилей календаря афиши под цвета wp-admin).
+ * ========================================================================== */
+.pika-single {
+	position: absolute;
+	z-index: 100000;
+	display: none;
+	box-sizing: border-box;
+	width: 240px;
+	margin: 0;
+	padding: 0;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 6px;
+	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+	font-size: 13px;
+	line-height: 1.4;
+	color: #1d2327;
+}
+
+.pika-single:not(.is-hidden) {
+	display: block;
+}
+
+.pika-lendar {
+	float: none;
+	width: auto;
+	margin: 8px;
+}
+
+.pika-title {
+	position: relative;
+	text-align: center;
+	padding: 8px 36px 4px;
+}
+
+.pika-title .pika-label {
+	display: inline-block;
+	margin: 0;
+	padding: 4px 8px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+	cursor: default;
+}
+
+.pika-title .pika-label:hover {
+	background: #f0f0f1;
+}
+
+.pika-title select {
+	position: absolute;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.pika-prev,
+.pika-next {
+	position: absolute;
+	top: 8px;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	background: transparent;
+	color: transparent;
+	font-size: 0;
+	cursor: pointer;
+	overflow: hidden;
+	transition: background 0.12s ease;
+}
+
+.pika-prev::before,
+.pika-next::before {
+	content: '';
+	display: block;
+	width: 100%;
+	height: 100%;
+	background-color: #2271b1;
+	-webkit-mask: center / 12px no-repeat;
+	mask: center / 12px no-repeat;
+}
+
+.pika-prev::before {
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E");
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E");
+}
+
+.pika-next::before {
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E");
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E");
+}
+
+.pika-prev {
+	left: 4px;
+}
+
+.pika-next {
+	right: 4px;
+}
+
+.pika-prev:hover,
+.pika-next:hover {
+	background: #f0f0f1;
+}
+
+.pika-prev.is-disabled,
+.pika-next.is-disabled {
+	pointer-events: none;
+	opacity: 0.25;
+}
+
+.pika-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.pika-table th {
+	padding: 4px 0 8px;
+	color: #8c8f94;
+	font-size: 11px;
+	font-weight: 500;
+	text-transform: uppercase;
+	text-align: center;
+}
+
+.pika-table th,
+.pika-table td {
+	width: 14.2857%;
+	padding: 1px;
+}
+
+.pika-table td {
+	text-align: right;
+}
+
+.pika-button {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 6px 4px;
+	border: 0;
+	border-radius: 4px;
+	background: #f6f7f7;
+	font: inherit;
+	font-size: 13px;
+	line-height: 1.4;
+	text-align: center;
+	color: #1d2327;
+	cursor: pointer;
+	transition: background 0.1s ease, color 0.1s ease;
+}
+
+.pika-button:hover {
+	background: #2271b1;
+	color: #fff;
+}
+
+.is-today .pika-button {
+	color: #2271b1;
+	font-weight: 700;
+}
+
+.is-selected .pika-button {
+	background: #2271b1;
+	color: #fff;
+	font-weight: 600;
+}
+
+.is-disabled .pika-button {
+	pointer-events: none;
+	background: transparent;
+	color: #c3c4c7;
+	cursor: default;
+}
