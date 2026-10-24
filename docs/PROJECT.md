@@ -6789,3 +6789,25 @@ Yoast-шаблоны тайтлов для CPT `event`/`venue` были наст
 | Где смотреть | Yoast → Settings → Search Appearance → Content Types → Events/Площадки → Meta description; на карточке события/площадки — `<meta name="description">` |
 
 **Приёмка:** metadesc-шаблоны для event/venue заполнены (были пустые).
+
+### 40. DEV-317 (P1, S) — без JS не вводится дата настроек баннера (24.10.2026)
+
+Форма настроек баннера содержала поле даты с `readonly` + Pikaday, из-за чего при
+отключенном JavaScript дату ввести и отправить нельзя. Решение — вариант A:
+убрано `readonly`, поле само несёт `name`/`value` (ГГГГ-ММ-ДД, нужный санитизации),
+JS-обработчик валидирует ввод и конвертирует старый вид ДД.ММ.ГГГД.
+
+**Реализация:**
+- `plugins/idpg-core/templates/partials/banner-settings/field-date.php`:
+  убрал `readonly`, добавил `name`/`value` (без скрытого `<input type="hidden">`),
+  поменял плейсхолдер на `ГГГГ-ММ-ДД`.
+- `plugins/idpg-core/assets/js/admin-banner-fields.js`: убрал зависимость от
+  Pikaday, добавил валидацию ручного ввода (ГГГГ-ММ-ДД; конверсия ДД.ММ.ГГГД);
+  очистка кнопкой.
+- `plugins/idpg-core/tests/test-banner-form-nojs.php`: PHPUnit-тест,
+  проверяющий приёмку без JS (нет `readonly`, есть `name`/`value`, тип `text`).
+
+**Приёмка:**
+- Без JS поле вводится: нет `readonly`, есть `name`/`value`, тип `text`.
+- PHPUnit: `phpunit plugins/idpg-core/tests/test-banner-form-nojs.php` — зелёный при
+  запуске в окружении с WP test lib и подключённой БД (прогон на стенде).
