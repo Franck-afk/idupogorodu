@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Исправленные ошибки — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Диагностика · 22.10.2026</div>
+			<h1>Исправленные ошибки</h1>
+			<p>Разбор двух критичных поломок: parse error в настройках баннера и «голая» стилизация баннера из-за расхождения CSS и HTML.</p>
+		</header>
+
+		<h2>Баг 1 · Parse error в админке</h2>
+
+		<div class="card">
+			<div class="card__title">Parse error: syntax error, unexpected fully qualified name <span class="badge badge--fix">исправлено</span></div>
+			<p class="card__desc"><code>plugins/idpg-core/includes/class-banner-settings.php</code> on line 423 — админка не открывалась.</p>
+
+			<h3 style="margin-top:18px">Причина</h3>
+			<p>Файл был повреждён скриптовой вставкой: реальные табы и переводы строк записались как <strong>литеральные <code>\t</code> и <code>\n</code></strong> (backslash + символ). PHP интерпретировал <code>\</code> перед табом как начало fully qualified name.</p>
+
+			<h3>Зоны повреждения</h3>
+			<ol>
+				<li>Строки 418–430: трижды дублированная <code>$saved_meta</code> + чужой блок <code>$edit_slug/$editing</code> (код из виджет-менеджера) с литеральными <code>\t\t</code></li>
+				<li>Строка 548: в HTML втиснута строка с литеральными <code>\n\t\t\t\t</code> + чужой блок <code>if ( $editing )</code> с кнопкой «Отмена»</li>
+			</ol>
+
+			<h3>Исправление</h3>
+			<ul>
+				<li>Убран весь мусорный блок — осталась одна корректная <code>$saved_meta = (int) get_user_meta( ... );</code></li>
+				<li>Кнопка сохранения очищена от хвоста с <code>$editing</code>/«Отмена»</li>
+				<li>Файл не был в git (untracked) — восстановление выполнено вручную</li>
+			</ul>
+		</div>
+
+		<h2>Баг 2 · Баннер без стилизации</h2>
+
+		<div class="card">
+			<div class="card__title">Бейджи и кнопка баннера выводились «голыми» <span class="badge badge--fix">исправлено</span></div>
+			<p class="card__desc">CSS отставал от доработанного HTML баннера.</p>
+
+			<h3 style="margin-top:18px">Диагноз</h3>
+			<p>В коде баннер перешёл со старых классов <code>__badge</code>/<code>__status--*</code> на новые <code>__chip--*</code>, плюс добавились кнопка «Подробнее» и VIP-цена. В <code>current-event-banner.css</code> для новых классов не было ни одного правила — <code>grep chip</code> возвращал пусто.</p>
+
+			<h3>Исправление</h3>
+			<ul>
+				<li>Дописаны стили <code>__chips</code>, <code>__chip</code> и всех модификаторов типов</li>
+				<li>Стиль взят из карточки события (<code>templates.css</code>) — те же hex-цвета</li>
+				<li>Добавлены кнопка <code>__btn</code>, VIP-акцент и мобильный адаптив</li>
+				<li>Скобки 59/59, все классы HTML покрыты</li>
+			</ul>
+		</div>
+
+		<h2>Метод диагностики</h2>
+
+		<div class="timeline">
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__title">1. Локализация</div>
+				<p class="timeline__text">Чтение файла вокруг строки из ошибки → обнаружены литеральные <code>\t\t</code> вместо табов.</p>
+			</div>
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__title">2. grep по маркерам</div>
+				<p class="timeline__text">Поиск <code>\\t</code> и <code>\\n</code> по всем PHP-файлам проекта — другие повреждения не найдены (3 вхождения легитимны: trim-строка, комментарий, тест).</p>
+			</div>
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__title">3. Проверка git</div>
+				<p class="timeline__text">Файл untracked — восстановление из репозитория невозможно, восстановлена логика вручную.</p>
+			</div>
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__title">4. Верификация</div>
+				<p class="timeline__text"><code>php -l</code> на PHP 8.2 и 8.3, повторный grep на мусор — чисто.</p>
+			</div>
+		</div>
+
+		<div class="callout callout--danger">
+			<div class="callout__icon">!</div>
+			<div>
+				<p><strong>Выводы на будущее.</strong> Скриптовые вставки кода через heredoc без интерполяции опасны: <code>\t</code>/<code>\n</code> записываются буквально. Правки через инструменты редактирования файлов с валидацией. После массовых замен — <code>php -l</code> + grep по маркерам.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

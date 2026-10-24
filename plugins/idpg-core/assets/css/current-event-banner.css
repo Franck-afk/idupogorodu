@@ -7,7 +7,7 @@
 	display: block;
 	position: relative;
 	width: 100%;
-	height: 400px;
+	height: var(--idpg-banner-h, 400px);
 	overflow: hidden;
 	margin: 16px 0 4rem;
 	border-radius: 20px;
@@ -80,6 +80,51 @@
 	background: #27ae60;
 }
 
+/* -------- Бейджи события (chips) — как в карточке события -------- */
+
+.idpg-current-event-banner__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0 0 12px;
+}
+
+.idpg-current-event-banner__chip {
+	display: inline-block;
+	padding: 5px 11px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.18);
+	color: #fff;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+.idpg-current-event-banner__chip--status {
+	background: #c0392b;
+}
+
+.idpg-current-event-banner__chip--free {
+	background: #059669;
+}
+
+.idpg-current-event-banner__chip--popular {
+	background: #ff7846;
+}
+
+.idpg-current-event-banner__chip--promo {
+	background: #6d28d9;
+}
+
+.idpg-current-event-banner__chip--online {
+	background: #1d4ed8;
+}
+
+.idpg-current-event-banner__chip--new {
+	background: #14532d;
+}
+
 /* Даты проведения события. */
 .idpg-current-event-banner__dates {
 	display: block;
@@ -108,6 +153,25 @@
 	opacity: 0.92;
 }
 
+/* Кнопка «Подробнее». */
+.idpg-current-event-banner__btn {
+	display: inline-block;
+	margin: 16px 0 0;
+	padding: 10px 24px;
+	background: #fff;
+	color: #0a0b0d;
+	font-size: 0.95rem;
+	font-weight: 600;
+	line-height: 1.2;
+	border-radius: 999px;
+	transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.idpg-current-event-banner:hover .idpg-current-event-banner__btn {
+	background: #f0f0f0;
+	transform: translateY(-1px);
+}
+
 /* Строка доп. данных: цена, город, возраст, площадка. */
 .idpg-current-event-banner__meta {
 	display: block;
@@ -123,6 +187,12 @@
 
 .idpg-current-event-banner__meta-item--price {
 	font-weight: 700;
+}
+
+/* VIP-цена — золотой акцент. */
+.idpg-current-event-banner__meta-item--vip {
+	font-weight: 700;
+	color: #fbbf24;
 }
 
 /* -------- Планшет и меньше -------- */
@@ -195,6 +265,22 @@
 	.idpg-current-event-banner__meta {
 		font-size: 0.75rem;
 		margin-top: 8px;
+	}
+
+	.idpg-current-event-banner__chips {
+		gap: 4px;
+		margin-bottom: 8px;
+	}
+
+	.idpg-current-event-banner__chip {
+		font-size: 11px;
+		padding: 4px 9px;
+	}
+
+	.idpg-current-event-banner__btn {
+		font-size: 0.85rem;
+		padding: 8px 18px;
+		margin-top: 10px;
 	}
 }
 

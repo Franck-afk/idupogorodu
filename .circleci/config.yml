@@ -44,6 +44,11 @@ jobs:
           command: |
             cd plugins/idpg-auth
             ../idpg-core/vendor/bin/phpunit -c phpunit.xml.dist
+      - run:
+          name: PHPUnit — idpg-city-admin
+          command: |
+            cd plugins/idpg-city-admin
+            ../idpg-core/vendor/bin/phpunit -c phpunit.xml.dist
 
   phpcs:
     docker:
@@ -82,6 +87,14 @@ jobs:
           name: PHPCS — idpg-auth (baseline)
           command: |
             cd plugins/idpg-auth
+            /tmp/phpcs-tools/vendor/bin/phpcs --standard=.phpcs.xml.dist \
+              --bootstrap=/tmp/phpcs-tools/vendor/forrest79/phpcs-ignores/src/bootstrap.php \
+              --runtime-set ignore_warnings_on_exit 1 \
+              --report=full --no-colors
+      - run:
+          name: PHPCS — idpg-city-admin (baseline)
+          command: |
+            cd plugins/idpg-city-admin
             /tmp/phpcs-tools/vendor/bin/phpcs --standard=.phpcs.xml.dist \
               --bootstrap=/tmp/phpcs-tools/vendor/forrest79/phpcs-ignores/src/bootstrap.php \
               --runtime-set ignore_warnings_on_exit 1 \

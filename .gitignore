@@ -154,3 +154,4 @@ Thumbs.db
 /tmp-*.php
 /audit-*.php
 /fix_*.php
+fix-rows.php

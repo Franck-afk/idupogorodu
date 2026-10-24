@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тесты и проверки — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Контроль качества</div>
+			<h1>Тесты и проверки</h1>
+			<p>Все правки сопровождались обратными пробами: тест обязан падать, если правка намеренно сломана. Ниже — что написано и какими проверками прошло.</p>
+		</header>
+
+		<h2>Написанные тесты</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>Тест</th><th>Что проверяет</th></tr>
+				</thead>
+				<tbody>
+					<tr><td><code>test_defaults_match_previous_hardcoded_values</code></td><td>Дефолты настроек баннера сохраняют прежнее поведение</td></tr>
+					<tr><td><code>test_position_setting_removed</code></td><td>Обратная проба: настройка позиции удалена целиком (ключ, геттер, sanitize, форма)</td></tr>
+					<tr><td><code>test_render_gates_enabled_and_position</code></td><td>Гейты рендера: enabled / hero / is_front_page</td></tr>
+					<tr><td><code>test_carousel_data_attrs_reflect_settings</code></td><td><code>data-interval</code> и <code>data-autorotate</code> отражают настройки</td></tr>
+					<tr><td><code>test_output_params_defaults</code></td><td>Дефолты полей: «Подробнее», 0, 400</td></tr>
+					<tr><td><code>test_output_params_getters_read_option_and_clamp</code></td><td>Геттеры читают option и зажимают мусорные значения</td></tr>
+					<tr><td><code>test_sanitize_settings_reads_output_params</code></td><td>Санитизация: текст чистится, пустой → дефолт, числа зажаты</td></tr>
+					<tr><td><code>test_admin_tab_renders_output_param_fields</code></td><td>Форма рендерит поля ввода</td></tr>
+					<tr><td><code>test_banner_override_defaults_empty</code></td><td>Override-поля по умолчанию пустые (fallback на событие)</td></tr>
+					<tr><td><code>test_sanitize_settings_reads_banner_override</code></td><td>Свой заголовок/текст: теги вырезаются, пробелы обрезаются</td></tr>
+					<tr><td><code>test_admin_tab_has_no_field_checkboxes</code></td><td>Обратная проба: чекбоксы полей не вернулись в форму</td></tr>
+					<tr><td><code>test_banner_output_matches_settings_fields</code></td><td>Функциональная сверка: значения полей попадают в HTML, данные события не дублируются</td></tr>
+					<tr><td><code>test_two_tabs_and_panels</code></td><td>Контракт страницы настроек: 2 вкладки / 2 панели</td></tr>
+					<tr><td><code>test_success_notice_is_one_shot_and_gated_by_tab</code></td><td>Плашка сохранения одноразовая и только на своей вкладке</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Обратные пробы</h2>
+
+		<p>По процессу проекта критерий должен ловить дефект, а не описывать текущее поведение. Ключевые пробы:</p>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">Override не применился</div>
+				<p class="card__desc">Если <code>get_banner_title()</code> не читается в рендере — в HTML остаётся название события, тест падает на <code>assertStringNotContainsString</code>.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Fallback сломан</div>
+				<p class="card__desc">Если при пустых полях баннер не берёт данные события — тест падает на <code>assertStringContainsString( 'Название события из БД' )</code>.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Чекбоксы вернулись</div>
+				<p class="card__desc">Если секция полей с чекбоксами reappeared в форме — <code>test_admin_tab_has_no_field_checkboxes</code> падает.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Высота не проброшена</div>
+				<p class="card__desc">Без <code>--idpg-banner-h:Npx</code> в HTML тест сверки падает — высота из поля не доходит до CSS.</p>
+			</div>
+		</div>
+
+		<h2>Статические проверки</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>php -l на обеих версиях PHP</span><button class="codeblock__copy">Копировать</button></div>
+<pre>/d/laragon/bin/php/php-8.2.29-nts-Win32-vs16-x64/php.exe -l class-banner-settings.php
+/d/laragon/bin/php/php-8.3.31-nts-Win32-vs16-x64/php.exe -l class-banner-settings.php
+→ No syntax errors detected</pre>
+		</div>
+
+		<div class="grid-3">
+			<div class="card">
+				<div class="card__title">php -l</div>
+				<p class="card__desc">Все правленые файлы — 8.2 + 8.3, без ошибок</p>
+			</div>
+			<div class="card">
+				<div class="card__title">PHPCS</div>
+				<p class="card__desc">Baseline темы и city-admin регенерированы, прогон exit 0</p>
+			</div>
+			<div class="card">
+				<div class="card__title">grep-аудит</div>
+				<p class="card__desc">Литеральные <code>\t</code>/<code>\n</code>, сироты CSS — проверено по проекту</p>
+			</div>
+		</div>
+
+		<h2>База данных (стенд)</h2>
+
+		<ul>
+			<li>Удалена опция <code>idpg_home_sections</code> (DEV-273) — 1 строка <code>wp_options</code></li>
+			<li>Деструктивные операции на проде не выполнялись — деплой переносит только код</li>
+		</ul>
+
+		<div class="callout callout--warn">
+			<div class="callout__icon">!</div>
+			<div>
+				<p><strong>Что осталось вне локального прогона.</strong> PHPUnit на стенде не запускался (нет WP test library) — полный прогон покрывает CI. При ручной проверке на сайте: CSS/JS кэшируются по версии плагина, нужен <strong>Ctrl+F5</strong>.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

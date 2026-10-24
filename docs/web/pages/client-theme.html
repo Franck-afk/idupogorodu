@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тема «Иду по городу» — для заказчика</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+
+			<div class="sidebar__section">Техническое</div>
+			<a class="sidebar__link" href="developer.html"><span class="dash"></span>Для разработчиков</a>
+			<a class="sidebar__link" href="for-ai.html"><span class="dash"></span>Для нейросетей</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Для заказчика · простым языком</div>
+			<h1>Тема «Иду по городу» — как выглядит сайт</h1>
+			<p>Тема — это внешний вид портала: страницы, оформление, адаптация под телефон. Если плагин — склад и касса, тема — витрина магазина. Здесь описано, что посетитель видит и может делать.</p>
+		</header>
+
+		<h2>Какие страницы есть на сайте</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Страница</th><th>Что посетитель видит</th></tr></thead>
+				<tbody>
+					<tr><td><strong>Главная</strong></td><td>Крупный баннер «событие дня», секции «Сегодня», «На выходных», «Бесплатные», «Популярные» — всё в афише города посетителя</td></tr>
+					<tr><td><strong>Афиша</strong></td><td>Сетка событий с фильтрами: по дате (сегодня / выходные / свой период), категории, городу</td></tr>
+					<tr><td><strong>Событие</strong></td><td>Карточка с афишей, датой, ценой, местом, описанием, кнопкой «в избранное» и «добавить в календарь»</td></tr>
+					<tr><td><strong>Площадка</strong></td><td>Адрес, часы работы, контакты, ближайшие события этого места</td></tr>
+					<tr><td><strong>Город</strong></td><td>Афиша конкретного города по ссылке-адресу</td></tr>
+					<tr><td><strong>Вход и регистрация</strong></td><td>Формы входа через ВК, Яндекс, MAX; восстановление пароля; всё работает даже без интернета-JS</td></tr>
+					<tr><td><strong>Избранное</strong></td><td>Сохранённые посетителем события — личный список</td></tr>
+					<tr><td><strong>Правовые страницы</strong></td><td>Политика конфиденциальности, соглашение, контакты, о проекте</td></tr>
+					<tr><td><strong>Поиск</strong></td><td>Результаты с живыми подсказками при вводе</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Дизайн и ощущения</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">Единый стиль</div>
+				<p class="card__desc">Все элементы — кнопки, карточки, бейджи («Бесплатно», «ТОП», «Новый»), формы — нарисованы в одном ключе. Цвета и отступы заданы «образцовыми настройками» (101 параметр), поэтому сайт выглядит цельно.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Работает на телефоне</div>
+				<p class="card__desc">Сайт адаптирован под смартфоны и планшеты: меню сворачивается, карточки перестраиваются в одну колонку, баннер становится компактнее. Посетителя с телефоном не меньше, чем с компьютера.</p>
+			</div>
+		</div>
+
+		<ul>
+			<li><strong>Быстрая загрузка</strong> — рекламные блоки подключаются после основной отрисовки и не тормозят сайт</li>
+			<li><strong>Доступность</strong> — элементы управления подписаны для программ чтения с экрана, навигация работает с клавиатуры</li>
+			<li><strong>Понятные адреса</strong> — <code>/afisha/</code> для событий, <code>/gorod/izhevsk/</code> для городов: ссылки человекочитаемые</li>
+		</ul>
+
+		<h2>Реклама и виджеты</h2>
+
+		<p>На сайт можно размещать рекламные блоки в <strong>пяти местах</strong>: под шапкой, над содержимым, сбоку от события, под содержимым, перед подвалом. Для каждого блока настраивается, на каких страницах его показывать:</p>
+
+		<ul>
+			<li><strong>Везде</strong>, <strong>только на главной</strong>, <strong>на всех страницах</strong>, <strong>в записях</strong>, <strong>в архивах</strong> или <strong>на выбранных страницах</strong> — условия выбираются точками</li>
+			<li>Рекламный виджет поддерживает <strong>код рекламной сети</strong> (Яндекс Директ, VK и другие) или <strong>баннер-картинку</strong> со ссылкой</li>
+			<li>Есть виджеты «Последние события» и «Подписка на дайджест»</li>
+			<li>Управление областями — на отдельной странице «Области виджетов» в меню «Иду по городу»</li>
+		</ul>
+
+		<h2>Выбор города — как это выглядит</h2>
+
+		<p>В шапке сайта — выпадающий список городов с поиском. Если сайт определил город сам, сверху появляется вежливая плашка: «Мы определили ваш город: Ижевск. Это ваш город?» с кнопками «Да, мой город» и «Другой город».</p>
+
+		<h2>Что заказчик может менять без разработчика</h2>
+
+		<ul>
+			<li>Меню сайта — стандартными средствами WordPress</li>
+			<li>Рекламные блоки и их места — на странице «Области виджетов»</li>
+			<li>Баннер на главной — тексты, высоту, скорость смены слайдов</li>
+			<li>Виджеты в сайдбаре главной — перетаскиванием</li>
+			<li>Логотип и базовые цвета — через встроенный кастомайзер WordPress</li>
+		</ul>
+
+		<h2>Надёжность «под капотом»</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">Дочерняя тема</div>
+				<p class="card__desc">Если понадобятся индивидуальные правки внешнего вида — они делаются в «дочерней» теме. Обновления основной темы такие правки не затронут.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Проверка стилей</div>
+				<p class="card__desc">Перед выпуском обновления стили автоматически сверяются с образцом — сайт не «поедет» из-за случайной правки.</p>
+			</div>
+		</div>
+
+		<div class="callout callout--info">
+			<div class="callout__icon">i</div>
+			<div>
+				<p>Про «мозги» сайта — на странице <a href="client-plugin.html">«Плагин — что умеет»</a>. Полные технические описания — на страницах <a href="idpg-theme.html">«Тема idpg_core»</a> и <a href="idpg-core.html">«Плагин idpg-core»</a>.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

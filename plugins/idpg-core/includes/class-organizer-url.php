@@ -992,7 +992,7 @@ class IDPG_Organizer_URL {
 		if ( ! is_array( $input ) ) {
 			return new WP_Error(
 				'idpg_profile_invalid_input',
-				__( 'Некорректные данные профиля.', 'idpg_core' ),
+				__( 'Некорректные данные профиля.', 'idpg-core' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -1020,7 +1020,7 @@ class IDPG_Organizer_URL {
 				if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
 					return new WP_Error(
 						'idpg_profile_invalid_avatar',
-						__( 'Аватар должен быть файлом из медиатеки.', 'idpg_core' ),
+						__( 'Аватар должен быть файлом из медиатеки.', 'idpg-core' ),
 						array( 'status' => 400 )
 					);
 				}
@@ -1049,7 +1049,7 @@ class IDPG_Organizer_URL {
 			} else {
 				return new WP_Error(
 					'idpg_profile_invalid_inn',
-					__( 'ИНН должен содержать 10 или 12 цифр.', 'idpg_core' ),
+					__( 'ИНН должен содержать 10 или 12 цифр.', 'idpg-core' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -1102,7 +1102,7 @@ class IDPG_Organizer_URL {
 		if ( ! $user->exists() ) {
 			return new WP_Error(
 				'idpg_profile_user_not_found',
-				__( 'Пользователь не найден.', 'idpg_core' ),
+				__( 'Пользователь не найден.', 'idpg-core' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -1110,7 +1110,7 @@ class IDPG_Organizer_URL {
 		if ( ! is_array( $clean ) || ! $clean ) {
 			return new WP_Error(
 				'idpg_profile_nothing_to_update',
-				__( 'Нет данных для сохранения.', 'idpg_core' ),
+				__( 'Нет данных для сохранения.', 'idpg-core' ),
 				array( 'status' => 400 )
 			);
 		}

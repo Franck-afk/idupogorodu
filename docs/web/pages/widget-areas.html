@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Страница «Области виджетов» — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Навигация · 19.10.2026</div>
+			<h1>Отдельная страница «Области виджетов»</h1>
+			<p>Новый пункт подменю «Иду по городу → Области виджетов» со собственной страницей управления: создание, редактирование и удаление областей виджетов с выбором места вывода и условий показа — в визуальном стиле Clearfy Pro.</p>
+		</header>
+
+		<h2>Регистрация меню</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>class-settings-page.php — register_page()</span><button class="codeblock__copy">Копировать</button></div>
+<pre>public function register_page() {
+	add_menu_page(
+		__( 'Иду по городу', 'idpg-city-admin' ),
+		__( 'Иду по городу', 'idpg-city-admin' ),
+		'manage_options',
+		self::PAGE_SLUG,
+		array( $this, 'render_page' ),
+		'dashicons-admin-generic',
+		25
+	);
+
+	add_submenu_page(
+		self::PAGE_SLUG,
+		__( 'Области виджетов', 'idpg-city-admin' ),
+		__( 'Области виджетов', 'idpg-city-admin' ),
+		'manage_options',
+		self::WIDGET_AREAS_SLUG,          // idpg-widget-areas-manage
+		array( $this, 'render_widget_areas_page' )
+	);
+}</pre>
+		</div>
+
+		<h2>Методы страницы</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>Метод</th><th>Назначение</th></tr>
+				</thead>
+				<tbody>
+					<tr><td><code>render_widget_areas_page()</code></td><td>Полный рендер страницы: заголовок, плашка уведомления, карточка формы, карточка списка областей</td></tr>
+					<tr><td><code>handle_widget_areas_post()</code></td><td>Обработка POST на <code>admin_init</code>: добавление, обновление, удаление области + очистка <code>sidebars_widgets</code></td></tr>
+					<tr><td><code>render_widget_areas_notice()</code></td><td>Плашки «добавлена / обновлена / удалена / не указано название»</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Безопасность</h2>
+
+		<ul>
+			<li>Nonce: <code>wp_nonce_field( 'idpg_widget_areas_action' )</code> + <code>wp_verify_nonce()</code> в обработчике</li>
+			<li>Права: <code>current_user_can( 'manage_options' )</code> — и в рендере, и в обработке</li>
+			<li>Ввод: <code>sanitize_key</code> для slug/position/display, <code>sanitize_text_field</code> для названия, <code>array_map( 'intval' )</code> для страниц</li>
+			<li>Safelist: значение <code>position</code>/<code>display</code> принимается только из белого списка <code>idpg_widget_areas_positions()</code> / <code>idpg_widget_areas_display_options()</code></li>
+		</ul>
+
+		<h2>Данные областей</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">5 позиций вывода</div>
+				<p class="card__desc"><code>below-header</code> · <code>above-content</code> · <code>event-sidebar</code> · <code>below-content</code> · <code>before-footer</code></p>
+			</div>
+			<div class="card">
+				<div class="card__title">6 условий показа</div>
+				<p class="card__desc"><code>all</code> · <code>front</code> · <code>page</code> · <code>post</code> · <code>archive</code> · <code>specific</code> (конкретные страницы)</p>
+			</div>
+		</div>
+
+		<p>Данные читаются из опции <code>idpg_widget_areas</code> через функции темы (<code>idpg_widget_areas_all()</code> и др.) — дублирования логики нет, страница плагина использует существующий механизм. Каждая область регистрируется как стандартный sidebar <code>idpg-area-{slug}</code> и появляется на экране «Виджеты».</p>
+
+		<h2>Интерфейс страницы</h2>
+
+		<ul>
+			<li><strong>Карточка формы</strong> — поля «Название», «Место на фронте», «Показывать», чекбоксы страниц (появляются при условии «Конкретные страницы»)</li>
+			<li><strong>Карточка списка</strong> — каждая область: иконка, название, цветные бейджи (позиция / условие / число страниц), кнопки «Редактировать» и «Удалить» с confirm</li>
+			<li><strong>Hover-эффекты</strong> — подъём карточки + синяя акцентная полоса слева</li>
+			<li><strong>Sticky-панель</strong> сохранения формы</li>
+		</ul>
+
+		<div class="callout callout--info">
+			<div class="callout__icon">i</div>
+			<div>
+				<p>Хук экрана страницы (<code>idpg-settings_page_idpg-widget-areas-manage</code>) добавлен в <code>admin_ui_hooks()</code> — общий слой <code>admin-ui.css</code> подключается автоматически.</p>
+			</div>
+		</div>
+
+		<div class="callout callout--warn">
+			<div class="callout__icon">!</div>
+			<div>
+				<p>Старый URL <code>themes.php?page=idpg-widget-areas</code> остался в теме как редиректор на вкладку — прямые ссылки и закладки продолжают работать.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

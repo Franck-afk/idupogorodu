@@ -215,7 +215,7 @@ class Test_Registration_Form extends WP_UnitTestCase {
 
 		$this->assertNotSame( '', $panel, 'Панель регистрации не отрисована.' );
 		$this->assertStringContainsString(
-			'name="' . IDPG_Privacy::CONSENT_FIELD . '"',
+			'name="idpg_pdn_consent"',
 			$panel,
 			'В форме регистрации нет чекбокса согласия на обработку ПДн.'
 		);
@@ -248,7 +248,7 @@ class Test_Registration_Form extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'name="terms"', $panel, 'Нет чекбокса оферты.' );
 		$this->assertStringContainsString(
-			'name="' . IDPG_Privacy::CONSENT_FIELD . '"',
+			'name="idpg_pdn_consent"',
 			$panel,
 			'Нет отдельного чекбокса согласия на ПДн.'
 		);
@@ -391,6 +391,10 @@ class Test_Registration_Form extends WP_UnitTestCase {
 	 * Факт согласия фиксируется в метаданных.
 	 */
 	public function test_consent_is_recorded_with_organizer_source() {
+		if ( ! class_exists( 'IDPG_Privacy' ) ) {
+			$this->markTestSkipped( 'IDPG_Privacy вынесен в плагин idpg-city-admin (DEV-271).' );
+		}
+
 		$post = $this->registration_post();
 
 		$this->render_login_page( $post, 'POST' );

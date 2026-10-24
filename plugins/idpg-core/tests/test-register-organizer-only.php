@@ -334,4 +334,37 @@ class Test_Register_Organizer_Only extends WP_UnitTestCase {
 
 		$this->assertSame( 201, $response->get_status() );
 	}
+
+	/**
+	 * Короткий пароль отклоняется до траты лимита.
+	 */
+	public function test_short_password_does_not_consume_rate_limit() {
+		$before = $this->rate_count();
+
+		$response = rest_do_request( $this->register_request( array( 'password' => 'short' ) ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'short_password', $response->get_data()['code'] );
+		$this->assertSame( $before, $this->rate_count() );
+	}
+
+	/**
+	 * Истёкшее окно сбрасывает счётчик: регистрация снова проходит,
+	 * а в счётчике остаётся ровно одна новая попытка.
+	 */
+	public function test_expired_window_resets_registration_counter() {
+		set_transient(
+			$this->rate_key(),
+			array(
+				'count'         => IDPG_Auth_Rate_Limiter::REGISTRATION_LIMIT,
+				'first_attempt' => time() - IDPG_Auth_Rate_Limiter::REGISTRATION_WINDOW - 1,
+			),
+			IDPG_Auth_Rate_Limiter::REGISTRATION_WINDOW
+		);
+
+		$response = rest_do_request( $this->register_request( array( 'email' => 'after-window@example.com' ) ) );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( 1, $this->rate_count() );
+	}
 }

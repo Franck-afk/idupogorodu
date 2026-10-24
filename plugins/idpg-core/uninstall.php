@@ -33,15 +33,6 @@ foreach ( $direct_options as $option ) {
 	delete_option( $option );
 }
 
-// Опции режима «Сайт в разработке» — все с префиксом idpg_maintenance_
-// (enabled, title, message, contacts, цвет фона и т.д., регистрируются
-// через register_setting с группой idpg_maintenance).
-$GLOBALS['wpdb']->query(
-	"DELETE FROM {$GLOBALS['wpdb']->options}
-	 WHERE option_name LIKE 'idpg_maintenance\\_%'
-	    OR option_name = 'idpg_maintenance_enabled'"
-);
-
 // Транзиенты: блокировка миграций. Транзиенты с истечением
 // создают парные ключи *_timeout — удаляем по тому же LIKE.
 $transient_likes = array(
@@ -78,9 +69,6 @@ foreach ( $user_meta_keys as $meta_key ) {
 if ( wp_next_scheduled( 'idpg_cron_sync_tickets' ) ) {
 	wp_clear_scheduled_hook( 'idpg_cron_sync_tickets' );
 }
-
-// Cookie режима разработки — очистить у клиента нечем при uninstall,
-// WordPress удалит их по истечении срока; серверной записи нет.
 
 /**
  * Опциональная зачистка данных контента (post meta `_idpg_*`).

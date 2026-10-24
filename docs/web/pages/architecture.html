@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Структура проекта — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Архитектура</div>
+			<h1>Структура проекта</h1>
+			<p>Портал-афиша «Иду по городу»: мультигородская платформа событий на WordPress. Ниже — как устроен проект и какие компоненты затронули доработки.</p>
+		</header>
+
+		<h2>Плагины</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">idpg-core <span class="badge badge--info">v1.1.2</span></div>
+				<p class="card__desc">Ядро: 36 классов — CPT событий и площадок, таксономии, роли, REST API (36 маршрутов <code>idpg/v1</code>), мультигород, авторизация, баннер, календарь, избранное.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">idpg-auth <span class="badge badge--info">v1.0.0</span></div>
+				<p class="card__desc">OAuth-вход через ВКонтакте, Яндекс ID и MAX. Журналы, антибрутфорс, КоАП-режим. 11 классов.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">idpg-city-admin <span class="badge badge--info">v1.0.1</span></div>
+				<p class="card__desc">Админ-раздел «Иду по городу»: страница настроек с вкладками, «Конфиденциальность» (152-ФЗ), «Отклонить событие», «Области виджетов».</p>
+			</div>
+			<div class="card">
+				<div class="card__title">idpg-maintenance <span class="badge badge--info">v1.0.0</span></div>
+				<p class="card__desc">Режим «Сайт в разработке»: заглушка 503, пароль доступа, белый список IP, отсчёт до запуска.</p>
+			</div>
+		</div>
+
+		<h2>Тема idpg_core</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>Компонент</th><th>Назначение</th></tr>
+				</thead>
+				<tbody>
+					<tr><td><code>front-page.php</code></td><td>Главная: hero-баннер, 5 секций, позиции виджет-областей</td></tr>
+					<tr><td><code>inc/widget-areas.php</code></td><td>Менеджер произвольных областей виджетов: 5 позиций, 6 условий показа</td></tr>
+					<tr><td><code>inc/widgets.php</code></td><td>Сайдбар <code>home-sidebar</code> + 3 виджета: реклама, последние события, подписка</td></tr>
+					<tr><td><code>inc/helpers.php</code></td><td>30+ хелперов темы, крошки, Walker меню</td></tr>
+					<tr><td><code>assets/css/templates.css</code></td><td>Дизайн-система: 101 CSS-токен, карточки событий, чипы</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Ключевые зависимости</h2>
+
+		<div class="grid-3">
+			<div class="card">
+				<div class="card__title">Carbon Fields 3.6</div>
+				<p class="card__desc">Мета-поля событий (~35) и площадок, реквизиты организатора. Composer-зависимость в idpg-core.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Yoast SEO</div>
+				<p class="card__desc">JSON-LD <code>Event</code>/<code>Place</code>, OpenGraph, крошки — через <code>IDPG_SEO_Integration</code>.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">WooCommerce</div>
+				<p class="card__desc">Роль <code>customer</code>, HPOS-совместимость idpg-auth.</p>
+			</div>
+		</div>
+
+		<h2>Карта файлов доработок</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>Файлы, изменённые в ходе работ</span><button class="codeblock__copy">Копировать</button></div>
+<pre>plugins/
+├── idpg-core/
+│   ├── idpg-core.php                          require + init
+│   └── includes/
+│       ├── class-banner-settings.php          настройки вкладки «Баннер»
+│       ├── class-current-event-banner.php      рендер баннера на главной
+│       └── tests/
+│           └── test-banner-settings-tab.php    тесты баннера и настроек
+├── idpg-city-admin/
+│   ├── idpg-city-admin.php                    bootstrap плагина
+│   ├── includes/
+│   │   └── class-settings-page.php            меню, вкладки, области виджетов
+│   └── assets/
+│       ├── css/admin-ui.css                   общий слой Clearfy Pro
+│       ├── css/settings.css                   вкладки-чипы, заголовок
+│       └── js/settings.js                     переключение вкладок, экспорт
+└── themes/idpg_core/
+    ├── front-page.php                         главная (hero-баннер)
+    ├── inc/home-sections.php                  УДАЛЁН (DEV-273)
+    ├── inc/widget-areas.php                   менеджер областей виджетов
+    ├── inc/widgets.php                        сайдбары + виджеты темы
+    └── assets/css/current-event-banner.css    стили баннера (плагин)</pre>
+		</div>
+
+		<div class="callout callout--warn">
+			<div class="callout__icon">!</div>
+			<div>
+				<p><strong>Правило проекта.</strong> Бизнес-логика — в <code>idpg-core</code>; тема отвечает только за представление. Новый код — через хуки, с префиксом <code>idpg_</code>, без удаления работающего кода без явного запроса.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

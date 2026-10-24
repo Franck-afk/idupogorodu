@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEV-273 · Настройки главной — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">DEV-273 · 19.10.2026</div>
+			<h1>Удаление страницы «Настройки главной»</h1>
+			<p>Дублирующая страница управления видимостью секций главной устранена целиком: все 5 секций теперь показываются всегда, настройка через чекбоксы удалена из темы и из админки плагина.</p>
+		</header>
+
+		<h2>Проблема</h2>
+		<p>Страница «Внешний вид → Настройки главной» в теме дублировала функционал вкладки «Главная (Блоки)» в плагине <code>idpg-city-admin</code>. Владелец решил удалить настройку видимости секций целиком — секции главной должны отображаться всегда.</p>
+
+		<h2>Что удалено</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>Компонент</th><th>Что было удалено</th></tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Тема <code>idpg_core</code></td>
+						<td>
+							Файл <code>inc/home-sections.php</code> (148 строк): регистрация опции <code>idpg_home_sections</code>, страница админки, функции <code>idpg_home_sections_list()</code> и <code>idpg_home_section_enabled()</code>
+						</td>
+					</tr>
+					<tr>
+						<td><code>functions.php</code></td>
+						<td><code>require_once</code> удалённого файла</td>
+					</tr>
+					<tr>
+						<td><code>front-page.php</code></td>
+						<td>5 условных обёрток <code>if ( idpg_home_section_enabled( ... ) )</code> — секции «Сегодня», «Выходные», «Бесплатные», «Популярные», «Лента»</td>
+					</tr>
+					<tr>
+						<td><code>idpg-city-admin</code></td>
+						<td>Вкладка «Главная (Блоки)»: пункт массива <code>$tabs</code>, панель <code>&lt;section&gt;</code>, метод <code>render_glavnaya_tab()</code>, редирект старого URL <code>idpg-home-sections</code>, скрытие подменю</td>
+					</tr>
+					<tr>
+						<td>База (стенд)</td>
+						<td>Опция <code>idpg_home_sections</code> — 1 строка в <code>wp_options</code></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Обновления версий</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">Тема idpg_core</div>
+				<p class="card__desc"><strong>1.0.78 → 1.0.79</strong> — <code>functions.php</code> (константа <code>IDPG_VERSION</code>) и <code>style.css</code> (шапка темы).</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Плагин idpg-city-admin</div>
+				<p class="card__desc"><strong>1.0.0 → 1.0.1</strong> — заголовок плагина и константа <code>IDPG_CITY_ADMIN_VERSION</code>.</p>
+			</div>
+		</div>
+
+		<h2>Тесты и PHPCS</h2>
+
+		<ul>
+			<li><code>test-settings-page.php</code>: ожидание 3 → <strong>2</strong> вкладки/панели, дефолтная вкладка → <code>widgets</code>, убран <code>glavnaya</code> из циклов</li>
+			<li><code>test-admin-ui.php</code>: <code>glavnaya</code> → <code>widgets</code>, 3 → <strong>2</strong> панели</li>
+			<li>Регенерированы baseline <code>.phpcs.xml.dist-baseline.neon</code> темы и плагина — прогон <strong>exit 0</strong>, 0 «was not matched»</li>
+		</ul>
+
+		<h2>Фрагмент: было → стало</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>front-page.php</span><button class="codeblock__copy">Копировать</button></div>
+<pre>// БЫЛО — секция оборачивалась в проверку настройки:
+&lt;?php if ( idpg_home_section_enabled( 'today' ) ) : ?&gt;
+    &lt;section class="idpg-home__section"&gt;...&lt;/section&gt;
+&lt;?php endif; ?&gt;
+
+// СТАЛО — секция выводится всегда:
+&lt;section class="idpg-home__section"&gt;...&lt;/section&gt;</pre>
+		</div>
+
+		<div class="callout callout--success">
+			<div class="callout__icon">✓</div>
+			<div>
+				<p><strong>Результат.</strong> Настройка видимости секций удалена из двух мест одновременно, опция вычищена из БД, документация (<code>docs/PROJECT.md</code> §3.2, §1.8, §1б + карточка §45) и спецификация <code>docs/specs/DEV-273.md</code> обновлены в том же коммите.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

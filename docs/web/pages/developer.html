@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Для разработчиков — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+
+			<div class="sidebar__section">Техническое</div>
+			<a class="sidebar__link" href="developer.html"><span class="dash"></span>Для разработчиков</a>
+			<a class="sidebar__link" href="for-ai.html"><span class="dash"></span>Для нейросетей</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Техническое · для разработчиков</div>
+			<h1>Техническая документация</h1>
+			<p>Паттерны, контракты, точки расширения и инварианты кода. Всё, что нужно знать перед изменением плагинов <code>idpg-core</code> и <code>idpg-city-admin</code>.</p>
+		</header>
+
+		<h2>Паттерны кода</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">Singleton везде</div>
+				<p class="card__desc">Каждый компонент — класс-синглтон: <code>private function __construct()</code> + <code>public static function instance()</code>. Обращение к состоянию — только через <code>instance()</code>.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">File-load init</div>
+				<p class="card__desc">Синглтоны, которым нужны хуки Carbon Fields (<code>carbon_fields_register_fields</code>, dispatch на <code>init</code> priority 0), создаются <strong>на этапе загрузки файла</strong>, а не в <code>idpg_core_init()</code> — иначе подписка опаздывает.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Настройки-класс</div>
+				<p class="card__desc">Паттерн <code>IDPG_Banner_Settings</code>: <code>defaults()</code> → <code>get_settings()</code> (wp_parse_args) → типизированные геттеры с clamp → <code>sanitize_settings( $raw )</code> → <code>handle_save()</code> (nonce + redirect + flash).</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Версионирование</div>
+				<p class="card__desc">Каждый плагин — константа <code>IDPG_*_VERSION</code>; ассеты версионируются ей же (для cache-busting). Миграции меты — через option <code>idpg_meta_migration_version</code>.</p>
+			</div>
+		</div>
+
+		<h2>Ключевые контракты</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>Класс / функция</th><th>Контракт</th></tr>
+				</thead>
+				<tbody>
+					<tr><td><code>IDPG_Banner_Settings::defaults()</code></td><td>Полный массив дефолтов; <code>wp_parse_args</code> в <code>get_settings()</code> — старый option без новых ключей работает</td></tr>
+					<tr><td><code>IDPG_Banner_Settings::sanitize_settings( $raw )</code></td><td>Принимает <code>$_POST</code>-подобный массив, возвращает только известные ключи; числа зажаты в диапазоны</td></tr>
+					<tr><td><code>IDPG_Banner_Settings::get_*()</code></td><td>Типизированный возврат (string/int) с clamp — «мусор» из option не доходит до рендера</td></tr>
+					<tr><td><code>IDPG_Current_Event_Banner::render( $position )</code></td><td>Callback хука <code>idpg_banner_position</code>; рендерит только при <code>'hero' === $position</code> + <code>is_front_page()</code> + enabled</td></tr>
+					<tr><td><code>idpg_widget_areas_render( $position )</code></td><td>Выводит области с совпадающей позицией, прошедшие <code>idpg_widget_areas_matches()</code>; no-op в админке</td></tr>
+					<tr><td><code>IDPG_Settings_Page::admin_ui_hooks()</code></td><td>Единый реестр хуков экранов для общего слоя <code>admin-ui.css</code>; новая страница добавляется сюда</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Точки расширения (хуки)</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>Actions / filters проекта</span><button class="codeblock__copy">Копировать</button></div>
+<pre>/* Добавить позицию вывода баннера (тема вызывает в шаблоне): */
+add_action( 'idpg_banner_position', 'my_render', 10, 1 );
+
+/* Добавить вкладку на страницу «Иду по городу»: */
+add_filter( 'idpg_widget_areas_admin_tabs', function ( $tabs ) {
+	$tabs['my-tab'] = array(
+		'label'    => 'Моя вкладка',
+		'callback' => 'my_tab_render',
+	);
+	return $tabs;
+} );
+
+/* Сбросить кэш баннера при своих событиях: */
+do_action( 'save_post_event', $post_id );  // уже purge_cache</pre>
+		</div>
+
+		<h2>Жизненный цикл баннера</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>Request → HTML</span><button class="codeblock__copy">Копировать</button></div>
+<pre>front-page.php
+  └─ do_action( 'idpg_banner_position', 'hero' )
+       └─ IDPG_Current_Event_Banner::render( 'hero' )
+            ├─ should_render(): enabled? hero? is_front_page?
+            ├─ render_paid_html()
+            │    ├─ get_paid_events(): transient idpg_paid_banner_ids_{city}
+            │    │    └─ WP_Query( _idpg_banner_approved=yes, poster, даты )
+            │    └─ 1 событие → render_single_html()
+            │       N событий → карусель + data-interval/data-autorotate
+            └─ render_html()
+                 └─ get_current_event(): transient idpg_current_event_id_{city}
+                      └─ render_single_html( $event )
+                           ├─ override: banner_title / banner_text / button_text
+                           ├─ fallback: get_the_title / get_the_excerpt (+обрезка)
+                           ├─ chips · dates · meta-line · fav · btn
+                           └─ &lt;a style="--idpg-banner-h:{height}px"&gt;</pre>
+		</div>
+
+		<h2>Carbon Fields</h2>
+
+		<ul>
+			<li>Bootstrap: <code>after_setup_theme</code> priority <strong>5</strong> с гардом <code>function_exists( 'carbon_get_theme_option' )</code> — плагин boot'ит раньше темы, дубль пропускается</li>
+			<li>Контейнеры: 5× <code>post_meta</code> для события, 1× для площадки, 1× <code>user_meta</code> для реквизитов организатора</li>
+			<li>Машинный экспорт полей: <code>docs/carbon-fields-export.json</code></li>
+		</ul>
+
+		<h2>REST API</h2>
+
+		<ul>
+			<li>Пространство <code>idpg/v1</code>, ~36 маршрутов: события, площадки, города, live-поиск, избранное, подписка, статистика организатора</li>
+			<li>У каждого маршрута — <code>permission_callback</code>; у каждого параметра — <code>sanitize_callback</code></li>
+			<li>Nonce для JS: <code>wp_create_nonce( 'wp_rest' )</code></li>
+		</ul>
+
+		<h2>Инварианты безопасности</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">Формы</div>
+				<p class="card__desc"><code>wp_nonce_field()</code> + <code>wp_verify_nonce()</code> / <code>check_admin_referer()</code>; POST-обработчики висят на <code>admin_init</code> и выходят молча без своего action-поля</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Escape / санитизация</div>
+				<p class="card__desc">Escape на выводе «как можно позже»: <code>esc_html</code>, <code>esc_attr</code>, <code>esc_url</code>, <code>esc_textarea</code>. Ввод — safelist вместо blocklist</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Права</div>
+				<p class="card__desc"><code>current_user_can( 'manage_options' )</code> в рендере И в обработчике; проверки с клиента не доверяем</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Рекламный код</div>
+				<p class="card__desc"><code>&lt;script&gt;</code>/<code>&lt;iframe&gt;</code> в виджете рекламы — только при <code>edit_theme_options</code> (wp_kses с расширенным whitelist)</p>
+			</div>
+		</div>
+
+		<h2>Тестирование</h2>
+
+		<ul>
+			<li><code>WP_UnitTestCase</code> + фабрики; private-методы — через <code>ReflectionMethod</code> (см. <code>render_single_html</code>, <code>should_render</code>)</li>
+			<li>Контрактные тесты: HTML проверяется по подстрокам (<code>name="idpg_banner_*"</code>, <code>data-settings-panel</code>) — ловят поломку формы без браузера</li>
+			<li>Обратная проба обязательна: тест должен падать при намеренной поломке правки</li>
+			<li>PHPCS: свой <code>.phpcs.xml.dist</code> + baseline на компонент; Windows-пути — через патчи <code>bin/phpcs-patches/</code></li>
+		</ul>
+
+		<h2>Команды</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>Проверки</span><button class="codeblock__copy">Копировать</button></div>
+<pre># Синтаксис всех правленых файлов (8.2 + 8.3)
+php -l plugins/idpg-core/includes/class-banner-settings.php
+php -l plugins/idpg-core/includes/class-current-event-banner.php
+
+# PHPCS с baseline (Windows: через phpcs-tools + патчи)
+phpcs --standard=.phpcs.xml.dist --report=summary
+
+# Тесты (в CI или где есть WP test library)
+phpunit
+
+# Локально: очистка опций стенда
+mysql idupogorodu -e "DELETE FROM wp_options WHERE option_name='idpg_home_sections'"</pre>
+		</div>
+
+		<div class="callout callout--info">
+			<div class="callout__icon">i</div>
+			<div>
+				<p>Машинно-читаемая версия этого контекста для LLM и AI-агентов — на странице <a href="for-ai.html">«Для нейросетей»</a> и в файлах <code>llms.txt</code> / <code>llms-full.txt</code>.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

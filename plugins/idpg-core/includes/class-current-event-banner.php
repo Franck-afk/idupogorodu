@@ -58,6 +58,19 @@ class IDPG_Current_Event_Banner {
 	const META_BANNER_APPROVED = '_idpg_banner_approved';
 
 	/**
+	 * Мета-ключи полей карточки события, которые выводятся в баннере.
+	 *
+	 * @var string
+	 */
+	const META_IS_FREE   = '_idpg_is_free';
+	const META_IS_ONLINE = '_idpg_is_online';
+	const META_VIP_PRICE = '_idpg_vip_price';
+	const META_ALL_DAY   = '_idpg_all_day';
+	const META_CURRENCY  = '_idpg_currency';
+	const META_VIEWS     = '_idpg_views';
+	const META_SESSIONS  = '_idpg_sessions_json';
+
+	/**
 	 * Префикс транзиентов кэша списка оплаченных событий (на город).
 	 *
 	 * @var string
@@ -188,7 +201,7 @@ class IDPG_Current_Event_Banner {
 	 * @param string $position Позиция: hero / middle / bottom.
 	 */
 	public function render( $position ) {
-		if ( 'hero' !== $position || ! is_front_page() ) {
+		if ( ! $this->should_render( $position ) ) {
 			return;
 		}
 
@@ -204,6 +217,33 @@ class IDPG_Current_Event_Banner {
 		if ( $html ) {
 			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
+	}
+
+	/**
+	 * Выводить ли баннер в указанной позиции хука.
+	 *
+	 * Гейты: блок включён в настройках вкладки «Баннер на главной»,
+	 * позиция hero (настройка позиции удалена — баннер показывается
+	 * только в hero, как и до появления вкладки), запрос — главная
+	 * страница.
+	 *
+	 * @param string $position Позиция хука: hero / middle / bottom.
+	 * @return bool
+	 */
+	private function should_render( $position ) {
+		if ( ! IDPG_Banner_Settings::is_enabled() ) {
+			return false;
+		}
+
+		if ( 'hero' !== $position ) {
+			return false;
+		}
+
+		if ( ! is_front_page() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -310,20 +350,23 @@ class IDPG_Current_Event_Banner {
 			),
 		);
 
+		// Кэш выбора баннера по городу (срок задаётся в настройках баннера).
+		$cache_ttl = IDPG_Banner_Settings::get_cache_ttl();
+
 		$posts = get_posts( $args );
 		if ( empty( $posts ) ) {
-			set_transient( $cache_key, 0, 10 * MINUTE_IN_SECONDS );
+			set_transient( $cache_key, 0, $cache_ttl );
 			return null;
 		}
 
 		// Полное скрытие баннера: вместо замены следующим событием
 		// баннер на главной не показывается вовсе.
 		if ( $this->is_full_banner_hidden( (int) $posts[0]->ID ) ) {
-			set_transient( $cache_key, 0, 10 * MINUTE_IN_SECONDS );
+			set_transient( $cache_key, 0, $cache_ttl );
 			return null;
 		}
 
-		set_transient( $cache_key, (int) $posts[0]->ID, 10 * MINUTE_IN_SECONDS );
+		set_transient( $cache_key, (int) $posts[0]->ID, $cache_ttl );
 		return $posts[0];
 	}
 
@@ -335,30 +378,6 @@ class IDPG_Current_Event_Banner {
 	 */
 	private function is_full_banner_hidden( $post_id ) {
 		return 'yes' === get_post_meta( $post_id, self::META_HIDE_FULL, true );
-	}
-
-	/**
-	 * Первая рубрика события.
-	 *
-	 * @param int $post_id ID события.
-	 * @return array|null Массив с name/link или null.
-	 */
-	private function get_rubric( $post_id ) {
-		$terms = wp_get_post_terms( $post_id, self::TAX_CAT, array( 'number' => 1 ) );
-		if ( is_wp_error( $terms ) || empty( $terms ) ) {
-			return null;
-		}
-
-		$term = $terms[0];
-		$link = get_term_link( $term, self::TAX_CAT );
-		if ( is_wp_error( $link ) ) {
-			$link = '';
-		}
-
-		return array(
-			'name' => $term->name,
-			'link' => $link,
-		);
 	}
 
 	/**
@@ -375,6 +394,177 @@ class IDPG_Current_Event_Banner {
 		}
 
 		return $terms[0]->name;
+	}
+
+	/**
+	 * Рубрики события (до двух) — как в карточке события.
+	 *
+	 * @param int $post_id ID события.
+	 * @param int $limit   Сколько рубрик вернуть.
+	 * @return array Массив названий рубрик.
+	 */
+	private function get_rubrics( $post_id, $limit = 2 ) {
+		$terms = wp_get_post_terms( $post_id, self::TAX_CAT, array( 'number' => $limit ) );
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return array();
+		}
+
+		$names = array();
+		foreach ( $terms as $term ) {
+			$names[] = $term->name;
+		}
+
+		return $names;
+	}
+
+	/**
+	 * Бейджи события — те же, что у карточки события.
+	 *
+	 * Порядок и набор совпадают с карточкой: статус билетов, «Бесплатно»,
+	 * «Популярное», «ТОП», «Онлайн», «Новый». Порог «популярного»
+	 * считает тема для секций главной ($GLOBALS['idpg_popular_min_views']).
+	 *
+	 * @param int $post_id ID события.
+	 * @return array Массив бейджей: label (текст), type (тип для класса).
+	 */
+	private function get_event_chips( $post_id ) {
+		$chips = array();
+
+		$status_labels = array(
+			'in_sale'   => __( 'Билеты в продаже', 'idpg-core' ),
+			'sold_out'  => __( 'Билеты закончились', 'idpg-core' ),
+			'cancelled' => __( 'Отменено', 'idpg-core' ),
+			'postponed' => __( 'Перенесено', 'idpg-core' ),
+		);
+		$status        = IDPG_Helpers::get_ticket_status( $post_id );
+
+		if ( $status && isset( $status_labels[ $status ] ) ) {
+			$chips[] = array(
+				'label' => $status_labels[ $status ],
+				'type'  => 'status',
+			);
+		}
+
+		if ( 'yes' === get_post_meta( $post_id, self::META_IS_FREE, true ) ) {
+			$chips[] = array(
+				'label' => __( 'Бесплатно', 'idpg-core' ),
+				'type'  => 'free',
+			);
+		}
+
+		$popular_min = isset( $GLOBALS['idpg_popular_min_views'] ) ? (int) $GLOBALS['idpg_popular_min_views'] : 0;
+		if ( $popular_min > 0 && (int) get_post_meta( $post_id, self::META_VIEWS, true ) >= $popular_min ) {
+			$chips[] = array(
+				'label' => __( 'Популярное', 'idpg-core' ),
+				'type'  => 'popular',
+			);
+		}
+
+		if ( 'yes' === get_post_meta( $post_id, IDPG_Promotion::META_PROMOTED, true ) ) {
+			$chips[] = array(
+				'label' => __( 'ТОП', 'idpg-core' ),
+				'type'  => 'promo',
+			);
+		}
+
+		if ( 'yes' === get_post_meta( $post_id, self::META_IS_ONLINE, true ) ) {
+			$chips[] = array(
+				'label' => __( 'Онлайн', 'idpg-core' ),
+				'type'  => 'online',
+			);
+		}
+
+		$published = (int) get_post_time( 'U', false, $post_id );
+		if ( $published && ( time() - $published ) < 14 * DAY_IN_SECONDS ) {
+			$chips[] = array(
+				'label' => __( 'Новый', 'idpg-core' ),
+				'type'  => 'new',
+			);
+		}
+
+		return $chips;
+	}
+
+	/**
+	 * Время события: «весь день» или время первого сеанса.
+	 *
+	 * Сеансы читаются из зеркала `_idpg_sessions_json` (см. IDPG_Meta).
+	 *
+	 * @param int $post_id ID события.
+	 * @return string Пустая строка, если времени нет.
+	 */
+	private function get_event_time_label( $post_id ) {
+		if ( 'yes' === get_post_meta( $post_id, self::META_ALL_DAY, true ) ) {
+			return __( 'весь день', 'idpg-core' );
+		}
+
+		$raw = (string) get_post_meta( $post_id, self::META_SESSIONS, true );
+		if ( '' === $raw ) {
+			return '';
+		}
+
+		$sessions = json_decode( $raw, true );
+		if ( ! is_array( $sessions ) || empty( $sessions[0]['time'] ) ) {
+			return '';
+		}
+
+		return (string) $sessions[0]['time'];
+	}
+
+	/**
+	 * VIP-цена события — как в карточке события.
+	 *
+	 * @param int $post_id ID события.
+	 * @return string Пустая строка, если VIP-цены нет.
+	 */
+	private function get_vip_price( $post_id ) {
+		$vip = trim( (string) get_post_meta( $post_id, self::META_VIP_PRICE, true ) );
+
+		if ( '' === $vip || '0' === $vip ) {
+			return '';
+		}
+
+		$currency = trim( (string) get_post_meta( $post_id, self::META_CURRENCY, true ) );
+		if ( '' === $currency ) {
+			$currency = 'RUB';
+		}
+
+		$symbols = array(
+			'RUB' => '₽',
+			'USD' => '$',
+			'EUR' => '€',
+		);
+		$symbol  = isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : $currency;
+
+		return sprintf(
+			/* translators: 1: VIP-цена, 2: символ валюты */
+			__( 'VIP: %1$s %2$s', 'idpg-core' ),
+			number_format_i18n( (float) $vip ),
+			$symbol
+		);
+	}
+
+	/**
+	 * HTML бейджей события.
+	 *
+	 * @param array $chips Бейджи из get_event_chips().
+	 * @return string Пустая строка, если бейджей нет.
+	 */
+	private function render_chips_html( $chips ) {
+		if ( empty( $chips ) ) {
+			return '';
+		}
+
+		$html = '<span class="idpg-current-event-banner__chips">';
+
+		foreach ( $chips as $chip ) {
+			$html .= '<span class="idpg-current-event-banner__chip idpg-current-event-banner__chip--'
+				. esc_attr( $chip['type'] ) . '">' . esc_html( $chip['label'] ) . '</span>';
+		}
+
+		$html .= '</span>';
+
+		return $html;
 	}
 
 	/**
@@ -469,9 +659,19 @@ class IDPG_Current_Event_Banner {
 			$items['city'] = '<span class="idpg-current-event-banner__meta-item">' . esc_html( $city ) . '</span>';
 		}
 
+		$rubrics = $this->get_rubrics( $post_id, 2 );
+		if ( $rubrics ) {
+			$items['rubric'] = '<span class="idpg-current-event-banner__meta-item">' . esc_html( implode( ', ', $rubrics ) ) . '</span>';
+		}
+
 		$age = $this->get_first_term_name( $post_id, 'age_rating' );
 		if ( $age ) {
 			$items['age'] = '<span class="idpg-current-event-banner__meta-item">' . esc_html( $age ) . '</span>';
+		}
+
+		$vip = $this->get_vip_price( $post_id );
+		if ( $vip ) {
+			$items['vip'] = '<span class="idpg-current-event-banner__meta-item idpg-current-event-banner__meta-item--vip">' . esc_html( $vip ) . '</span>';
 		}
 
 		$venue = $this->get_venue( $post_id );
@@ -602,31 +802,42 @@ class IDPG_Current_Event_Banner {
 			return '';
 		}
 
-		$title    = get_the_title( $event );
-		$excerpt  = has_excerpt( $event ) ? trim( (string) get_the_excerpt( $event ) ) : '';
-		$rubric   = $this->get_rubric( $event->ID );
+		// Свои заголовок и текст из настроек перекрывают данные события.
+		$title = IDPG_Banner_Settings::get_banner_title();
+		if ( '' === $title ) {
+			$title = get_the_title( $event );
+		}
+
+		$excerpt = IDPG_Banner_Settings::get_banner_text();
+		if ( '' === $excerpt ) {
+			$excerpt = has_excerpt( $event ) ? trim( (string) get_the_excerpt( $event ) ) : '';
+
+			// Анонс события обрезаем до настроенной длины (0 — без
+			// обрезки); свой текст выводим как есть.
+			$excerpt_length = IDPG_Banner_Settings::get_excerpt_length();
+			if ( $excerpt_length > 0 && mb_strlen( $excerpt ) > $excerpt_length ) {
+				$excerpt = mb_substr( $excerpt, 0, $excerpt_length ) . '…';
+			}
+		}
+
 		$date_raw = get_post_meta( $event->ID, self::META_START, true );
 		$end_raw  = get_post_meta( $event->ID, self::META_END, true );
 		$dates    = $this->format_date_range( $date_raw, $end_raw );
-		$status   = IDPG_Helpers::get_ticket_status( $event->ID );
+		$time     = $this->get_event_time_label( $event->ID );
+		$chips    = $this->render_chips_html( $this->get_event_chips( $event->ID ) );
 		$meta     = $this->get_event_meta_line( $event->ID );
 
+		// Время события дописываем к дате — как в карточке события.
+		if ( $time ) {
+			$dates = $dates ? $dates . ', ' . $time : $time;
+		}
+
 		$content = '';
-		if ( $title || $excerpt || $rubric || $dates || $meta ) {
+		if ( $title || $excerpt || $dates || $meta || $chips ) {
 			$content .= '<div class="idpg-current-event-banner__content">';
 
-			if ( $rubric ) {
-				$content .= '<span class="idpg-current-event-banner__badge">' . esc_html( $rubric['name'] ) . '</span>';
-			}
-			$status_labels = array(
-				'in_sale'   => __( 'Билеты в продаже', 'idpg-core' ),
-				'sold_out'  => __( 'Билеты закончились', 'idpg-core' ),
-				'cancelled' => __( 'Мероприятие отменено', 'idpg-core' ),
-				'postponed' => __( 'Мероприятие перенесено', 'idpg-core' ),
-			);
-			if ( ! empty( $status ) && isset( $status_labels[ $status ] ) ) {
-				$content .= '<span class="idpg-current-event-banner__status idpg-current-event-banner__status--'
-					. esc_attr( $status ) . '">' . esc_html( $status_labels[ $status ] ) . '</span>';
+			if ( $chips ) {
+				$content .= $chips;
 			}
 			if ( $dates ) {
 				$content .= '<span class="idpg-current-event-banner__dates">' . esc_html( $dates ) . '</span>';
@@ -640,6 +851,7 @@ class IDPG_Current_Event_Banner {
 			if ( $meta ) {
 				$content .= '<span class="idpg-current-event-banner__meta">' . $meta . '</span>';
 			}
+			$content .= '<span class="idpg-current-event-banner__btn">' . esc_html( IDPG_Banner_Settings::get_button_text() ) . '</span>';
 			$content .= '</div>';
 		}
 
@@ -652,8 +864,29 @@ class IDPG_Current_Event_Banner {
 			. '<img class="idpg-current-event-banner__img" src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $title ) . '" loading="lazy">'
 			. '</picture>';
 
-		return '<a class="idpg-current-event-banner" href="' . esc_url( get_permalink( $event ) ) . '">'
-			. $picture . $overlay . $content . '</a>';
+		// Сердце «в избранное» — как в карточке события (только для
+		// авторизованных пользователей).
+		$fav = '';
+		if ( class_exists( 'IDPG_Favorites' ) ) {
+			ob_start();
+			IDPG_Favorites::button( $event->ID );
+			$fav = (string) ob_get_clean();
+		}
+
+		// Микроразметка Schema.org/Event — как у карточки события.
+		$jsonld = '';
+		if ( function_exists( 'idpg_core_event_jsonld' ) ) {
+			ob_start();
+			idpg_core_event_jsonld( $event->ID );
+			$jsonld = (string) ob_get_clean();
+		}
+
+		// Высота баннера — из настроек (CSS-переменная, чтобы медиа-запрос
+		// на мобильных её перебил).
+		$banner_height = IDPG_Banner_Settings::get_banner_height();
+
+		return '<a class="idpg-current-event-banner" style="--idpg-banner-h:' . esc_attr( (string) $banner_height ) . 'px" href="' . esc_url( get_permalink( $event ) ) . '">'
+			. $fav . $picture . $overlay . $content . '</a>' . $jsonld;
 	}
 
 	/**
@@ -686,10 +919,13 @@ class IDPG_Current_Event_Banner {
 			return $posts;
 		}
 
+		$paid_limit = IDPG_Banner_Settings::get_paid_limit();
+		$cache_ttl  = IDPG_Banner_Settings::get_cache_ttl();
+
 		$args = array(
 			'post_type'              => 'event',
 			'post_status'            => 'publish',
-			'posts_per_page'         => 20,
+			'posts_per_page'         => $paid_limit,
 			'no_found_rows'          => true,
 			'ignore_sticky_posts'    => true,
 			'update_post_meta_cache' => false,
@@ -766,7 +1002,7 @@ class IDPG_Current_Event_Banner {
 		}
 
 		$ids = wp_list_pluck( $paid, 'ID' );
-		set_transient( $key, $ids, 10 * MINUTE_IN_SECONDS );
+		set_transient( $key, $ids, $cache_ttl );
 
 		return $paid;
 	}
@@ -810,9 +1046,22 @@ class IDPG_Current_Event_Banner {
 			return '';
 		}
 
-		return '<div class="idpg-current-event-banner-carousel" data-idpg-banner-carousel data-interval="' . self::CAROUSEL_INTERVAL . '">'
+		return '<div class="idpg-current-event-banner-carousel" data-idpg-banner-carousel' . $this->get_carousel_data_attrs() . '>'
 			. '<div class="idpg-current-event-banner-carousel__viewport">' . $slides . '</div>'
 			. '<div class="idpg-current-event-banner-carousel__dots">' . $dots . '</div>'
 			. '</div>';
+	}
+
+	/**
+	 * Атрибуты data-* контейнера карусели: интервал и авто-ротация.
+	 *
+	 * Берутся из настроек вкладки «Баннер на главной»; JS карусели
+	 * читает data-autorotate и при "0" не запускает таймер ротации.
+	 *
+	 * @return string Строка атрибутов с ведущими пробелами.
+	 */
+	private function get_carousel_data_attrs() {
+		return ' data-interval="' . esc_attr( (string) IDPG_Banner_Settings::get_carousel_interval() ) . '"'
+			. ' data-autorotate="' . ( IDPG_Banner_Settings::is_auto_rotate() ? '1' : '0' ) . '"';
 	}
 }

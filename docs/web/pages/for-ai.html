@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Для нейросетей — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+
+			<div class="sidebar__section">Техническое</div>
+			<a class="sidebar__link" href="developer.html"><span class="dash"></span>Для разработчиков</a>
+			<a class="sidebar__link" href="for-ai.html"><span class="dash"></span>Для нейросетей</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Машинно-читаемое · для нейросетей</div>
+			<h1>Документация для нейросетей</h1>
+			<p>Артефакты, оптимизированные для LLM и AI-агентов: индекс по стандарту <code>llms.txt</code>, полный технический контекст одним файлом и правила работы с кодовой базой.</p>
+		</header>
+
+		<h2>Доступные артефакты</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">llms.txt</div>
+				<p class="card__desc">Индекс по стандарту <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a>: H1, блок-описание и курируемые ссылки с аннотациями. Точка входа для любого агента.</p>
+				<p><code>docs/web/llms.txt</code></p>
+			</div>
+			<div class="card">
+				<div class="card__title">llms-full.txt</div>
+				<p class="card__desc">Полный технический контекст одним файлом: структура, контракты классов, хуки, инварианты, команды, глоссарий. Скачать и скормить в контекст целиком.</p>
+				<p><code>docs/web/llms-full.txt</code></p>
+			</div>
+			<div class="card">
+				<div class="card__title">AGENTS.md</div>
+				<p class="card__desc">Корневые правила проекта для AI-агентов: запреты на удаление/перезапись, стандарты WordPress, требования к безопасности, Spec Driven-процесс.</p>
+				<p><code>AGENTS.md</code> (корень проекта)</p>
+			</div>
+			<div class="card">
+				<div class="card__title">HTML-документация</div>
+				<p class="card__desc">Человекочитаемая версия того же материала с навигацией. Для агентов с веб-доступом — можно читать по ссылкам из <code>llms.txt</code>.</p>
+				<p><code>docs/web/index.html</code></p>
+			</div>
+		</div>
+
+		<h2>Как использовать в промпте</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>Пример контекста для LLM</span><button class="codeblock__copy">Копировать</button></div>
+<pre>Ты работаешь с WordPress-плагинами проекта «Иду по городу».
+Перед правками изучи docs/web/llms-full.txt — там контракты
+классов IDPG_Banner_Settings / IDPG_Current_Event_Banner,
+инварианты безопасности и точки расширения.
+
+Правила: не удаляй работающий код без явного запроса;
+новые функции — с префиксом idpg_; правки настроек баннера
+только через defaults/sanitize/get_* с clamp.</pre>
+		</div>
+
+		<h2>Структура llms-full.txt</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>Секция</th><th>Содержание</th></tr>
+				</thead>
+				<tbody>
+					<tr><td>Project overview</td><td>Что за проект, стек, 4 плагина, тема, интеграции</td></tr>
+					<tr><td>Architecture map</td><td>Дерево файлов с аннотациями по каждому компоненту</td></tr>
+					<tr><td>Class contracts</td><td>Сигнатуры и инварианты ключевых классов и функций</td></tr>
+					<tr><td>Hooks registry</td><td>Actions/filters с префиксом <code>idpg_</code> — точки расширения</td></tr>
+					<tr><td>Data flow</td><td>Жизненный цикл баннера, потоки настроек и кэшей</td></tr>
+					<tr><td>Security invariants</td><td>Nonce, capability, escape, санитизация — обязательные правила</td></tr>
+					<tr><td>Testing protocol</td><td>Обратные пробы, reflection, контрактные тесты, команды</td></tr>
+					<tr><td>Glossary</td><td>Термины проекта: CPT event, area, chips, override-поля</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="callout callout--info">
+			<div class="callout__icon">i</div>
+			<div>
+				<p><strong>Формат.</strong> Оба файла — чистый UTF-8 Markdown без HTML-обвязки, чтобы любой парсер и любая модель могли потребить их напрямую. Обновляются в том же коммите, что и код.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Плагин idpg-core — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+
+			<div class="sidebar__section">Техническое</div>
+			<a class="sidebar__link" href="developer.html"><span class="dash"></span>Для разработчиков</a>
+			<a class="sidebar__link" href="for-ai.html"><span class="dash"></span>Для нейросетей</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Ядро платформы · v1.1.2</div>
+			<h1>Плагин idpg-core</h1>
+			<p>Центральный плагин портала: контент-модель событий и площадок, мультигородность, REST API, авторизация, роли, баннер, виджеты, кэши и миграции. 42 класса, ~24 000 строк.</p>
+		</header>
+
+		<div class="stats">
+			<div class="stat"><div class="stat__value">42</div><div class="stat__label">класса в includes/</div></div>
+			<div class="stat"><div class="stat__value">32</div><div class="stat__label">REST-маршрута</div></div>
+			<div class="stat"><div class="stat__value">47</div><div class="stat__label">тестовых файлов</div></div>
+			<div class="stat"><div class="stat__value">14</div><div class="stat__label">ассетов (CSS+JS)</div></div>
+		</div>
+
+		<div class="callout callout--warn">
+			<div class="callout__icon">!</div>
+			<div>
+				<p><strong>Актуальное состояние.</strong> Carbon Fields выпилен из плагина: мета переведена на нативный <code>register_meta()</code>, редактирование полей — через собственные вкладки <code>IDPG_Event_Fields</code> / <code>IDPG_Venue_Fields</code>. <code>vendor/autoload.php</code> больше не подключается, runtime-зависимостей в <code>composer.json</code> нет (только dev: phpunit + yoast/phpunit-polyfills). В теме осталось одно использование <code>carbon_get_theme_option()</code>.</p>
+			</div>
+		</div>
+
+		<h2>Bootstrap и константы</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>idpg-core.php — инициализация</span><button class="codeblock__copy">Копировать</button></div>
+<pre>define( 'IDPG_CORE_VERSION', '1.1.2' );
+define( 'IDPG_CORE_FILE',    __FILE__ );
+define( 'IDPG_CORE_DIR',     plugin_dir_path( __FILE__ ) );
+define( 'IDPG_CORE_URL',     plugin_dir_url( __FILE__ ) );
+define( 'IDPG_CORE_BASENAME', plugin_basename( __FILE__ ) );
+
+// Город по умолчанию для фильтрации (терм таксономии city).
+define( 'IDPG_DEFAULT_CITY_ID', 15 );
+
+// Базовый URL внешнего API агрегатора билетов (заглушка).
+define( 'IDPG_TICKET_API_URL', 'https://api.example.com/v1' );
+
+// require_once всех class-*.php → idpg_core_init() на 'init'</pre>
+		</div>
+
+		<ul>
+			<li>Загрузка: <code>require_once</code> каждого класса в фиксированном порядке, затем <code>add_action( 'init', 'idpg_core_init' )</code></li>
+			<li>Синглтоны, которым нужны ранние хуки, создаются на этапе загрузки файла (file-load init)</li>
+			<li>Деструктивность при удалении плагина — <code>uninstall.php</code></li>
+		</ul>
+
+		<h2>Состав includes/ — 42 класса</h2>
+
+		<h3>Контент-модель</h3>
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Класс</th><th>Строк</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>IDPG_CPT</code></td><td>272</td><td>CPT <code>event</code> / <code>venue</code>, таксономии <code>event_category</code>, <code>age_rating</code>, <code>city</code></td></tr>
+					<tr><td><code>IDPG_Meta</code></td><td>780</td><td><code>register_meta()</code> (init 20), auth-callback меты, зеркала сеансов/часов/соцсетей, гарантия города и даты при сохранении</td></tr>
+					<tr><td><code>IDPG_Event_Fields</code></td><td>1343</td><td>Вкладка «События»: редактирование полей события, Tom Select, Pikaday, своё сохранение</td></tr>
+					<tr><td><code>IDPG_Venue_Fields</code></td><td>630</td><td>Вкладка полей площадки: часы, соцсети, адрес</td></tr>
+					<tr><td><code>IDPG_Media</code></td><td>408</td><td>Постер события, размеры <code>event-card</code> / <code>event-featured</code>, скоуп медиатеки организатора</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>Мультигородность и гео</h3>
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Класс</th><th>Строк</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>IDPG_City_Filter</code></td><td>837</td><td>Cookie выбранного города, AJAX-установка, подтверждение города по IP, общий IP-lookup с кэшем</td></tr>
+					<tr><td><code>IDPG_City_URL</code></td><td>581</td><td>Город в URL (<code>/gorod/{slug}/</code>), 301-редиректы, rewrite из реальных слагов, canonical</td></tr>
+					<tr><td><code>IDPG_Geo_Service</code></td><td>51</td><td>Тонкая обёртка вызова внешних IP-сервисов</td></tr>
+					<tr><td><code>IDPG_Geo_Ranges</code></td><td>644</td><td>Локальная таблица диапазонов IP → город (без внешних запросов), fallback для гео</td></tr>
+					<tr><td><code>IDPG_City_Selector_Widget</code></td><td>728</td><td>Виджет «Выбор города»: дерево область→город→район, Tom Select, кэш 24ч</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>Авторизация и 152-ФЗ</h3>
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Класс</th><th>Строк</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>IDPG_Auth</code></td><td>348</td><td>Перехват login-редиректов, запрет /wp-admin организаторам, свои URL входа</td></tr>
+					<tr><td><code>IDPG_REST_Auth</code></td><td>942</td><td>REST login/register/logout/forgot/reset, PHP-fallback, honeypot</td></tr>
+					<tr><td><code>IDPG_Auth_Rate_Limiter</code></td><td>346</td><td>Лимиты попыток (в т.ч. сброс пароля по IP — 10/час)</td></tr>
+					<tr><td><code>IDPG_Auth_Emails</code></td><td>610</td><td>HTML-письма: подтверждение организатора, сброс пароля</td></tr>
+					<tr><td><code>IDPG_Privacy</code></td><td>926</td><td>Cookie-баннер, согласие <code>idpg_pdn_consent</code>, запросы субъектов ПДн</td></tr>
+					<tr><td><code>IDPG_Organizer_Verify</code></td><td>208</td><td>Подтверждение email организатора</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>Организатор</h3>
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Класс</th><th>Строк</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>IDPG_Organizer_URL</code></td><td>1170</td><td>Маршруты и рендер ЛК организатора (роутер отключён — DEV-234/235, REST без UI)</td></tr>
+					<tr><td><code>IDPG_Organizer_Meta</code></td><td>314</td><td>Реквизиты организатора (ИП/ООО, ИНН, документы), верификация</td></tr>
+					<tr><td><code>IDPG_Organizer_Scope</code></td><td>56</td><td>Изоляция: организатор видит только свои события и медиа</td></tr>
+					<tr><td><code>IDPG_REST_Organizer</code></td><td>2138</td><td>REST /organizer/*: профиль, события, площадки, статистика</td></tr>
+					<tr><td><code>IDPG_Event_Moderation</code></td><td>604</td><td>Модерация по цене: бесплатные авто-публикуются, платные без билетов → draft</td></tr>
+					<tr><td><code>IDPG_User_Purge</code></td><td>206</td><td>Полная зачистка данных при удалении пользователя</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>REST и фронт</h3>
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Класс</th><th>Строк</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>IDPG_REST_API</code></td><td>1525</td><td>16 маршрутов <code>idpg/v1</code>: события, площадки, города, live-поиск, подписка, трекинг кликов</td></tr>
+					<tr><td><code>IDPG_REST_Auth</code></td><td>942</td><td>6 маршрутов авторизации</td></tr>
+					<tr><td><code>IDPG_REST_Organizer</code></td><td>2138</td><td>7 маршрутов /organizer/*</td></tr>
+					<tr><td><code>IDPG_Favorites</code></td><td>216</td><td>3 маршрута избранного + кнопка-сердце</td></tr>
+					<tr><td><code>IDPG_Views</code></td><td>299</td><td>Счётчик просмотров с антиботом</td></tr>
+					<tr><td><code>IDPG_Search</code></td><td>206</td><td>Расширенный поиск по афише</td></tr>
+					<tr><td><code>IDPG_iCal_Export</code></td><td>449</td><td>Экспорт события/месяца в .ics</td></tr>
+					<tr><td><code>IDPG_Template_Helpers</code></td><td>310</td><td>Форматирование дат, цен, бейджей для шаблонов</td></tr>
+					<tr><td><code>IDPG_Helpers</code></td><td>249</td><td>Дерево городов одним запросом, статус билетов, общие утилиты</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>Баннер и продвижение</h3>
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Класс</th><th>Строк</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>IDPG_Current_Event_Banner</code></td><td>1067</td><td>Рендер баннера hero, карусель оплаченных, чипы, кэш по городам</td></tr>
+					<tr><td><code>IDPG_Banner_Settings</code></td><td>704</td><td>Вкладка «Баннер на главной»: defaults/sanitize/get_*, override-поля</td></tr>
+					<tr><td><code>IDPG_Promotion</code></td><td>271</td><td>Платное продвижение события (ТОП), cron daily</td></tr>
+					<tr><td><code>IDPG_Ticket_Sync</code></td><td>541</td><td>Синхронизация статусов билетов — заглушка (URL = example.com), cron каждые 3ч</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>Инфраструктура</h3>
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Класс</th><th>Строк</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>IDPG_Roles</code></td><td>570</td><td>Роль <code>event_organizer</code>, версионная синхронизация caps (option <code>idpg_roles_version</code>)</td></tr>
+					<tr><td><code>IDPG_Migrations</code></td><td>394</td><td>Миграции мета-ключей, версия в option <code>idpg_meta_migration_version</code></td></tr>
+					<tr><td><code>IDPG_CLI</code></td><td>252</td><td>WP-CLI команды плагина</td></tr>
+					<tr><td><code>IDPG_Logger</code></td><td>125</td><td>Единый логгер плагина (без error_log в бою)</td></tr>
+					<tr><td><code>IDPG_Notifications</code></td><td>140</td><td>Уведомления администраторам/организаторам</td></tr>
+					<tr><td><code>IDPG_Dashboard_Stats</code></td><td>800</td><td>Статистика на dashboard организатора</td></tr>
+					<tr><td><code>IDPG_SEO_Integration</code></td><td>507</td><td>Yoast: JSON-LD Event/Place, OG, крошки (только при активном Yoast)</td></tr>
+					<tr><td><code>IDPG_Expected_Events_Widget</code></td><td>436</td><td>Виджет «Самые ожидаемые события» (по просмотрам)</td></tr>
+					<tr><td><code>IDPG_Event_Calendar_Widget</code></td><td>746</td><td>Виджет-календарь: месяц/неделя/список, AJAX, iCal, 3 цветовые схемы</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Контент-модель</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">CPT event</div>
+				<p class="card__desc">Rewrite <code>/afisha/</code>, есть архив. Поля: даты (<code>_idpg_start_date</code>, <code>_idpg_end_date</code>), цены, билеты, сеансы (зеркало <code>_idpg_sessions_json</code>), флаги «бесплатно», «онлайн», «весь день».</p>
+			</div>
+			<div class="card">
+				<div class="card__title">CPT venue</div>
+				<p class="card__desc">Rewrite <code>/venues/</code>, есть архив. Поля: адрес, часы (зеркало), соцсети (зеркало).</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Таксономии</div>
+				<p class="card__desc"><code>event_category</code> (<code>/event-category/</code>), <code>age_rating</code> (<code>/age-rating/</code>), <code>city</code> — иерархическая область→город→район (<code>/gorod/</code>).</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Мета</div>
+				<p class="card__desc">Нативный <code>register_meta()</code> с <code>auth_callback</code> — запись через REST только для своих ключей; гарантия города и даты на <code>save_post</code>.</p>
+			</div>
+		</div>
+
+		<h2>REST API · 32 маршрута</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Файл</th><th>Маршрутов</th><th>Группы</th></tr></thead>
+				<tbody>
+					<tr><td><code>class-rest-api.php</code></td><td>16</td><td>events CRUD, venues CRUD, terms, city select/confirm, event dates, live search, popular, subscribe, click tracking</td></tr>
+					<tr><td><code>class-rest-auth.php</code></td><td>6</td><td>login, register, logout, forgot, reset, me</td></tr>
+					<tr><td><code>class-rest-organizer.php</code></td><td>7</td><td>профиль, события, площадки, статистика организатора</td></tr>
+					<tr><td><code>class-favorites.php</code></td><td>3</td><td>список, добавление, удаление избранного</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<ul>
+			<li>Namespace <code>idpg/v1</code>; nonce для JS — <code>wp_create_nonce( 'wp_rest' )</code></li>
+			<li>У каждого маршрута — <code>permission_callback</code>, у каждого параметра — <code>sanitize_callback</code></li>
+			<li>Схемы ответов описаны inline в <code>register_rest_route()</code></li>
+		</ul>
+
+		<h2>Кэши и cron</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">Транзиенты</div>
+				<p class="card__desc"><code>idpg_current_event_id_{city}</code> (выбор баннера, TTL из настроек), <code>idpg_paid_banner_ids_{city}</code> (оплаченные), <code>idpg_city_tree_{md5}</code> (24ч), <code>idpg_cal_*</code> (сетка 24ч / события 1ч), <code>idpg_expected_*</code> (1ч)</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Cron</div>
+				<p class="card__desc"><code>IDPG_Promotion</code> — daily; <code>IDPG_Ticket_Sync</code> — <code>idpg_every_3_hours</code> (заглушка). Сброс кэшей: <code>save_post_event</code> / <code>delete_post_event</code>, изменение терминов <code>city</code></p>
+			</div>
+		</div>
+
+		<h2>Ассеты (8 CSS + 6 JS)</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>CSS</th><th>JS</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>current-event-banner.css</code></td><td><code>current-event-banner.js</code></td><td>Баннер: чипы, карусель, точки</td></tr>
+					<tr><td><code>city-selector.css</code></td><td><code>city-selector.js</code></td><td>Виджет выбора города + Tom Select</td></tr>
+					<tr><td><code>event-calendar.css</code></td><td><code>event-calendar.js</code></td><td>Календарь: AJAX-навигация по месяцам</td></tr>
+					<tr><td><code>expected-events.css</code></td><td>—</td><td>Виджет «Самые ожидаемые»</td></tr>
+					<tr><td><code>favorites.css</code></td><td><code>favorites.js</code></td><td>Кнопка-сердце и страница /lk/favorites/</td></tr>
+					<tr><td><code>dashboard-stats.css</code></td><td>—</td><td>Статистика организатора</td></tr>
+					<tr><td><code>privacy.css</code></td><td>—</td><td>Cookie-баннер</td></tr>
+					<tr><td><code>editor.css</code></td><td><code>event-fields.js</code>, <code>ticket-clicks.js</code></td><td>Редактор: вкладка «События», трекинг кликов</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Тесты — 47 файлов</h2>
+
+		<ul>
+			<li>Покрыты: CPT/таксономии, роли, REST-маршруты, город/гео, авторизация, баннер, настройки, приватность, миграции, виджеты</li>
+			<li>Приватные методы тестируются через <code>ReflectionMethod</code></li>
+			<li>Dev-зависимости: <code>phpunit/phpunit</code> ^9.6 || ^10.5 + <code>yoast/phpunit-polyfills</code> ^3.0</li>
+		</ul>
+
+		<div class="callout callout--info">
+			<div class="callout__icon">i</div>
+			<div>
+				<p>Баннер разобран детально на странице <a href="banner.html">«Баннер на главной»</a>. Общие паттерны и контракты — на странице <a href="developer.html">«Для разработчиков»</a>.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

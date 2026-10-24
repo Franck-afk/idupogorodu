@@ -14,6 +14,10 @@
 		var slides = carousel.querySelectorAll('.idpg-current-event-banner-carousel__slide');
 		var dots = carousel.querySelectorAll('.idpg-current-event-banner-carousel__dot');
 		var interval = parseInt(carousel.getAttribute('data-interval') || '6000', 10);
+		// Авто-ротация из настроек вкладки «Баннер на главной»:
+		// data-autorotate="0" — таймер не запускается вовсе,
+		// переключение остаётся ручным (точки, свайп).
+		var autoRotate = carousel.getAttribute('data-autorotate') !== '0';
 		var current = 0;
 		var timer = null;
 		var startX = 0;
@@ -48,6 +52,10 @@
 		function restartTimer() {
 			if (timer) {
 				window.clearInterval(timer);
+				timer = null;
+			}
+			if (!autoRotate) {
+				return;
 			}
 			timer = window.setInterval(next, interval);
 		}

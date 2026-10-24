@@ -221,15 +221,13 @@ class IDPG_Event_Fields {
 						'sanitize'   => 'checkbox',
 						'admin_only' => true,
 					),
-					array(
-						'id'         => 'idpg_hide_full_banner',
-						'key'        => '_idpg_hide_full_banner',
-						'type'       => 'checkbox',
-						'label'      => __( 'Скрыть баннер полностью', 'idpg-core' ),
-						'help'       => __( 'Событие не будет показано в баннере и не будет заменено следующим — баннер на главной скроется полностью.', 'idpg-core' ),
-						'sanitize'   => 'checkbox',
-						'admin_only' => true,
-					),
+
+					/*
+					 * Поле «Скрыть баннер полностью» (_idpg_hide_full_banner)
+					 * перенесено во вкладку «Баннер на главной» по решению
+					 * владельца (см. IDPG_Banner_Settings::render_admin_tab()).
+					 * Мета события та же, здесь поле больше не редактируется.
+					 */
 					array(
 						'id'         => 'idpg_views',
 						'key'        => '_idpg_views',

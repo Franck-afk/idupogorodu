@@ -21,7 +21,6 @@ get_header();
 		<div class="idpg-home">
 			<div class="idpg-home__inner">
 
-			<?php if ( idpg_home_section_enabled( 'today' ) ) : ?>
 		<?php
 		/*
 		 * Секционный блок «Сегодня».
@@ -87,20 +86,15 @@ get_header();
 						$idpg_today_query->the_post();
 
 						get_template_part( 'template-parts/content', 'event-today' );
-
 					endwhile;
 					wp_reset_postdata();
 					?>
- 				</div>
- 			</section>
- 			<?php
-		endif;
+				</div>
+			</section>
+			<?php
 		endif;
 		?>
 
-		<?php
-		if ( idpg_home_section_enabled( 'weekend' ) ) :
-		?>
 		<?php
 		/*
 		 * Секционный блок «В ближайшие выходные».
@@ -183,7 +177,6 @@ get_header();
 						$idpg_we_query->the_post();
 
 						get_template_part( 'template-parts/content', 'event' );
-
 					endwhile;
 					wp_reset_postdata();
 					?>
@@ -191,12 +184,8 @@ get_header();
 			</section>
 			<?php
 		endif;
-		endif;
 		?>
 
-		<?php
-		if ( idpg_home_section_enabled( 'free' ) ) :
-		?>
 		<?php
 		/*
 		 * Секционный блок «Бесплатные события».
@@ -232,19 +221,16 @@ get_header();
 						$idpg_free_query->the_post();
 
 						get_template_part( 'template-parts/content', 'event' );
-
 					endwhile;
- 					wp_reset_postdata();
- 					?>
- 				</div>
- 			</section>
- 			<?php
-		endif;
+					wp_reset_postdata();
+					?>
+				</div>
+			</section>
+			<?php
 		endif;
 		?>
 
 			<?php
-			if ( idpg_home_section_enabled( 'popular' ) ) :
 			/*
 			 * ─── Секция «Популярные события» ───
 			 *
@@ -275,7 +261,7 @@ get_header();
 			}
 
 			// Порог «выше среднего» для бейджа в карточке.
-			$idpg_pop_views = array_map(
+			$idpg_pop_views                    = array_map(
 				static fn( $p ) => (int) get_post_meta( $p->ID, '_idpg_views', true ),
 				$idpg_pop_query->posts
 			);
@@ -297,11 +283,9 @@ get_header();
 			);
 
 			unset( $GLOBALS['idpg_popular_min_views'] );
-			endif;
 			?>
 
- 			<?php
- 			if ( idpg_home_section_enabled( 'feed' ) ) :
+			<?php
 			/*
 			 * Основная лента: последние события города.
 			 *
@@ -332,14 +316,12 @@ get_header();
 							$idpg_feed_query->the_post();
 
 							get_template_part( 'template-parts/content', 'event' );
-
 						endwhile;
 						wp_reset_postdata();
 						?>
 				</div>
 				</section>
 				<?php
-			endif;
 			endif;
 			?>
 
@@ -352,7 +334,10 @@ get_header();
 			<?php endif; ?>
 		</div>
 
-		<?php do_action( 'idpg_banner_position', 'middle' ); idpg_widget_areas_render( 'below-content' ); ?>
+		<?php
+		do_action( 'idpg_banner_position', 'middle' );
+		idpg_widget_areas_render( 'below-content' );
+		?>
 
 	</div>
 </main>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тема idpg_core — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+
+			<div class="sidebar__section">Техническое</div>
+			<a class="sidebar__link" href="developer.html"><span class="dash"></span>Для разработчиков</a>
+			<a class="sidebar__link" href="for-ai.html"><span class="dash"></span>Для нейросетей</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Представление · v1.0.79</div>
+			<h1>Тема idpg_core</h1>
+			<p>Слой представления портала: шаблоны, дизайн-система на 101 CSS-токене, собственные хелперы, виджеты и менеджер областей виджетов. Бизнес-логика — в плагинах, тема отвечает только за вывод.</p>
+		</header>
+
+		<div class="stats">
+			<div class="stat"><div class="stat__value">23</div><div class="stat__label">шаблона в корне</div></div>
+			<div class="stat"><div class="stat__value">7</div><div class="stat__label">template-parts</div></div>
+			<div class="stat"><div class="stat__value">101</div><div class="stat__label">CSS-токен</div></div>
+			<div class="stat"><div class="stat__value">49</div><div class="stat__label">функций idpg_*</div></div>
+		</div>
+
+		<h2>Bootstrap — functions.php</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>functions.php — основа (1109 строк)</span><button class="codeblock__copy">Копировать</button></div>
+<pre>define( 'IDPG_VERSION', '1.0.79' );   // + style.css: Version 1.0.79
+
+// Поддержки темы:
+add_theme_support( 'automatic-feed-links' );
+add_theme_support( 'title-tag' );
+add_theme_support( 'post-thumbnails' );
+add_theme_support( 'widgets' );
+add_theme_support( 'editor-styles' );   // editor-style.css
+
+register_nav_menus( ... );              // меню шапки/подвала
+
+// Подключение ассетов (версия через filemtime):
+wp_enqueue_style( 'idpg_core-style',   get_stylesheet_uri() );
+wp_enqueue_style( 'idpg_core-templates', '.../templates.css' );
+wp_enqueue_style( 'idpg_core-subscribe', '.../subscribe.css' );
+
+// Инкрементальные require модулей inc/:
+require_once get_template_directory() . '/inc/widgets.php';
+require_once get_template_directory() . '/inc/widget-areas.php';
+require_once get_template_directory() . '/inc/template-tags.php';
+require_once get_template_directory() . '/inc/breadcrumbs.php';
+require_once get_template_directory() . '/inc/theme-helpers.php';</pre>
+		</div>
+
+		<h2>Шаблоны — 23 файла</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Шаблон</th><th>Строк</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>front-page.php</code></td><td>350</td><td>Главная: hero-баннер (<code>idpg_banner_position</code>), 5 секций, позиции виджет-областей</td></tr>
+					<tr><td><code>header.php</code></td><td>343</td><td>Шапка: лого, навигация, модалка/панель выбора города, <code>below-header</code></td></tr>
+					<tr><td><code>footer.php</code></td><td>78</td><td>Подвал: меню, <code>before-footer</code>, скрипты</td></tr>
+					<tr><td><code>single-event.php</code></td><td>378</td><td>Карточка события: постер, бейджи, даты, цена, площадка</td></tr>
+					<tr><td><code>single-venue.php</code></td><td>241</td><td>Карточка площадки + <code>event-sidebar</code></td></tr>
+					<tr><td><code>single.php</code></td><td>—</td><td>Запись по умолчанию</td></tr>
+					<tr><td><code>archive-event.php</code></td><td>292</td><td>Афиша: фильтры по дате/категории, Pikaday, сетка событий</td></tr>
+					<tr><td><code>archive-venue.php</code></td><td>112</td><td>Архив площадок</td></tr>
+					<tr><td><code>archive.php</code></td><td>—</td><td>Архив по умолчанию</td></tr>
+					<tr><td><code>taxonomy-city.php</code></td><td>73</td><td>Страница города: события термина <code>city</code></td></tr>
+					<tr><td><code>search.php</code></td><td>121</td><td>Результаты поиска</td></tr>
+					<tr><td><code>index.php</code></td><td>—</td><td>Фолбэк</td></tr>
+					<tr><td><code>404.php</code></td><td>—</td><td>Ошибка 404 + области виджетов</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>Страницы</h3>
+
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Шаблон</th><th>Строк</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>page-login.php</code></td><td>628</td><td>Вход/регистрация: PHP-fallback форм, обработка без JS</td></tr>
+					<tr><td><code>page-reset-password.php</code></td><td>—</td><td>Сброс пароля по ссылке из письма</td></tr>
+					<tr><td><code>page-favorites.php</code></td><td>74</td><td>Избранное (<code>/lk/favorites/</code>), вызов REST-данных</td></tr>
+					<tr><td><code>page-privacy.php</code></td><td>—</td><td>Политика конфиденциальности (152-ФЗ)</td></tr>
+					<tr><td><code>page-terms.php</code></td><td>—</td><td>Пользовательское соглашение</td></tr>
+					<tr><td><code>page-legal.php</code></td><td>—</td><td>Правовая информация</td></tr>
+					<tr><td><code>page-about.php</code></td><td>—</td><td>О проекте</td></tr>
+					<tr><td><code>page-contacts.php</code></td><td>—</td><td>Контакты</td></tr>
+					<tr><td><code>page.php</code></td><td>—</td><td>Страница по умолчанию + области виджетов</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>template-parts — 7 файлов</h3>
+
+		<p><code>content-event-today.php</code> (карточка секции «Сегодня»), <code>content-event.php</code> (карточка афиши), <code>content-venue.php</code>, <code>content-page.php</code>, <code>content.php</code>, <code>content-none.php</code> (пусто), <code>home-section.php</code> (обёртка секции главной).</p>
+
+		<h2>Модули inc/ — 7770 строк PHP</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Модуль</th><th>Строк</th><th>Содержимое</th></tr></thead>
+				<tbody>
+					<tr><td><code>template-tags.php</code></td><td>1248</td><td>Хелперы вывода: форматирование дат/цен, бейджи события, условия фильтров афиши, <code>idpg_get_home_section_events()</code> для секций главной</td></tr>
+					<tr><td><code>widget-areas.php</code></td><td>817</td><td>Менеджер произвольных областей: 5 позиций, 6 условий показа, <code>idpg_widget_areas_render()</code>, страница админки, кастомный select, обработка сохранения</td></tr>
+					<tr><td><code>widgets.php</code></td><td>811</td><td>Сайдбар <code>home-sidebar</code> + 3 виджета: <code>IDPG_Ad_Ru_Widget</code>, <code>IDPG_Recent_Events_Widget</code>, <code>IDPG_Subscribe_Widget</code>; сортировка рекламы по полю «позиция»</td></tr>
+					<tr><td><code>breadcrumbs.php</code></td><td>156</td><td>Свои крошки с интеграцией Yoast и обёрткой в стили темы</td></tr>
+					<tr><td><code>class-idpg-nav-walker.php</code></td><td>112</td><td>Walker меню: поддержка dropdown/активного состояния</td></tr>
+					<tr><td><code>theme-helpers.php</code></td><td>74</td><td>Мелкие утилиты темы</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>Виджеты темы</h3>
+
+		<div class="grid-3">
+			<div class="card">
+				<div class="card__title">IDPG_Ad_Ru_Widget</div>
+				<p class="card__desc">Реклама: код площадки (РСЯ, VK, SMI2, MarketGid, MediaVenus) или баннер-картинка. Медиа-загрузчик, пресеты шаблонов, поле «Позиция» для сортировки.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">IDPG_Recent_Events_Widget</div>
+				<p class="card__desc">Последние события с фильтром по текущему городу (2–10 штук).</p>
+			</div>
+			<div class="card">
+				<div class="card__title">IDPG_Subscribe_Widget</div>
+				<p class="card__desc">Подписка на дайджест: форма с honeypot и согласием 152-ФЗ, отправка через REST <code>idpg/v1/subscribe</code>.</p>
+			</div>
+		</div>
+
+		<h3>Области виджетов</h3>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">5 позиций</div>
+				<p class="card__desc"><code>below-header</code> · <code>above-content</code> · <code>event-sidebar</code> · <code>below-content</code> · <code>before-footer</code></p>
+			</div>
+			<div class="card">
+				<div class="card__title">6 условий показа</div>
+				<p class="card__desc"><code>all</code> · <code>front</code> · <code>page</code> · <code>post</code> · <code>archive</code> · <code>specific</code></p>
+			</div>
+		</div>
+
+		<p>Данные — в опции <code>idpg_widget_areas</code>; каждая область регистрируется как sidebar <code>idpg-area-{slug}</code>. Управление — на отдельной странице <a href="widget-areas.html">«Области виджетов»</a> в меню «Иду по городу».</p>
+
+		<h2>Дизайн-система</h2>
+
+		<ul>
+			<li><strong>101 CSS-токен</strong> в <code>style.css</code> (<code>--idpg-*</code>): цвета, отступы, радиусы, тени, типографика</li>
+			<li><strong>25 SCSS-файлов</strong>: <code>base/</code> (сброс, типографика), <code>components/</code> (кнопки, карточки, формы, чипы), <code>pages/</code> (главная, афиша, событие), <code>responsive.scss</code></li>
+			<li><strong>Сборка:</strong> <code>npm run watch</code> (sass --watch), <code>npm run check:css</code> — компиляция во временный файл и сверка с эталоном <code>style.css</code> (bin/check-css-build.mjs)</li>
+			<li><strong>Линт:</strong> <code>npm run lint:scss</code> (stylelint + recommended-scss)</li>
+			<li>Собранные CSS подключаются с версией через <code>filemtime</code> — автокэш-бастинг при изменениях</li>
+		</ul>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>package.json — скрипты</span><button class="codeblock__copy">Копировать</button></div>
+<pre>"scripts": {
+	"watch":             "sass --watch assets/scss/style.scss:style.css --no-source-map",
+	"compile:css:temp":  "sass assets/scss/style.scss:style.css.tmp --no-source-map --style=expanded",
+	"check:css":         "npm run compile:css:temp && node bin/check-css-build.mjs style.css.tmp style.css",
+	"compile:css:apply": "sass assets/scss/style.scss:style.css --no-source-map --style=expanded",
+	"lint:scss":         "stylelint \"assets/scss/**/*.scss\""
+}</pre>
+		</div>
+
+		<h2>JS — 12 файлов</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Файл</th><th>Назначение</th></tr></thead>
+				<tbody>
+					<tr><td><code>navigation.js</code></td><td>Мобильное меню, модалка выбора города, блок «Это ваш город?»</td></tr>
+					<tr><td><code>live-search.js</code></td><td>Живой поиск по шапке (REST live-поиск)</td></tr>
+					<tr><td><code>auth.js</code></td><td>Формы входа/регистрации (REST + fallback)</td></tr>
+					<tr><td><code>subscribe.js</code></td><td>Виджет подписки на дайджест</td></tr>
+					<tr><td><code>pikaday.js</code> + <code>pikaday-locale-ru.js</code></td><td>Календарь в фильтрах афиши</td></tr>
+					<tr><td><code>widget-ad.js</code></td><td>Медиа-загрузчик и пресеты виджета рекламы</td></tr>
+					<tr><td><code>widget-ad-front.js</code></td><td>Отложенная вставка рекламного кода (РСЯ, iframe)</td></tr>
+					<tr><td><code>canvas-fix.js</code></td><td>Коррекция поведения canvas в редакторе</td></tr>
+					<tr><td><code>customize-preview.js</code></td><td>Live-превью кастомайзера</td></tr>
+					<tr><td><code>customize-sidebar-sticky.js</code></td><td>Sticky-сайдбар в превью кастомайзера</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Дочерняя тема idpg_core-child</h2>
+
+		<p>Готовая заготовка (<code>functions.php</code>, <code>style.css</code>, <code>screenshot.png</code>) — точечные правки без риска потерять их при обновлении родительской темы.</p>
+
+		<h2>Интеграция с плагином idpg-core</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead><tr><th>Механика</th><th>Кто предоставляет</th></tr></thead>
+				<tbody>
+					<tr><td>Хук <code>idpg_banner_position</code> (hero/middle/bottom)</td><td>Тема вызывает в шаблонах → <code>IDPG_Current_Event_Banner::render()</code></td></tr>
+					<tr><td><code>idpg_widget_areas_render( $position )</code></td><td>Тема вызывает в шаблонах → данные из опции <code>idpg_widget_areas</code></td></tr>
+					<tr><td><code>idpg_get_home_section_events()</code></td><td>Хелпер темы, использует <code>IDPG_City_Filter</code> плагина</td></tr>
+					<tr><td>Рекламный код с <code>&lt;script&gt;</code>/<code>&lt;iframe&gt;</code></td><td>Виджет темы + whitelist <code>idpg_core_ad_code_allowed_html()</code></td></tr>
+					<tr><td>Микроразметка, крошки</td><td>Yoast + интеграция из плагина; тема даёт обёртки</td></tr>
+					<tr><td>Настройки главной (Carbon Fields)</td><td>Осталось одно <code>carbon_get_theme_option()</code> в functions.php; чекбоксы секций удалены (DEV-273)</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="callout callout--info">
+			<div class="callout__icon">i</div>
+			<div>
+				<p>Разделение ответственности: бизнес-логика — в <a href="idpg-core.html">idpg-core</a>, тема отвечает только за представление. Новые элементы вывода — через хуки и <code>template-parts</code>, без правки логики плагина.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

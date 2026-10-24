@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI/UX Clearfy Pro — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">UI/UX · 19.10.2026</div>
+			<h1>Редизайн админки в стиле Clearfy Pro</h1>
+			<p>Единый визуальный язык для всех страниц пункта меню «Иду по городу»: современные toggle-переключатели, карточки-секции с иконками, вкладки-чипы и статус-индикаторы вместо стандартной админки WordPress.</p>
+		</header>
+
+		<h2>Ключевые элементы</h2>
+
+		<div class="grid-2">
+			<div class="card">
+				<div class="card__title">Toggle 44×24</div>
+				<p class="card__desc">Крупный переключатель с плавной анимацией слайда (0.25s). Серый <code>#c4c4c4</code> → синий акцент <code>#165ff4</code>. Бегунок с тенью.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Карточки-секции</div>
+				<p class="card__desc">Белые панели с мягкой тенью и радиусом 8px. В шапке — иконка в цветном квадрате, заголовок и описание.</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Вкладки-чипы</div>
+				<p class="card__desc">Иконка Dashicons + подпись, закругление 4px, тень при активной вкладке. Переключение без перезагрузки (ссылки <code>?tab=</code> остаются рабочими).</p>
+			</div>
+			<div class="card">
+				<div class="card__title">Статус-индикаторы</div>
+				<p class="card__desc">Метки «Вкл/Выкл» с цветной точкой: зелёный для активных, серый для выключенных.</p>
+			</div>
+		</div>
+
+		<h2>Дизайн-токены</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>assets/css/admin-ui.css — CSS-переменные</span><button class="codeblock__copy">Копировать</button></div>
+<pre>.idpg-admin-ui {
+	--idpg-ui-accent: #165ff4;
+	--idpg-ui-accent-soft: rgba(22, 95, 244, .12);
+	--idpg-ui-accent-hover: #0f4ad4;
+	--idpg-ui-text: #0a0b0d;
+	--idpg-ui-muted: #5b616e;
+	--idpg-ui-line: #e5e5e5;
+	--idpg-ui-surface: #fff;
+	--idpg-ui-shadow-card: 0 2px 8px rgba(0, 0, 0, .08);
+	--idpg-ui-radius: .5rem;
+	--idpg-ui-success: #00a32a;
+	--idpg-ui-danger: #c62828;
+	max-width: 1180px;
+}</pre>
+		</div>
+
+		<h2>Toggle: CSS</h2>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>Тумблер 44×24</span><button class="codeblock__copy">Копировать</button></div>
+<pre>.idpg-ui-switch__track {
+	width: 44px;
+	height: 24px;
+	border-radius: 24px;
+	background: #c4c4c4;
+	transition: background .25s ease;
+}
+
+.idpg-ui-switch__track::after {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+	transition: transform .25s ease;
+}
+
+.idpg-ui-switch input:checked + .idpg-ui-switch__track {
+	background: var(--idpg-ui-accent);
+}
+
+.idpg-ui-switch input:checked + .idpg-ui-switch__track::after {
+	transform: translateX(20px);
+}</pre>
+		</div>
+
+		<h2>Строка настройки</h2>
+
+		<p>Все настройки сведены к единому паттерну «подпись слева (200px) / тело справа» — как в Clearfy Pro:</p>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>Разметка строки</span><button class="codeblock__copy">Копировать</button></div>
+<pre>&lt;div class="idpg-ui-row"&gt;
+	&lt;div class="idpg-ui-row__label"&gt;
+		&lt;span&gt;Название настройки&lt;/span&gt;
+	&lt;/div&gt;
+	&lt;div class="idpg-ui-row__body"&gt;
+		&lt;!-- элемент управления + описание --&gt;
+		&lt;p class="description"&gt;Пояснение&lt;/p&gt;
+	&lt;/div&gt;
+&lt;/div&gt;</pre>
+		</div>
+
+		<h2>Файлы стиля</h2>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>Файл</th><th>Содержимое</th></tr>
+				</thead>
+				<tbody>
+					<tr><td><code>assets/css/admin-ui.css</code></td><td>Общий слой: токены, toggle, статусы, карточки, кнопки, уведомления, адаптация виджет-менеджера темы. Скоуп <code>.idpg-admin-ui</code></td></tr>
+					<tr><td><code>assets/css/settings.css</code></td><td>Специфика страницы настроек: вкладки-чипы с иконками, заголовок с логотипом, sticky-панель сохранения, кнопки экспорта/импорта/сброса</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Покрытие страниц</h2>
+
+		<ul>
+			<li><strong>Иду по городу</strong> (<code>idpg-settings</code>) — вкладки «Области виджетов» и «Экспорт / О плагине»</li>
+			<li><strong>Конфиденциальность</strong> (<code>idpg-privacy</code>) — cookie-баннер, запросы субъектов ПДн</li>
+			<li><strong>Отклонить событие</strong> (<code>idpg-reject-event</code>) — модерация</li>
+			<li><strong>Области виджетов</strong> (<code>idpg-widget-areas-manage</code>) — собственная страница в том же стиле</li>
+		</ul>
+
+		<div class="callout callout--info">
+			<div class="callout__icon">i</div>
+			<div>
+				<p>Общий слой подключается через <code>enqueue_admin_ui()</code> по списку хуков <code>IDPG_Settings_Page::admin_ui_hooks()</code> — новая страница автоматически получает оформление после добавления своего хука в массив.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

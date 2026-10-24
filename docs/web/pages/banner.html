@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Баннер на главной — Иду по городу</title>
+<link rel="stylesheet" href="../assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="../index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="testing.html"><span class="dash"></span>Тесты и проверки</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Баннер · 22.10.2026</div>
+			<h1>Баннер на главной</h1>
+			<p>Три этапа работ: восстановление стилизации после расхождения CSS и HTML, замена чекбоксов полей на реальные поля ввода данных и сверка «поле формы → вывод в баннере».</p>
+		</header>
+
+		<h2>Как устроен баннер</h2>
+
+		<p>Баннер рендерит <code>IDPG_Current_Event_Banner</code> по хуку <code>idpg_banner_position</code> (позиция <code>hero</code>, вызывается в <code>front-page.php</code>). Приоритет — подтверждённые (оплаченные) события: одно — обычный баннер, несколько — карусель с авто-ротацией. Иначе — ближайшее предстоящее событие текущего города с постером.</p>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>front-page.php — позиция баннера</span><button class="codeblock__copy">Копировать</button></div>
+<pre>&lt;div class="container" style="padding-top: 106px;"&gt;
+	&lt;?php do_action( 'idpg_banner_position', 'hero' ); ?&gt;
+&lt;/div&gt;</pre>
+		</div>
+
+		<h2>Этап 1 · Возвращена стилизация</h2>
+
+		<p>Код баннера был доработан (бейджи <code>__chip--*</code> вместо старых <code>__badge</code>/<code>__status</code>, кнопка «Подробнее», VIP-цена), но CSS не обновился — новые классы выводились «голыми». Дописаны стили в визуальном языке карточки события:</p>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>Класс</th><th>Оформление</th></tr>
+				</thead>
+				<tbody>
+					<tr><td><code>__chips</code></td><td>flex-контейнер, gap 6px</td></tr>
+					<tr><td><code>__chip</code></td><td>Пилюля 999px, полупрозрачный белый фон на оверлее</td></tr>
+					<tr><td><code>__chip--status</code></td><td>Красный <code>#c0392b</code></td></tr>
+					<tr><td><code>__chip--free</code></td><td>Зелёный <code>#059669</code></td></tr>
+					<tr><td><code>__chip--popular</code></td><td>Оранжевый <code>#ff7846</code></td></tr>
+					<tr><td><code>__chip--promo</code></td><td>Фиолетовый <code>#6d28d9</code></td></tr>
+					<tr><td><code>__chip--online</code></td><td>Синий <code>#1d4ed8</code></td></tr>
+					<tr><td><code>__chip--new</code></td><td>Тёмно-зелёный <code>#14532d</code></td></tr>
+					<tr><td><code>__btn</code></td><td>Белая пилюля с подъёмом при наведении</td></tr>
+					<tr><td><code>__meta-item--vip</code></td><td>Золотой <code>#fbbf24</code>, жирный</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h2>Этап 2 · Поля ввода вместо чекбоксов</h2>
+
+		<p>12 чекбоксов «полей баннера» удалены из вкладки «Баннер на главной» — все поля события теперь выводятся всегда. Вместо них добавлена секция <strong>«Данные баннера»</strong> с реальными полями ввода:</p>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>Поле формы</th><th>Option-ключ</th><th>Поведение в баннере</th></tr>
+				</thead>
+				<tbody>
+					<tr><td><code>idpg_banner_banner_title</code></td><td><code>banner_title</code></td><td>Свой заголовок; пусто → название события</td></tr>
+					<tr><td><code>idpg_banner_banner_text</code></td><td><code>banner_text</code></td><td>Свой текст анонса; пусто → анонс события</td></tr>
+					<tr><td><code>idpg_banner_button_text</code></td><td><code>button_text</code></td><td>Текст кнопки; пусто → «Подробнее»</td></tr>
+					<tr><td><code>idpg_banner_excerpt_length</code></td><td><code>excerpt_length</code></td><td>Обрезка событийного анонса (0–500 симв.)</td></tr>
+					<tr><td><code>idpg_banner_banner_height</code></td><td><code>banner_height</code></td><td>Высота 200–800 px через CSS-переменную</td></tr>
+				</tbody>
+			</table>
+		</div>
+
+		<h3>Override-логика в рендере</h3>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>class-current-event-banner.php — render_single_html()</span><button class="codeblock__copy">Копировать</button></div>
+<pre>// Свои заголовок и текст из настроек перекрывают данные события.
+$title = IDPG_Banner_Settings::get_banner_title();
+if ( '' === $title ) {
+	$title = get_the_title( $event );
+}
+
+$excerpt = IDPG_Banner_Settings::get_banner_text();
+if ( '' === $excerpt ) {
+	$excerpt = has_excerpt( $event ) ? trim( (string) get_the_excerpt( $event ) ) : '';
+
+	// Анонс события обрезаем до настроенной длины (0 — без
+	// обрезки); свой текст выводим как есть.
+	$excerpt_length = IDPG_Banner_Settings::get_excerpt_length();
+	if ( $excerpt_length > 0 && mb_strlen( $excerpt ) > $excerpt_length ) {
+		$excerpt = mb_substr( $excerpt, 0, $excerpt_length ) . '…';
+	}
+}</pre>
+		</div>
+
+		<h3>Высота через CSS-переменную</h3>
+
+		<div class="codeblock">
+			<div class="codeblock__head"><span>height — из настроек, мобильная фиксирована</span><button class="codeblock__copy">Копировать</button></div>
+<pre>// PHP — inline-переменная на элементе:
+return '&lt;a class="idpg-current-event-banner" style="--idpg-banner-h:'
+	. esc_attr( (string) $banner_height ) . 'px" href="..."&gt;';
+
+/* CSS */
+.idpg-current-event-banner { height: var(--idpg-banner-h, 400px); }
+
+@media (max-width: 767px) {
+	.idpg-current-event-banner { height: 260px; }  /* перебивает */
+}</pre>
+		</div>
+
+		<h2>Этап 3 · Сверка «поле → вывод»</h2>
+
+		<p>Написан функциональный тест <code>test_banner_output_matches_settings_fields</code>: рендерит баннер через reflection с заполненными полями и проверяет, что значения из формы попадают в HTML, данные события не дублируются, а fallback + обрезка работают при пустых полях.</p>
+
+		<div class="grid-3">
+			<div class="card">
+				<div class="card__title">10 полей</div>
+				<p class="card__desc">Проходят полный цикл форма → sanitize → геттер → HTML</p>
+			</div>
+			<div class="card">
+				<div class="card__title">7 тестов</div>
+				<p class="card__desc">Дефолты, clamp, санитизация, рендер полей, override-вывод</p>
+			</div>
+			<div class="card">
+				<div class="card__title">0 расхождений</div>
+				<p class="card__desc">Каждое поле формы читается и выводится в баннере</p>
+			</div>
+		</div>
+
+		<div class="callout callout--success">
+			<div class="callout__icon">✓</div>
+			<div>
+				<p><strong>Итог.</strong> Баннер полностью управляется из админки: заголовок, текст, кнопка, высота и обрезка анонса — всё через поля ввода. Чекбоксы полей удалены, механизм <code>is_field_enabled()</code> оставлен для совместимости (рендером не используется).</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="../assets/js/docs.js"></script>
+</body>
+</html>

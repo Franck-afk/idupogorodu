@@ -17,7 +17,7 @@ if ( ! defined( 'IDPG_VERSION' ) ) {
 	 * оставалась 1.0.75 при заявленной DEV-84 версии 1.0.77 — версия не росла,
 	 * поэтому браузеры отдавали ассеты из кэша.
 	 */
-	define( 'IDPG_VERSION', '1.0.78' );
+	define( 'IDPG_VERSION', '1.0.79' );
 }
 
 
@@ -371,15 +371,10 @@ require_once get_template_directory() . '/inc/template-tags.php';
  */
 require_once get_template_directory() . '/inc/breadcrumbs.php';
 
-/**
- * Видимость секций главной страницы (админ-чекбоксы).
- */
-require_once get_template_directory() . '/inc/home-sections.php';
-
-/**
- * Advertising widget + sidebar areas.
- */
-require_once get_template_directory() . '/inc/widgets.php';
+	/**
+	 * Advertising widget + sidebar areas.
+	 */
+	require_once get_template_directory() . '/inc/widgets.php';
 
 /**
  * Кастомный Walker для навигации.

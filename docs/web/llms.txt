@@ -1,0 +1,35 @@
+# Иду по городу — документация доработок
+
+> Портал-афиша «Иду по городу»: мультигородская WordPress-платформа
+> (4 плагина + тема idpg_core). Этот файл — машинно-читаемый индекс
+> документации выполненных работ (октябрь 2026) для LLM и AI-агентов.
+> Полный технический контекст: `llms-full.txt`.
+> Правила работы с кодовой базой: `../AGENTS.md`.
+
+## Обзор
+
+- [Главная](index.html): хронология 6 задач, статистика, точки входа
+- [Для заказчика — плагин](pages/client-plugin.html): простым языком о плагине idpg-core — что умеет и что даёт заказчику
+- [Для заказчика — тема](pages/client-theme.html): простым языком о теме idpg_core — как выглядит сайт
+- [Структура проекта](pages/architecture.html): плагины, тема, зависимости, карта файлов
+- [Плагин idpg-core](pages/idpg-core.html): 42 класса, контент-модель, REST (32 маршрута), мультигород, гео, авторизация, виджеты, кэши и cron
+- [Тема idpg_core](pages/idpg-theme.html): 23 шаблона, 7 template-parts, inc/ (template-tags, widget-areas, widgets), 101 CSS-токен, SCSS-сборка, 3 виджета, дочерняя тема
+
+## Выполненные работы
+
+- [DEV-273 · Настройки главной](pages/dev-273.html): удаление дублирующей страницы видимости секций, 5 обёрток в front-page.php, вкладки «Главная (Блоки)», опция idpg_home_sections
+- [UI/UX Clearfy Pro](pages/cleary-ui.html): дизайн-токены, toggle 44×24, карточки-секции, вкладки-чипы, статус-индикаторы админки
+- [Области виджетов](pages/widget-areas.html): подменю idpg-widget-areas-manage, POST-обработка, nonce, safelist позиций/условий
+- [Баннер на главной](pages/banner.html): стилизация чипов, override-поля (banner_title/banner_text/button_text), excerpt_length, banner_height, карусель
+- [Исправленные ошибки](pages/bugfixes.html): parse error от литеральных \t\n в class-banner-settings.php; CSS отставал от HTML баннера
+- [Тесты и проверки](pages/testing.html): 14 тестов, обратные пробы, php -l, PHPCS baseline
+
+## Техническое
+
+- [Для разработчиков](pages/developer.html): паттерны (singleton, file-load init, settings-класс), контракты классов, хуки, жизненный цикл баннера, инварианты безопасности, команды
+- [Для нейросетей](pages/for-ai.html): llms.txt, llms-full.txt, AGENTS.md — как использовать в промпте
+
+## Машинно-читаемые файлы
+
+- [llms.txt](llms.txt): этот индекс
+- [llms-full.txt](llms-full.txt): полный технический контекст одним файлом (структура, контракты, хуки, инварианты, тесты, глоссарий)

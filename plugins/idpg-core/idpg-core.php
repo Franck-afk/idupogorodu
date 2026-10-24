@@ -63,6 +63,7 @@ require_once IDPG_CORE_DIR . 'includes/class-ticket-sync.php';
 require_once IDPG_CORE_DIR . 'includes/class-rest-api.php';
 require_once IDPG_CORE_DIR . 'includes/class-ical-export.php';
 require_once IDPG_CORE_DIR . 'includes/class-current-event-banner.php';
+require_once IDPG_CORE_DIR . 'includes/class-banner-settings.php';
 
 /**
  * Инициализация баннера текущего события (file-load).
@@ -71,6 +72,7 @@ require_once IDPG_CORE_DIR . 'includes/class-current-event-banner.php';
  * чтобы подписки в конструкторе успевали сработать до init.
  */
 IDPG_Current_Event_Banner::instance();
+IDPG_Banner_Settings::instance();
 require_once IDPG_CORE_DIR . 'includes/class-meta.php';
 require_once IDPG_CORE_DIR . 'includes/class-event-fields.php';
 require_once IDPG_CORE_DIR . 'includes/class-venue-fields.php';

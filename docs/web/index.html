@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Иду по городу — документация доработок</title>
+<link rel="stylesheet" href="assets/css/docs.css">
+</head>
+<body>
+
+<button class="nav-burger" aria-label="Меню"><span></span></button>
+
+<div class="layout">
+
+	<aside class="sidebar">
+		<div class="sidebar__brand">
+			<div class="sidebar__logo">ИГ</div>
+			<div>Иду по городу<br><small style="font-weight:400;color:var(--text-faint)">документация доработок</small></div>
+		</div>
+		<nav class="sidebar__nav">
+			<div class="sidebar__section">Обзор</div>
+			<a class="sidebar__link" href="index.html"><span class="dash"></span>Главная</a>
+
+			<div class="sidebar__section">Для заказчика</div>
+			<a class="sidebar__link" href="pages/client-plugin.html"><span class="dash"></span>Плагин — что умеет</a>
+			<a class="sidebar__link" href="pages/client-theme.html"><span class="dash"></span>Тема — как выглядит</a>
+
+			<div class="sidebar__section">Архитектура</div>
+			<a class="sidebar__link" href="pages/architecture.html"><span class="dash"></span>Структура проекта</a>
+			<a class="sidebar__link" href="pages/idpg-core.html"><span class="dash"></span>Плагин idpg-core</a>
+			<a class="sidebar__link" href="pages/idpg-theme.html"><span class="dash"></span>Тема idpg_core</a>
+
+			<div class="sidebar__section">Выполненные работы</div>
+			<a class="sidebar__link" href="pages/dev-273.html"><span class="dash"></span>DEV-273 · Настройки главной</a>
+			<a class="sidebar__link" href="pages/cleary-ui.html"><span class="dash"></span>UI/UX Clearfy Pro</a>
+			<a class="sidebar__link" href="pages/widget-areas.html"><span class="dash"></span>Страница «Области виджетов»</a>
+			<a class="sidebar__link" href="pages/banner.html"><span class="dash"></span>Баннер на главной</a>
+			<a class="sidebar__link" href="pages/bugfixes.html"><span class="dash"></span>Исправленные ошибки</a>
+
+			<div class="sidebar__section">Контроль качества</div>
+			<a class="sidebar__link" href="pages/testing.html"><span class="dash"></span>Тесты и проверки</a>
+		</nav>
+		<div class="sidebar__footer">v1.0 · октябрь 2026</div>
+	</aside>
+
+	<main class="content">
+		<button class="theme-toggle" aria-label="Переключить тему">🌙 <span class="theme-toggle__label">Тёмная тема</span></button>
+
+		<header class="page-head">
+			<div class="page-head__eyebrow">Документация</div>
+			<h1>Доработки портала «Иду по городу»</h1>
+			<p>Полная документация выполненных работ: от чистки настроек главной страницы и редизайна админки в стиле Clearfy Pro до отдельной страницы управления областями виджетов и переработки баннера на главной.</p>
+		</header>
+
+		<div class="stats">
+			<div class="stat"><div class="stat__value">6</div><div class="stat__label">завершённых задач</div></div>
+			<div class="stat"><div class="stat__value">4</div><div class="stat__label">плагина затронуто</div></div>
+			<div class="stat"><div class="stat__value">12+</div><div class="stat__label">тестов написано</div></div>
+			<div class="stat"><div class="stat__value">2</div><div class="stat__label">версии выпущены</div></div>
+		</div>
+
+		<h2>Хронология работ</h2>
+
+		<div class="timeline">
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__date">19 октября · DEV-273</div>
+				<div class="timeline__title">Удаление страницы «Настройки главной»</div>
+				<p class="timeline__text">Убрано дублирование с вкладкой city-admin: файл <code>inc/home-sections.php</code>, 5 условных обёрток в <code>front-page.php</code>, вкладка «Главная (Блоки)». Версия темы 1.0.78 → 1.0.79.</p>
+			</div>
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__date">19 октября · UI</div>
+				<div class="timeline__title">Редизайн админки в стиле Clearfy Pro</div>
+				<p class="timeline__text">Иконки на вкладках, toggle-переключатели 44×24, карточки-секции, статус-индикаторы, sticky-панель сохранения.</p>
+			</div>
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__date">19 октября · Навигация</div>
+				<div class="timeline__title">Отдельная страница «Области виджетов»</div>
+				<p class="timeline__text">Собственное подменю в «Иду по городу» с управлением областями: создание, редактирование, удаление, условия показа.</p>
+			</div>
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__date">22 октября · Баг</div>
+				<div class="timeline__title">Исправлен parse error в настройках баннера</div>
+				<p class="timeline__text">Повреждённый скриптовой вставкой файл <code>class-banner-settings.php</code> восстановлен вручную — админка снова открывается.</p>
+			</div>
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__date">22 октября · Стили</div>
+				<div class="timeline__title">Возвращена стилизация баннера</div>
+				<p class="timeline__text">CSS отставал от нового HTML: бейджи <code>__chip--*</code>, кнопка «Подробнее» и VIP-цена выводились без оформления.</p>
+			</div>
+			<div class="timeline__item">
+				<div class="timeline__dot"></div>
+				<div class="timeline__date">22 октября · Функционал</div>
+				<div class="timeline__title">Поля ввода в вкладке «Баннер на главной»</div>
+				<p class="timeline__text">Чекбоксы полей заменены на реальные поля ввода: свой заголовок, свой текст, текст кнопки, длина анонса, высота баннера.</p>
+			</div>
+		</div>
+
+		<h2>Что освещено в документации</h2>
+
+		<div class="grid-2">
+			<a class="card" href="pages/client-plugin.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">🧩 Плагин — что умеет</div>
+				<p class="card__desc">Простым языком: события, города, баннеры, безопасность — для заказчика.</p>
+			</a>
+			<a class="card" href="pages/client-theme.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">🖥 Тема — как выглядит</div>
+				<p class="card__desc">Страницы, дизайн, реклама, мобильная версия — простым языком.</p>
+			</a>
+			<a class="card" href="pages/architecture.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">🏗 Структура проекта</div>
+				<p class="card__desc">Четыре плагина, тема, интеграции: как устроен проект и где что лежит.</p>
+			</a>
+			<a class="card" href="pages/idpg-core.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">⚙️ Плагин idpg-core</div>
+				<p class="card__desc">42 класса: контент-модель, REST, мультигород, гео, авторизация, виджеты, кэши.</p>
+			</a>
+			<a class="card" href="pages/idpg-theme.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">🎨 Тема idpg_core</div>
+				<p class="card__desc">23 шаблона, 101 CSS-токен, дизайн-система, виджеты, области виджетов.</p>
+			</a>
+			<a class="card" href="pages/dev-273.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">🧹 DEV-273 · Настройки главной</div>
+				<p class="card__desc">Полный разбор удаления дублирующей страницы настроек и всей связанной обвязки.</p>
+			</a>
+			<a class="card" href="pages/cleary-ui.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">🎨 UI/UX Clearfy Pro</div>
+				<p class="card__desc">Визуальный язык админки: тумблеры, карточки, иконки, типографика.</p>
+			</a>
+			<a class="card" href="pages/widget-areas.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">📐 Области виджетов</div>
+				<p class="card__desc">Новое подменю, форма создания/редактирования, обработка POST, стили.</p>
+			</a>
+			<a class="card" href="pages/banner.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">🖼 Баннер на главной</div>
+				<p class="card__desc">Стилизация чипов, поля ввода данных, override-поля, карусель.</p>
+			</a>
+			<a class="card" href="pages/testing.html" style="text-decoration:none;color:inherit">
+				<div class="card__title">✅ Тесты и проверки</div>
+				<p class="card__desc">Обратные пробы, php -l, PHPCS baseline, сверка «поле → вывод».</p>
+			</a>
+		</div>
+
+		<div class="callout callout--info">
+			<div class="callout__icon">i</div>
+			<div>
+				<p><strong>Как пользоваться документацией.</strong> Навигация — в левом сайдбаре. Переключение светлой/тёмной темы — кнопкой справа сверху (выбор сохраняется в браузере). Кодовые блоки можно скопировать одной кнопкой.</p>
+			</div>
+		</div>
+	</main>
+</div>
+
+<button class="scroll-top" aria-label="Наверх">↑</button>
+<script src="assets/js/docs.js"></script>
+</body>
+</html>
