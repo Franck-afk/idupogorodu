@@ -430,60 +430,42 @@ class IDPG_Current_Event_Banner {
 	private function get_event_chips( $post_id ) {
 		$chips = array();
 
+		// Чипы — только поля вкладки «Банер на главной»; событие в банкер
+		// не читается: не статус, не цены, не «популярное», не «ТОП», не
+		// «новое» — всё берётся строго из настроек баннера.
 		$status_labels = array(
 			'in_sale'   => __( 'Билеты в продаже', 'idpg-core' ),
 			'sold_out'  => __( 'Билеты закончились', 'idpg-core' ),
 			'cancelled' => __( 'Отменено', 'idpg-core' ),
 			'postponed' => __( 'Перенесено', 'idpg-core' ),
 		);
-		$status        = IDPG_Helpers::get_ticket_status( $post_id );
 
-		if ( $status && isset( $status_labels[ $status ] ) ) {
+		$b_status_setting = IDPG_Banner_Settings::get_output_value( 'banner_ticket_status' );
+		if ( '' !== $b_status_setting && isset( $status_labels[ $b_status_setting ] ) ) {
 			$chips[] = array(
-				'label' => $status_labels[ $status ],
+				'label' => $status_labels[ $b_status_setting ],
 				'type'  => 'status',
 			);
 		}
 
-		if ( 'yes' === get_post_meta( $post_id, self::META_IS_FREE, true ) ) {
+		$b_free_setting = IDPG_Banner_Settings::get_output_value( 'banner_is_free' );
+		if ( 'yes' === $b_free_setting ) {
 			$chips[] = array(
 				'label' => __( 'Бесплатно', 'idpg-core' ),
 				'type'  => 'free',
 			);
 		}
 
-		$popular_min = isset( $GLOBALS['idpg_popular_min_views'] ) ? (int) $GLOBALS['idpg_popular_min_views'] : 0;
-		if ( $popular_min > 0 && (int) get_post_meta( $post_id, self::META_VIEWS, true ) >= $popular_min ) {
-			$chips[] = array(
-				'label' => __( 'Популярное', 'idpg-core' ),
-				'type'  => 'popular',
-			);
-		}
-
-		if ( 'yes' === get_post_meta( $post_id, IDPG_Promotion::META_PROMOTED, true ) ) {
-			$chips[] = array(
-				'label' => __( 'ТОП', 'idpg-core' ),
-				'type'  => 'promo',
-			);
-		}
-
-		if ( 'yes' === get_post_meta( $post_id, self::META_IS_ONLINE, true ) ) {
+		$b_online_setting = IDPG_Banner_Settings::get_output_value( 'banner_is_online' );
+		if ( 'yes' === $b_online_setting ) {
 			$chips[] = array(
 				'label' => __( 'Онлайн', 'idpg-core' ),
 				'type'  => 'online',
 			);
 		}
 
-		$published = (int) get_post_time( 'U', false, $post_id );
-		if ( $published && ( time() - $published ) < 14 * DAY_IN_SECONDS ) {
-			$chips[] = array(
-				'label' => __( 'Новый', 'idpg-core' ),
-				'type'  => 'new',
-			);
-		}
-
 		return $chips;
-	}
+		}
 
 	/**
 	 * Время события: «весь день» или время первого сеанса.
@@ -520,7 +502,8 @@ class IDPG_Current_Event_Banner {
 	private function get_vip_price( $post_id ) {
 		$vip = trim( (string) get_post_meta( $post_id, self::META_VIP_PRICE, true ) );
 
-		if ( '' === $vip || '0' === $vip ) {
+		// Пустая или незначимая цена (< 1) — VIP-строка не выводится.
+		if ( '' === $vip || (float) $vip < 1 ) {
 			return '';
 		}
 
@@ -642,41 +625,59 @@ class IDPG_Current_Event_Banner {
 	private function get_event_meta_line( $post_id ) {
 		$items = array();
 
-		$price = 'yes' === get_post_meta( $post_id, '_idpg_is_free', true )
-			? __( 'Вход свободный', 'idpg-core' )
-			: $this->format_price(
-				get_post_meta( $post_id, '_idpg_price_from', true ),
-				get_post_meta( $post_id, '_idpg_price_to', true ),
-				get_post_meta( $post_id, '_idpg_currency', true )
-			);
+		// Только поля вкладки «Банер на главной»: город, рубрики и возраст
+		// не выводятся в баннере. Свои цены, VIP, адрес и онлайн берутся
+		// строго из настроек, данные события не читаются.
+		$b_free_setting = IDPG_Banner_Settings::get_output_value( 'banner_is_free' );
+		$b_price_from   = IDPG_Banner_Settings::get_output_value( 'banner_price_from' );
+		$b_price_to     = IDPG_Banner_Settings::get_output_value( 'banner_price_to' );
+		$b_currency     = IDPG_Banner_Settings::get_output_value( 'banner_currency' );
+		$b_vip          = IDPG_Banner_Settings::get_output_value( 'banner_vip_price' );
+		$b_address      = IDPG_Banner_Settings::get_output_value( 'banner_address' );
+		$b_online_setting = IDPG_Banner_Settings::get_output_value( 'banner_is_online' );
+		$b_online       = ( '' !== $b_online_setting )
+			? ( 'yes' === $b_online_setting )
+			: ( 'yes' === get_post_meta( $post_id, self::META_IS_ONLINE, true ) );
+
+		$has_own_prices = ( '' !== $b_price_from || '' !== $b_price_to );
+
+		if ( 'yes' === $b_free_setting ) {
+			// Явно отмечено «бесплатно» в настройках баннера.
+			$price = __( 'Вход свободный', 'idpg-core' );
+		} elseif ( $has_own_prices ) {
+			// Свои цены важнее статуса события.
+			$price = $this->format_price( $b_price_from, $b_price_to, $b_currency );
+		} else {
+			// Нет своих цен — без цены.
+			$price = '';
+		}
 		if ( $price ) {
 			$items['price'] = '<span class="idpg-current-event-banner__meta-item idpg-current-event-banner__meta-item--price">'
 				. esc_html( $price ) . '</span>';
 		}
 
-		$city = $this->get_first_term_name( $post_id, 'city' );
-		if ( $city ) {
-			$items['city'] = '<span class="idpg-current-event-banner__meta-item">' . esc_html( $city ) . '</span>';
-		}
-
-		$rubrics = $this->get_rubrics( $post_id, 2 );
-		if ( $rubrics ) {
-			$items['rubric'] = '<span class="idpg-current-event-banner__meta-item">' . esc_html( implode( ', ', $rubrics ) ) . '</span>';
-		}
-
-		$age = $this->get_first_term_name( $post_id, 'age_rating' );
-		if ( $age ) {
-			$items['age'] = '<span class="idpg-current-event-banner__meta-item">' . esc_html( $age ) . '</span>';
-		}
-
-		$vip = $this->get_vip_price( $post_id );
+		// VIP-цена: только своя.
+		$vip = ( '' !== $b_vip )
+			? sprintf(
+				/* translators: %s: цена */
+				__( 'VIP: %s', 'idpg-core' ),
+				number_format_i18n( (float) $b_vip ) . ' ' . $this->currency_symbol( $b_currency )
+			)
+			: '';
 		if ( $vip ) {
 			$items['vip'] = '<span class="idpg-current-event-banner__meta-item idpg-current-event-banner__meta-item--vip">' . esc_html( $vip ) . '</span>';
 		}
 
-		$venue = $this->get_venue( $post_id );
+		// Адрес: только своя.
+		$venue = ( '' !== $b_address ) ? $b_address : '';
 		if ( $venue ) {
 			$items['venue'] = '<span class="idpg-current-event-banner__meta-item">' . esc_html( $venue ) . '</span>';
+		}
+
+		// Метка «Онлайн» из настроек баннера.
+		if ( $b_online ) {
+			$items['online'] = '<span class="idpg-current-event-banner__meta-item idpg-current-event-banner__meta-item--online">'
+				. esc_html__( 'Онлайн', 'idpg-core' ) . '</span>';
 		}
 
 		if ( empty( $items ) ) {
@@ -684,6 +685,24 @@ class IDPG_Current_Event_Banner {
 		}
 
 		return implode( '', $items );
+		}
+
+	/**
+	 * Символ валюты по коду.
+	 *
+	 * @param string $currency Код валюты (RUB/USD/EUR).
+	 * @return string
+	 */
+	private function currency_symbol( $currency ) {
+		$symbols = array(
+			'RUB' => '₽',
+			'USD' => '$',
+			'EUR' => '€',
+		);
+
+		$currency = strtoupper( trim( (string) $currency ) );
+
+		return isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : $currency;
 	}
 
 	/**
@@ -802,30 +821,44 @@ class IDPG_Current_Event_Banner {
 			return '';
 		}
 
-		// Свои заголовок и текст из настроек перекрывают данные события.
+		// Только поля вкладки «Банер на главной»: заголовок, текст, даты,
+		// время и площадка не зависят от события.
 		$title = IDPG_Banner_Settings::get_banner_title();
-		if ( '' === $title ) {
-			$title = get_the_title( $event );
-		}
 
 		$excerpt = IDPG_Banner_Settings::get_banner_text();
-		if ( '' === $excerpt ) {
-			$excerpt = has_excerpt( $event ) ? trim( (string) get_the_excerpt( $event ) ) : '';
-
-			// Анонс события обрезаем до настроенной длины (0 — без
-			// обрезки); свой текст выводим как есть.
-			$excerpt_length = IDPG_Banner_Settings::get_excerpt_length();
-			if ( $excerpt_length > 0 && mb_strlen( $excerpt ) > $excerpt_length ) {
-				$excerpt = mb_substr( $excerpt, 0, $excerpt_length ) . '…';
-			}
+		// Длина анонса из настроек (0 — без обрезки).
+		$excerpt_length = IDPG_Banner_Settings::get_excerpt_length();
+		if ( $excerpt_length > 0 && '' !== $excerpt && mb_strlen( $excerpt ) > $excerpt_length ) {
+			$excerpt = mb_substr( $excerpt, 0, $excerpt_length ) . '…';
 		}
 
-		$date_raw = get_post_meta( $event->ID, self::META_START, true );
-		$end_raw  = get_post_meta( $event->ID, self::META_END, true );
-		$dates    = $this->format_date_range( $date_raw, $end_raw );
-		$time     = $this->get_event_time_label( $event->ID );
-		$chips    = $this->render_chips_html( $this->get_event_chips( $event->ID ) );
+		$b_start   = IDPG_Banner_Settings::get_output_value( 'banner_start_date' );
+		$b_end     = IDPG_Banner_Settings::get_output_value( 'banner_end_date' );
+		$b_time    = IDPG_Banner_Settings::get_output_value( 'banner_time' );
+		$b_all_day = ( 'yes' === IDPG_Banner_Settings::get_output_value( 'banner_all_day' ) );
+
+		$dates = ( '' !== $b_start || '' !== $b_end )
+			? $this->format_date_range( $b_start, $b_end )
+			: '';
+
+		if ( $b_all_day ) {
+			$time = '';
+		} elseif ( '' !== $b_time ) {
+			$time = $b_time;
+		} else {
+			$time = '';
+		}
+
+		$chips_html = $this->render_chips_html( $this->get_event_chips( $event->ID ) );
 		$meta     = $this->get_event_meta_line( $event->ID );
+
+		/*
+		 * Все поля события выводятся всегда: чекбоксы «Поля события
+		 * в баннере» удалены по решению владельца, поэтому гейты
+		 * is_field_enabled() здесь не применяются. Рубрики, цена, город,
+		 * возраст и VIP уже собраны в $meta (get_event_meta_line()),
+		 * отдельно их выводить не нужно — иначе дубли.
+		 */
 
 		// Время события дописываем к дате — как в карточке события.
 		if ( $time ) {
@@ -833,11 +866,11 @@ class IDPG_Current_Event_Banner {
 		}
 
 		$content = '';
-		if ( $title || $excerpt || $dates || $meta || $chips ) {
+		if ( $title || $excerpt || $dates || $meta || $chips_html ) {
 			$content .= '<div class="idpg-current-event-banner__content">';
 
-			if ( $chips ) {
-				$content .= $chips;
+			if ( $chips_html ) {
+				$content .= $chips_html;
 			}
 			if ( $dates ) {
 				$content .= '<span class="idpg-current-event-banner__dates">' . esc_html( $dates ) . '</span>';
@@ -885,7 +918,12 @@ class IDPG_Current_Event_Banner {
 		// на мобильных её перебил).
 		$banner_height = IDPG_Banner_Settings::get_banner_height();
 
-		return '<a class="idpg-current-event-banner" style="--idpg-banner-h:' . esc_attr( (string) $banner_height ) . 'px" href="' . esc_url( get_permalink( $event ) ) . '">'
+		// Ссылка баннера: своя страница продажи из настроек → иначе страница события.
+		$b_ticket_url = IDPG_Banner_Settings::get_output_value( 'banner_ticket_url' );
+		$link_url     = ( '' !== $b_ticket_url ) ? $b_ticket_url : get_permalink( $event );
+		$link_extra   = ( '' !== $b_ticket_url ) ? ' target="_blank" rel="noopener"' : '';
+
+		return '<a class="idpg-current-event-banner" style="--idpg-banner-h:' . esc_attr( (string) $banner_height ) . 'px" href="' . esc_url( $link_url ) . '"' . $link_extra . '>'
 			. $fav . $picture . $overlay . $content . '</a>' . $jsonld;
 	}
 

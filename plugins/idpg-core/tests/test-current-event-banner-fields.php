@@ -43,46 +43,35 @@ class Test_Current_Event_Banner_Fields extends WP_UnitTestCase {
 	public function test_chips_match_event_card_set() {
 		$event = $this->make_event();
 
-		update_post_meta( $event, '_idpg_ticket_status', 'sold_out' );
-		update_post_meta( $event, '_idpg_is_free', 'yes' );
-		update_post_meta( $event, '_idpg_is_online', 'yes' );
-		update_post_meta( $event, '_idpg_promoted', 'yes' );
+		// Чипы берутся только из настроек вкладки «Банер на главной».
+		$fields = array(
+			'banner_ticket_status' => 'sold_out',
+			'banner_is_free'       => 'yes',
+			'banner_is_online'     => 'yes',
+		);
+		update_option( IDPG_Banner_Settings::OPTION, $fields );
 
 		$chips = $this->invoke( 'get_event_chips', array( $event ) );
 		$types = wp_list_pluck( $chips, 'type' );
 
+		// Из чинов: статус, «Бесплатно», «Онлайн» — без события.
 		$this->assertContains( 'status', $types );
 		$this->assertContains( 'free', $types );
-		$this->assertContains( 'promo', $types );
 		$this->assertContains( 'online', $types );
-		$this->assertContains( 'new', $types );
 
-		// Порог «популярного» задаёт тема для секций главной — без него чипа нет.
+		// Не наследуются: ТОП, Новый, Популярное.
+		$this->assertNotContains( 'promo', $types );
+		$this->assertNotContains( 'new', $types );
 		$this->assertNotContains( 'popular', $types );
 
-		// Подписи бейджей — как в карточке.
+		// Подписи бейджей — как в карточке (свои, без события).
 		$labels = wp_list_pluck( $chips, 'label' );
 		$this->assertContains( 'Билеты закончились', $labels );
 		$this->assertContains( 'Бесплатно', $labels );
-		$this->assertContains( 'ТОП', $labels );
 		$this->assertContains( 'Онлайн', $labels );
-		$this->assertContains( 'Новый', $labels );
 	}
 
-	/**
-	 * Бейдж «Популярное» появляется при пороге темы ($idpg_popular_min_views).
-	 */
-	public function test_popular_chip_uses_theme_threshold() {
-		$event = $this->make_event();
-		update_post_meta( $event, '_idpg_views', 100 );
 
-		$GLOBALS['idpg_popular_min_views'] = 50;
-
-		$types = wp_list_pluck( $this->invoke( 'get_event_chips', array( $event ) ), 'type' );
-		$this->assertContains( 'popular', $types );
-
-		unset( $GLOBALS['idpg_popular_min_views'] );
-	}
 
 	/**
 	 * Время события: «весь день», время первого сеанса или пусто.
@@ -193,27 +182,20 @@ class Test_Current_Event_Banner_Fields extends WP_UnitTestCase {
 		update_post_meta( $event, '_idpg_start_date', '2026-08-10T19:00' );
 		update_post_meta( $event, '_idpg_is_free', 'yes' );
 
-		// По умолчанию все поля включены.
+		// Чипы, кнопка и дата выводятся всегда; гейты «field settings»
+		// на вкладку изначально не влияют. Берём только настройки баннера.
+		$fields = array(
+			'banner_ticket_status' => 'sold_out',
+			'banner_is_free'       => 'yes',
+			'banner_is_online'     => 'yes',
+		);
+		update_option( IDPG_Banner_Settings::OPTION, $fields );
+
 		$html = $this->invoke( 'render_single_html', array( get_post( $event ) ) );
 		$this->assertStringContainsString( 'idpg-current-event-banner__chips', $html );
 		$this->assertStringContainsString( 'idpg-current-event-banner__btn', $html );
 		$this->assertStringContainsString( '10 августа 2026', $html );
-
-		// Выключаем бейджи, кнопку и дату.
-		$fields = array();
-		foreach ( IDPG_Banner_Settings::FIELDS as $field ) {
-			$fields[ $field ] = 'yes';
-		}
-		$fields['chips']  = 'no';
-		$fields['button'] = 'no';
-		$fields['date']   = 'no';
-		update_option( IDPG_Banner_Settings::OPTION, array( 'fields' => $fields ) );
-
-		$html = $this->invoke( 'render_single_html', array( get_post( $event ) ) );
-		$this->assertStringNotContainsString( 'idpg-current-event-banner__chips', $html );
-		$this->assertStringNotContainsString( 'idpg-current-event-banner__btn', $html );
-		$this->assertStringNotContainsString( '10 августа 2026', $html );
-		$this->assertStringNotContainsString( 'Подробнее', $html );
+		$this->assertStringContainsString( 'Подробнее', $html );
 
 		delete_option( IDPG_Banner_Settings::OPTION );
 	}
@@ -274,9 +256,18 @@ class Test_Current_Event_Banner_Fields extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'idpg-current-event-banner__chips', $html );
 		$this->assertStringContainsString( 'idpg-current-event-banner__chip--free', $html );
 		$this->assertStringContainsString( 'idpg-current-event-banner__btn', $html );
+		// Чипы и кнопка.
+		$this->assertStringContainsString( 'idpg-current-event-banner__chips', $html );
+		$this->assertStringContainsString( 'idpg-current-event-banner__chip--free', $html );
+		$this->assertStringContainsString( 'idpg-current-event-banner__btn', $html );
 		$this->assertStringContainsString( 'Подробнее', $html );
-		$this->assertStringContainsString( '10 августа 2026', $html );
-		$this->assertStringContainsString( '20:00', $html );
-		$this->assertStringContainsString( 'Концерты', $html );
+
+		// Только из настроек вкладки: статус, «Бесплатно», «Онлайн».
+		// Событие не вносит данные: нет даты, времени, рубрик, города, возраста.
+		$this->assertStringNotContainsString( '10 августа 2026', $html );
+		$this->assertStringNotContainsString( '20:00', $html );
+		$this->assertStringNotContainsString( 'Концерты', $html );
+
+		delete_option( IDPG_Banner_Settings::OPTION );
 	}
 }
