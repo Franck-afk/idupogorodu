@@ -1,51 +1,68 @@
-# Просмотр проекта в GitHub Codespaces + Docker
+# Просмотр проекта в браузере: GitHub Codespaces + Docker
 
-Для предпросмотра сайта «Иду по городу» с локальными правками плагинов и темы.
+Окружение поднимает полный WordPress с плагинами `idpg-core`, `idpg-auth` и
+темой `idpg_core` из этого репозитория: любые изменения кода видны в браузере
+сразу, без копирования файлов на сервер.
 
-## Способ 1: GitHub Codespaces (рекомендуется)
+## Файлы окружения
 
-1. Откройте репозиторий в GitHub
-2. Нажмите `Code` → `Codespaces` → `Create codespace on main` (или на нужной ветке)
-3. Codespaces автоматически обнаружит `.devcontainer/devcontainer.json` и поднимет окружение через `docker-compose.yml`
-4. Дождитесь сборки (первый раз ~2-5 минут)
-5. После запуска откроется порт `8080` с WordPress. Пройдите установку WordPress
-6. Активируйте плагины `idpg-core`, `idpg-auth` и тему `idpg_core` в админке
+| Файл | Роль |
+|---|---|
+| `docker-compose.yml` | 4 сервиса: `db` (MySQL 8), `wordpress` (сайт на порту 8080), `wp-setup` (одноразовая установка WP + активация темы и плагинов), `dev` (PHP 8.4 + Composer + Xdebug — контейнер редактора) |
+| `.devcontainer/devcontainer.json` | конфиг Codespace: сервис `dev`, проброс порта 8080, расширения VS Code |
+| `.devcontainer/install-wp.sh` | скрипт сервиса `wp-setup`: ждёт ядро WP, ставит сайт, активирует `idpg_core` / `idpg-core` / `idpg-auth` |
+| `.devcontainer/setup.sh` | postCreateCommand: ставит WP-CLI, зависимости composer и SCSS темы |
 
-## Способ 2: Локально с Docker
+## Запуск в Codespaces
+
+1. Открыть репозиторий на GitHub → **Code** → **Codespaces** → **Create codespace on main**.
+2. Codespace поднимет `docker-compose.yml` целиком, сервис `wp-setup` сам установит
+   WordPress и активирует плагины/тему (первый запуск ~3–5 минут).
+3. Внизу окна VS Code откроется уведомление о проброшенном порте **8080** →
+   кнопка **Open in Browser**. Это и есть сайт со всеми изменениями кода.
+4. Админка — `http://localhost:8080/wp-admin`, логин/пароль: `admin` / `admin`.
+
+Проверить, что всё поднялось:
 
 ```bash
-# Клонировать репозиторий
+docker compose ps            # все сервиса healthy / exited 0 у wp-setup
+docker compose logs wp-setup # последние строки: «==> Готово»
+```
+
+## Запуск локально (Docker на своём компьютере)
+
+```bash
 git clone https://github.com/Franck-afk/idupogorodu.git
 cd idupogorodu
-
-# Запустить окружение
 docker compose up -d
-
-# Открыть в браузере
-# http://localhost:8080
+# открыть http://localhost:8080
 ```
 
-## Особенности монтирования
+Остановить: `docker compose down`. Полный сброс (удалить БД и сайт):
+`docker compose down -v`.
 
-В `docker-compose.yml` смонтированы:
-- `./plugins` → `/var/www/html/wp-content/plugins` (плагины `idpg-core`, `idpg-auth` и др.)
-- `./themes` → `/var/www/html/wp-content/themes` (тема `idpg_core`)
+## Как устроено монтирование
 
-Все изменения в этих директориях сразу видны в WordPress.
+```
+./plugins  →  /var/www/html/wp-content/plugins   (idpg-core, idpg-auth)
+./themes   →  /var/www/html/wp-content/themes    (idpg_core, idpg_core-child)
+```
 
-## Полезные команды
+То есть код в контейнере `wordpress` — это код репозитория. Правка файла в
+редакторе (или в Codespace) сразу меняет сайт; перезапускать контейнер не нужно,
+достаточно обновить страницу. Загрузки WordPress живут в отдельном томе
+`wordpress_data` и в репозиторий не попадают.
+
+## Полезные команды (в терминале Codespace)
 
 ```bash
-# Остановить
-docker compose down
-
-# Остановить с удалением БД (сброс)
-docker compose down -v
-
-# Посмотреть логи
-docker compose logs -f wordpress
+docker compose logs -f wordpress  # логи сайта
+docker compose exec wordpress wp --allow-root plugin list
+docker compose exec db mysql -uwordpress -pwordpress wordpress  # БД напрямую
 ```
 
-## Тестирование изменений
+## Что НЕ делает это окружение
 
-После активации плагинов/темы вы сможете сразу просматривать все внесённые вами правки в браузере.
+- Не ставит продакшен-конфигурацию (`wp-config.php` с солями) — только dev-значения.
+- Не запускает PHPUnit/PHPCS: они живут в CircleCI (см. `.circleci/config.yml`).
+- Не предназначено для выкладки: `docs/PRODUCTION.md` описывает отдельный процесс.
