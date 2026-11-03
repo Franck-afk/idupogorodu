@@ -14,7 +14,7 @@ REST API организатора — `docs/API.md`;
 
 | Файл | Что содержит |
 |---|---|
-| `themes/idpg_core/assets/scss/base/_tokens.scss` | CSS-токены `--idpg-*` в `:root` (101 запись: цвета, отступы, радиусы) + `@font-face` Gilroy |
+| `themes/idpg_core/assets/scss/base/_tokens.scss` | CSS-токены `--idpg-*` в `:root` (**99** записей: цвета, отступы, радиусы; было 101 до P3 03.11.2026) + `@font-face` Gilroy |
 | `themes/idpg_core/assets/scss/base/_variables.scss` | SCSS-переменные — тонкий слой над токенами |
 | `themes/idpg_core/assets/scss/base/_typography.scss`, `_reset.scss` | Типографика и сброс |
 | `themes/idpg_core/assets/scss/style.scss` | Вход сборки: порядок `@use` = порядок каскада |
@@ -28,6 +28,12 @@ REST API организатора — `docs/API.md`;
 `_dashboard.scss` (DEV-197), `_create-event.scss`/`_venue-form.scss`
 (DEV-206) — подключения в `style.scss` не восстанавливать.
 
+`pages/_organizer.scss` (DEV-312, восстановлен вместе с кабинетом организатора)
+в `style.scss` **не подключается**: он собирается отдельно в
+`assets/css/organizer.css` скриптами `compile:organizer-css`,
+`compile:organizer-css:temp` и проверяется `check:organizer-css`.
+Файл подключается только на `/organizer/*`.
+
 Фронтовые стили опираются на токены: в `templates.css` — 225 ссылок `var(--idpg-*)`.
 Голых hex осталось **192**: `editor-style.css` 29, `widget-areas-admin.css` 91,
 `templates.css` 64, `subscribe.css` 8 — план выноса в §12.
@@ -37,8 +43,9 @@ REST API организатора — `docs/API.md`;
 Полный список — `base/_tokens.scss`, `:root`. Именование: `--idpg-<группа>-<роль>`.
 Единственный источник токенов и порядок правок — §11.
 
-Счётчики в этом README ведутся по коду: в `:root` **101** запись, из них 47 —
-алиасы (сверено 07.10.2026; комментарий в `_tokens.scss` синхронизирован, DEV-252).
+Счётчики в этом README ведутся по коду: в `:root` **99** записей, из них **45** —
+алиасы (сверено 03.11.2026; до удаления мёртвых `--idpg-cabinet-card-bg/-border`
+было 101 и 47; комментарий в `_tokens.scss` синхронизирован, DEV-252).
 
 ### Цвета
 
@@ -191,7 +198,7 @@ REST API организатора — `docs/API.md`;
 3. **НЕ править `style.css` руками** (§8): файл собирается из SCSS, ручная
    правка затирается следующей сборкой и ловится `npm run check:css`.
 4. **НЕ писать новые правила на алиасы** (`--idpg-bg`, `--idpg-text`,
-   `--idpg-border`, …): 47 алиасов оставлены только для старого CSS,
+   `--idpg-border`, …): 45 алиасов оставлены только для старого CSS,
    новое — исключительно на базовые токены (§2).
 5. **НЕ прятать honeypot-поля форм через `display:none`** — спам-боты
    отсеивают такие поля и honeypot перестаёт работать; скрывать
@@ -211,8 +218,9 @@ REST API организатора — `docs/API.md`;
   3. синхронизировать этот README (§1, §2, таблицы);
   4. если токен попадает в палитру редактора — обновить `theme.json`.
 - Числа в README сверяются по коду, а не по комментариям в SCSS (§2: по `:root`
-  на 07.10.2026 — 101 токен, 47 алиасов). Комментарии SCSS и документы
-  синхронизированы в DEV-252/256.
+  на 07.10.2026 — 101 токен, 47 алиасов; на 03.11.2026 — **99** токенов и **45**
+  алиасов после удаления мёртвых `--idpg-cabinet-*`). Комментарии SCSS и документы
+  синхронизированы в DEV-252/256 и P3.
 - REST API организатора (namespace `idpg/v1`) — контракт и примеры
   в `docs/API.md` (DEV-261/264).
 
