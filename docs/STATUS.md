@@ -4,6 +4,13 @@
 **Версии:** `plugins/idpg-core` 1.1.2, `plugins/idpg-auth` 1.0.0, `themes/idpg_core` 1.0.79, `themes/idpg_core-child` 1.0.0
 **Источники:** `docs/PROJECT.md`, `PROJECT_ANALYSIS.md`, `docs/specs/`, `.workbuddy-ai/memory/`, git (`origin`: `github.com/Franck-afk/idupogorodu`).
 
+> **⚠️ Уточнение 04.11.2026 (DEV-312).** Строка §2.1 про DEV-235
+> («`/organizer/*` закрыт … 404») — историческая, она фиксирует состояние на
+> 07.10.2026. **Кабинет организатора восстановлен** в объёме чтения: роутер
+> включён, `page-organizer.php` + 4 раздела, меню и ассеты вернулись в тему.
+> Формы события/площадки не возвращены (DEV-313).
+> Актуально — `docs/PROJECT.md` §6.0 и `docs/specs/DEV-312.md`.
+
 ## 1. Метод
 
 - ТЗ — карточки `DEV-*` (`docs/PROJECT.md`, разделы 1–11).

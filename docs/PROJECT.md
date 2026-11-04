@@ -596,7 +596,7 @@ SCSS во временный файл и сравнивает набор пра�
 | 7 | Поля из ТЗ п.11 не реализованы | `idpg_pin_expires`, `idpg_venue_hours`, `idpg_venue_social`, `idpg_legal_type`, `idpg_inn`, `idpg_verified`, `idpg_documents`, панель организатора в админке — в коде отсутствуют. Реализованы `_idpg_stream_embed` и `_idpg_venue_type` |
 | 8 | Координаты события из ТЗ не реализованы | `_idpg_coordinates_lat/lng`, `_idpg_address` — в коде нет (гео хранится только у площадки) |
 | 9 | `documents`/`verified` организатора | Реализовано частично и иначе: подтверждение по email + модерация публикаций |
-| 10 | `require_once` ≠ работающий класс | **Закрыто DEV-100**: пять классов организатора были подключены, но не инициализированы — хуки висели в конструкторах, которые никто не вызывал. Сейчас все 40 файлов `includes/` подключены (07.10.2026), способ инициализации каждого класса описан в §5.1 — включая исключение `IDPG_Organizer_URL` (`::init()` отключён, DEV-235); контроль — набор `tests/test-class-init.php` |
+| 10 | `require_once` ≠ работающий класс | **Закрыто DEV-100**: пять классов организатора были подключены, но не инициализированы — хуки висели в конструкторах, которые никто не вызывал. Сейчас все 40 файлов `includes/` подключены (07.10.2026), способ инициализации каждого класса описан в §5.1 — включая исключение `IDPG_Organizer_URL` (`::init()` отключён, DEV-235); контроль — набор `tests/test-class-init.php`. **С 03.11.2026 (DEV-312) исключение снято** — см. §6.0 |
 
 ---
 
@@ -609,7 +609,7 @@ SCSS во временный файл и сравнивает набор пра�
 
 Состояние на 07.10.2026 — все 40 файлов `includes/` подключены в
 `idpg-core.php`, у каждого класса описан способ инициализации ниже (с DEV-235 есть
-исключение: `IDPG_Organizer_URL` подключён, но `::init()` не вызывается — §5.1).
+исключение: `IDPG_Organizer_URL` подключён, но `::init()` не вызывается — §5.1).<br>**Актуально на 04.11.2026 (DEV-312):** исключение снято, `::init()` вызывается — см. §6.0.
 Способы инициализации:
 
 | Способ | Классы | Где вызывается |
@@ -617,7 +617,7 @@ SCSS во временный файл и сравнивает набор пра�
 | `::instance()` в `idpg_core_init()` | 23 класса (`IDPG_CPT`, `IDPG_Roles`, `IDPG_REST_API`, `IDPG_Auth`, `IDPG_REST_Organizer`, `IDPG_Privacy` ядро при `require`, `IDPG_Promotion` и др.) | `idpg-core.php`, функция `idpg_core_init()` |
 | `::instance()` при загрузке файла | `IDPG_Current_Event_Banner`, `IDPG_User_Purge`, `IDPG_Privacy` | `idpg-core.php` ~строка 101 и конец соответствующих файлов |
 | Статический `::init()` | `IDPG_City_URL`, `IDPG_Favorites`, `IDPG_Organizer_Scope` | `idpg_core_init()` либо конец файла. ~~`IDPG_Organizer_Page`~~ удалён DEV-141 вместе с анкетой |
-| `::init()` не вызывается (отключён) | `IDPG_Organizer_URL` | Файл подключён `require_once`, но `IDPG_Organizer_URL::init()` из `idpg_core_init()` убран **DEV-235**: роутер `/organizer/*` отключён. Профиль/доступ/social-логика класса нужна REST и редиректам — потребители остаются |
+| `::init()` не вызывается (отключён) — **устарело с 03.11.2026** | `IDPG_Organizer_URL` | Файл подключён `require_once`, но `IDPG_Organizer_URL::init()` из `idpg_core_init()` убран **DEV-235**: роутер `/organizer/*` отключён. Профиль/доступ/social-логика класса нужна REST и редиректам — потребители остаются.<br>**Актуально на 04.11.2026 (DEV-312):** `::init()` снова вызывается из `idpg_core_init()`, карта в `test-class-init.php` переведена в разряд инициализируемых. Строка оставлена как историческая запись состояния на 07.10.2026 — см. §6.0 |
 | `register_widget()` на `widgets_init` | `IDPG_City_Selector_Widget`, `IDPG_Event_Calendar_Widget`, `IDPG_Expected_Events_Widget` | `idpg_core_register_plugin_widgets()` |
 | Не требуется | `IDPG_Search`, `IDPG_Template_Helper` (статические helper-ы), `IDPG_CLI` (только под `WP_CLI`), `IDPG_Auth_Rate_Limiter`, `IDPG_GeoService` (ленивая инициализация) | — |
 
@@ -635,6 +635,37 @@ SCSS во временный файл и сравнивает набор пра�
 ---
 
 ### 6. ЛК организатора: фактическое состояние (сверено 28.09.2026, уточнено 30.09.2026)
+
+> **⚠️ Актуальное состояние — 04.11.2026 (DEV-312).** Кабинет организатора
+> **восстановлен** и работает в объёме чтения. См. **§6.0** ниже и спецификацию
+> `docs/specs/DEV-312.md`. Всё, что написано дальше в §6.1–§6.5, — **историческая
+> сверка на 07.10.2026** (момент удаления ЛК DEV-234 / отключения роутера DEV-235).
+> Пометки «Удалено DEV-234», «Отключён DEV-235», «→ 404», «прод-потребителей нет»
+> описывают **тот момент** и не отражают текущее дерево (проверено 04.11.2026 после
+> merge `e4ef3d5`). Исключение — строка роутера в §6.1, куда уже добавлена пометка
+> о включении обратно 03.11.2026.
+
+#### 6.0 Кабинет организатора сейчас (04.11.2026, DEV-312)
+
+| Компонент | Состояние по коду |
+|---|---|
+| Роутер `/organizer/*` | **Включён.** `IDPG_Organizer_URL::init()` вызывается из `idpg_core_init()` (`idpg-core.php`, 1 вхождение); `const TEMPLATE = 'page-organizer.php'`, выбор шаблона — `locate_template()`. После выкладки нужен `flush_rewrite_rules()` (маркер `REWRITE_VERSION` сбрасывается сам) |
+| Разделы | `/organizer/`, `dashboard`, `events`, `venues`, `profile` — рендерятся серверно, навигация из `idpg_organizer_menu()` |
+| Шаблоны темы | `page-organizer.php` + 4 `template-parts/organizer/section-{dashboard,events,venues,profile}.php` — в дереве |
+| Меню кабинета | `inc/organizer-menu.php` (8 функций `idpg_organizer_*` + `idpg_core_is_organizer_cabinet()`), `require_once` в `functions.php` |
+| Ассеты | `assets/css/organizer.css` и `assets/js/organizer.js` подключаются **только** на `/organizer/*` (внутри `if ( idpg_core_is_organizer_cabinet() )`); источник CSS — отдельная сборка `assets/scss/pages/_organizer.scss`, в `style.scss` не входит |
+| Страница WP `/organizer/` | Создаётся и самовосстанавливается на `after_setup_theme`; исключена из sitemap Yoast фильтром `wpseo_exclude_from_sitemap_by_post_ids` |
+| Доступ | `get_access_decision()`: гость → `/login/`, без роли → **403**, `event_organizer` / `administrator` / `editor` → кабинет |
+| Профиль | Сохранение **без JavaScript**: nonce `idpg_organizer_profile`, `sanitize_profile_input()` / `update_profile()`, Post/Redirect/Get |
+| REST кабинета | 7 маршрутов `class-rest-organizer.php` — **без изменений**: `/organizer/events`, `/events/{id}`, `/submit`, `/stats`, `/venues`, `/venues/{id}`, `/profile` |
+| Тексты писем | Фильтр `idpg_organizer_cabinet_enabled`; значение по умолчанию выводится из фактического состояния роутера. Точки подмены: `idpg_email_organizer_verify_intro`, `idpg_email_organizer_welcome_subject_tail`, `idpg_email_organizer_welcome_body`, `idpg_registration_organizer_message` |
+| **Что НЕ вернулось** | Формы создания/правки **события и площадки** (`page-organizer-event.php`, `page-organizer-venue.php`, `organizer-*-form.js`, SCSS форм) — они были на Carbon Fields, удалённом DEV-311. Адреса `/organizer/event/*` и `/organizer/venue/*` редиректят в разделы, а не отдают битую страницу. Отдельная карточка **DEV-313** |
+| Контроль | `tests/test-organizer-cabinet.php` (статические критерии 1–10), `tests/test-organizer-cabinet-texts.php`, карта `tests/test-class-init.php` описывает `IDPG_Organizer_URL` как инициализируемый |
+
+> Связанные документы, которые фиксировали удалённое состояние и потому устарели
+> в части ЛК: `PROJECT_ANALYSIS.md` (раздел 5, карточки DEV-235/244/89),
+> `docs/STATUS.md` (строка DEV-235). Их исторические формулировки сохранены,
+> но сопровождены пометкой об актуальном состоянии.
 
 > **Источник:** сверка по текущему дереву `idpg-core` 1.1.2 / тема 1.0.78
 > (проверка `require`, `enqueue`, наличия REST-маршрутов и методов), а не

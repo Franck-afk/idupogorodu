@@ -1,7 +1,7 @@
 <?php
-/** 
+/**
  * Настройки баннера на главной.
- * 
+ *
  * Отдельная вкладка «Баннер на главной» на странице «IDPG»: все
  * настройки вывода баннера как самостоятельного блока главной страницы —
  * вкл/выкл показа, авто-ротация карусели, интервал ротации, число
@@ -13,71 +13,71 @@
  * через геттеры с fallback на дефолт. Настройка позиции (hero/middle/bottom)
  * удалена по решению владельца — баннер показывается только в hero,
  * как и до появления вкладки.
- * 
+ *
  * Мета-поля конкретных событий (заявка, подтверждение оплаты, скрытие)
  * остаются во вкладке «События» — здесь только глобальные параметры.
- * 
+ *
  * @package idpg-core
  */
 
- /** 
+ /**
   * Класс IDPG_Banner_Settings
   */
 
 class IDPG_Banner_Settings {
 
-	/** 
+	/**
 	 * Слаг вкладки на странице «IDPG».
-	 * 
+	 *
 	 * @var string
-	 */ 
+	 */
 	const TAB_SLUG = 'banner';
 
-	/** 
+	/**
 	 * Префикс meta-ключей для настроек баннера (как у полей события).
-	 * 
+	 *
 	 * @var string
-	 */ 
+	 */
 	const META_PREFIX = '_idpg_banner_';
 
-	/** 
+	/**
 	 * Имя option с настройками баннера (оставляем для обратной совместимости при миграции).
-	 * 
+	 *
 	 * @var string
-	 */ 
+	 */
 	const OPTION = 'idpg_banner_settings';
 
-	/** 
+	/**
 	 * Действие nonce формы.
-	 * 
+	 *
 	 * @var string
-	 */ 
+	 */
 	const NONCE_ACTION = 'idpg_save_banner_settings';
 
-	/** 
+	/**
 	 * Имя поля nonce.
-	 * 
+	 *
 	 * @var string
-	 */ 
+	 */
 	const NONCE_NAME = 'idpg_banner_settings_nonce';
 
-	/** 
+	/**
 	 * User meta одноразового сообщения «Настройки баннера сохранены.».
-	 * 
+	 *
 	 * @var string
-	 */ 
+	 */
 	const USER_SAVED_META = 'idpg_banner_tab_saved';
 
-	/** 
+	/**
 	 * Поля баннера — тот же набор, что у карточки события.
-	 * 
+	 *
 	 * Чекбоксы полей удалены из вкладки по решению владельца: все поля
 	 * события выводятся в баннере всегда. Константа и механизм
 	 * is_field_enabled()/sanitize оставлены для совместимости — рендер
 	 * баннера их больше не использует.
-	 * 
+	 *
 	 * @var array
-	 */ 
+	 */
 	const FIELDS = array(
 		'chips',
 		'date',
@@ -93,11 +93,11 @@ class IDPG_Banner_Settings {
 		'excerpt',
 	);
 
-	/** 
+	/**
 	 * Подписи полей баннера для формы настроек.
-	 * 
+	 *
 	 * @return array Массив ключ => подпись.
-	 */ 
+	 */
 	public static function get_field_labels() {
 		return array(
 			'chips'     => __( 'Бейджи события (статус билетов, «Бесплатно», «Популярное», «ТОП», «Онлайн», «Новый»)', 'idpg-core' ),
@@ -131,18 +131,18 @@ class IDPG_Banner_Settings {
 		);
 	}
 
-	/** 
+	/**
 	 * Синглтон.
-	 * 
+	 *
 	 * @var IDPG_Banner_Settings|null
-	 */ 
+	 */
 	private static $instance = null;
 
-	/** 
+	/**
 	 * Получение экземпляра синглтона.
-	 * 
+	 *
 	 * @return IDPG_Banner_Settings
-	 */ 
+	 */
 	public static function instance() {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
@@ -150,9 +150,9 @@ class IDPG_Banner_Settings {
 		return self::$instance;
 	}
 
-	/** 
+	/**
 	 * Конструктор: хуки вкладки и обработчика сохранения.
-	 */ 
+	 */
 	private function __construct() {
 		add_filter( 'idpg_widget_areas_admin_tabs', array( $this, 'register_admin_tab' ) );
 		add_action( 'admin_init', array( $this, 'handle_save' ) );
@@ -298,7 +298,7 @@ class IDPG_Banner_Settings {
 		if ( is_array( $stored ) && ! empty( $stored ) ) {
 			return wp_parse_args( $stored, self::defaults() );
 		}
-		
+
 		// Единого option нет или он пустой — читаем индивидуальные option с префиксом idpg_banner_*
 		// Это делает настройки "самостоятельными" — не зависит от единого option-файла.
 		$settings = array();
@@ -315,25 +315,25 @@ class IDPG_Banner_Settings {
 				$settings[ $key ] = $default;
 			}
 		}
-		
+
 		return wp_parse_args( $settings, self::defaults() );
 	}
 
-	/** 
+	/**
 	 * Интервал авто-ротации карусели, мс.
-	 * 
+	 *
 	 * @return int
-	 */ 
+	 */
 	public static function get_carousel_interval() {
 		$s = self::get_settings();
 		return max( 2000, (int) $s['carousel_interval'] );
 	}
 
-	/** 
+	/**
 	 * Максимум оплаченных событий в карусели.
-	 * 
+	 *
 	 * @return int
-	 */ 
+	 */
 	public static function get_paid_limit() {
 		$s = self::get_settings();
 		return max( 1, min( 50, (int) $s['paid_limit'] ) );
@@ -383,62 +383,62 @@ class IDPG_Banner_Settings {
 		);
 	}
 
-	/** 
+	/**
 	 * Срок кэша выбора баннера, в секундах.
-	 * 
+	 *
 	 * @return int
-	 */ 
+	 */
 	public static function get_cache_ttl() {
 		$s = self::get_settings();
 		return max( 1, (int) $s['cache_ttl'] ) * MINUTE_IN_SECONDS;
 	}
 
-	/** 
+	/**
 	 * Текст кнопки в баннере (пустая строка → дефолт «Подробнее»).
-	 * 
+	 *
 	 * @return string
-	 */ 
+	 */
 	public static function get_button_text() {
 		$s = self::get_settings();
 		$t = isset( $s['button_text'] ) ? trim( (string) $s['button_text'] ) : '';
 		return ( '' !== $t ) ? $t : __( 'Подробнее', 'idpg-core' );
 	}
 
-	/** 
+	/**
 	 * Свой заголовок баннера (пустая строка — использовать название события).
-	 * 
+	 *
 	 * @return string
-	 */ 
+	 */
 	public static function get_banner_title() {
 		$s = self::get_settings();
 		return isset( $s['banner_title'] ) ? trim( (string) $s['banner_title'] ) : '';
 	}
 
-	/** 
+	/**
 	 * Свой текст анонса баннера (пустая строка — использовать анонс события).
-	 * 
+	 *
 	 * @return string
-	 */ 
+	 */
 	public static function get_banner_text() {
 		$s = self::get_settings();
 		return isset( $s['banner_text'] ) ? trim( (string) $s['banner_text'] ) : '';
 	}
 
-	/** 
+	/**
 	 * Длина анонса в символах (0 — без обрезки).
-	 * 
+	 *
 	 * @return int
-	 */ 
+	 */
 	public static function get_excerpt_length() {
 		$s = self::get_settings();
 		return max( 0, min( 500, (int) $s['excerpt_length'] ) );
 	}
 
-	/** 
+	/**
 	 * Высота баннера, px.
-	 * 
+	 *
 	 * @return int
-	 */ 
+	 */
 	public static function get_banner_height() {
 		$s = self::get_settings();
 		return max( 200, min( 800, (int) $s['banner_height'] ) );
@@ -778,25 +778,25 @@ class IDPG_Banner_Settings {
 		return 'yes' === $s['enabled'];
 	}
 
-	/** 
+	/**
 	 * Включена ли авто-ротация карусели.
-	 * 
+	 *
 	 * @return bool
-	 */ 
+	 */
 	public static function is_auto_rotate() {
 		$s = self::get_settings();
 		return 'yes' === $s['auto_rotate'];
 	}
 
-	/** 
+	/**
 	 * Выводится ли поле баннера.
-	 * 
+	 *
 	 * Неизвестное поле всегда выключено; для полей, которых нет в настройках,
 	 * действует дефолт (включено).
-	 * 
+	 *
 	 * @param string $field Ключ поля из self::FIELDS.
 	 * @return bool
-	 */ 
+	 */
 	public static function is_field_enabled( $field ) {
 		if ( ! in_array( $field, self::FIELDS, true ) ) {
 			return false;
@@ -1039,12 +1039,12 @@ class IDPG_Banner_Settings {
 		return $individual_settings;
 	}
 
-	/** 
+	/**
 	 * События для селектора «Скрыть баннер полностью».
-	 * 
+	 *
 	 * @param int $limit Сколько событий брать (без учёта уже отмеченных).
 	 * @return array Массив объектов WP_Post.
-	 */ 
+	 */
 	public static function get_hide_events( $limit = 100 ) {
 		$events = get_posts(
 			array(
@@ -1077,12 +1077,12 @@ class IDPG_Banner_Settings {
 		return $events;
 	}
 
-	/** 
+	/**
 	 * Запись флага «Скрыть баннер полностью» для выбранного события.
-	 * 
+	 *
 	 * @param array $raw Данные $_POST.
 	 * @return int ID события, если мета обновлена; иначе 0.
-	 */ 
+	 */
 	public static function save_hide_full_flag( $raw ) {
 		if ( ! is_array( $raw ) ) {
 			return 0;
@@ -1103,12 +1103,12 @@ class IDPG_Banner_Settings {
 		return $event_id;
 	}
 
-	/** 
+	/**
 	 * Регистрация вкладки «Баннер на главной».
-	 * 
+	 *
 	 * @param array $tabs Карта вкладок `slug => ['label','callback']`.
 	 * @return array
-	 */ 
+	 */
 	public function register_admin_tab( $tabs ) {
 		if ( ! is_array( $tabs ) ) {
 			$tabs = array();
@@ -1120,9 +1120,9 @@ class IDPG_Banner_Settings {
 		return $tabs;
 	}
 
-	/** 
+	/**
 	 * Рендер вкладки: скрытие баннера по событию + глобальные настройки.
-	 */ 
+	 */
 	public function render_admin_tab() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -1146,9 +1146,9 @@ class IDPG_Banner_Settings {
 			$hide_event = null;
 		}
 
-		/* 
+		/*
 		 * Сообщение после сохранения — одноразовое.
-		 * 
+		 *
 		 * Ставится user meta в handle_save() и читается здесь только на
 		 * активной вкладке «Баннер на главной»: callbacks вкладок страницы
 		 * IDPG выполняются все при каждой загрузке, поэтому без проверки
@@ -1156,7 +1156,7 @@ class IDPG_Banner_Settings {
 		 * (код idpg_msg=saved в URL общий). Мета удаляется после показа —
 		 * F5, назад/вперёд и возвраты на вкладку не дублируют плашку
 		 * (как «Поля события сохранены.» на вкладке «События»).
-		 */ 
+		 */
 		if ( $this->has_saved_notice() ) {
 			delete_user_meta( get_current_user_id(), self::USER_SAVED_META );
 			?>
@@ -1345,9 +1345,9 @@ class IDPG_Banner_Settings {
 		<?php
 	}
 
-	/** 
+	/**
 	 * Обработчик сохранения настроек (admin_init).
-	 */ 
+	 */
 	public function handle_save() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce проверяется ниже.
 		if ( ! isset( $_POST['idpg_banner_action'] ) || 'save' !== $_POST['idpg_banner_action'] ) {
@@ -1375,13 +1375,13 @@ class IDPG_Banner_Settings {
 			IDPG_Current_Event_Banner::instance()->purge_cache();
 		}
 
-		/* 
+		/*
 		 * Одноразовое «Настройки баннера сохранены.»: код кладём в user
 		 * meta, а не в URL — иначе idpg_msg=saved висел бы в адресе при
 		 * JS-переключении вкладок и F5, и плашка повторялась бы при
 		 * каждом возврате на вкладку «Баннер на главной» (как это было
 		 * решено для вкладки «События»).
-		 */ 
+		 */
 		update_user_meta( get_current_user_id(), self::USER_SAVED_META, 1 );
 
 		$redirect = admin_url( 'admin.php?page=idpg-widget-areas&tab=' . self::TAB_SLUG );
