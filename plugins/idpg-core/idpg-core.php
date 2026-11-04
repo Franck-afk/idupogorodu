@@ -64,6 +64,7 @@ require_once IDPG_CORE_DIR . 'includes/class-rest-api.php';
 require_once IDPG_CORE_DIR . 'includes/class-ical-export.php';
 require_once IDPG_CORE_DIR . 'includes/class-current-event-banner.php';
 require_once IDPG_CORE_DIR . 'includes/class-banner-settings.php';
+require_once IDPG_CORE_DIR . 'includes/class-admin-toasts.php';
 
 /**
  * Инициализация баннера текущего события (file-load).
@@ -148,6 +149,9 @@ function idpg_core_init() {
 
 	// DEV-305: локальная база IP→регион (242-ФЗ), вкладка «Гео» на странице «IDPG».
 	IDPG_Geo_Ranges::instance();
+
+	// Тосты стандартных notice на всех страницах админки.
+	IDPG_Admin_Toasts::instance();
 
 	// Интеграция с Yoast SEO (хуки вешаются только если плагин активен).
 	IDPG_SEO_Integration::instance();

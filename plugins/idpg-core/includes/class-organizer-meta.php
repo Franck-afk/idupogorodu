@@ -247,7 +247,16 @@ class IDPG_Organizer_Meta {
 
 		foreach ( self::get_fields() as $field ) {
 			if ( 'documents' === $field['type'] ) {
-				$raw = isset( $_POST['idpg_documents_ids'] ) ? sanitize_text_field( wp_unslash( $_POST['idpg_documents_ids'] ) ) : '';
+				$documents_raw = isset( $_POST['idpg_documents_ids'] ) ? wp_unslash( $_POST['idpg_documents_ids'] ) : '';
+				if ( is_array( $documents_raw ) ) {
+					// Поле может прийти массивом (name="idpg_documents_ids[]"):
+					// sanitize_text_field() с массивом даёт
+					// "Array to string conversion" в wp_check_invalid_utf8().
+					// Приводим к CSV-строке, которую ниже разбирает explode().
+					$raw = implode( ',', array_map( 'absint', $documents_raw ) );
+				} else {
+					$raw = sanitize_text_field( $documents_raw );
+				}
 				$ids = array();
 
 				if ( '' !== $raw ) {

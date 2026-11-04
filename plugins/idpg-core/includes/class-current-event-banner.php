@@ -2,9 +2,10 @@
 /**
  * Баннер текущего события на главной.
  *
- * Рендерит на фронте баннер с данными ближайшего предстоящего события
- * из Gutenberg-редактора CPT "event": изображение, рубрика, даты,
- * заголовок и анонс. Настроек в админке не имеет.
+ * Рендерит на фронте баннер с событиями CPT "event", выбранными во
+ * вкладке «Банер на главной» (`IDPG_Banner_Settings`). Одно событие —
+ * обычный баннер, несколько — карусель. События без выбора (в том числе
+ * новые) в баннер не попадают; закончившиеся события исключаются.
  *
  * @package IDPG_Core
  */
@@ -205,17 +206,16 @@ class IDPG_Current_Event_Banner {
 			return;
 		}
 
-		// Приоритет — подтверждённые (оплаченные) события: одно — баннер,
-		// несколько — карусель с авто-ротацией.
-		$paid_html = $this->render_paid_html();
-		if ( $paid_html ) {
-			echo $paid_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			return;
-		}
-
-		$html = $this->render_html();
-		if ( $html ) {
-			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		/*
+		 * События для баннера выбираются во вкладке «Банер на главной».
+		 * Одно событие — обычный баннер, несколько — карусель с авто-ротацией.
+		 *
+		 * Автоматический выбор ближайшего события отключён: новые и уже
+		 * существующие события не попадают в баннер без явного выбора.
+		 */
+		$selected_html = $this->render_selected_html();
+		if ( $selected_html ) {
+			echo $selected_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
@@ -378,6 +378,37 @@ class IDPG_Current_Event_Banner {
 	 */
 	private function is_full_banner_hidden( $post_id ) {
 		return 'yes' === get_post_meta( $post_id, self::META_HIDE_FULL, true );
+	}
+
+	/**
+	 * Закончилось ли событие на текущий момент.
+	 *
+	 * Даты события хранятся как Y-m-d (событие идёт весь день) либо
+	 * Y-m-d\TH:i / Y-m-d H:i (с точным временем). Дата без времени
+	 * считается актуальной до конца дня окончания; дата со временем —
+	 * до указанного момента.
+	 *
+	 * @param int $post_id ID события.
+	 * @return bool True, если событие уже закончилось.
+	 */
+	private function is_event_expired( $post_id ) {
+		$start = trim( (string) get_post_meta( $post_id, self::META_START, true ) );
+		$end   = trim( (string) get_post_meta( $post_id, self::META_END, true ) );
+
+		$value = ( '' !== $end ) ? $end : $start;
+		if ( '' === $value ) {
+			return false;
+		}
+
+		// Единый вид для сравнения: «T» в дате-времени заменяем пробелом.
+		$value = str_replace( 'T', ' ', $value );
+
+		// Дата без времени: событие показывается весь день окончания.
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
+			return $value < current_time( 'Y-m-d' );
+		}
+
+		return $value < current_time( 'mysql' );
 	}
 
 	/**
@@ -950,9 +981,20 @@ class IDPG_Current_Event_Banner {
 			$posts = array();
 			foreach ( $cached as $post_id ) {
 				$post = get_post( (int) $post_id );
-				if ( $post && 'publish' === $post->post_status ) {
-					$posts[] = $post;
+				if ( ! $post || 'publish' !== $post->post_status ) {
+					continue;
 				}
+
+				// Кэш мог сохраниться до окончания события — перепроверяем даты.
+				if ( $this->is_full_banner_hidden( (int) $post->ID ) ) {
+					continue;
+				}
+
+				if ( $this->is_event_expired( (int) $post->ID ) ) {
+					continue;
+				}
+
+				$posts[] = $post;
 			}
 			return $posts;
 		}
@@ -1030,12 +1072,17 @@ class IDPG_Current_Event_Banner {
 
 		$posts = get_posts( $args );
 
-		// События, у которых стоит «скрыть баннер полностью», в ротацию не попадают.
+		// Скрытые и закончившиеся события в ротацию не попадают.
 		$paid = array();
 		foreach ( $posts as $post ) {
 			if ( $this->is_full_banner_hidden( (int) $post->ID ) ) {
 				continue;
 			}
+
+			if ( $this->is_event_expired( (int) $post->ID ) ) {
+				continue;
+			}
+
 			$paid[] = $post;
 		}
 
@@ -1046,20 +1093,84 @@ class IDPG_Current_Event_Banner {
 	}
 
 	/**
+	 * События, выбранные во вкладке «Банер на главной».
+	 *
+	 * Порядок — как в форме. Пропускаются неопубликованные, скрытые
+	 * полностью, закончившиеся события и события без постера.
+	 *
+	 * @return WP_Post[] Список событий.
+	 */
+	private function get_selected_events() {
+		$ids = IDPG_Banner_Settings::get_banner_event_ids();
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		// Число слайдов карусели ограничено настройкой вкладки.
+		$limit = IDPG_Banner_Settings::get_paid_limit();
+		if ( count( $ids ) > $limit ) {
+			$ids = array_slice( $ids, 0, $limit );
+		}
+
+		$events = array();
+		foreach ( $ids as $id ) {
+			$post = get_post( (int) $id );
+			if ( ! $post || 'event' !== $post->post_type || 'publish' !== $post->post_status ) {
+				continue;
+			}
+
+			if ( $this->is_full_banner_hidden( (int) $post->ID ) ) {
+				continue;
+			}
+
+			if ( $this->is_event_expired( (int) $post->ID ) ) {
+				continue;
+			}
+
+			if ( ! IDPG_Media::idpg_get_poster_id( (int) $post->ID ) ) {
+				continue;
+			}
+
+			$events[] = $post;
+		}
+
+		return $events;
+	}
+
+	/**
+	 * Рендер событий, выбранных во вкладке «Банер на главной».
+	 *
+	 * @return string Пустая строка, если события не выбраны.
+	 */
+	private function render_selected_html() {
+		return $this->render_events_html( $this->get_selected_events() );
+	}
+
+	/**
 	 * Рендер подтверждённых (оплаченных) событий.
 	 *
-	 * Одно событие — обычный баннер; несколько — карусель с авто-ротацией.
+	 * Оставлен для обратной совместимости; баннер на главной использует
+	 * выбор из вкладки «Банер на главной» (render_selected_html()).
 	 *
 	 * @return string Пустая строка, если подтверждённых событий нет.
 	 */
 	private function render_paid_html() {
-		$paid = $this->get_paid_events();
-		if ( empty( $paid ) ) {
+		return $this->render_events_html( $this->get_paid_events() );
+	}
+
+	/**
+	 * HTML одного баннера или карусели для набора событий.
+	 *
+	 * @param WP_Post[] $events События.
+	 * @return string Пустая строка, если событий нет.
+	 */
+	private function render_events_html( $events ) {
+		if ( empty( $events ) ) {
 			return '';
 		}
 
-		if ( 1 === count( $paid ) ) {
-			return $this->render_single_html( $paid[0] );
+		if ( 1 === count( $events ) ) {
+			return $this->render_single_html( $events[0] );
 		}
 
 		// Собираем слайды и точки в одном цикле, чтобы индексы совпадали.
@@ -1067,7 +1178,7 @@ class IDPG_Current_Event_Banner {
 		$dots   = '';
 		$index  = 0;
 
-		foreach ( $paid as $event ) {
+		foreach ( $events as $event ) {
 			$html = $this->render_single_html( $event );
 			if ( ! $html ) {
 				continue;

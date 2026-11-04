@@ -604,12 +604,30 @@ if ( ! function_exists( 'idpg_core_video_embed_url' ) ) {
 			}
 		}
 
-		// Rutube.
+		// Rutube: /video/<hash>/, /video/private/<hash>/?p=<token>,
+		// /play/embed/<hash>/, /shorts/<hash>/.
+		// ID — длинный хеш (32 символа), поэтому требуем минимум 8 знаков:
+		// иначе «private» из /video/private/ ловится как ID, а короткие
+		// фрагменты обрезаются на дефисах.
 		elseif ( false !== strpos( $host, 'rutube.ru' ) ) {
-			if ( false !== strpos( $url, '/play/embed/' ) ) {
-				$embed = $url;
-			} elseif ( preg_match( '/rutube\.ru\/(?:video|v)\/([a-zA-Z0-9]+)/', $url, $m ) ) {
-				$embed = 'https://rutube.ru/play/embed/' . $m[1];
+			$rutube_id  = '';
+			$rutube_par = '';
+
+			if ( preg_match( '#/play/embed/([a-zA-Z0-9_-]{8,})#', $url, $m ) ) {
+				$rutube_id = $m[1];
+			} elseif ( preg_match( '#rutube\.ru/(?:video|v)/(?:private/)?([a-zA-Z0-9_-]{8,})#', $url, $m ) ) {
+				$rutube_id = $m[1];
+			} elseif ( preg_match( '#rutube\.ru/shorts/([a-zA-Z0-9_-]{8,})#', $url, $m ) ) {
+				$rutube_id = $m[1];
+			}
+
+			if ( '' !== $rutube_id ) {
+				$embed = 'https://rutube.ru/play/embed/' . $rutube_id . '/';
+
+				// Приватное видео требует токен p= из ссылки.
+				if ( preg_match( '/[?&]p=([a-zA-Z0-9_-]+)/', $url, $pm ) ) {
+					$embed = add_query_arg( 'p', $pm[1], $embed );
+				}
 			}
 		}
 

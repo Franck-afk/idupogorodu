@@ -1,0 +1,75 @@
+/**
+ * Тосты стандартных уведомлений админки WordPress.
+ *
+ * Базовое позиционирование и анимацию даёт Toastify; здесь — оформление
+ * под админку: цвета success/error/warning/info, скругление и тень.
+ */
+.idpg-admin-toast.toastify {
+	max-width: 420px;
+	border-radius: 8px;
+	box-shadow: 0 6px 20px rgba( 0, 0, 0, 0.18 );
+	color: #1d2327;
+	font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	padding: 14px 18px;
+	white-space: normal;
+	word-break: break-word;
+}
+
+.idpg-admin-toast--success.toastify {
+	background: #edfaef;
+	border-left: 4px solid #00a32a;
+}
+
+.idpg-admin-toast--error.toastify {
+	background: #fcf0f1;
+	border-left: 4px solid #d63638;
+}
+
+.idpg-admin-toast--warning.toastify {
+	background: #fcf9e8;
+	border-left: 4px solid #dba617;
+}
+
+.idpg-admin-toast--info.toastify {
+	background: #f0f6fc;
+	border-left: 4px solid #72aee6;
+}
+
+.idpg-admin-toast__content p {
+	margin: 0 0 8px;
+}
+
+.idpg-admin-toast__content p:last-child {
+	margin-bottom: 0;
+}
+
+.idpg-admin-toast__content a {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.idpg-admin-toast__content a:hover,
+.idpg-admin-toast__content a:focus {
+	color: #135e96;
+}
+
+.idpg-admin-toast.toastify .toast-close {
+	color: currentColor;
+	opacity: 0.45;
+}
+
+.idpg-admin-toast.toastify .toast-close:hover,
+.idpg-admin-toast.toastify .toast-close:focus {
+	opacity: 0.85;
+}
+
+/* Fallback-notice скрыт до инициализации тоста (JS снимет hidden). */
+.idpg-banner-saved-notice[hidden] {
+	display: none;
+}
+
+@media screen and (max-width: 480px) {
+	.idpg-admin-toast.toastify {
+		max-width: calc( 100vw - 30px );
+	}
+}

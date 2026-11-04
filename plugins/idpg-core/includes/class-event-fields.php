@@ -722,10 +722,19 @@ class IDPG_Event_Fields {
 						$value = isset( $_POST['idpg_sessions_rows'] ) ? wp_unslash( $_POST['idpg_sessions_rows'] ) : array();
 						break;
 
-					case 'gallery':
-						// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce проверяется выше.
-						$value = isset( $_POST['idpg_gallery_ids'] ) ? sanitize_text_field( wp_unslash( $_POST['idpg_gallery_ids'] ) ) : '';
-						break;
+				case 'gallery':
+					// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce проверяется выше.
+					$gallery_raw = isset( $_POST['idpg_gallery_ids'] ) ? wp_unslash( $_POST['idpg_gallery_ids'] ) : '';
+					if ( is_array( $gallery_raw ) ) {
+						// Поле может прийти массивом (name="idpg_gallery_ids[]"):
+						// sanitize_text_field() с массивом даёт
+						// "Array to string conversion" в wp_check_invalid_utf8().
+						// Приводим к CSV-строке, которую ждёт save_gallery().
+						$value = implode( ',', array_map( 'absint', $gallery_raw ) );
+					} else {
+						$value = sanitize_text_field( $gallery_raw );
+					}
+					break;
 
 					default:
 						$value = self::sanitize_field( $field, $raw );

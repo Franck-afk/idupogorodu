@@ -57,6 +57,7 @@ class Test_Class_Init extends WP_UnitTestCase {
 		'IDPG_SEO_Integration'      => 'idpg_core_init()',
 		'IDPG_Current_Event_Banner' => 'idpg-core.php:99, при загрузке файла',
 		'IDPG_Banner_Settings'     => 'idpg-core.php:75, при загрузке файла',
+		'IDPG_Admin_Toasts'        => 'idpg_core_init()',
 		'IDPG_User_Purge'           => 'конец class-user-purge.php',
 	);
 

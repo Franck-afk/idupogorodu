@@ -1,0 +1,224 @@
+/*
+ * Календарь Pikaday для полей даты в админке «Иду по городу».
+ * Стили повторяют визуальный язык Clearfy Pro (синий акцент, мягкие тени).
+ */
+.pika-single {
+	position: relative;
+	z-index: 9999;
+	display: block;
+	color: #0a0b0d;
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	border-radius: 8px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+	width: 280px;
+	padding: 8px;
+}
+
+.pika-single.is-hidden { display: none; }
+.pika-single.is-bound { position: absolute; }
+
+.pika-title {
+	position: relative;
+	text-align: center;
+	padding: 4px 0 8px;
+	font-weight: 600;
+}
+
+.pika-label {
+	display: inline-block;
+	position: relative;
+	overflow: hidden;
+	margin: 0;
+	padding: 3px 6px;
+	border-radius: 4px;
+	background: transparent;
+	color: #0a0b0d;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.pika-label:hover { background: #f0f1f4; }
+
+.pika-label select {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.pika-prev,
+.pika-next {
+	position: absolute;
+	top: 6px;
+	width: 28px;
+	height: 28px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: #5b616e;
+	font-size: 0;
+	cursor: pointer;
+	text-indent: -9999px;
+	overflow: hidden;
+}
+
+.pika-prev { left: 4px; }
+.pika-next { right: 4px; }
+
+.pika-prev::before,
+.pika-next::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 7px;
+	height: 7px;
+	border-top: 2px solid currentColor;
+	border-left: 2px solid currentColor;
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.pika-next::before { transform: translate(-50%, -50%) rotate(135deg); }
+
+.pika-prev:hover,
+.pika-next:hover { background: #f0f1f4; color: #165ff4; }
+
+.pika-prev.is-disabled,
+.pika-next.is-disabled { opacity: .35; cursor: default; }
+
+.pika-table {
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+.pika-table th {
+	width: 14.28%;
+	padding: 4px 0;
+	color: #8a8f98;
+	font-size: 11px;
+	font-weight: 600;
+	text-align: center;
+	text-transform: uppercase;
+	background: transparent;
+	border: 0;
+}
+
+.pika-table td { padding: 1px; background: transparent; border: 0; }
+
+.pika-button {
+	display: block;
+	width: 100%;
+	padding: 6px 0;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: #0a0b0d;
+	font-size: 12.5px;
+	line-height: 1;
+	text-align: center;
+	cursor: pointer;
+}
+
+.pika-button:hover {
+	background: rgba(22, 95, 244, .12);
+	color: #165ff4;
+}
+
+.pika-week { color: #8a8f98; }
+
+.is-today .pika-button {
+	color: #165ff4;
+	font-weight: 700;
+	box-shadow: inset 0 0 0 1px rgba(22, 95, 244, .35);
+}
+
+.is-selected .pika-button {
+	background: #165ff4;
+	color: #fff;
+	font-weight: 600;
+	box-shadow: none;
+}
+
+.is-selected .pika-button:hover { background: #0f4ad4; color: #fff; }
+
+.is-disabled .pika-button,
+.is-outside-current-month .pika-button {
+	color: #c4c6cc;
+	cursor: default;
+}
+
+.is-disabled .pika-button:hover,
+.is-outside-current-month .pika-button:hover { background: transparent; }
+
+.pika-footer {
+	display: flex;
+	justify-content: space-between;
+	padding: 6px 4px 2px;
+	border-top: 1px solid #f0f1f4;
+	margin-top: 4px;
+}
+
+.pika-today,
+.pika-clear {
+	border: 0;
+	background: transparent;
+	color: #165ff4;
+	font-size: 12px;
+	cursor: pointer;
+	padding: 4px 6px;
+	border-radius: 4px;
+}
+
+.pika-today:hover,
+.pika-clear:hover { background: rgba(22, 95, 244, .1); }
+
+/* Поле даты в форме настроек */
+.idpg-datepicker {
+	width: 160px;
+	padding: 5px 8px;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235b616e' stroke-width='2'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3 10h18'/%3E%3C/svg%3E") no-repeat right 8px center;
+	background-size: 14px;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.idpg-datepicker:focus {
+	border-color: #165ff4;
+	box-shadow: 0 0 0 1px #165ff4;
+	outline: none;
+}
+
+/* Обёртка поля даты: календарь + кнопка очистки */
+.idpg-datepicker-wrap {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.idpg-datepicker-clear {
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+	color: #8a8f98;
+	font-size: 15px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.idpg-datepicker-clear:hover {
+	border-color: #c62828;
+	color: #c62828;
+}

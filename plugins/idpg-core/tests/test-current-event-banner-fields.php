@@ -11,6 +11,25 @@
 class Test_Current_Event_Banner_Fields extends WP_UnitTestCase {
 
 	/**
+	 * Чистка настроек баннера между тестами.
+	 *
+	 * Санитизация пишет и индивидуальные option; без чистки значения
+	 * из одного теста могут протечь в другой (порядок не гарантирован).
+	 */
+	public function tear_down() {
+		delete_option( IDPG_Banner_Settings::OPTION );
+
+		foreach ( array_keys( IDPG_Banner_Settings::defaults() ) as $key ) {
+			delete_option( 'idpg_banner_' . $key );
+		}
+
+		// `fields` не входит в defaults(), но тоже пишется индивидуально.
+		delete_option( 'idpg_banner_fields' );
+
+		parent::tear_down();
+	}
+
+	/**
 	 * Вызов приватного метода баннера.
 	 *
 	 * @param string $method Имя метода.
@@ -72,6 +91,176 @@ class Test_Current_Event_Banner_Fields extends WP_UnitTestCase {
 	}
 
 
+
+	/**
+	 * Постер для события — баннер без изображения не строится.
+	 *
+	 * @param int $event_id ID события.
+	 * @return int ID вложения.
+	 */
+	private function attach_poster( $event_id ) {
+		$attachment_id = self::factory()->attachment->create_object(
+			'banner.jpg',
+			0,
+			array( 'post_mime_type' => 'image/jpeg' )
+		);
+		update_attached_file( $attachment_id, '2026/01/banner.jpg' );
+		wp_update_attachment_metadata(
+			$attachment_id,
+			array(
+				'file'   => '2026/01/banner.jpg',
+				'width'  => 1200,
+				'height' => 800,
+				'sizes'  => array(),
+			)
+		);
+		set_post_thumbnail( $event_id, $attachment_id );
+
+		return $attachment_id;
+	}
+
+	/**
+	 * Город события — баннер выбирает события только текущего города.
+	 *
+	 * @param int    $event_id ID события.
+	 * @param string $slug     Slug города.
+	 * @return int ID термина.
+	 */
+	private function attach_city( $event_id, $slug = 'izhevsk' ) {
+		$term_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'city',
+				'slug'     => $slug,
+				'name'     => 'Ижевск',
+			)
+		);
+		wp_set_object_terms( $event_id, array( (int) $term_id ), 'city' );
+
+		return $term_id;
+	}
+
+	/**
+	 * Рендер баннера на главной для теста.
+	 *
+	 * @return string HTML.
+	 */
+	private function render_front_banner() {
+		update_option( 'show_on_front', 'posts' );
+		$this->go_to( home_url( '/' ) );
+
+		$banner = IDPG_Current_Event_Banner::instance();
+		$banner->purge_cache();
+
+		ob_start();
+		$banner->render( 'hero' );
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Без выбора во вкладке «Банер на главной» баннер не выводится.
+	 *
+	 * Обратная проба: если вернуть автовыбор ближайшего события в render(),
+	 * тест обязан упасть — новое событие с постером снова окажется в баннере.
+	 */
+	public function test_render_skips_when_no_event_selected() {
+		$event = self::factory()->post->create(
+			array(
+				'post_type'   => 'event',
+				'post_status' => 'publish',
+			)
+		);
+		$this->attach_poster( $event );
+		$this->attach_city( $event );
+		update_post_meta( $event, '_idpg_start_date', '2099-01-01' );
+		update_post_meta( $event, '_idpg_end_date', '2099-01-01' );
+
+		$this->assertSame( '', $this->render_front_banner() );
+	}
+
+	/**
+	 * Событие, выбранное во вкладке «Банер на главной», выводится в баннере.
+	 */
+	public function test_render_shows_selected_event() {
+		$event = self::factory()->post->create(
+			array(
+				'post_type'   => 'event',
+				'post_status' => 'publish',
+			)
+		);
+		$this->attach_poster( $event );
+		$this->attach_city( $event );
+		update_post_meta( $event, '_idpg_start_date', '2099-01-01' );
+		update_post_meta( $event, '_idpg_end_date', '2099-01-01' );
+
+		update_option(
+			IDPG_Banner_Settings::OPTION,
+			array(
+				'banner_event_ids' => array( $event ),
+				'banner_title'     => 'Тестовый баннер',
+			)
+		);
+
+		$html = $this->render_front_banner();
+
+		$this->assertStringContainsString( 'idpg-current-event-banner', $html );
+		$this->assertStringContainsString( 'Тестовый баннер', $html );
+
+		delete_option( IDPG_Banner_Settings::OPTION );
+	}
+
+	/**
+	 * Закончившееся выбранное событие в баннер не попадает.
+	 *
+	 * Обратная проба: без фильтра is_event_expired() в get_selected_events()
+	 * просроченное событие осталось бы в выдаче.
+	 */
+	public function test_render_skips_expired_selected_event() {
+		$event = self::factory()->post->create(
+			array(
+				'post_type'   => 'event',
+				'post_status' => 'publish',
+			)
+		);
+		$this->attach_poster( $event );
+		$this->attach_city( $event );
+		update_post_meta( $event, '_idpg_start_date', '2000-01-01' );
+		update_post_meta( $event, '_idpg_end_date', '2000-01-01' );
+
+		update_option(
+			IDPG_Banner_Settings::OPTION,
+			array( 'banner_event_ids' => array( $event ) )
+		);
+
+		$this->assertSame( '', $this->render_front_banner() );
+	}
+
+	/**
+	 * Границы просрочки: дата без времени актуальна весь день окончания.
+	 */
+	public function test_is_event_expired_boundaries() {
+		$event = $this->make_event();
+
+		update_post_meta( $event, '_idpg_start_date', '2000-01-01' );
+		update_post_meta( $event, '_idpg_end_date', '2000-01-01' );
+		$this->assertTrue( $this->invoke( 'is_event_expired', array( $event ) ) );
+
+		// Сегодняшняя дата без времени — событие ещё идёт.
+		update_post_meta( $event, '_idpg_end_date', current_time( 'Y-m-d' ) );
+		$this->assertFalse( $this->invoke( 'is_event_expired', array( $event ) ) );
+
+		// Дата-время в будущем — не истекло.
+		update_post_meta( $event, '_idpg_end_date', '2099-01-01T09:00' );
+		$this->assertFalse( $this->invoke( 'is_event_expired', array( $event ) ) );
+
+		// Дата-время в прошлом — истекло.
+		update_post_meta( $event, '_idpg_end_date', '2000-01-01T09:00' );
+		$this->assertTrue( $this->invoke( 'is_event_expired', array( $event ) ) );
+
+		// Пустые даты не считаются просроченными.
+		delete_post_meta( $event, '_idpg_start_date' );
+		delete_post_meta( $event, '_idpg_end_date' );
+		$this->assertFalse( $this->invoke( 'is_event_expired', array( $event ) ) );
+	}
 
 	/**
 	 * Время события: «весь день», время первого сеанса или пусто.
@@ -185,6 +374,7 @@ class Test_Current_Event_Banner_Fields extends WP_UnitTestCase {
 		// Чипы, кнопка и дата выводятся всегда; гейты «field settings»
 		// на вкладку изначально не влияют. Берём только настройки баннера.
 		$fields = array(
+			'banner_start_date'    => '2026-08-10',
 			'banner_ticket_status' => 'sold_out',
 			'banner_is_free'       => 'yes',
 			'banner_is_online'     => 'yes',
@@ -250,6 +440,16 @@ class Test_Current_Event_Banner_Fields extends WP_UnitTestCase {
 			)
 		);
 		wp_set_object_terms( $event, array( $cat ), 'event_category' );
+
+		// Чипы берутся только из настроек вкладки «Банер на главной».
+		update_option(
+			IDPG_Banner_Settings::OPTION,
+			array(
+				'banner_ticket_status' => 'sold_out',
+				'banner_is_free'       => 'yes',
+				'banner_is_online'     => 'yes',
+			)
+		);
 
 		$html = $this->invoke( 'render_single_html', array( get_post( $event ) ) );
 

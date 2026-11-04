@@ -149,7 +149,24 @@ get_header();
 										</div>
 									<?php else : ?>
 										<div class="idpg-video">
-											<iframe class="idpg-video__frame" src="<?php echo esc_url( $idpg_video ); ?>" title="<?php the_title_attribute(); ?>" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+											<?php
+											/*
+											 * Rutube и VK проверяют Referer и не инициализируют
+											 * плеер при loading="lazy" вне вьюпорта — поэтому
+											 * грузим сразу (eager) и явно задаём referrerpolicy.
+											 * webkitallowfullscreen/mozallowfullscreen — для
+											 * полноэкранного режима в старых движках.
+											 */
+											?>
+											<iframe class="idpg-video__frame"
+												src="<?php echo esc_url( $idpg_video ); ?>"
+												title="<?php the_title_attribute(); ?>"
+												loading="eager"
+												referrerpolicy="strict-origin-when-cross-origin"
+												allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture"
+												webkitallowfullscreen
+												mozallowfullscreen
+												allowfullscreen></iframe>
 										</div>
 										<?php
 										$idpg_host = idpg_core_video_host_label( $idpg_video );
@@ -172,13 +189,17 @@ get_header();
 									<div class="idpg-video idpg-video--embed">
 										<?php echo wp_kses( $idpg_stream_embed, array(
 											'iframe' => array(
-												'src'         => true,
-												'width'       => true,
-												'height'      => true,
-												'frameborder' => true,
-												'allow'       => true,
+												'src'             => true,
+												'width'           => true,
+												'height'          => true,
+												'frameborder'     => true,
+												'allow'           => true,
 												'allowfullscreen' => true,
-												'title'       => true,
+												'title'           => true,
+												'loading'         => true,
+												'referrerpolicy'  => true,
+												'webkitallowfullscreen' => true,
+												'mozallowfullscreen'    => true,
 											),
 											'video' => array(
 												'src'      => true,

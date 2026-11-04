@@ -54,7 +54,9 @@
 
 		<h2>Как устроен баннер</h2>
 
-		<p>Баннер рендерит <code>IDPG_Current_Event_Banner</code> по хуку <code>idpg_banner_position</code> (позиция <code>hero</code>, вызывается в <code>front-page.php</code>). Приоритет — подтверждённые (оплаченные) события: одно — обычный баннер, несколько — карусель с авто-ротацией. Иначе — ближайшее предстоящее событие текущего города с постером.</p>
+		<p>Баннер рендерит <code>IDPG_Current_Event_Banner</code> по хуку <code>idpg_banner_position</code> (позиция <code>hero</code>, вызывается в <code>front-page.php</code>). Событие выбирается во вкладке «Банер на главной» селектом (опция <code>banner_event_ids</code>). Автоподстановка ближайшего события отключена, закончившиеся события исключаются — без явного выбора баннер не выводится.</p>
+
+		<p>Плашка «Настройки баннера сохранены.» показывается тостом в правом нижнем углу, как и остальные стандартные notice админки: локальная Toastify 1.12.0 (<code>assets/vendor/toastify</code>) подключается на всех страницах wp-admin через <code>IDPG_Admin_Toasts</code>, а <code>assets/js/admin-banner-toast.js</code> переносит уведомления в тосты. Обычный notice остаётся в разметке как fallback без JavaScript; сложные notice с формами не трогаются.</p>
 
 		<div class="codeblock">
 			<div class="codeblock__head"><span>front-page.php — позиция баннера</span><button class="codeblock__copy">Копировать</button></div>
@@ -97,37 +99,30 @@
 					<tr><th>Поле формы</th><th>Option-ключ</th><th>Поведение в баннере</th></tr>
 				</thead>
 				<tbody>
-					<tr><td><code>idpg_banner_banner_title</code></td><td><code>banner_title</code></td><td>Свой заголовок; пусто → название события</td></tr>
-					<tr><td><code>idpg_banner_banner_text</code></td><td><code>banner_text</code></td><td>Свой текст анонса; пусто → анонс события</td></tr>
+					<tr><td><code>idpg_banner_banner_title</code></td><td><code>banner_title</code></td><td>Свой заголовок; пусто → заголовок не выводится</td></tr>
+					<tr><td><code>idpg_banner_banner_text</code></td><td><code>banner_text</code></td><td>Свой текст анонса; пусто → текст не выводится</td></tr>
 					<tr><td><code>idpg_banner_button_text</code></td><td><code>button_text</code></td><td>Текст кнопки; пусто → «Подробнее»</td></tr>
-					<tr><td><code>idpg_banner_excerpt_length</code></td><td><code>excerpt_length</code></td><td>Обрезка событийного анонса (0–500 симв.)</td></tr>
+					<tr><td><code>idpg_banner_excerpt_length</code></td><td><code>excerpt_length</code></td><td>Обрезка текста анонса из поля (0–500 симв.)</td></tr>
 					<tr><td><code>idpg_banner_banner_height</code></td><td><code>banner_height</code></td><td>Высота 200–800 px через CSS-переменную</td></tr>
 				</tbody>
 			</table>
 		</div>
 
-		<h3>Override-логика в рендере</h3>
+		<h3>Данные только из настроек</h3>
 
 		<div class="codeblock">
 			<div class="codeblock__head"><span>class-current-event-banner.php — render_single_html()</span><button class="codeblock__copy">Копировать</button></div>
-<pre>// Свои заголовок и текст из настроек перекрывают данные события.
+<pre>// Заголовок и текст берутся только из полей вкладки.
 $title = IDPG_Banner_Settings::get_banner_title();
-if ( '' === $title ) {
-	$title = get_the_title( $event );
-}
 
 $excerpt = IDPG_Banner_Settings::get_banner_text();
-if ( '' === $excerpt ) {
-	$excerpt = has_excerpt( $event ) ? trim( (string) get_the_excerpt( $event ) ) : '';
-
-	// Анонс события обрезаем до настроенной длины (0 — без
-	// обрезки); свой текст выводим как есть.
-	$excerpt_length = IDPG_Banner_Settings::get_excerpt_length();
-	if ( $excerpt_length > 0 && mb_strlen( $excerpt ) > $excerpt_length ) {
-		$excerpt = mb_substr( $excerpt, 0, $excerpt_length ) . '…';
-	}
+$excerpt_length = IDPG_Banner_Settings::get_excerpt_length();
+if ( $excerpt_length > 0 && '' !== $excerpt && mb_strlen( $excerpt ) > $excerpt_length ) {
+	$excerpt = mb_substr( $excerpt, 0, $excerpt_length ) . '…';
 }</pre>
 		</div>
+
+		<p>Событие даёт только постер и ссылку. Название, анонс, даты и площадка события в баннер не подставляются: пустое поле — пустой блок.</p>
 
 		<h3>Высота через CSS-переменную</h3>
 
@@ -147,7 +142,7 @@ return '&lt;a class="idpg-current-event-banner" style="--idpg-banner-h:'
 
 		<h2>Этап 3 · Сверка «поле → вывод»</h2>
 
-		<p>Написан функциональный тест <code>test_banner_output_matches_settings_fields</code>: рендерит баннер через reflection с заполненными полями и проверяет, что значения из формы попадают в HTML, данные события не дублируются, а fallback + обрезка работают при пустых полях.</p>
+		<p>Написан функциональный тест <code>test_banner_output_matches_settings_fields</code>: рендерит баннер через reflection с заполненными полями и проверяет, что значения из формы попадают в HTML, данные события не подставляются, а длина анонса обрезает именно текст из поля.</p>
 
 		<div class="grid-3">
 			<div class="card">

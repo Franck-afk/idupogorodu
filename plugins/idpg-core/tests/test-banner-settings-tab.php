@@ -15,6 +15,17 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 	 */
 	public function tear_down() {
 		delete_option( IDPG_Banner_Settings::OPTION );
+
+		// Санитизация пишет и индивидуальные option, которые читаются,
+		// когда единого option нет. Чистим их, иначе значения из одного
+		// теста протекают в другой (порядок тестов не гарантирован).
+		foreach ( array_keys( IDPG_Banner_Settings::defaults() ) as $key ) {
+			delete_option( 'idpg_banner_' . $key );
+		}
+
+		// `fields` не входит в defaults(), но тоже пишется индивидуально.
+		delete_option( 'idpg_banner_fields' );
+
 		unset( $_GET['hide_event'] );
 		if ( isset( $GLOBALS['wp_query'] ) ) {
 			$GLOBALS['wp_query']->is_home = false;
@@ -37,6 +48,9 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 		// баннер показывается в hero, карусель крутится автоматически.
 		$this->assertSame( 'yes', $defaults['enabled'] );
 		$this->assertSame( 'yes', $defaults['auto_rotate'] );
+
+		// Выбор событий баннера по умолчанию пуст — баннер не выводится.
+		$this->assertSame( array(), $defaults['banner_event_ids'] );
 
 		// Настройка позиции удалена по решению владельца — ключа нет.
 		$this->assertArrayNotHasKey( 'position', $defaults );
@@ -256,6 +270,42 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Без чекбоксов полей в форме сохраняется прежний набор полей.
+	 *
+	 * Обратная проба: старая логика «нет ключа → no» сбрасывала все поля
+	 * при каждом сохранении вкладки — тест обязан падать на 'no' у chips.
+	 */
+	public function test_sanitize_settings_preserves_fields_without_checkboxes() {
+		update_option(
+			IDPG_Banner_Settings::OPTION,
+			array(
+				'fields' => array(
+					'chips' => 'no',
+					'date'  => 'yes',
+				),
+			)
+		);
+
+		$clean = IDPG_Banner_Settings::sanitize_settings( array( 'idpg_banner_enabled' => 'yes' ) );
+
+		$this->assertSame( 'no', $clean['fields']['chips'] );
+		$this->assertSame( 'yes', $clean['fields']['date'] );
+		// Поля, которых не было в сохранённом наборе, остаются включёнными.
+		$this->assertSame( 'yes', $clean['fields']['button'] );
+	}
+
+	/**
+	 * Без сохранённого набора и без чекбоксов все поля включены (дефолт).
+	 */
+	public function test_sanitize_settings_defaults_fields_enabled() {
+		$clean = IDPG_Banner_Settings::sanitize_settings( array( 'idpg_banner_enabled' => 'yes' ) );
+
+		foreach ( IDPG_Banner_Settings::FIELDS as $field ) {
+			$this->assertSame( 'yes', $clean['fields'][ $field ], 'Поле должно остаться включённым: ' . $field );
+		}
+	}
+
+	/**
 	 * Поле, снятое в настройках, выключается — геттер это учитывает.
 	 */
 	public function test_field_settings_saved_toggle() {
@@ -461,6 +511,31 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Тосты админки подключаются на любой странице, без флага и вкладки.
+	 *
+	 * Обратная проба: если вернуть условную загрузку только для плашки
+	 * баннера (как было до DEV-тостов), тест упадёт здесь.
+	 */
+	public function test_admin_toasts_enqueued_on_every_admin_page() {
+		wp_dequeue_script( 'idpg-toastify' );
+		wp_dequeue_script( IDPG_Admin_Toasts::HANDLE );
+		wp_dequeue_style( 'idpg-toastify' );
+		wp_dequeue_style( IDPG_Admin_Toasts::HANDLE );
+
+		IDPG_Admin_Toasts::instance()->enqueue_assets();
+
+		$this->assertTrue( wp_script_is( 'idpg-toastify', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( IDPG_Admin_Toasts::HANDLE, 'enqueued' ) );
+		$this->assertTrue( wp_style_is( 'idpg-toastify', 'enqueued' ) );
+		$this->assertTrue( wp_style_is( IDPG_Admin_Toasts::HANDLE, 'enqueued' ) );
+
+		wp_dequeue_script( 'idpg-toastify' );
+		wp_dequeue_script( IDPG_Admin_Toasts::HANDLE );
+		wp_dequeue_style( 'idpg-toastify' );
+		wp_dequeue_style( IDPG_Admin_Toasts::HANDLE );
+	}
+
+	/**
 	 * Обратная проба: сохранение без nonce отклоняется (wp_die).
 	 */
 	public function test_save_requires_nonce() {
@@ -544,10 +619,10 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 
 		// На своей вкладке плашка показывается и meta потребляется.
 		$_GET['tab'] = IDPG_Banner_Settings::TAB_SLUG;
-		$this->assertStringContainsString(
-			'Настройки баннера сохранены.',
-			$this->render_tab()
-		);
+		$html        = $this->render_tab();
+		$this->assertStringContainsString( 'Настройки баннера сохранены.', $html );
+		// Класс-маркер: JS забирает плашку и показывает её тостом.
+		$this->assertStringContainsString( 'idpg-banner-saved-notice', $html );
 		$this->assertFalse(
 			(bool) get_user_meta( $admin, IDPG_Banner_Settings::USER_SAVED_META, true ),
 			'Мета должна удалиться после показа (одноразовость).'
@@ -657,6 +732,204 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Хелпер sanitize_text_value: массив → пустая строка (без Array-to-string).
+	 *
+	 * Обратная проба: без is_array-гарда sanitize_text_field( array )
+	 * даёт "Array to string conversion" в wp_check_invalid_utf8().
+	 */
+	public function test_sanitize_text_value_guards_arrays() {
+		$this->assertSame( '', IDPG_Banner_Settings::sanitize_text_value( array( 'k' => array( 'x' ) ), 'k', 'text' ) );
+		$this->assertSame( '', IDPG_Banner_Settings::sanitize_text_value( array( 'k' => array( 'x' ) ), 'k', 'textarea' ) );
+		$this->assertSame( '', IDPG_Banner_Settings::sanitize_text_value( array(), 'k', 'text' ) );
+		$this->assertSame( 'Купить', IDPG_Banner_Settings::sanitize_text_value( array( 'k' => '<b>Купить</b>' ), 'k', 'text' ) );
+	}
+
+	/**
+	 * sanitize_settings переживает массивы в текстовых полях формы.
+	 */
+	public function test_sanitize_settings_survives_array_fields() {
+		$clean = IDPG_Banner_Settings::sanitize_settings(
+			array(
+				'idpg_banner_button_text'  => array( 'x' ),
+				'idpg_banner_banner_title' => array( 'x' ),
+				'idpg_banner_banner_text'  => array( 'x' ),
+			)
+		);
+
+		$this->assertSame( 'Подробнее', $clean['button_text'] );
+		$this->assertSame( '', $clean['banner_title'] );
+		$this->assertSame( '', $clean['banner_text'] );
+	}
+
+	/**
+	 * У каждого типа поля есть PHP-партиал; id полей уникальны.
+	 *
+	 * Обратная проба: удаление партиала или дубль id ломает форму.
+	 */
+	public function test_output_field_definitions_have_partials() {
+		$definitions = IDPG_Banner_Settings::get_output_field_definitions();
+		$this->assertNotEmpty( $definitions );
+
+		$ids = array();
+		foreach ( $definitions as $key => $field ) {
+			$this->assertArrayHasKey( 'id', $field, $key );
+			$this->assertArrayHasKey( 'type', $field, $key );
+			$this->assertContains( $field['type'], array( 'text', 'textarea', 'number', 'date', 'checkbox', 'select', 'url' ), $key );
+
+			$partial = IDPG_CORE_DIR . 'templates/partials/banner-settings/field-' . $field['type'] . '.php';
+			$this->assertFileExists( $partial, 'Нет партиала для типа ' . $field['type'] );
+
+			$this->assertArrayNotHasKey( $field['id'], $ids, 'Дубль id: ' . $field['id'] );
+			$ids[ $field['id'] ] = true;
+		}
+	}
+
+	/**
+	 * Санитизация берёт диапазоны из определений полей.
+	 */
+	public function test_sanitize_settings_clamps_by_definitions() {
+		$clean = IDPG_Banner_Settings::sanitize_settings(
+			array(
+				'idpg_banner_excerpt_length' => 9999,
+				'idpg_banner_banner_height'  => 10,
+			)
+		);
+
+		$this->assertSame( 500, $clean['excerpt_length'] );
+		$this->assertSame( 200, $clean['banner_height'] );
+	}
+
+	/**
+	 * Поля баннера: санитизация по типам (date, select, url, number).
+	 *
+	 * Обратная проба: без safelist в select «hacked» попал бы в option;
+	 * без проверки формата дата 01.12.2026 сохранилась бы как есть.
+	 */
+	public function test_sanitize_output_field_types() {
+		$clean = IDPG_Banner_Settings::sanitize_settings(
+			array(
+				'idpg_banner_banner_start_date'    => '2026-12-01',
+				'idpg_banner_banner_currency'      => 'GBP',
+				'idpg_banner_banner_ticket_status' => 'hacked',
+				'idpg_banner_banner_ticket_url'    => 'javascript:alert(1)',
+				'idpg_banner_banner_price_from'    => '1200',
+				'idpg_banner_banner_price_to'      => '99999999',
+			)
+		);
+
+		$this->assertSame( '2026-12-01', $clean['banner_start_date'] );
+		$this->assertSame( 'RUB', $clean['banner_currency'] );
+		$this->assertSame( '', $clean['banner_ticket_status'] );
+		$this->assertSame( '', $clean['banner_ticket_url'] );
+		$this->assertSame( 1200, $clean['banner_price_from'] );
+		$this->assertSame( 1000000, $clean['banner_price_to'] );
+
+		// Невалидная дата отбрасывается.
+		$bad = IDPG_Banner_Settings::sanitize_settings(
+			array( 'idpg_banner_banner_start_date' => '01.12.2026' )
+		);
+		$this->assertSame( '', $bad['banner_start_date'] );
+	}
+
+	/**
+	 * Все определения полей имеют уникальные id и известный тип.
+	 */
+	public function test_output_field_definitions_types_known() {
+		$known = array( 'text', 'textarea', 'number', 'date', 'checkbox', 'select', 'url' );
+
+		foreach ( IDPG_Banner_Settings::get_output_field_definitions() as $key => $field ) {
+			$this->assertContains( $field['type'], $known, 'Неизвестный тип поля: ' . $key );
+			$partial = IDPG_CORE_DIR . 'templates/partials/banner-settings/field-' . $field['type'] . '.php';
+			$this->assertFileExists( $partial, 'Нет партиала для типа ' . $field['type'] );
+		}
+	}
+
+	/**
+	 * Выбор событий баннера: геттер по умолчанию пуст; санитизация
+	 * оставляет только опубликованные события CPT `event`.
+	 *
+	 * Обратные пробы: (1) без проверки post_type черновик/запись попадут
+	 * в баннер — тест обязан падать; (2) без проверки post_status
+	 * неопубликованное событие тоже пройдёт; (3) без absint мусор
+	 * сохранится как есть.
+	 */
+	public function test_banner_event_ids_sanitized_and_filtered() {
+		delete_option( IDPG_Banner_Settings::OPTION );
+
+		$this->assertSame( array(), IDPG_Banner_Settings::get_banner_event_ids() );
+
+		$published = self::factory()->post->create(
+			array(
+				'post_type'   => 'event',
+				'post_status' => 'publish',
+			)
+		);
+		$draft     = self::factory()->post->create(
+			array(
+				'post_type'   => 'event',
+				'post_status' => 'draft',
+			)
+		);
+		$post      = self::factory()->post->create( array( 'post_type' => 'post' ) );
+
+		$clean = IDPG_Banner_Settings::sanitize_settings(
+			array(
+				'idpg_banner_event_ids' => array(
+					(string) $published,
+					$published,
+					$draft,
+					$post,
+					'abc',
+					0,
+				),
+			)
+		);
+
+		$this->assertSame( array( $published ), $clean['banner_event_ids'] );
+		$this->assertSame( array( $published ), IDPG_Banner_Settings::get_banner_event_ids() );
+	}
+
+	/**
+	 * Вкладка рендерит одиночный селект события баннера и отмечает выбранное.
+	 *
+	 * Обратная проба: без блока выбора владелец не может настроить
+	 * баннер из этой вкладки; при возврате multiple-списка тест падает.
+	 */
+	public function test_admin_tab_renders_banner_event_selector() {
+		// Событие создаём без текущего пользователя: иначе модерация
+		// организаторов (enforce_pending_for_organizer) переводит publish
+		// в pending, и селект остаётся пустым.
+		wp_set_current_user( 0 );
+
+		$event = self::factory()->post->create(
+			array(
+				'post_type'   => 'event',
+				'post_status' => 'publish',
+				'post_title'  => 'Событие для баннера',
+			)
+		);
+
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		update_option(
+			IDPG_Banner_Settings::OPTION,
+			array( 'banner_event_ids' => array( $event ) )
+		);
+
+		$html = $this->render_tab();
+
+		$this->assertStringContainsString( 'name="idpg_banner_event_ids[]"', $html );
+		$this->assertStringContainsString( 'value="' . $event . '"', $html );
+		$this->assertStringContainsString( 'Событие для баннера', $html );
+		$this->assertStringContainsString( 'value="' . $event . '"  selected', $html );
+		$this->assertStringContainsString( '— Не выбрано —', $html );
+
+		// Это выпадающий список одного значения, а не multiple-список.
+		$this->assertStringNotContainsString( 'idpg_banner_event_ids[]" multiple', $html );
+	}
+
+	/**
 	 * Вкладка рендерит поля ввода параметров вывода.
 	 *
 	 * Обратная проба: без полей в форме настройки сохраняются,
@@ -739,15 +1012,17 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 	/**
 	 * Вывод в баннере соответствует данным в полях формы.
 	 *
-	 * Обратные пробы: (1) override-поля не применились — в HTML
-	 * останутся данные события, тест падает; (2) fallback на событие
-	 * сломан — тест падает на второй части; (3) высота не проброшена
+	 * Обратные пробы: (1) поля формы не применились — в HTML останутся
+	 * данные события, тест падает; (2) длина анонса не применяется —
+	 * тест падает на обрезанном тексте; (3) высота не проброшена
 	 * в CSS-переменную — тест падает на '--idpg-banner-h'.
 	 */
 	public function test_banner_output_matches_settings_fields() {
 		// Событие с постером и данными «из БД».
 		$attachment = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
 		update_post_meta( $attachment, '_wp_attached_file', '2026/10/test-banner.jpg' );
+
+		wp_set_current_user( 0 );
 
 		$event = self::factory()->post->create(
 			array(
@@ -763,7 +1038,7 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 		$method = new ReflectionMethod( $banner, 'render_single_html' );
 		$method->setAccessible( true );
 
-		// 1. Поля формы заполнены — в баннере именно они.
+		// 1. Поля формы заполнены — в баннере именно они, анонс без обрезки.
 		update_option(
 			IDPG_Banner_Settings::OPTION,
 			array(
@@ -771,7 +1046,7 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 				'banner_text'    => 'Мой текст анонса',
 				'button_text'    => 'Купить билет',
 				'banner_height'  => 520,
-				'excerpt_length' => 10,
+				'excerpt_length' => 0,
 			)
 		);
 
@@ -781,27 +1056,31 @@ class Test_Banner_Settings_Tab extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Мой текст анонса', $html, 'Текст из поля не выведен' );
 		$this->assertStringContainsString( 'Купить билет', $html, 'Текст кнопки из поля не выведен' );
 		$this->assertStringContainsString( '--idpg-banner-h:520px', $html, 'Высота из поля не проброшена' );
-		$this->assertStringNotContainsString( 'Название события из БД', $html, 'Override не перекрыл название события' );
-		$this->assertStringNotContainsString( 'Анонс события из БД', $html, 'Override не перекрыл анонс события' );
+		$this->assertStringNotContainsString( 'Название события из БД', $html, 'Поля не перекрыли название события' );
+		$this->assertStringNotContainsString( 'Анонс события из БД', $html, 'Поля не перекрыли анонс события' );
 
-		// 2. Поля пустые — баннер берёт данные события, анонс режется по длине.
+		// 2. Длина анонса из настроек обрезает текст поля.
+		$long_text = 'Очень длинный текст анонса из настроек';
+
 		update_option(
 			IDPG_Banner_Settings::OPTION,
 			array(
 				'banner_title'   => '',
-				'banner_text'    => '',
+				'banner_text'    => $long_text,
 				'button_text'    => 'Подробнее',
-				'excerpt_length' => 5,
+				'excerpt_length' => 12,
 				'banner_height'  => 400,
 			)
 		);
 
 		$html = $method->invoke( $banner, get_post( $event ) );
 
-		$this->assertStringContainsString( 'Название события из БД', $html, 'Нет fallback на название события' );
-		$this->assertStringContainsString( 'Анонс…', $html, 'Анонс события не обрезан по длине' );
+		$this->assertStringNotContainsString( $long_text, $html, 'Анонс не обрезан по длине из настроек' );
+		$this->assertStringContainsString( mb_substr( $long_text, 0, 12 ) . '…', $html, 'Нет обрезанного анонса' );
 		$this->assertStringContainsString( 'Подробнее', $html, 'Нет fallback текста кнопки' );
 		$this->assertStringContainsString( '--idpg-banner-h:400px', $html, 'Нет дефолтной высоты' );
+		$this->assertStringNotContainsString( 'Название события из БД', $html, 'Вернулся fallback на событие' );
+		$this->assertStringNotContainsString( 'Анонс события из БД', $html, 'Вернулся fallback на анонс события' );
 	}
 
 	/**
