@@ -523,6 +523,20 @@ function idpg_core_exclude_organizer_page_from_sitemap( $excluded ) {
 add_filter( 'wpseo_exclude_from_sitemap_by_post_ids', 'idpg_core_exclude_organizer_page_from_sitemap' );
 
 /**
+ * Проверяет, является ли текущая страница кабинетом организатора.
+ *
+ * Использует метод IDPG_Organizer_URL::is_cabinet_request() для проверки.
+ *
+ * @return bool True, если текущая страница - кабинет организатора.
+ */
+function idpg_core_is_organizer_cabinet() {
+	if ( ! class_exists( 'IDPG_Organizer_URL' ) ) {
+		return false;
+	}
+	return IDPG_Organizer_URL::is_cabinet_request();
+}
+
+/**
  * Автосоздание меню навигации по умолчанию.
  *
  * Создаёт меню «Основное меню» с пунктами:
