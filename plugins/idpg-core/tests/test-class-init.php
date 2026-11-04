@@ -88,6 +88,14 @@ class Test_Class_Init extends WP_UnitTestCase {
 		'IDPG_Organizer_Scope' => array(
 			'pre_get_posts' => 'scope_admin_attachments',
 		),
+		// DEV-312: роутер кабинета включён обратно — init() снова вызывается
+		// из idpg_core_init(), шаблоны и меню вернулись в тему (DEV-235 их снимал).
+		'IDPG_Organizer_URL'   => array(
+			'init'             => 'rewrites',
+			'query_vars'       => 'query_vars',
+			'template_include' => 'template',
+			'wp_redirect'      => 'guard_cabinet_redirect',
+		),
 	);
 
 	/**
@@ -114,7 +122,6 @@ class Test_Class_Init extends WP_UnitTestCase {
 		'IDPG_Logger'            => 'Статический helper (DEV-02): кольцевой буфер журнала в опции, все методы public static, состояния и хуков нет.',
 		'IDPG_Template_Helper' => 'Статический helper: все методы public static, состояния нет, хуки не нужны.',
 		'IDPG_Helpers'         => 'Статический helper (DEV-22): общие get_client_ip()/get_city_tree() и геттеры мета билетов, состояния нет, хуки не нужны.',
-		'IDPG_Organizer_URL' => 'Роутер /organizer/* отключён (DEV-235): init() не вызывается, хуки не регистрируются. Класс подключён: profile/access/social-логика нужна REST и редиректам.',
 		'IDPG_CLI'             => 'Команды WP-CLI: регистрация происходит в блоке if ( defined( \'WP_CLI\' ) ), в обычном запросе WP_CLI не определён.',
 		'IDPG_Auth_Rate_Limiter' => 'Ленивая инициализация: экземпляр создаётся при первом обращении из обработчиков class-rest-auth.php и class-rest-api.php, до первого запроса он не нужен.',
 		'IDPG_GeoService'      => 'Ленивая инициализация: экземпляр создаётся по требованию. ВНИМАНИЕ: единственный потребитель сейчас — тесты, в production-коде вызовов нет. Кандидат на удаление (DEV-100).',

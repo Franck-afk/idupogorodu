@@ -6,6 +6,9 @@
 // `npm run compile:css` откатывал дизайн — терялись 101 токен, 47 алиасов из
 // :root и 13 компонентов, а 187 правил содержали жёсткий hex вместо
 // var(--idpg-*). Теперь style.css собирается из этих партиалов.
+// На 03.11.2026 в :root 99 токенов и 45 алиасов: удалены два мёртвых токена
+// карточки кабинета (P3; партиал cabinet удалён DEV-253 — см. style.scss:62-64).
+// Числа сверять по коду, не по комментарию.
 //
 // ПОРЯДОК ФАЙЛОВ В style.scss = ПОРЯДОК КАСКАДА. Не переставлять и не
 // переименовывать без перепроверки: правила опираются на очерёдность.
@@ -107,8 +110,6 @@
   --idpg-stat-card-border: var(--idpg-hairline);
   --idpg-filter-btn-bg:   var(--idpg-canvas);
   --idpg-filter-btn-border: var(--idpg-hairline);
-  --idpg-cabinet-card-bg: var(--idpg-canvas);
-  --idpg-cabinet-card-border: var(--idpg-hairline);
   --idpg-status-publish-bg: #dcfce7;
   --idpg-status-publish-text: #166534;
   --idpg-status-pending-bg: #fef9c3;

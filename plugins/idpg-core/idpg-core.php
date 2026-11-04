@@ -135,8 +135,10 @@ function idpg_core_init() {
 	// Модерация публикации событий организаторов (pending + уведомления).
 	IDPG_Event_Moderation::instance();
 
-	// DEV-235: роутер /organizer/* отключён (шаблоны кабинета удалены).
-	// Класс подключён: profile/access-логика нужна REST и редиректам.
+	// Роутер /organizer/*: rewrite-правила, query-переменные, template_include
+	// и guard-редирект. DEV-235 отключал его вместе с шаблонами кабинета;
+	// DEV-312 включил обратно — шаблоны и меню вернулись в тему.
+	IDPG_Organizer_URL::init();
 
 	// REST-маршруты кабинета организатора (события, площадки, профиль).
 	IDPG_REST_Organizer::instance();

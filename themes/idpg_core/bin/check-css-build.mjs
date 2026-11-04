@@ -15,10 +15,51 @@
  * Запуск: node bin/check-css-build.mjs <сборка.css> <эталон.css>
  * Код возврата: 0 — правила совпадают, 1 — расхождения, 2 — ошибка запуска.
  *
+ * Дополнительно сверяется `Version:` в шапках `assets/scss/style.scss` и
+ * `style.css`: `sass` копирует шапку из SCSS, поэтому расхождение версий
+ * означает, что пересборка молча откатит версию темы — а она источник `?ver=`
+ * для ассетов (сторож DEV-138 `test-theme-version.php`).
+ *
  * @package idpg_core
  */
 
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// В ESM `__dirname` нет — восстанавливаем от расположения скрипта (`bin/`).
+const __dirname = path.dirname( fileURLToPath( import.meta.url ) );
+
+/**
+ * Корень темы (каталог над `bin/`).
+ */
+const THEME_ROOT = path.resolve( __dirname, '..' );
+
+/**
+ * Сверяет `Version:` в шапке style.scss и в собранном style.css.
+ *
+ * @return {void}
+ */
+function checkThemeVersion() {
+	const scssContent = readFileSync( path.resolve( THEME_ROOT, 'assets/scss/style.scss' ), 'utf8' );
+	const cssContent = readFileSync( path.resolve( THEME_ROOT, 'style.css' ), 'utf8' );
+
+	const scssVersionMatch = scssContent.match( /Version:\s*([\d.]+)/ );
+	const cssVersionMatch = cssContent.match( /Version:\s*([\d.]+)/ );
+
+	if ( ! scssVersionMatch || ! cssVersionMatch ) {
+		console.error( '❌ VERSION CHECK: в шапке не найдено поле Version:' );
+		process.exit( 2 );
+	}
+
+	if ( scssVersionMatch[ 1 ] !== cssVersionMatch[ 1 ] ) {
+		console.error( `❌ VERSION MISMATCH: style.scss says ${ scssVersionMatch[ 1 ] }, but style.css says ${ cssVersionMatch[ 1 ]}` );
+		console.error( 'Пересборка откатит версию темы: сначала выровнять шапку style.scss (IDPG_VERSION в functions.php).' );
+		process.exit( 1 );
+	}
+
+	process.stdout.write( `Версия шапки: style.scss = style.css = ${ scssVersionMatch[ 1 ] }\n` );
+}
 
 /**
  * Убирает CSS-комментарии (блочные).
@@ -160,6 +201,9 @@ try {
 	process.stderr.write( `Не удалось прочитать файл: ${ error.message }\n` );
 	process.exit( 2 );
 }
+
+// Шапка темы: сборка копирует её из SCSS, поэтому версии обязаны совпадать.
+checkThemeVersion();
 
 const missing = [];
 const added = [];

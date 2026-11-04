@@ -250,9 +250,31 @@ class IDPG_Auth_Emails {
 			$this->get_login_url()
 		);
 
+		// Текст зависит от фактической доступности кабинета: обещать кабинет
+		// нельзя, если роутер /organizer/* не обслуживает запросы.
+		$idpg_cabinet_enabled = class_exists( 'IDPG_Helpers' )
+			? IDPG_Helpers::organizer_cabinet_enabled()
+			: false;
+
+		$idpg_verify_purpose = $idpg_cabinet_enabled
+			? 'Чтобы активировать аккаунт и получить доступ к кабинету организатора, '
+			: 'Чтобы активировать аккаунт организатора, ';
+
+		/**
+		 * Вводная строка письма подтверждения регистрации организатора.
+		 *
+		 * @param string $idpg_verify_purpose   Текст перед кнопкой подтверждения.
+		 * @param bool   $idpg_cabinet_enabled  Доступен ли кабинет организатора.
+		 */
+		$idpg_verify_purpose = (string) apply_filters(
+			'idpg_email_organizer_verify_intro',
+			$idpg_verify_purpose,
+			$idpg_cabinet_enabled
+		);
+
 		$content  = '<p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #4a4a4a;">';
 		$content .= 'Вы зарегистрировались на платформе «Иду по городу» как организатор. ';
-		$content .= 'Чтобы активировать аккаунт и получить доступ к кабинету организатора, ';
+		$content .= $idpg_verify_purpose;
 		$content .= 'подтвердите ваш email по кнопке ниже:';
 		$content .= '</p>';
 
@@ -282,7 +304,29 @@ class IDPG_Auth_Emails {
 		$login_url = $this->get_login_url();
 
 		$body    = $this->render_organizer_email_template( $display_name, $email, $password, $login_url );
-		$subject = 'Добро пожаловать, ' . ( $display_name ?: $email ) . '! Ваш кабинет организатора готов';
+
+		// Тема письма тоже не должна обещать кабинет, если его нет.
+		$idpg_cabinet_enabled = class_exists( 'IDPG_Helpers' )
+			? IDPG_Helpers::organizer_cabinet_enabled()
+			: false;
+
+		$idpg_welcome_tail = $idpg_cabinet_enabled
+			? '! Ваш кабинет организатора готов'
+			: '! Регистрация организатора завершена';
+
+		/**
+		 * Хвост темы приветственного письма организатору.
+		 *
+		 * @param string $idpg_welcome_tail     Часть темы после имени.
+		 * @param bool   $idpg_cabinet_enabled  Доступен ли кабинет организатора.
+		 */
+		$idpg_welcome_tail = (string) apply_filters(
+			'idpg_email_organizer_welcome_subject_tail',
+			$idpg_welcome_tail,
+			$idpg_cabinet_enabled
+		);
+
+		$subject = 'Добро пожаловать, ' . ( $display_name ?: $email ) . $idpg_welcome_tail;
 
 		wp_mail( $email, $subject, $body );
 	}
@@ -342,6 +386,11 @@ class IDPG_Auth_Emails {
 		$logo_url = $this->get_logo_url();
 		$year     = date( 'Y' );
 
+		// Вводный абзац зависит от фактической доступности кабинета.
+		$idpg_cabinet_enabled = class_exists( 'IDPG_Helpers' )
+			? IDPG_Helpers::organizer_cabinet_enabled()
+			: false;
+
 		// Карточка с данными для входа; строка пароля показывается, только если он известен.
 		$password_row = '';
 		if ( $password ) {
@@ -365,7 +414,24 @@ class IDPG_Auth_Emails {
 	<tr>
 		<td align="center" bgcolor="#ffffff" style="background-color:#ffffff;padding:40px 32px 36px;border-radius:0 0 16px 16px;">
 			<h1 style="margin:0 0 12px;font-size:26px;line-height:1.3;font-weight:800;color:#1a2332;letter-spacing:-0.3px;">Добро пожаловать, <?php echo esc_html( $display_name ?: $email ); ?>!</h1>
-			<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#5a6473;">Ваш кабинет организатора на платформе <strong style="color:#1a2332;">IDU POGORODU</strong> создан. Теперь вы можете публиковать мероприятия, получать заявки и следить за посещаемостью — всё в одном месте.</p>
+			<?php
+			$idpg_welcome_lead = $idpg_cabinet_enabled
+				? 'Ваш кабинет организатора на платформе <strong style="color:#1a2332;">IDU POGORODU</strong> создан. Теперь вы можете публиковать мероприятия, получать заявки и следить за посещаемостью — всё в одном месте.'
+				: 'Ваш аккаунт организатора на платформе <strong style="color:#1a2332;">IDU POGORODU</strong> создан. Личный кабинет временно недоступен.';
+
+			/**
+			 * Вводный абзац приветственного письма организатору.
+			 *
+			 * @param string $idpg_welcome_lead     HTML абзаца.
+			 * @param bool   $idpg_cabinet_enabled  Доступен ли кабинет организатора.
+			 */
+			$idpg_welcome_lead = (string) apply_filters(
+				'idpg_email_organizer_welcome_body',
+				$idpg_welcome_lead,
+				$idpg_cabinet_enabled
+			);
+			?>
+			<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#5a6473;"><?php echo wp_kses_post( $idpg_welcome_lead ); ?></p>
 			<p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#5a6473;">Ниже — данные для входа.</p>
 
 			<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:440px;width:100%;margin:0 auto 24px;">

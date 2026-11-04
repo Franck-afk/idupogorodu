@@ -48,7 +48,7 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 
 ---
 
-### 1. Плагин IDPG Core (ядро) — 40 классов
+### 1. Плагин IDPG Core (ядро) — ~~40 классов~~ **42 класса** [актуализировано 2026-11-03: +`class-banner-settings`, +`class-logger` (24.10.2026); −`class-event-rejection` (24.10.2026)]
 
 > Замер 07.10.2026 (DEV-241): в `includes/` **40** файлов `class-*.php`, столько же
 > `require_once` в `idpg-core.php`. Ранее «39» приписывалось к пропущенному подключению —
@@ -60,6 +60,13 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 > подключало **39** файлов классов (проверено: 39 строк `require_once IDPG_CORE_DIR`
 > в блоке подключений). **На 07.10.2026 — 40:** добавлен `class-helpers.php` (DEV-22,
 > `5c7a028`), не связанный с ЛК.
+
+> **[актуализировано 2026-11-03: `2b38690` от 24.10.2026]** Счёт сверен по коду:
+> в `includes/` **42** файла `class-*.php` и **42** строки `require_once IDPG_CORE_DIR`
+> в `idpg-core.php`. После 07.10.2026 добавились `class-banner-settings.php` и
+> `class-logger.php` (коммит «Баннер на главной», 24.10.2026), удалён
+> `class-event-rejection.php` (тот же день, см. §6.2.3). Числа «40» выше —
+> исторические, на дату замера 07.10.2026.
 
 #### 1.1 Контент-модель
 
@@ -73,7 +80,7 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 | Регистрация при активации | CPT + таксономии + роли + cron + миграции + flush rewrite |
 | При деактивации | удаление ролей, снятие cron, flush rewrite |
 
-#### 1.2 Мета-поля (Carbon Fields + `register_post_meta`, префикс `_idpg_`)
+#### 1.2 Мета-поля (~~Carbon Fields +~~ нативные метабоксы + `register_post_meta`, префикс `_idpg_`) [актуализировано 2026-11-03: DEV-311 удалил Carbon Fields]
 
 **Событие:** `_idpg_start_date`, `_idpg_end_date`, `_idpg_all_day`, `_idpg_sessions_json`,
 `_idpg_venue`, `_idpg_venue_type`, `_idpg_price_from`, `_idpg_price_to`, `_idpg_is_free`,
@@ -86,9 +93,18 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 **Площадка:** `_idpg_venue_address`, `_idpg_venue_phone`, `_idpg_venue_email`,
 `_idpg_venue_website`, `_idpg_venue_lat`, `_idpg_venue_lng`, `_idpg_venue_capacity`.
 
-**Carbon Fields-контейнеры:** детали события, билеты/цены, данные площадки, заявка на баннер
+**~~Carbon Fields-контейнеры:~~** ~~детали события, билеты/цены, данные площадки, заявка на баннер
 (для организатора) + подтверждение оплаты баннера (только админ). Ленивые опции площадок,
-санитизация URL/чисел через фильтр `sanitize`.
+санитизация URL/чисел через фильтр `sanitize`.~~ **[актуализировано 2026-11-03: удалено DEV-311, `b0bae55` от 22.10.2026]**
+
+**Фактическое состояние (сверено по коду 03.11.2026):** Carbon Fields удалён — в
+`composer.json` плагина нет runtime-зависимостей (`htmlburger/carbon-fields` — 0 вхождений),
+каталога `vendor/htmlburger` нет. Поля события — нативные метабоксы в
+`class-event-fields.php` (1343 стр.) плюс вкладка «События» на странице «IDPG»
+(`TAB_SLUG = 'events'`); поля площадки — `class-venue-fields.php` (630 стр.); профиль
+организатора — `class-organizer-meta.php` на нативных user-полях. Зеркала
+(`_idpg_sessions_json`, `_idpg_venue_hours_json`, `_idpg_venue_social_json`) собираются
+через `get_post_meta` на `save_post_event` / `save_post_venue` (`class-meta.php:778-780`).
 
 #### 1.3 Многогородская механика
 
@@ -206,11 +222,16 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 - `class-user-purge.php` — полная зачистка при удалении организатора (постеры, вложения-потомки,
   аватар, сиротские `_edit_last`/`_edit_lock`), с учётом выбора «переназначить записи».
 
-#### 1.6 REST API (36 маршрутов, namespace `idpg/v1`)
+#### 1.6 REST API (~~36 маршрутов~~ **32 вызова** `register_rest_route()`, namespace `idpg/v1`) [актуализировано 2026-11-03: пересчитано по коду]
 
 > Замер 07.10.2026 (DEV-241): 32 вызова `register_rest_route()` — 31 в `idpg-core`
 > + 1 в `idpg-auth` (базовый класс, цикл по 5 соцпровайдерам), что даёт
 > **36 маршрутов**. Прежнее число «23» в заголовке не соответствовало коду.
+
+> **[актуализировано 2026-11-03]** Число «36» — оценка маршрутов после разворота цикла,
+> а не факт о вызовах. По коду **32** вызова `register_rest_route(`: `class-rest-api` 15,
+> `class-rest-auth` 6, `class-rest-organizer` 7, `class-favorites` 3, `idpg-auth` 1
+> (цикл по провайдерам). Сверять с кодом нужно именно 32.
 
 **Публичные:** `GET /events` (city, category, date_from, date_to, search, page, per_page),
 `GET /venues`, `GET /venues/{id}`, `GET /cities`, `GET /categories`, `GET /age-ratings`,
@@ -277,10 +298,10 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
   принудительный `og:image`/`twitter:image` из постера, поддержка крошек Yoast.
 - **All-In-One WP Security:** авто-добавление маршрута `idpg` в белый список REST + safety-net
   фильтр + админ-предупреждения о конфликтах (блокировка REST, переименование страницы входа).
-- **Настройки плагина:** меню «IDPG» — вкладки Главная (блоки), Области виджетов, Экспорт / О плагине.
+- ~~**Настройки плагина:** меню «IDPG» — вкладки Главная (блоки), Области виджетов, Экспорт / О плагине.~~ **[актуализировано 2026-11-03: удалено 24.10.2026, `2b38690` — `class-settings-page.php`]** Фактически: меню «IDPG» ведёт на `admin.php?page=idpg-widget-areas`; базовые вкладки `list` и `form` (области виджетов), остальные добавляются фильтром `idpg_widget_areas_admin_tabs` — `banner` («Баннер на главной», `class-banner-settings.php`), `events` («События», `class-event-fields.php`), `geo` («Гео», `class-geo-ranges.php`), `privacy` («Приватность», `class-privacy.php`).
 - **Подстраница «Конфиденциальность»** в этом же меню — обработка запросов субъектов ПДн
   (см. п. 1.4а).
-- **Настройки режима разработки:** отдельная страница в «Настройки».
+- ~~**Настройки режима разработки:** отдельная страница в «Настройки».~~ **[актуализировано 2026-11-03: удалено 24.10.2026, `2b38690` — `class-maintenance.php`]**
 - **Виджеты плагина (3):** «Выбор города», «Календарь событий», «Самые ожидаемые события».
 - **Уведомление о заглушке API билетов** в админке.
 
@@ -289,7 +310,7 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 - `uninstall.php` — очистка опций, транзиентов, user meta, cron (данные событий сохраняются,
   полная зачистка — константой `IDPG_CORE_UNINSTALL_WIPE_DATA`).
 - i18n: `languages/idpg-core.pot`, генератор `bin/make-pot.js` (без внешних зависимостей).
-- Тесты: PHPUnit — **40 файлов** `tests/test-*.php` (на 30.09.2026; список растёт),
+- Тесты: PHPUnit — **49 файлов** `tests/test-*.php` **[актуализировано 2026-11-03: было «40» (на 30.09.2026); на 24.10.2026 — 47; +`test-organizer-cabinet.php` (DEV-312) и +`test-organizer-cabinet-texts.php` (P1, 03.11.2026) = 49, проверено `ls tests/test-*.php`]** (список растёт),
   `phpunit.xml.dist`, `bin/install-wp-tests.*`.
   Итого прогон на **02.10.2026, 17:45** (после DEV-196 и правки admin bar): idpg-core —
   **663 теста / 1901 утверждение**, падений **0**. Промежуточный прогон этого же дня
@@ -367,15 +388,16 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 
 ---
 
-### 3. Тема idpg_core (v1.0.73) + дочерняя тема
+### 3. Тема idpg_core (~~v1.0.73~~ **v1.0.79**) + дочерняя тема [актуализировано 2026-11-03: `IDPG_VERSION` (`functions.php:20`) = `Version:` (`style.css:8`) = 1.0.79]
 
-#### 3.1 Шаблоны (25 PHP-файлов + 7 template-parts)
+#### 3.1 Шаблоны (~~25 PHP-файлов + 7 template-parts~~ **24 PHP-файла + 11 template-parts**) [актуализировано 2026-11-03: в HEAD было 23 + 7; после DEV-312 вернулся `page-organizer.php` и 4 части кабинета в `template-parts/organizer/` — стало 24 + 11, проверено `ls`] [актуализировано 2026-11-03: пересчитано по `ls themes/idpg_core/*.php`]
 
 - **Главная:** `front-page.php` — секции «Сегодня», «В ближайшие выходные», «Бесплатные события»,
   «Популярные события», лента «Все события» + позиции баннеров и областей виджетов.
 - **Афиша и контент:** `archive-event.php`, `archive-venue.php`, `archive.php`, `single-event.php`,
-  `single-venue.php`, `taxonomy-city.php`, `taxonomy-event_category.php`, `search.php`, `404.php`,
+  `single-venue.php`, `taxonomy-city.php`, ~~`taxonomy-event_category.php`~~, `search.php`, `404.php`,
   `page.php`, `single.php`, `index.php`.
+  **[актуализировано 2026-11-03: `taxonomy-event_category.php` в теме отсутствует — архив рубрики событий обслуживает `archive.php`]**
 - **Страницы:** `page-login.php` (вход / регистрация пользователя / регистрация организатора
   с полями org_name, contact_name, phone, terms), `page-reset-password.php`, `page-terms.php`,
   `page-privacy.php`, `page-offer` (через `page-legal.php`), `page-about.php`, `page-contacts.php`,
@@ -396,8 +418,8 @@ DEV-131: регрессии закрыты) 30.09.2026. Проверено: `plu
 - **`widget-areas.php`:** менеджер областей виджетов — 5 позиций вывода (под шапкой, над контентом,
   сайдбар события, под контентом, перед футером), условия показа (везде, главная, страницы, записи,
   архивы, конкретные страницы), страница в админке.
-- **`home-sections.php`:** настройки видимости секций главной, страница «Настройки главной»
-  (Внешний вид), опция `idpg_home_sections`.
+- ~~**`home-sections.php`:** настройки видимости секций главной, страница «Настройки главной»
+  (Внешний вид), опция `idpg_home_sections`.~~ **[актуализировано 2026-11-03: удалено DEV-273 (19.10.2026): файла в `inc/` нет, опция `idpg_home_sections` в коде не используется; секции главной заданы жёстко в `front-page.php`]**
 - **`breadcrumbs.php`:** свои крошки с интеграцией вывода Yoast и обёрткой в стили темы.
 - **`class-idpg-nav-walker.php`:** кастомный Walker меню.
 - **`theme-helpers.php`:** метабокс «Скрыть заголовок» для страниц/записей.
@@ -510,7 +532,7 @@ npx sass assets/scss/style.scss %TEMP%\style-check.css --no-source-map --style=e
 
 | Каталог | Содержимое |
 |---|---|
-| `base/` | `_tokens.scss` — 101 токен, 47 алиасов в `:root`, `_reset.scss`, `_typography.scss`, `_variables.scss` (переведён на `--idpg-*`) |
+| `base/` | `_tokens.scss` — **99** токенов, **45** алиасов в `:root` [актуализировано 2026-11-03: было 101/47; удалены мёртвые `--idpg-cabinet-card-bg/-border`, P3], `_reset.scss`, `_typography.scss`, `_variables.scss` (переведён на `--idpg-*`) |
 | `components/` | `_header`, `_nav`, `_auth-dropdown`, `_menu-toggle`, `_city-selector`, `_city-modal`, `_bottom-bar`, `_search`, `_footer`, `_container`, `_buttons`, `_home-sidebar`, `_widget-areas`, `_recent-events`, `_mobile` |
 | `pages/` | `_auth`, `_create-event`, `_cabinet`, `_dashboard`, `_organizer` |
 | корень | `responsive.scss`, `style.scss` (точка входа) |
@@ -650,7 +672,7 @@ SCSS во временный файл и сравнивает набор пра�
 
 | Компонент | Состояние |
 |---|---|
-| Роутер `/organizer/` и `/organizer/{section}/` (`IDPG_Organizer_URL`) | **Отключён (DEV-235, 07.10.2026).** `require_once` в `idpg-core.php` остался (~строка 85), но `IDPG_Organizer_URL::init()` из `idpg_core_init()` убран: rewrite-правила, query vars, `template_include` и guard на `wp_redirect` не регистрируются, принудительный flush по `REWRITE_VERSION` больше не выполняется. `/organizer/` и подразделы → **404** (нужен `flush_rewrite_rules()` и удаление осиротевшей страницы-заглушки — на dev сделано 07.10.2026, на проде повторить). Был подключён и работал с DEV-37. **DEV-37, DEV-235** |
+| Роутер `/organizer/` и `/organizer/{section}/` (`IDPG_Organizer_URL`) | **Отключён (DEV-235, 07.10.2026).** `require_once` в `idpg-core.php` остался (~строка 85), но `IDPG_Organizer_URL::init()` из `idpg_core_init()` убран: rewrite-правила, query vars, `template_include` и guard на `wp_redirect` не регистрируются, принудительный flush по `REWRITE_VERSION` больше не выполняется. `/organizer/` и подразделы → **404** (нужен `flush_rewrite_rules()` и удаление осиротевшей страницы-заглушки — на dev сделано 07.10.2026, на проде повторить). Был подключён и работал с DEV-37. **DEV-37, DEV-235**<br>**Включён обратно 03.11.2026 (DEV-312):** `IDPG_Organizer_URL::init()` снова вызывается из `idpg_core_init()`, `const TEMPLATE` и выбор шаблона через `locate_template()` возвращены, в тему вернулись `page-organizer.php`, 4 шаблона разделов (`template-parts/organizer/`) и `inc/organizer-menu.php`. Формы события/площадки не возвращены (были на Carbon Fields, удалённом DEV-311) — их адреса редиректят в разделы. После выкладки нужен `flush_rewrite_rules()` (маркер `REWRITE_VERSION` сбросится сам). Спецификация — `docs/specs/DEV-312.md`.<br>**Тексты писем и ответов регистрации (P1, 03.11.2026):** обещание «кабинета» управляется фильтром `idpg_organizer_cabinet_enabled`; значение по умолчанию выводится из фактического состояния роутера (перехват `template_include` + наличие `page-organizer.php` в теме), поэтому при отключённом роутере письма автоматически становятся нейтральными. Точки подмены формулировок: `idpg_email_organizer_verify_intro`, `idpg_email_organizer_welcome_subject_tail`, `idpg_email_organizer_welcome_body`, `idpg_registration_organizer_message`. |
 | Меню кабинета (`inc/organizer-menu.php`, 8 функций `idpg_organizer_*` + `idpg_core_is_organizer_cabinet()`) | **Удалено DEV-234.** Файл выпаден из дерева, `require_once` в `functions.php` убран — функций меню в теме нет (проверено grep'ом), в т.ч. фильтра `sidebars_widgets` для баннера над подвалом. Было подключено и работало с DEV-38. **DEV-38, удалено DEV-234** |
 | Ассеты кабинета | **Удалены DEV-234.** `assets/css/organizer.css`, `organizer.js`, `organizer-event-form.js`, `organizer-venue-form.js`, их `wp_enqueue_*` в `functions.php` (~строки 224-227) и отдельная сборка `organizer.css` убраны; SCSS-партиалы кабинета исчезли из `style.scss`. Были подключены только на `/organizer/*` с DEV-38/DEV-98. **DEV-38, DEV-98, удалено DEV-234** |
 | Страница WP `/organizer/` | **Удалена DEV-234.** `idpg_core_create_organizer_page()`, хук `after_setup_theme` и `idpg_core_get_organizer_page_id()` убраны из `functions.php` — самовосстановления нет, тест `test-organizer-page-creation.php` удалён (DEV-235). Осиротевшая запись страницы (slug `organizer`) могла остаться в БД: на проде удалить — на dev сделано 07.10.2026 (DEV-235). История строки: первоисточник DEV-39, регрессии DEV-102 (откат хука) и DEV-131 (починка), обе закрыты до удаления. **DEV-39, DEV-131, удалено DEV-234** |
@@ -671,6 +693,15 @@ SCSS во временный файл и сравнивает набор пра�
 | Изоляция контента (`IDPG_Organizer_Scope`, `IDPG_City_Filter`) | Работает — организатор видит только свои медиа/события |
 | Анкета `/organizer/complete/` | **Удалена полностью.** DEV-72 снял её продуктово (данные организации переехали в `/organizer/profile/`), но удалил только REST-маршрут `/auth/organizer-complete`; класс `IDPG_Organizer_Page`, шаблон, скрипт и rewrite-правило остались подключёнными и висели мёртвым грузом. **DEV-141 (30.09.2026) удалил остатки.** Организатор после подтверждения email попадает на главную (раньше — в `/organizer/`, роутер отключён DEV-235). URL `/organizer/complete/` отдаёт **404** |
 | Поле «Подать заявку на показ в баннере на главной» в ЛК организатора | **Запланировано (карточка, 22.10.2026).** Флаг `_idpg_banner_request` уже есть в REST-схеме организатора (`banner_request` = `yes|no`, `class-rest-organizer.php` арг ~L916 и маппинг ~L1443) и в мета-схеме (`_idpg_banner_request` = `yes|no`); виден админу колонкой «Заявка» в списке событий (`class-meta.php`, `render_banner_column`). Осталось вынести чекбокс в **ЛК организатора** (веб-форма `/organizer/`), когда ЛК вернётся: сама заявка ставит `_idpg_banner_request=yes`, согласование оплаты и `_idpg_banner_approved` остаются **за администратором**. Карточка фиксирует намерение; реализация — после возврата ЛК |
+
+> **[актуализировано 2026-11-03: P1, 03.11.2026]** Письма и сообщения больше не обещают
+> кабинет безусловно: тексты зависят от фильтра `idpg_organizer_cabinet_enabled`
+> (значение по умолчанию — фактическое состояние роутера: перехват `template_include`
+> + наличие `page-organizer.php`). Точки подмены формулировок:
+> `idpg_email_organizer_verify_intro`, `idpg_email_organizer_welcome_subject_tail`,
+> `idpg_email_organizer_welcome_body` (`class-auth-emails.php`),
+> `idpg_registration_organizer_message` (`class-rest-auth.php`). Тесты —
+> `tests/test-organizer-cabinet-texts.php` (10 проверок).
 
 #### 6.2 Что есть, но НЕ подключено (мёртвый код в рантайме)
 
@@ -755,6 +786,12 @@ REST-пути нет, поэтому `submit` вызывает
 и статус выставляется — см. §6.2.3.
 
 #### 6.2.3 Отклонение события модератором (DEV-46)
+
+> **[актуализировано 2026-11-03: удалено 24.10.2026, `2b38690`]** Коммитом `2b38690`
+> удалены `class-event-rejection.php`, `test-event-rejection.php`,
+> `class-settings-page.php`, `class-maintenance.php`. Статус `rejected` в REST остался
+> константой (`class-rest-organizer.php:56/114`), переводить в него нечем. Всё ниже —
+> историческое описание работы до 24.10.2026.
 
 `plugins/idpg-core/includes/class-event-rejection.php` (`IDPG_Event_Rejection`).
 До DEV-46 статус `rejected` был мёртвым: зарегистрирован как перечисление,

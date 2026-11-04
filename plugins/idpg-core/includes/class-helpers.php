@@ -246,4 +246,49 @@ class IDPG_Helpers {
 	public static function get_ticket_url( $post_id ) {
 		return (string) get_post_meta( (int) $post_id, self::META_TICKET_URL, true );
 	}
+
+	/**
+	 * Доступен ли кабинет организатора `/organizer/*`.
+	 *
+	 * Источник истины — фактическое состояние роутера `IDPG_Organizer_URL`:
+	 * кабинет считается работающим, только если `init()` зарегистрировал
+	 * перехват шаблона (`template_include`) и файл шаблона есть в теме.
+	 * Поэтому значение по умолчанию всегда совпадает с реальностью: при
+	 * отключённом роутере (DEV-235) — false, при включённом (DEV-312) — true.
+	 *
+	 * Значение можно переопределить фильтром `idpg_organizer_cabinet_enabled`:
+	 * например, скрыть кабинет на время работ, не трогая код и тексты.
+	 *
+	 * @return bool
+	 */
+	public static function organizer_cabinet_enabled() {
+		$enabled = false;
+
+		if ( class_exists( 'IDPG_Organizer_URL' ) && function_exists( 'has_filter' ) ) {
+			$router_on = false !== has_filter(
+				'template_include',
+				array( 'IDPG_Organizer_URL', 'template' )
+			);
+
+			$template = defined( 'IDPG_Organizer_URL::TEMPLATE' )
+				? (string) constant( 'IDPG_Organizer_URL::TEMPLATE' )
+				: 'page-organizer.php';
+
+			$has_template = function_exists( 'locate_template' )
+				? '' !== (string) locate_template( $template )
+				: false;
+
+			$enabled = $router_on && $has_template;
+		}
+
+		/**
+		 * Фильтр доступности кабинета организатора.
+		 *
+		 * Управляет только текстами писем и сообщений: сам маршрут
+		 * `/organizer/*` включается вызовом `IDPG_Organizer_URL::init()`.
+		 *
+		 * @param bool $enabled Доступен ли кабинет организатора.
+		 */
+		return (bool) apply_filters( 'idpg_organizer_cabinet_enabled', $enabled );
+	}
 }

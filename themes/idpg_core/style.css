@@ -105,8 +105,6 @@ Tags: custom-background,custom-logo,custom-menu,featured-images,threaded-comment
   --idpg-stat-card-border: var(--idpg-hairline);
   --idpg-filter-btn-bg: var(--idpg-canvas);
   --idpg-filter-btn-border: var(--idpg-hairline);
-  --idpg-cabinet-card-bg: var(--idpg-canvas);
-  --idpg-cabinet-card-border: var(--idpg-hairline);
   --idpg-status-publish-bg: #dcfce7;
   --idpg-status-publish-text: #166534;
   --idpg-status-pending-bg: #fef9c3;

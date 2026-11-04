@@ -579,7 +579,7 @@ class IDPG_REST_Auth {
 					'success'       => true,
 					'user_id'       => $user_id,
 					'pending_email' => true,
-					'message'       => __( 'Регистрация почти готова! Мы отправили на ваш email письмо со ссылкой для подтверждения. Перейдите по ней, чтобы войти в кабинет организатора.', 'idpg-core' ),
+					'message'       => $this->get_register_pending_message(),
 					'redirect_url'  => home_url( '/login/' ),
 				),
 				201
@@ -634,10 +634,42 @@ class IDPG_REST_Auth {
 				'success'       => true,
 				'user_id'       => 0,
 				'pending_email' => true,
-				'message'       => __( 'Регистрация почти готова! Мы отправили на ваш email письмо со ссылкой для подтверждения. Перейдите по ней, чтобы войти в кабинет организатора.', 'idpg-core' ),
+				'message'       => $this->get_register_pending_message(),
 				'redirect_url'  => home_url( '/login/' ),
 			),
 			201
+		);
+	}
+
+	/**
+	 * Сообщение после регистрации организатора.
+	 *
+	 * Текст зависит от фактической доступности кабинета: обещать «вход в
+	 * кабинет» нельзя, если роутер `/organizer/*` не обслуживает запросы.
+	 * Один метод на оба места (`handle_register()` и bait-ответ honeypot),
+	 * поэтому тексты остаются неотличимыми — на этом держится honeypot.
+	 *
+	 * @return string
+	 */
+	private function get_register_pending_message() {
+		$idpg_cabinet_enabled = class_exists( 'IDPG_Helpers' )
+			? IDPG_Helpers::organizer_cabinet_enabled()
+			: false;
+
+		$message = $idpg_cabinet_enabled
+			? __( 'Регистрация почти готова! Мы отправили на ваш email письмо со ссылкой для подтверждения. Перейдите по ней, чтобы войти в кабинет организатора.', 'idpg-core' )
+			: __( 'Регистрация почти готова! Мы отправили на ваш email письмо со ссылкой для подтверждения. Перейдите по ней, чтобы завершить регистрацию.', 'idpg-core' );
+
+		/**
+		 * Сообщение после регистрации организатора (до подтверждения email).
+		 *
+		 * @param string $message               Текст ответа.
+		 * @param bool   $idpg_cabinet_enabled  Доступен ли кабинет организатора.
+		 */
+		return (string) apply_filters(
+			'idpg_registration_organizer_message',
+			$message,
+			$idpg_cabinet_enabled
 		);
 	}
 

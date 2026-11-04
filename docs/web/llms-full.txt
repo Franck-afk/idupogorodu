@@ -1,0 +1,265 @@
+# Иду по городу — полный технический контекст (llms-full.txt)
+
+> Машинно-читаемый файл по стандарту llmstxt.org. Индекс: `docs/web/llms.txt`.
+> Правила работы с кодом: `AGENTS.md`. Человекочитаемая версия: `docs/web/index.html`.
+> Составлено: 24.10.2026, по кодовой базе (сверено с деревом; числа замерены по коду).
+> Формат: чистый Markdown без HTML-обвязки. Обновляется в том же коммите, что и код.
+
+# Project overview
+
+WordPress-портал афиши «Иду по городу» (idupogorodu.ru): события, площадки,
+мультигородская механика, регистрация и кабинет организатора через REST,
+152-ФЗ, платные показы в баннере.
+
+| Компонент | Версия | Роль |
+|---|---|---|
+| `plugins/idpg-core` | 1.1.2 | Ядро: контент-модель, города, REST, авторизация, баннер, приватность, модерация |
+| `plugins/idpg-auth` | 1.0.0 | Соцвход VK / Яндекс ID / MAX, журнал событий, настройка в админке |
+| `themes/idpg_core` | 1.0.79 | Публичная тема (23 PHP-файла в корне, 7 template-parts, 6 модулей `inc/`) |
+| `themes/idpg_core-child` | 1.0.0 | Дочерняя тема + принудительное отключение регистрации WP |
+
+Сторонние плагины окружения (не в дереве): Yoast SEO, WP Mail SMTP, All-In-One
+WP Security, WpVivid Backup, Clearfy Pro. У ядра **нет** Composer-зависимостей
+в рантайме (Carbon Fields удалены, DEV-311); Composer нужен только для dev-зависимостей
+PHPUnit (`phpunit ^9.6 || ^10.5`, `yoast/phpunit-polyfills ^3.0`).
+
+Требования: WP 6.0+, PHP 7.4+.
+
+# Architecture map
+
+```
+wp-content/
+├── plugins/
+│   ├── idpg-core/
+│   │   ├── idpg-core.php               # bootstrap: 42 require_once + idpg_core_init() на init
+│   │   ├── includes/                   # 42 класса class-*.php (все подключены, см. тест test-class-init.php)
+│   │   ├── assets/ (css, js, vendor/tom-select)
+│   │   ├── languages/idpg-core.pot
+│   │   ├── tests/                      # 47 PHPUnit-файлов + tests/js/auth-registration.test.js
+│   │   └── uninstall.php
+│   └── idpg-auth/
+│       ├── idpg-auth.php               # bootstrap: 8 из 11 классов подключены (см. Class contracts)
+│       └── includes/                   # class-wp-auth-ru-*.php
+└── themes/
+    ├── idpg_core/
+    │   ├── functions.php               # сетап, enqueue, фильтры афиши, юрдокументы, кастомайзер
+    │   ├── header.php footer.php front-page.php
+    │   ├── single-event.php single-venue.php archive-event.php archive-venue.php
+    │   │   search.php taxonomy-city.php 404.php page.php index.php single.php archive.php
+    │   ├── page-login.php page-reset-password.php page-favorites.php
+    │   │   page-privacy.php page-terms.php page-legal.php page-about.php page-contacts.php
+    │   ├── template-parts/ (content-event, content-event-today, content-venue, content-page,
+    │   │                   content-none, content, home-section)
+    │   ├── inc/ (template-tags, widget-areas, widgets, breadcrumbs, class-idpg-nav-walker, theme-helpers)
+    │   ├── assets/ (js: auth.js, navigation.js, live-search.js, subscribe.js, pikaday.js,
+    │   │           pikaday-locale-ru.js, widget-ad.js, widget-ad-front.js, canvas-fix.js,
+    │   │           customize-*.js, vendor/)
+    │   ├── assets/scss/ → style.css    # единственная сборка (править нельзя, см. Testing)
+    │   ├── assets/css/ (templates.css, subscribe.css, editor-style.css, widget-areas-admin.css)
+    │   ├── theme.json                  # палитра/типографика редактора из токенов
+    │   └── bin/check-css-build.mjs     # локальный сторож сборки (реплика test-css-build.php)
+    └── idpg_core-child/ (functions.php, style.css)
+```
+
+Способ инициализации классов ядра (инициализация ≠ подключение файла, DEV-100):
+
+| Способ | Классы |
+|---|---|
+| `::instance()` в `idpg_core_init()` | IDPG_CPT, IDPG_Roles, IDPG_City_Filter, IDPG_Media, IDPG_Ticket_Sync, IDPG_REST_API, IDPG_iCal_Export, IDPG_Meta, IDPG_Event_Fields, IDPG_Venue_Fields, IDPG_Migrations, IDPG_Views, IDPG_Notifications, IDPG_Auth, IDPG_REST_Auth, IDPG_Auth_Emails, IDPG_Organizer_Verify, IDPG_Dashboard_Stats, IDPG_Event_Moderation, IDPG_REST_Organizer, IDPG_Promotion, IDPG_Privacy, IDPG_Geo_Ranges, IDPG_SEO_Integration |
+| `::instance()` при загрузке файла | IDPG_Current_Event_Banner, IDPG_Banner_Settings, IDPG_User_Purge |
+| `::init()` при загрузке файла | IDPG_Favorites, IDPG_Organizer_Scope |
+| `::init()` отключён (осознанно, DEV-235) | IDPG_Organizer_URL — роутер `/organizer/*` выключен; статические методы (`user_is_organizer()`, `get_profile_data()`, `sanitize_profile_input()`, `update_profile()`, `after_login_url()`) нужны REST |
+| `register_widget()` на `widgets_init` | IDPG_City_Selector_Widget, IDPG_Event_Calendar_Widget, IDPG_Expected_Events_Widget |
+| Статические, без инициализации | IDPG_Search, IDPG_Template_Helper, IDPG_Helpers, IDPG_Auth_Rate_Limiter, IDPG_CLI (только под WP_CLI), IDPG_GeoService (потребителей в проде нет, потребитель — тесты) |
+
+# Class contracts
+
+## Модель данных
+
+- CPT `event` — слаг `/afisha/`, `capability_type: event`, `map_meta_cap: true`, supports title/editor/thumbnail.
+- CPT `venue` — слаг `/venues/`, capability `venue` (свой набор caps у admin/editor/organizer).
+- Таксономии: `city` (иерархия регион → город → район, слаг `gorod`, привязка к event+venue),
+  `event_category` (иерархическая), `age_rating` (плоская).
+- Мета: 43 ключа с префиксом `_idpg_`, регистрируются `register_post_meta()` (`class-meta.php`).
+  Ключевые: `_idpg_start_date`, `_idpg_end_date`, `_idpg_sessions_json` (зеркало сеансов),
+  `_idpg_venue`, `_idpg_price_from/_to`, `_idpg_is_free`, `_idpg_vip_price`, `_idpg_currency`,
+  `_idpg_ticket_status/_type/_url`, `_idpg_views`, `_idpg_clicks`, `_idpg_promoted`,
+  `_idpg_pin_expires`, `_idpg_banner_request`, `_idpg_banner_approved`, `_idpg_hide_from_banner`,
+  `_idpg_hide_full_banner`; у площадки `_idpg_venue_address/_phone/_email/_website/_lat/_lng/_capacity/...`.
+- Таблицы БД: `{prefix}idpg_subscribers` (email уникальный, IP, дата), `{prefix}idpg_geo_ranges`
+  (ip_start, ip_end, region). При удалении плагина (uninstall) данные событий сохраняются,
+  полная зачистка — константой `IDPG_CORE_UNINSTALL_WIPE_DATA`.
+- Роли: `event_organizer` (правки свои events/venues), `subscriber` — роль по умолчанию
+  (+ cap upload_files). Роль организатора выдаётся только после подтверждения email
+  (`IDPG_Organizer_Verify`, хэш ключа в user meta).
+
+## Ключевые классы
+
+| Класс | Контракт |
+|---|---|
+| `IDPG_Helpers::get_client_ip() / get_city_tree() / get_ticket_*` | единые реализации, ранее дублировались в нескольких классах (DEV-22) |
+| `IDPG_City_Filter` | cookie `idpg_selected_city` (30 дней), автоопределение по IP с кэшем на сутки, фильтрация архивов `tax_query` city |
+| `IDPG_City_URL` | 13 rewrite-правил: `/afisha/{city}/`, `/afisha/{city}/events/{slug}/`, `/venues/{city}/`, 301 с `/gorod/{slug}/`, `?city=` и слаговых архивов; правила строятся из реальных слагов, `maybe_rebuild()` на сохранении термина |
+| `IDPG_Auth_Rate_Limiter` | 5 вход /60с по IP, 3 регистрации/час по IP, 3 сброса/час на email, 10 сброс/час на IP; транзиенты |
+| `IDPG_REST_Auth` | login/register/logout/forgot-password/reset-password/me; honeypot-поле `idpg_company`; опциональная капча через фильтры `idpg_auth_captcha_*` |
+| `IDPG_REST_Organizer` | CRUD событий/площадок организатора + submit + stats; enum'ы проверяются `validate_callback`; параметр `banner_request = yes|no` есть в схеме |
+| `IDPG_Event_Moderation` | организатор не публикует (force `pending`); бесплатные события публикуются автоматически; платные с неполными билетными данными → `draft` + email-уведомления обеим сторонам |
+| `IDPG_Banner_Settings` | вкладка «Баннер на главной», опция `idpg_banner_settings`, `defaults() → get_settings() → sanitize_settings() → handle_save()` (nonce + redirect + flash в user meta) |
+| `IDPG_Current_Event_Banner` | рендер по хуку `idpg_banner_position` только в hero на фронт-странице; кэш выбора TTL 10 мин, сброс на `save_post_event`/`delete_post_event`; карусель платных событий (лимит 20, интервал 6000 мс); чипы статуса билетов/«Бесплатно»/«ТОП» и т.д. |
+| `IDPG_Favorites` | user meta `_idpg_favorites` (массив ID), REST add/remove/list для авторизованных, страница `/lk/favorites/` |
+| `IDPG_Privacy` | согласие (`idpg_pdn_consent`, версия `2026-10-20`), хеш IP, отзыв (`_idpg_pdn_consent_withdrawn`), cookie-баннер `idpg_cookie_consent` (all/necessary, год), выгрузка данных субъекта в JSON (без `session_tokens`), удаление с предпросмотром, вкладка «Приватность» |
+| `IDPG_Geo_Ranges` | локальная база IP → регион (242-ФЗ), импорт CSV DB-IP, перевод названий через `idpg_geo_region_aliases` |
+| `IDPG_Ticket_Sync` | cron каждые 3 ч (`idpg_cron_sync_tickets`); до настройки реального `IDPG_TICKET_API_URL` события пропускаются с warning (защита от запроса на placeholder `api.example.com`); ретраи: 3 попытки, задержка 2с (до 8с), таймаут 15с |
+| `IDPG_Search` | единая логика «заголовок/контент + события по площадке + совпадение в названиях таксономий», лимит ID на подзапрос |
+| `idpg_widget_areas_*` (тема) | функции `idpg_widget_areas_positions()` (5 позиций), `idpg_widget_areas_display_options()` (6 условий), `idpg_widget_areas_render( $position )` — вывод подходящих областей |
+
+## Плагин idpg-auth
+
+Namespace REST: `wp-auth-ru/v1`. Настройки: опция `idpg_auth_settings` (+ env-переменные
+через `merge_env_settings()`). Провайдеры:
+
+- VK — OAuth 2.0 (`id.vk.com`), email приходит в ответе token endpoint.
+- Яндекс ID — OAuth 2.0 (`oauth.yandex.ru`), scope `login:info`, `login:email`.
+- MAX — не OAuth: Mini App `initData` + HMAC-SHA256 (аналог Telegram Web App).
+
+Роль нового соц-пользователя = `default_role` сайта (`subscriber`), фильтр
+`idpg_auth_new_user_role`. Журнал событий — кольцевой буфер 200 записей в опции без autoload.
+
+**Важно:** в bootstrap `idpg-auth.php` подключены 8 из 11 файлов. `WP_Auth_Ru_Login_Log`,
+`WP_Auth_Ru_Security` (брутфорс/блокировка IP) и `WP_Auth_Ru_Updater` (автообновление с GitHub)
+файлы есть, но `require_once` их не подключает — в рантайме эти функции НЕ работают.
+`docs/PROJECT.md` §2 описывает их как сработанные — расхождение документации с кодом.
+
+# Hooks registry
+
+Точки расширения с префиксом `idpg_` (замер по прод-коду на 24.10.2026):
+
+| Хук | Тип | Где |
+|---|---|---|
+| `idpg_banner_position` | do_action | темы шаблонов (front-page и др.); принимает `hero` |
+| `idpg_widget_areas_admin_tabs` | filter | вкладки страницы «IDPG» (баннер, приватность добавляются так) |
+| `idpg_privacy_consent_version` | filter | версия согласия 152-ФЗ |
+| `idpg_privacy_user_export` | filter | заменен/дополняет выгрузку субъекта |
+| `idpg_organizer_user_allowed` | filter | доступ организаторских REST-эндпоинтов |
+| `idpg_organizer_profile_sanitized` | filter | санитизация профиля организатора |
+| `idpg_organizer_after_login_url` | filter | редирект после входа организатора |
+| `idpg_auth_new_user_role` | filter | роль нового соц-пользователя (idpg-auth) |
+| `idpg_ticket_sync_api_url` | filter | замена placeholder URL синхронизации билетов на реальный |
+| `idpg_ticket_sync_timeout / _max_attempts / _retry_delay / _response_data / _status_map` | filter | тюнинг синхронизации билетов |
+| `idpg_geo_region_aliases` | filter | карта названий регионов DB-IP → русские термины `city` |
+| `idpg_ticket_status_changed` | do_action | уведомления про статус билетов |
+| `idpg_organizer_verified` / `idpg_organizer_event_submitted` / `idpg_organizer_profile_updated` | do_action | события кабинета организатора |
+| `idpg_auth_after_login` / `idpg_auth_after_register` | do_action | после входа/регистрации |
+| `idpg_privacy_consent_record` / `_withdrawn` / `idpg_privacy_subject_request` | do_action | события приватности |
+| `idpg_event_unpinned` | do_action | снятие закрепления по cron |
+
+WP-хуки, которые строит/слушает ядро: `pre_get_posts` (фильтры афиши и скоуп
+организатора), `save_post_event`, `transition_post_status`, `wp_insert_post_data`,
+`template_include`, `rest_api_init`, `widgets_init`, `admin_init`, `delete_user`.
+
+# Data flow
+
+## Баннер на главной
+
+1. Тема вызывает `do_action( 'idpg_banner_position', 'hero' )`.
+2. `IDPG_Current_Event_Banner::render()` проверяет: `IDPG_Banner_Settings::is_enabled()`, позиция `hero`, `is_front_page()`.
+3. Выбор события кэшируется по текущему городу (`cache_ttl`, по умолчанию 10 мин); выборка учитывает
+   `_idpg_promoted`, `_idpg_banner_approved`, `_idpg_hide_from_banner/_hide_full_banner`.
+   Баннеру обязательно нужна миниатюра — события без постера не показываются.
+4. Карусель платных событий (`_idpg_banner_request` от организатора + оплата,
+   согласуемая админом через `_idpg_banner_approved`), лимит и интервал из настроек.
+5. Настройки: `IDPG_Banner_Settings::handle_save()` → `sanitize_settings( $_POST )` →
+   `update_option()` → `purge_cache()` → flash «Сохранено» через user meta.
+
+## Настройки вкладок страницы «IDPG»
+
+Все вкладки (Области виджетов, Баннер, Приватность) строятся по одному паттерну:
+`register_admin_tab()` в фильтре `idpg_widget_areas_admin_tabs` → форма
+`wp_nonce_field` → обработчик на `admin_init` с `current_user_can( 'manage_options' )`
++ `check_admin_referer` → Post/Redirect/Get → одноразовое сообщение через user meta
+(не через URL — иначе плашка повторяется при F5).
+
+## Города
+
+Cookie `idpg_selected_city` (30 дней) → `IDPG_City_Filter::get_current_city_id()`
+→ фильтр архивов; REST `POST /city/select` и `/city/confirm` (nonce `wp_rest`),
+fallback на admin-ajax `idpg_set_city`. Автоопределение по IP: ip-api.com →
+ipapi.co (fallback), кэш на сутки; 242-ФЗ: если включён локальный режим,
+используется таблица `idpg_geo_ranges` и иностранных API нет.
+
+## Сеансы (зеркало)
+
+Сеансы события канонически хранятся как `_idpg_sessions` (legacy-хранилище
+Carbon Fields), а шаблоны читают зеркало `_idpg_sessions_json`, собираемое
+`IDPG_Meta::mirror_sessions()`. Организаторский REST пишет в оба ключа;
+пустое значение удаляет зеркало. Двусторонняя видимость admin ↔ REST.
+
+# Security invariants
+
+1. **Санитизация сразу, эскейпинг перед выводом:** `sanitize_text_field/absint/sanitize_key`
+   на входе; `esc_html/esc_attr/esc_url/wp_kses_post` на выводе, как можно позже.
+2. **Nonce + capability на каждой мутации:** формы — `wp_nonce_field` + `check_admin_referer`;
+   AJAX/REST — `check_ajax_referer`/`check_rest_nonce` или permission callback;
+   сохранение настроек всегда `current_user_can( 'manage_options' )`.
+3. **REST:** у каждого маршрута есть `permission_callback`; публичные места —
+   осознанное решение (чтения каталога; `/track/click` и `/city/*` — с nonce `wp_rest`;
+   `/subscribe` — honeypot и rate limiter вместо nonce, о чём в коде есть комментарий).
+   Аргументы описаны с `sanitize_callback` (+ `required`/`type`, где нужно).
+4. **SQL — только через `$wpdb->prepare()`**; интерполировать можно только имена таблиц/колонок,
+   значения — плейсхолдеры.
+5. **Приватность:** scoped-запросы к user data только от текущего пользователя
+   (`get_current_user_id()`); организатор видит только свои события/медиа
+   (`IDPG_Organizer_Scope` + скоуп запросов); выгрузка субъекта исключает `session_tokens`.
+6. **Загрузка файлов:** `wp_check_filetype` + `current_user_can( 'upload_files' )`
+   в media-хелперах; аватар — по ID вложения (`idpg_avatar_attachment_id`).
+7. **Honeypot:** поле `idpg_company` прячется off-screen-механикой, НЕ через
+   `display:none` (спам-боты распознают это) — правило из `README.md`.
+8. **Логи:** `var_dump/print_r/error_log` запрещены в боевом коде — только `IDPG_Logger`
+   (кольцевой буфер в опции без autoload) или соц-провайдерский `WP_Auth_Ru_Logger`.
+9. **Секреты:** не в коде/репозитории; база API билетов — константа
+   `IDPG_TICKET_API_URL` в wp-config (placeholder по умолчанию отключает запросы).
+
+# Testing protocol
+
+| Что | Как |
+|---|---|
+| PHPUnit ядра | `bash bin/install-wp-tests.sh WP_DB WP_USER WP_PASS localhost <WP_VERSION> true` затем `composer install` затем `vendor/bin/phpunit -c phpunit.xml.dist` (в `plugins/idpg-core`) |
+| PHPUnit idpg-auth | `../idpg-core/vendor/bin/phpunit -c phpunit.xml.dist` (vendor ядра общий) |
+| Объём | 47 файлов, 573 тестовых метода |
+| JS-тест регистрации | `node plugins/idpg-core/tests/js/auth-registration.test.js` — исполняет `themes/idpg_core/assets/js/auth.js` с мини-стабом DOM/fetch (13 паттернов, включая consent-регрессию) |
+| Сборка CSS | `npm run check:css` (тема): sass в temp + сравнение правил с эталоном via `bin/check-css-build.mjs`; авторитетный гейт — `tests/test-css-build.php` |
+| Сторож версии темы | `tests/test-theme-version.php`: идентичный `IDPG_VERSION` в `functions.php` и `Version:` в `style.css` |
+| Сторож инициализации | `tests/test-class-init.php`: каждый файл `includes/` подключён и описан в карте инициализации |
+| PHPCS | через `.circleci/config.yml` c baseline `.phpcs.xml.dist-baseline.neon` (конфиг CI сейчас требует ремонта: ссылается на отсутствующий плагин `idpg-city-admin` и удалённые скрипты `bin/phpcs-patches/`) |
+
+**Обратная проба обязательна** (процесс Spec Driven): замер «до», замер «после»,
+и тест должен падать на намеренно сломанной правке (проверка мутацией).
+Зелёный тест на сломанном коде = критерий усилен.
+
+**Замечания по текущему состоянию (24.10.2026):**
+- PHPUnit нужен полный test lib WordPress + MySQL; без него тесты не запускаются
+  (на 24.10.2026 в песочнице PHP/MySQL нет — прогон не выполнялся).
+- JS-тест запускается без зависимостей: на 24.10.2026 — 13/13 PASS.
+
+# Glossary
+
+- **CPT event / venue** — пользовательские типы «Событие» `/afisha/` и «Площадка» `/venues/`.
+- **Дерево городов** — иерархия таксономии `city`: регион → город → район; слаг города в URL-путях.
+- **Область виджетов (area)** — администрируемый набор виджетов в конкретной позиции
+  с условием показа (5 позиций × 6 условий, классическая WP Widget API под капотом).
+- **Чипы (chips)** — бейджи события в карточке/баннере: статус билетов, «Бесплатно»,
+  «Популярное», «ТОП» (закреплённое), «Онлайн», «Новый».
+- **Override-поля баннера** — banner_title, banner_text, button_text, excerpt_length,
+  banner_height: перекрытие данных события настройками вкладки.
+- **Сеансы (sessions)** — расписание внутри события (`_idpg_sessions` + зеркало `_idpg_sessions_json`).
+- **Заявка на баннер** — `_idpg_banner_request` (желание организатора) →
+  `_idpg_banner_approved` (решение админа) → показ в карусели платных событий.
+- **Закрепление в топе (promoted)** — `_idpg_promoted` + дата `_idpg_pin_expires`;
+  cron ежедневно снимает просроченные (пустая дата = бессрочно).
+- **Роль организатора** — `event_organizer`: не публикует сам (модерация),
+  получает роль только после подтверждения e-mail.
+- **152-ФЗ модуль** — согласие, cookie-баннер, права субъекта, вкладка «Приватность».
+- **Миграции** — идемпотентные переносы меты, маркер `_idpg_meta_migrated`, версия
+  в option `idpg_meta_migration_version`; повторный запуск безопасен.
+- **Сторож (guard test)** — PHPUnit-тест, который проверяет не поведение фичи,
+  а инвариант кодовой базы (карта инициализации, версия темы, сборка CSS).
