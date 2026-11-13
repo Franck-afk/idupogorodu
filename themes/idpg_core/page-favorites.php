@@ -19,7 +19,7 @@ $idpg_fav_ids = class_exists( 'IDPG_Favorites' ) ? IDPG_Favorites::get_ids() : a
 				<h1 class="idpg-archive-header__title"><?php esc_html_e( 'Избранное', 'idpg_core' ); ?></h1>
 
 				<div class="idpg-archive-header__back">
-					<a href="<?php echo esc_url( home_url( '/afisha/' ) ); ?>">
+					<a href="<?php echo esc_url( idpg_core_get_afisha_url() ); ?>">
 						<?php esc_html_e( '← Все события', 'idpg_core' ); ?>
 					</a>
 				</div>
@@ -61,7 +61,7 @@ $idpg_fav_ids = class_exists( 'IDPG_Favorites' ) ? IDPG_Favorites::get_ids() : a
 				</div>
 
 				<div class="idpg-page-actions" style="margin-top:24px;">
-					<a href="<?php echo esc_url( home_url( '/afisha/' ) ); ?>" class="idpg-btn idpg-btn--primary">
+					<a href="<?php echo esc_url( idpg_core_get_afisha_url() ); ?>" class="idpg-btn idpg-btn--primary">
 						<?php esc_html_e( 'Смотреть афишу', 'idpg_core' ); ?>
 					</a>
 				</div>

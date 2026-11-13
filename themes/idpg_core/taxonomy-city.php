@@ -30,7 +30,7 @@ get_header();
 				<?php the_archive_description( '<div class="idpg-archive-header__desc">', '</div>' ); ?>
 
 				<div class="idpg-archive-header__back">
-					<a href="<?php echo esc_url( get_post_type_archive_link( 'event' ) ); ?>">
+					<a href="<?php echo esc_url( idpg_core_get_afisha_url() ); ?>">
 						<?php esc_html_e( '← Все события', 'idpg_core' ); ?>
 					</a>
 				</div>

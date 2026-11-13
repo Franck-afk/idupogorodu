@@ -44,7 +44,7 @@ $idpg_s_query = get_search_query();
 				</form>
 
 				<div class="idpg-archive-header__back">
-					<a href="<?php echo esc_url( class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::afisha_url() : home_url( '/afisha/' ) ); ?>">
+					<a href="<?php echo esc_url( idpg_core_get_afisha_url() ); ?>">
 						<?php esc_html_e( '← Все события', 'idpg_core' ); ?>
 					</a>
 				</div>

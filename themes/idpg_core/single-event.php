@@ -37,7 +37,7 @@ get_header();
 				$idpg_maps    = idpg_core_maps_link( $idpg_address );
 				$idpg_video   = idpg_core_video_embed_url( $idpg_meta['video'] );
 				$idpg_views   = (int) get_post_meta( $idpg_post_id, '_idpg_views', true );
-				$idpg_archive = class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::afisha_url() : get_post_type_archive_link( 'event' );
+				$idpg_archive = idpg_core_get_afisha_url();
 
 				// Код встраивания трансляции (HTML-плеер).
 				$idpg_stream_embed = get_post_meta( $idpg_post_id, '_idpg_stream_embed', true );
@@ -46,7 +46,7 @@ get_header();
 				<article id="post-<?php the_ID(); ?>" <?php post_class( 'idpg-event-single' ); ?>>
 
 					<div class="idpg-event-single__back">
-						<a href="<?php echo esc_url( $idpg_archive ? $idpg_archive : home_url( '/afisha/' ) ); ?>">
+						<a href="<?php echo esc_url( $idpg_archive ); ?>">
 							<?php esc_html_e( '← Все события', 'idpg_core' ); ?>
 						</a>
 					</div>

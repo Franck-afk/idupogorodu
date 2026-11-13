@@ -48,7 +48,7 @@ function idpg_core_get_afisha_url() {
 	if ( class_exists( 'IDPG_City_URL' ) ) {
 		return IDPG_City_URL::afisha_url();
 	}
-	return home_url( '/afisha/' );
+	return get_post_type_archive_link( 'event' );
 }
 
 /**
@@ -593,9 +593,9 @@ function idpg_core_create_default_menu() {
 		// Афиша (с подменю)
 		array(
 			'title'  => 'Афиша',
-			'url'    => home_url( '/afisha/' ),
+			'url'    => idpg_core_get_afisha_url(),
 			'children' => array(
-				array( 'title' => 'Все события',   'url' => home_url( '/afisha/' ) ),
+				array( 'title' => 'Все события',   'url' => idpg_core_get_afisha_url() ),
 				array( 'title' => 'Сегодня',       'url' => home_url( '/afisha/?date=today' ) ),
 				array( 'title' => 'Завтра',        'url' => home_url( '/afisha/?date=tomorrow' ) ),
 				array( 'title' => 'Этот уикенд',   'url' => home_url( '/afisha/?date=weekend' ) ),

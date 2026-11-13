@@ -230,7 +230,7 @@ if ( ! function_exists( 'idpg_core_city_filter_url' ) ) {
 			return IDPG_City_URL::filter_url( $type, $value );
 		}
 
-		return get_post_type_archive_link( 'event' );
+		return idpg_core_get_afisha_url();
 	}
 }
 
@@ -247,7 +247,7 @@ if ( ! function_exists( 'idpg_core_city_afisha_url' ) ) {
 			return IDPG_City_URL::afisha_url( $slug, $preserve );
 		}
 
-		return get_post_type_archive_link( 'event' );
+		return idpg_core_get_afisha_url();
 	}
 }
 

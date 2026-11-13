@@ -49,7 +49,7 @@ get_header();
 					<?php
 					$idpg_pill_base(
 						__( 'Все события', 'idpg_core' ),
-						class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::afisha_url() : get_post_type_archive_link( 'event' ),
+						idpg_core_get_afisha_url(),
 						! $idpg_f_fd && ! $idpg_f_ff
 					);
 
@@ -58,7 +58,7 @@ get_header();
 					$idpg_pill_base( __( 'Уикенд', 'idpg_core' ), idpg_core_city_filter_url( 'weekend' ), 'weekend' === $idpg_f_fd );
 
  					// Дата: кастомный выпадающий календарь.
- 					$idpg_date_base = class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::afisha_url() : home_url( '/afisha/' );
+ 					$idpg_date_base = idpg_core_get_afisha_url();
 					?>
 					<div class="idpg-fpill-wrap">
 						<button type="button" class="idpg-fpill idpg-fpill--date<?php echo $idpg_is_date_filter ? ' is-active' : ''; ?>"

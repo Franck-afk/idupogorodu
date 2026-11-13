@@ -77,12 +77,12 @@ if ( ! function_exists( 'idpg_core_breadcrumbs' ) ) {
 		} elseif ( is_post_type_archive( 'venue' ) ) {
 			$items[] = array( '', __( 'Площадки', 'idpg_core' ) );
 		} elseif ( is_tax( 'city' ) || is_tax( 'event_category' ) || is_tax( 'age_rating' ) ) {
-			$items[] = array( get_post_type_archive_link( 'event' ), __( 'Афиша', 'idpg_core' ) );
+			$items[] = array( idpg_core_get_afisha_url(), __( 'Афиша', 'idpg_core' ) );
 			$items[] = array( '', single_term_title( '', false ) );
 		} elseif ( is_tax() ) {
 			$items[] = array( '', single_term_title( '', false ) );
 		} elseif ( is_singular( 'event' ) ) {
-			$items[] = array( get_post_type_archive_link( 'event' ), __( 'Афиша', 'idpg_core' ) );
+			$items[] = array( idpg_core_get_afisha_url(), __( 'Афиша', 'idpg_core' ) );
 			$idpg_event_terms = get_the_terms( get_the_ID(), 'event_category' );
 			if ( $idpg_event_terms && ! is_wp_error( $idpg_event_terms ) ) {
 				$idpg_event_term = reset( $idpg_event_terms );

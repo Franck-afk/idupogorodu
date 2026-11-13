@@ -50,7 +50,7 @@ get_header();
 			</div>
 
 			<div class="idpg-page-actions">
-				<a href="<?php echo esc_url( home_url( '/afisha/' ) ); ?>" class="idpg-btn idpg-btn--secondary">
+				<a href="<?php echo esc_url( idpg_core_get_afisha_url() ); ?>" class="idpg-btn idpg-btn--secondary">
 					<?php esc_html_e( '← Все события', 'idpg_core' ); ?>
 				</a>
 			</div>
