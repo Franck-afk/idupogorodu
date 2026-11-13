@@ -20,7 +20,22 @@ if ( ! defined( 'IDPG_VERSION' ) ) {
 	define( 'IDPG_VERSION', '1.0.79' );
 }
 
-
+/**
+ * Cache for class_exists checks to avoid repeated autoloading.
+ * Performance: Reduces redundant class_exists() calls by caching results in a static array.
+ *
+ * @param string $class_name Class name to check.
+ * @return bool Whether the class exists.
+ */
+function idpg_core_class_exists( $class_name ) {
+	static $class_cache = array();
+	
+	if ( ! isset( $class_cache[ $class_name ] ) ) {
+		$class_cache[ $class_name ] = class_exists( $class_name );
+	}
+	
+	return $class_cache[ $class_name ];
+}
 
 /**
  * Родительские пункты меню «Афиша» и «Площадки» — неактивные (без ссылки),
@@ -57,6 +72,13 @@ add_filter( 'wp_nav_menu_objects', 'idpg_core_disable_parent_menu_items' );
  * @return string
  */
 function idpg_core_get_login_url_in_theme() {
+	// Performance: Use get_page_by_path first (more efficient than get_posts with meta query)
+	$login_page = get_page_by_path( 'login' );
+	if ( $login_page ) {
+		return trailingslashit( get_permalink( $login_page ) );
+	}
+
+	// Fallback: Search for page with specific template
 	$login_page = get_posts(
 		array(
 			'post_type'   => 'page',

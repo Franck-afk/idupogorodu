@@ -28,24 +28,27 @@ if ( ! function_exists( 'idpg_core_event_meta' ) ) {
 		// остаются с пустой валютой — и карточка выводила бы цену без
 		// символа. Пустое значение здесь заменяется на RUB, чтобы карточка
 		// и прайс всегда показывали ₽.
-		$currency = (string) get_post_meta( $post_id, '_idpg_currency', true );
+		// Performance: Fetch all meta in a single query instead of 15+ individual queries
+		$meta = get_post_custom( $post_id );
+
+		$currency = isset( $meta['_idpg_currency'][0] ) ? (string) $meta['_idpg_currency'][0] : '';
 
 		return array(
-			'status'      => get_post_meta( $post_id, '_idpg_ticket_status', true ),
-			'ticket_type' => get_post_meta( $post_id, '_idpg_ticket_type', true ),
-			'ticket_url'  => get_post_meta( $post_id, '_idpg_ticket_url', true ),
-			'date_start'  => get_post_meta( $post_id, '_idpg_start_date', true ),
-			'date_end'    => get_post_meta( $post_id, '_idpg_end_date', true ),
-			'all_day'     => 'yes' === get_post_meta( $post_id, '_idpg_all_day', true ),
-			'price_from'  => get_post_meta( $post_id, '_idpg_price_from', true ),
-			'price_to'    => get_post_meta( $post_id, '_idpg_price_to', true ),
-			'vip_price'   => get_post_meta( $post_id, '_idpg_vip_price', true ),
-			'is_free'     => 'yes' === get_post_meta( $post_id, '_idpg_is_free', true ),
+			'status'      => isset( $meta['_idpg_ticket_status'][0] ) ? $meta['_idpg_ticket_status'][0] : '',
+			'ticket_type' => isset( $meta['_idpg_ticket_type'][0] ) ? $meta['_idpg_ticket_type'][0] : '',
+			'ticket_url'  => isset( $meta['_idpg_ticket_url'][0] ) ? $meta['_idpg_ticket_url'][0] : '',
+			'date_start'  => isset( $meta['_idpg_start_date'][0] ) ? $meta['_idpg_start_date'][0] : '',
+			'date_end'    => isset( $meta['_idpg_end_date'][0] ) ? $meta['_idpg_end_date'][0] : '',
+			'all_day'     => isset( $meta['_idpg_all_day'][0] ) && 'yes' === $meta['_idpg_all_day'][0],
+			'price_from'  => isset( $meta['_idpg_price_from'][0] ) ? $meta['_idpg_price_from'][0] : '',
+			'price_to'    => isset( $meta['_idpg_price_to'][0] ) ? $meta['_idpg_price_to'][0] : '',
+			'vip_price'   => isset( $meta['_idpg_vip_price'][0] ) ? $meta['_idpg_vip_price'][0] : '',
+			'is_free'     => isset( $meta['_idpg_is_free'][0] ) && 'yes' === $meta['_idpg_is_free'][0],
 			'currency'    => '' === trim( $currency ) ? 'RUB' : $currency,
-			'address'     => get_post_meta( $post_id, '_idpg_address', true ),
-			'is_online'   => 'yes' === get_post_meta( $post_id, '_idpg_is_online', true ),
-			'stream_url'  => get_post_meta( $post_id, '_idpg_stream_url', true ),
-			'video'       => get_post_meta( $post_id, '_idpg_video_trailer', true ),
+			'address'     => isset( $meta['_idpg_address'][0] ) ? $meta['_idpg_address'][0] : '',
+			'is_online'   => isset( $meta['_idpg_is_online'][0] ) && 'yes' === $meta['_idpg_is_online'][0],
+			'stream_url'  => isset( $meta['_idpg_stream_url'][0] ) ? $meta['_idpg_stream_url'][0] : '',
+			'video'       => isset( $meta['_idpg_video_trailer'][0] ) ? $meta['_idpg_video_trailer'][0] : '',
 		);
 	}
 }
@@ -489,18 +492,21 @@ if ( ! function_exists( 'idpg_core_venue_meta' ) ) {
 	 * @return array Массив мета-данных.
 	 */
 	function idpg_core_venue_meta( $post_id ) {
-		$hours_raw  = get_post_meta( $post_id, '_idpg_venue_hours_json', true );
-		$social_raw = get_post_meta( $post_id, '_idpg_venue_social_json', true );
+		// Performance: Fetch all meta in a single query instead of 7+ individual queries
+		$meta = get_post_custom( $post_id );
+
+		$hours_raw  = isset( $meta['_idpg_venue_hours_json'][0] ) ? $meta['_idpg_venue_hours_json'][0] : '';
+		$social_raw = isset( $meta['_idpg_venue_social_json'][0] ) ? $meta['_idpg_venue_social_json'][0] : '';
 
 		$hours  = json_decode( $hours_raw, true );
 		$social = json_decode( $social_raw, true );
 
 		return array(
-			'address'  => get_post_meta( $post_id, '_idpg_venue_address', true ),
-			'phone'    => get_post_meta( $post_id, '_idpg_venue_phone', true ),
-			'email'    => get_post_meta( $post_id, '_idpg_venue_email', true ),
-			'website'  => get_post_meta( $post_id, '_idpg_venue_website', true ),
-			'capacity' => get_post_meta( $post_id, '_idpg_venue_capacity', true ),
+			'address'  => isset( $meta['_idpg_venue_address'][0] ) ? $meta['_idpg_venue_address'][0] : '',
+			'phone'    => isset( $meta['_idpg_venue_phone'][0] ) ? $meta['_idpg_venue_phone'][0] : '',
+			'email'    => isset( $meta['_idpg_venue_email'][0] ) ? $meta['_idpg_venue_email'][0] : '',
+			'website'  => isset( $meta['_idpg_venue_website'][0] ) ? $meta['_idpg_venue_website'][0] : '',
+			'capacity' => isset( $meta['_idpg_venue_capacity'][0] ) ? $meta['_idpg_venue_capacity'][0] : '',
 			'hours'    => is_array( $hours ) ? $hours : array(),
 			'social'   => is_array( $social ) ? $social : array(),
 		);
