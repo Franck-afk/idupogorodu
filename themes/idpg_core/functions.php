@@ -38,6 +38,35 @@ function idpg_core_class_exists( $class_name ) {
 }
 
 /**
+ * Get the afisha (events archive) URL.
+ * Uses IDPG_City_URL::afisha_url() if available, otherwise falls back to home_url('/afisha/').
+ * This consolidates duplicate URL logic across the theme.
+ *
+ * @return string The afisha URL.
+ */
+function idpg_core_get_afisha_url() {
+	if ( class_exists( 'IDPG_City_URL' ) ) {
+		return IDPG_City_URL::afisha_url();
+	}
+	return home_url( '/afisha/' );
+}
+
+/**
+ * Get the organizer cabinet base URL.
+ * Uses IDPG_Organizer_URL::section_url() if available, otherwise falls back to home_url('/organizer/').
+ * This consolidates duplicate organizer URL logic across the theme.
+ *
+ * @param string $section Optional section slug.
+ * @return string The organizer cabinet URL.
+ */
+function idpg_core_get_organizer_url( $section = '' ) {
+	if ( class_exists( 'IDPG_Organizer_URL' ) && method_exists( 'IDPG_Organizer_URL', 'section_url' ) ) {
+		return IDPG_Organizer_URL::section_url( $section );
+	}
+	return home_url( '/organizer/' . ( $section ? $section . '/' : '' ) );
+}
+
+/**
  * Родительские пункты меню «Афиша» и «Площадки» — неактивные (без ссылки),
  * подменю при этом продолжают работать.
  *
