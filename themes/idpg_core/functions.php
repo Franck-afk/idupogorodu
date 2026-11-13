@@ -20,51 +20,8 @@ if ( ! defined( 'IDPG_VERSION' ) ) {
 	define( 'IDPG_VERSION', '1.0.79' );
 }
 
-/**
- * Cache for class_exists checks to avoid repeated autoloading.
- * Performance: Reduces redundant class_exists() calls by caching results in a static array.
- *
- * @param string $class_name Class name to check.
- * @return bool Whether the class exists.
- */
-function idpg_core_class_exists( $class_name ) {
-	static $class_cache = array();
-	
-	if ( ! isset( $class_cache[ $class_name ] ) ) {
-		$class_cache[ $class_name ] = class_exists( $class_name );
-	}
-	
-	return $class_cache[ $class_name ];
-}
-
-/**
- * Get the afisha (events archive) URL.
- * Uses IDPG_City_URL::afisha_url() if available, otherwise falls back to home_url('/afisha/').
- * This consolidates duplicate URL logic across the theme.
- *
- * @return string The afisha URL.
- */
-function idpg_core_get_afisha_url() {
-	if ( idpg_core_class_exists( 'IDPG_City_URL' ) ) {
-		return IDPG_City_URL::afisha_url();
-	}
-	return get_post_type_archive_link( 'event' );
-}
-
-/**
- * Get the organizer cabinet base URL.
- * Uses IDPG_Organizer_URL::section_url() if available, otherwise falls back to home_url('/organizer/').
- * This consolidates duplicate organizer URL logic across the theme.
- *
- * @param string $section Optional section slug.
- * @return string The organizer cabinet URL.
- */
-function idpg_core_get_organizer_url( $section = '' ) {
-	if ( class_exists( 'IDPG_Organizer_URL' ) && method_exists( 'IDPG_Organizer_URL', 'section_url' ) ) {
-		return IDPG_Organizer_URL::section_url( $section );
-	}
-	return home_url( '/organizer/' . ( $section ? $section . '/' : '' ) );
-}
+// Load helper functions
+require_once get_template_directory() . '/inc/functions-helpers.php';
 
 /**
  * Родительские пункты меню «Афиша» и «Площадки» — неактивные (без ссылки),
