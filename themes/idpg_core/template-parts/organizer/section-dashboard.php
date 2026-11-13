@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $idpg_dash_new_url = function_exists( 'idpg_organizer_event_form_url' )
 	? idpg_organizer_event_form_url()
-	: home_url( '/organizer/event/new/' );
+	: idpg_core_get_organizer_url( 'event/new' );
 ?>
 
 <div

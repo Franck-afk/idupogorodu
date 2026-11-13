@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $idpg_events_new_url = function_exists( 'idpg_organizer_event_form_url' )
 	? idpg_organizer_event_form_url()
-	: home_url( '/organizer/event/new/' );
+	: idpg_core_get_organizer_url( 'event/new' );
 ?>
 
 <div
@@ -29,7 +29,7 @@ $idpg_events_new_url = function_exists( 'idpg_organizer_event_form_url' )
 	data-idpg-stats-url="<?php echo esc_url( rest_url( 'idpg/v1/organizer/stats' ) ); ?>"
 	data-idpg-events-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>"
 	data-idpg-media-url="<?php echo esc_url( rest_url( 'wp/v2/media' ) ); ?>"
-	data-idpg-events-edit-base="<?php echo esc_url( home_url( '/organizer/event/' ) ); ?>"
+	data-idpg-events-edit-base="<?php echo esc_url( idpg_core_get_organizer_url( 'event' ) ); ?>"
 >
 	<div class="idpg-org-filters" data-idpg-events-filters>
 		<?php

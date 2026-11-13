@@ -106,7 +106,7 @@ if ( isset( $_POST['idpg_org_profile_submit'] ) ) {
 					$idpg_org_profile_notice,
 					function_exists( 'idpg_organizer_section_url' )
 						? idpg_organizer_section_url( 'profile' )
-						: home_url( '/organizer/profile/' )
+						: idpg_core_get_organizer_url( 'profile' )
 				)
 			);
 			exit;

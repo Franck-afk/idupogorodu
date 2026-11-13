@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $idpg_venues_new_url = class_exists( 'IDPG_Organizer_URL' )
 	? IDPG_Organizer_URL::venue_form_url( 0 )
-	: home_url( '/organizer/venue/new/' );
+	: idpg_core_get_organizer_url( 'venue/new' );
 ?>
 
 <div

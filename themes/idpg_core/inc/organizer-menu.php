@@ -53,10 +53,10 @@ function idpg_organizer_section_url( $section ) {
 	}
 
 	if ( 'dashboard' === $section || '' === $section ) {
-		return home_url( '/organizer/' );
+		return idpg_core_get_organizer_url();
 	}
 
-	return home_url( '/organizer/' . $section . '/' );
+	return idpg_core_get_organizer_url( $section );
 }
 
 /**
@@ -77,10 +77,10 @@ function idpg_organizer_event_form_url( $event_id = 0 ) {
 	}
 
 	if ( $event_id ) {
-		return home_url( '/organizer/event/' . $event_id . '/' );
+		return idpg_core_get_organizer_url( 'event/' . $event_id );
 	}
 
-	return home_url( '/organizer/event/new/' );
+	return idpg_core_get_organizer_url( 'event/new' );
 }
 
 /**
