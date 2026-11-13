@@ -18,7 +18,7 @@ if ( ! function_exists( 'idpg_core_event_meta' ) ) {
 	 */
 	function idpg_core_event_meta( $post_id ) {
 		$post_id = absint( $post_id );
-		if ( class_exists( 'IDPG_Template_Helper' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_Template_Helper' ) ) {
 			return IDPG_Template_Helper::get_event_meta( $post_id );
 		}
 
@@ -62,7 +62,7 @@ if ( ! function_exists( 'idpg_core_event_sessions' ) ) {
 	 */
 	function idpg_core_event_sessions( $post_id ) {
 		$post_id = absint( $post_id );
-		if ( class_exists( 'IDPG_Template_Helper' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_Template_Helper' ) ) {
 			return IDPG_Template_Helper::get_event_sessions( $post_id );
 		}
 
@@ -85,7 +85,7 @@ if ( ! function_exists( 'idpg_core_ticket_button' ) ) {
 	 */
 	function idpg_core_ticket_button( $post_id ) {
 		$post_id = absint( $post_id );
-		if ( class_exists( 'IDPG_Template_Helper' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_Template_Helper' ) ) {
 			return IDPG_Template_Helper::get_ticket_button( $post_id );
 		}
 
@@ -114,7 +114,7 @@ if ( ! function_exists( 'idpg_core_event_poster_id' ) ) {
 			return 0;
 		}
 
-		if ( class_exists( 'IDPG_Media' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_Media' ) ) {
 			return (int) IDPG_Media::idpg_get_poster_id( $post_id );
 		}
 
@@ -137,7 +137,7 @@ if ( ! function_exists( 'idpg_core_event_poster_url' ) ) {
 			return '';
 		}
 
-		if ( class_exists( 'IDPG_Media' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_Media' ) ) {
 			return (string) IDPG_Media::idpg_get_poster_url( $post_id, $size );
 		}
 
@@ -169,7 +169,7 @@ if ( ! function_exists( 'idpg_core_event_poster' ) ) {
 			return '';
 		}
 
-		if ( class_exists( 'IDPG_Media' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_Media' ) ) {
 			return (string) IDPG_Media::idpg_get_poster( $post_id, $size, $atts );
 		}
 
@@ -194,7 +194,7 @@ if ( ! function_exists( 'idpg_core_event_gallery' ) ) {
 	function idpg_core_event_gallery( $post_id, $size = 'event-card' ) {
 		$post_id = absint( $post_id );
 
-		if ( ! $post_id || ! class_exists( 'IDPG_Media' ) ) {
+		if ( ! $post_id || ! idpg_core_class_exists( 'IDPG_Media' ) ) {
 			return '';
 		}
 
@@ -213,7 +213,7 @@ if ( ! function_exists( 'idpg_core_city_qvar' ) ) {
 	 * @return string Название query var (idpg_city_path).
 	 */
 	function idpg_core_city_qvar() {
-		return class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::QVAR : 'idpg_city_path';
+		return idpg_core_class_exists( 'IDPG_City_URL' ) ? IDPG_City_URL::QVAR : 'idpg_city_path';
 	}
 }
 
@@ -226,7 +226,7 @@ if ( ! function_exists( 'idpg_core_city_filter_url' ) ) {
 	 * @return string URL афиши (или дефолтный архив событий без плагина).
 	 */
 	function idpg_core_city_filter_url( $type, $value = null ) {
-		if ( class_exists( 'IDPG_City_URL' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_City_URL' ) ) {
 			return IDPG_City_URL::filter_url( $type, $value );
 		}
 
@@ -243,7 +243,7 @@ if ( ! function_exists( 'idpg_core_city_afisha_url' ) ) {
 	 * @return string URL афиши (или дефолтный архив событий без плагина).
 	 */
 	function idpg_core_city_afisha_url( $slug = null, $preserve = false ) {
-		if ( class_exists( 'IDPG_City_URL' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_City_URL' ) ) {
 			return IDPG_City_URL::afisha_url( $slug, $preserve );
 		}
 
@@ -259,7 +259,7 @@ if ( ! function_exists( 'idpg_core_city_venues_url' ) ) {
 	 * @return string URL архива площадок (или дефолтный архив venue).
 	 */
 	function idpg_core_city_venues_url( $slug = null ) {
-		if ( class_exists( 'IDPG_City_URL' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_City_URL' ) ) {
 			return IDPG_City_URL::venues_url( $slug );
 		}
 
@@ -844,7 +844,7 @@ if ( ! function_exists( 'idpg_get_current_city_id' ) ) {
 	 * @return int Term ID города или 0, если город не определён.
 	 */
 	function idpg_get_current_city_id() {
-		if ( class_exists( 'IDPG_City_Filter' ) ) {
+		if ( idpg_core_class_exists( 'IDPG_City_Filter' ) ) {
 			return (int) IDPG_City_Filter::get_current_city_id();
 		}
 

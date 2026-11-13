@@ -45,7 +45,7 @@ function idpg_core_class_exists( $class_name ) {
  * @return string The afisha URL.
  */
 function idpg_core_get_afisha_url() {
-	if ( class_exists( 'IDPG_City_URL' ) ) {
+	if ( idpg_core_class_exists( 'IDPG_City_URL' ) ) {
 		return IDPG_City_URL::afisha_url();
 	}
 	return get_post_type_archive_link( 'event' );
