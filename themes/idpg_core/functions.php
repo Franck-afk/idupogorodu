@@ -160,25 +160,12 @@ add_filter( 'wp_nav_menu_objects', 'idpg_core_remove_footer_login_item', 20, 2 )
  * Carbon Fields устанавливается через Composer в плагине.
  * Тема больше не грузит собственный vendor.
  */
-// $composer_autoload = get_template_directory() . '/vendor/autoload.php';
-// if ( file_exists( $composer_autoload ) ) {
-// 	require_once $composer_autoload;
-// }
-
 /**
  * Carbon Fields bootstrap.
  *
  * ПЕРЕНЕСЕНО В ПЛАГИН idpg-core: boot выполняется в idpg-core.php
  * (after_setup_theme, приоритет 5). Закомментировано во избежание
  * конфликта имён функции и двойной инициализации.
- */
-// add_action( 'after_setup_theme', 'idpg_carbon_fields_boot', 5 );
-// function idpg_carbon_fields_boot() {
-// 	if ( function_exists( 'carbon_get_theme_option' ) ) {
-// 		return;
-// 	}
-// 	\Carbon_Fields\Carbon_Fields::boot();
-// }
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
