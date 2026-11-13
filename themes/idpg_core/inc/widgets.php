@@ -161,10 +161,10 @@ class IDPG_Ad_Ru_Widget extends WP_Widget {
 		$ad_image = ! empty( $instance['ad_image'] ) ? (int) $instance['ad_image'] : 0;
 		$ad_link  = ! empty( $instance['ad_link'] ) ? esc_url_raw( $instance['ad_link'] ) : '';
 
-		echo $args['before_widget'];
+		echo wp_kses_post( $args['before_widget'] );
 
 		if ( $title ) {
-			echo $args['before_title'] . $title . $args['after_title'];
+			echo wp_kses_post( $args['before_title'] ) . wp_kses_post( $title ) . wp_kses_post( $args['after_title'] );
 		}
 
 		if ( $ad_code ) {
@@ -174,7 +174,7 @@ class IDPG_Ad_Ru_Widget extends WP_Widget {
 			if ( $img && $ad_link ) {
 				echo '<a href="' . esc_url( $ad_link ) . '" target="_blank" rel="nofollow noopener">' . $img . '</a>';
 			} elseif ( $img ) {
-				echo $img;
+				echo wp_kses_post( $img );
 			} else {
 				// Вложение не найдено (удалено) — показываем заглушку,
 				// чтобы виджет не выводил пустоту.
@@ -184,7 +184,7 @@ class IDPG_Ad_Ru_Widget extends WP_Widget {
 			echo '<p class="idpg-ad-widget__empty">' . esc_html__( '(Рекламный блок)', 'idpg_core' ) . '</p>';
 		}
 
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 
 	public function form( $instance ) {
@@ -344,10 +344,10 @@ class IDPG_Recent_Events_Widget extends WP_Widget {
 			return;
 		}
 
-		echo $args['before_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo wp_kses_post( $args['before_widget'] );
 
 		if ( $title ) {
-			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_kses_post( $args['before_title'] ) . wp_kses_post( $title ) . wp_kses_post( $args['after_title'] );
 		}
 
 		echo '<ul class="idpg-recent-events">';
@@ -363,7 +363,7 @@ class IDPG_Recent_Events_Widget extends WP_Widget {
 
 		echo '</ul>';
 
-		echo $args['after_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo wp_kses_post( $args['after_widget'] );
 
 		wp_reset_postdata();
 	}
@@ -478,14 +478,14 @@ class IDPG_Subscribe_Widget extends WP_Widget {
 
 		// Открываем обёртку виджета (section.widget) — без неё карточная
 		// вёрстка сайдбара (белый фон) не применяется.
-		echo $args['before_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo wp_kses_post( $args['before_widget'] );
 
 		if ( $image ) {
 			echo '<div class="idpg-subscribe__image">' . idpg_get_attachment_image_any( $image ) . '</div>';
 		}
 
 		if ( $title ) {
-			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_kses_post( $args['before_title'] ) . wp_kses_post( $title ) . wp_kses_post( $args['after_title'] );
 		}
 
 		if ( '' !== $text ) {
@@ -514,7 +514,7 @@ class IDPG_Subscribe_Widget extends WP_Widget {
 		</form>
 		<?php
 
-		echo $args['after_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo wp_kses_post( $args['after_widget'] );
 	}
 
 	/**

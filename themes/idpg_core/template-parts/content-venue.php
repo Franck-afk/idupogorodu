@@ -14,7 +14,7 @@ $idpg_perm    = get_permalink( $idpg_post_id );
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'idpg-venue-card' ); ?>>
 	<?php if ( $idpg_thumb ) : ?>
 		<a class="idpg-venue-card__thumb" href="<?php echo esc_url( $idpg_perm ); ?>" tabindex="-1" aria-hidden="true">
-			<?php echo $idpg_thumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo wp_kses_post( $idpg_thumb ); ?>
 		</a>
 	<?php endif; ?>
 

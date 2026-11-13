@@ -123,7 +123,7 @@ $idpg_placeholder_letter = mb_strtoupper( mb_substr( get_the_title(), 0, 1 ) );
 	?>
 
 	<?php if ( $idpg_thumb ) : ?>
-		<?php echo $idpg_thumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		<?php echo wp_kses_post( $idpg_thumb ); ?>
 	<?php else : ?>
 		<span class="idpg-event-card__placeholder"><?php echo esc_html( $idpg_placeholder_letter ); ?></span>
 	<?php endif; ?>

@@ -55,7 +55,7 @@
 						?>
 						<li>
 							<a class="site-footer__social-link" href="#" aria-label="<?php echo esc_attr( $social_labels[ $social_icon ] ); ?>" title="<?php echo esc_attr( $social_labels[ $social_icon ] ); ?>">
-								<?php echo $social_icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								<?php echo wp_kses_post( $social_icon_svg ); ?>
 							</a>
 						</li>
 					<?php endforeach; ?>

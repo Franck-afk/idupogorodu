@@ -103,8 +103,8 @@ $idpg_city_confirm_panel = class_exists( 'IDPG_City_Selector_Widget' )
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 			</button>
 		</div>
-		<?php echo $idpg_city_ipnote; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-		<?php echo $idpg_city_confirm_modal; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+		<?php echo wp_kses_post( $idpg_city_ipnote ); ?>
+		<?php echo wp_kses_post( $idpg_city_confirm_modal ); ?>
 		<?php if ( ! empty( $city_tree ) ) : ?>
 			<select class="idpg-city-modal__select" id="idpg-city-modal-select" data-idpg-city-header>
 				<?php foreach ( $city_tree as $region ) : ?>
@@ -183,7 +183,7 @@ $idpg_city_confirm_panel = class_exists( 'IDPG_City_Selector_Widget' )
 			</button>
 
 		<div class="idpg-city-selector__panel" id="idpg-city-panel" hidden>
-			<?php echo $idpg_city_ipnote; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<?php echo wp_kses_post( $idpg_city_ipnote ); ?>
 			<?php if ( ! empty( $city_tree ) ) : ?>
 					<label class="idpg-city-selector__select-label" for="idpg-city-select">
 						<?php esc_html_e( 'Выберите город', 'idpg_core' ); ?>
@@ -221,7 +221,7 @@ $idpg_city_confirm_panel = class_exists( 'IDPG_City_Selector_Widget' )
 		</div>
 
 		<?php /* DEV-19: видимый без открытия панели вопрос «это ваш город?». */ ?>
-		<?php echo $idpg_city_confirm_panel; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+		<?php echo wp_kses_post( $idpg_city_confirm_panel ); ?>
 
 		<!-- Блок действий -->
 		<div class="idpg-header__actions">
